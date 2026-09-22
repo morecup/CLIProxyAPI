@@ -505,6 +505,21 @@ func (e *ClaudeExecutor) applyClaudeHeadersWithProfile(
 	r.Header.Set("X-Stainless-Runtime-Version", software.RuntimeVersion)
 	r.Header.Set("X-Stainless-OS", software.OS)
 	r.Header.Set("X-Stainless-Arch", software.Arch)
+	if value := strings.TrimSpace(headers.ClientPlatform); value != "" {
+		r.Header.Set("Anthropic-Client-Platform", value)
+	} else {
+		r.Header.Del("Anthropic-Client-Platform")
+	}
+	if value := strings.TrimSpace(headers.ClientVersion); value != "" {
+		r.Header.Set("Anthropic-Client-Version", value)
+	} else {
+		r.Header.Del("Anthropic-Client-Version")
+	}
+	if value := strings.TrimSpace(headers.RequestClass); value != "" {
+		r.Header.Set("X-Claude-Code-Request-Class", value)
+	} else {
+		r.Header.Del("X-Claude-Code-Request-Class")
+	}
 	if headers.IncludeTimeout {
 		timeout := strings.TrimSpace(headers.Timeout)
 		if timeout == "" {

@@ -12,7 +12,7 @@ import (
 func Load(path string) (*Bundle, error) {
 	path = strings.TrimSpace(path)
 	if path == "" {
-		return BuiltinV140609()
+		return BuiltinCurrent()
 	}
 	data, errRead := os.ReadFile(path)
 	if errRead != nil {

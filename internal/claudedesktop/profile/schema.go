@@ -62,6 +62,9 @@ type HeaderProfile struct {
 	IncludeAsync     bool   `json:"include_async"`
 	IncludeClientID  bool   `json:"include_client_request_id"`
 	IncludeSessionID bool   `json:"include_session_id"`
+	ClientPlatform   string `json:"client_platform,omitempty"`
+	ClientVersion    string `json:"client_version,omitempty"`
+	RequestClass     string `json:"request_class,omitempty"`
 }
 
 type TransportProfile struct {
@@ -100,6 +103,7 @@ type BodyProfile struct {
 	Thinking           json.RawMessage `json:"thinking,omitempty"`
 	ContextManagement  json.RawMessage `json:"context_management,omitempty"`
 	OutputConfig       json.RawMessage `json:"output_config,omitempty"`
+	Diagnostics        json.RawMessage `json:"diagnostics,omitempty"`
 	Temperature        json.RawMessage `json:"temperature,omitempty"`
 	ToolChoice         json.RawMessage `json:"tool_choice,omitempty"`
 	EnsureTools        bool            `json:"ensure_tools"`
@@ -677,6 +681,17 @@ func (b *Bundle) Validate() error {
 		}
 		if strings.TrimSpace(variant.Headers.Accept) == "" || strings.TrimSpace(variant.Headers.AcceptEncoding) == "" {
 			return fmt.Errorf("claude desktop profile: variants[%d] has incomplete headers", index)
+		}
+		clientPlatform := strings.TrimSpace(variant.Headers.ClientPlatform)
+		clientVersion := strings.TrimSpace(variant.Headers.ClientVersion)
+		requestClass := strings.TrimSpace(variant.Headers.RequestClass)
+		if clientPlatform != "" || clientVersion != "" || requestClass != "" {
+			if clientPlatform == "" || clientVersion == "" || requestClass == "" {
+				return fmt.Errorf("claude desktop profile: variants[%d] has incomplete client identity headers", index)
+			}
+			if requestClass != "main" && requestClass != "auxiliary" {
+				return fmt.Errorf("claude desktop profile: variants[%d] has unsupported request class %q", index, requestClass)
+			}
 		}
 		if _, errTransport := b.TransportForRole(variant.Key.Role); errTransport != nil {
 			return fmt.Errorf("claude desktop profile: variants[%d]: %w", index, errTransport)
@@ -1938,6 +1953,7 @@ func validateBodyProfiles(profiles *BodyProfiles) error {
 			{name: "thinking", value: &body.Thinking},
 			{name: "context_management", value: &body.ContextManagement},
 			{name: "output_config", value: &body.OutputConfig},
+			{name: "diagnostics", value: &body.Diagnostics},
 			{name: "temperature", value: &body.Temperature},
 			{name: "tool_choice", value: &body.ToolChoice},
 		}

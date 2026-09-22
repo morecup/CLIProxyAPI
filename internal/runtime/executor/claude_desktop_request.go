@@ -481,6 +481,7 @@ func (e *ClaudeExecutor) normalizeClaudeDesktopBody(payload []byte, plan claudeD
 		"thinking":           bodyProfile.Thinking,
 		"context_management": bodyProfile.ContextManagement,
 		"output_config":      bodyProfile.OutputConfig,
+		"diagnostics":        bodyProfile.Diagnostics,
 		"temperature":        bodyProfile.Temperature,
 		"tool_choice":        bodyProfile.ToolChoice,
 	} {
@@ -499,7 +500,7 @@ func (e *ClaudeExecutor) normalizeClaudeDesktopBody(payload []byte, plan claudeD
 			return nil, fmt.Errorf("set Claude Desktop tools: %w", errSet)
 		}
 	}
-	if !plan.Variant.Key.Diagnostics {
+	if len(bodyProfile.Diagnostics) == 0 && !plan.Variant.Key.Diagnostics {
 		payload, errSet = sjson.DeleteBytes(payload, "diagnostics")
 		if errSet != nil {
 			return nil, fmt.Errorf("remove unprofiled Claude Desktop diagnostics: %w", errSet)

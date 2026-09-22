@@ -33,9 +33,12 @@ type countTokensToolCatalog struct {
 // tool definitions. It deliberately has no input path for downstream MCP or
 // caller tool schemas.
 type CountTokensCalibrationTools struct {
-	BuiltinTools []json.RawMessage
-	MCPTools     []json.RawMessage
-	SingleTools  []json.RawMessage
+	Layout           string
+	ExpectedRequests int
+	BuiltinTools     []json.RawMessage
+	MCPTools         []json.RawMessage
+	SingleTools      []json.RawMessage
+	ToolRequests     [][]json.RawMessage
 }
 
 var (
@@ -45,8 +48,22 @@ var (
 )
 
 func (b *Bundle) CountTokensCalibrationTools(model string) (CountTokensCalibrationTools, error) {
-	if b == nil || strings.TrimSpace(b.DesktopVersion) != "1.40609.0.0" {
+	if b == nil {
 		return CountTokensCalibrationTools{}, fmt.Errorf("claude desktop profile: no count_tokens calibration catalog for Desktop %q", bundleDesktopVersion(b))
+	}
+	variant, errVariant := b.Resolve(RequestVariantKey{Model: model, LogicalModel: model, Role: RoleCountTokens})
+	if errVariant != nil {
+		return CountTokensCalibrationTools{}, errVariant
+	}
+	requestProfile, errProfile := b.RequestProfileForVariant(variant)
+	if errProfile != nil {
+		return CountTokensCalibrationTools{}, errProfile
+	}
+	if catalogID := strings.TrimSpace(requestProfile.CountTokensCatalog); catalogID != "" {
+		return builtinCurrentCountTokensToolCatalog(catalogID, model)
+	}
+	if strings.TrimSpace(requestProfile.DesktopVersion) != "1.40609.0.0" {
+		return CountTokensCalibrationTools{}, fmt.Errorf("claude desktop profile: no count_tokens calibration catalog for Desktop %q", requestProfile.DesktopVersion)
 	}
 	catalog, errCatalog := builtinCountTokensToolCatalog()
 	if errCatalog != nil {
@@ -61,6 +78,12 @@ func (b *Bundle) CountTokensCalibrationTools(model string) (CountTokensCalibrati
 		return CountTokensCalibrationTools{}, fmt.Errorf("claude desktop profile: no observed count_tokens calibration catalog for model %q", model)
 	}
 	return CountTokensCalibrationTools{
+		Layout: "v140609",
+		ExpectedRequests: map[string]int{
+			"claude-opus-4-6": 46, "claude-opus-4-7": 46, "claude-opus-4-8": 38,
+			"claude-opus-5": 41, "claude-sonnet-4-6": 46, "claude-sonnet-5": 42,
+			"claude-haiku-4-5-20251001": 46,
+		}[strings.TrimSpace(model)],
 		BuiltinTools: cloneRawMessages(catalog.BuiltinTools),
 		MCPTools:     cloneRawMessages(catalog.MCPTools),
 		SingleTools:  cloneRawMessages(singles),

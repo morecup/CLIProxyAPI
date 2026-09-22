@@ -110,6 +110,9 @@ func (e *ClaudeExecutor) buildClaudeDesktopCalibrationRequests(model string, mai
 	if errTools != nil {
 		return nil, errTools
 	}
+	if tools.Layout == claudeprofile.CountTokensLayoutV2255313 {
+		return buildClaudeDesktopCurrentCalibrationRequests(model, mainBody, tools)
+	}
 	sections, errSections := claudeDesktopCalibrationSystemSections(model, mainBody)
 	if errSections != nil {
 		return nil, errSections
@@ -136,15 +139,117 @@ func (e *ClaudeExecutor) buildClaudeDesktopCalibrationRequests(model string, mai
 		}
 		requests = append(requests, claudeDesktopCalibrationRequest{body: body})
 	}
-	want := map[string]int{
-		"claude-opus-4-6": 46, "claude-opus-4-7": 46, "claude-opus-4-8": 38,
-		"claude-opus-5": 41, "claude-sonnet-4-6": 46, "claude-sonnet-5": 42,
-		"claude-haiku-4-5-20251001": 46,
-	}[model]
+	want := tools.ExpectedRequests
 	if want == 0 || len(requests) != want {
 		return nil, fmt.Errorf("claude desktop calibration request count for %q is %d, want %d", model, len(requests), want)
 	}
 	return requests, nil
+}
+
+func buildClaudeDesktopCurrentCalibrationRequests(model string, mainBody []byte, tools claudeprofile.CountTokensCalibrationTools) ([]claudeDesktopCalibrationRequest, error) {
+	contents, errContents := claudeDesktopCurrentCalibrationContents(mainBody)
+	if errContents != nil {
+		return nil, errContents
+	}
+	requests := make([]claudeDesktopCalibrationRequest, 0, len(contents)+len(tools.ToolRequests))
+	for _, content := range contents {
+		body, errBody := marshalClaudeDesktopCalibrationBody(model, content, nil)
+		if errBody != nil {
+			return nil, errBody
+		}
+		requests = append(requests, claudeDesktopCalibrationRequest{body: body})
+	}
+	for _, toolSet := range tools.ToolRequests {
+		body, errBody := marshalClaudeDesktopCalibrationBody(model, "foo", toolSet)
+		if errBody != nil {
+			return nil, errBody
+		}
+		requests = append(requests, claudeDesktopCalibrationRequest{body: body})
+	}
+	if tools.ExpectedRequests == 0 || len(requests) != tools.ExpectedRequests {
+		return nil, fmt.Errorf("claude desktop calibration request count for %q is %d, want %d", model, len(requests), tools.ExpectedRequests)
+	}
+	return requests, nil
+}
+
+func claudeDesktopCurrentCalibrationContents(mainBody []byte) ([]any, error) {
+	system := gjson.GetBytes(mainBody, "system")
+	if !system.IsArray() || len(system.Array()) != 4 {
+		return nil, fmt.Errorf("claude desktop current calibration requires the four-block main system")
+	}
+	messages := gjson.GetBytes(mainBody, "messages")
+	if !messages.IsArray() || len(messages.Array()) != 2 || messages.Array()[0].Get("role").String() != "user" || messages.Array()[1].Get("role").String() != "system" {
+		return nil, fmt.Errorf("claude desktop current calibration requires the captured user/system history pair")
+	}
+	userContent := messages.Array()[0].Get("content")
+	if !userContent.IsArray() || len(userContent.Array()) != 3 {
+		return nil, fmt.Errorf("claude desktop current calibration requires the captured three-block user turn")
+	}
+	historyText := messages.Array()[1].Get("content.0.text").String()
+	historyMarkers := []string{
+		"# Environment",
+		"You are powered by the model named",
+		"The following deferred tools are now available",
+		"Available agent types for the Agent tool:",
+		"# MCP Server Instructions",
+		"The following skills are available for use with the Skill tool:",
+		"While auto mode is active:",
+		"<total_tokens>",
+		"Today's date is",
+	}
+	historySections, errHistory := splitClaudeDesktopCalibrationSystemBlock(historyText, historyMarkers)
+	if errHistory != nil {
+		return nil, fmt.Errorf("claude desktop current calibration history: %w", errHistory)
+	}
+	if len(historySections) != 9 {
+		return nil, fmt.Errorf("claude desktop current calibration history section count is %d, want 9", len(historySections))
+	}
+	historyBlocks := make([]json.RawMessage, len(historySections))
+	for index, section := range historySections {
+		encoded, errJSON := json.Marshal(struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		}{Type: "text", Text: "<system-reminder>\n" + section + "\n</system-reminder>"})
+		if errJSON != nil {
+			return nil, fmt.Errorf("encode Claude Desktop current calibration history block %d: %w", index, errJSON)
+		}
+		historyBlocks[index] = encoded
+	}
+	userBlocks := userContent.Array()
+	orderedBlocks := make([]json.RawMessage, 0, 12)
+	orderedBlocks = append(orderedBlocks, historyBlocks[:8]...)
+	orderedBlocks = append(orderedBlocks, json.RawMessage(userBlocks[0].Raw), historyBlocks[8])
+	orderedBlocks = append(orderedBlocks, json.RawMessage(userBlocks[1].Raw), json.RawMessage(userBlocks[2].Raw))
+	dynamicContent, errDynamic := json.Marshal(orderedBlocks)
+	if errDynamic != nil {
+		return nil, fmt.Errorf("encode Claude Desktop current calibration dynamic history: %w", errDynamic)
+	}
+
+	sessionMarkers := []string{
+		"Write code that reads like the surrounding code:",
+		"When you use a pronoun for someone",
+		"For actions that are hard to reverse or outward-facing",
+		"# Session-specific guidance",
+		"# Memory",
+		"# Environment",
+		"# Context management",
+		"When you have enough information to act, act.",
+		"<total_tokens>",
+		"You are running inside the Claude desktop app (Code tab).",
+	}
+	sessionSections, errSession := splitClaudeDesktopCalibrationSystemBlock(system.Array()[3].Get("text").String(), sessionMarkers)
+	if errSession != nil {
+		return nil, fmt.Errorf("claude desktop current calibration session: %w", errSession)
+	}
+	if len(sessionSections) != 10 {
+		return nil, fmt.Errorf("claude desktop current calibration session section count is %d, want 10", len(sessionSections))
+	}
+	contents := make([]any, 0, 12)
+	contents = append(contents, json.RawMessage(dynamicContent), system.Array()[2].Get("text").String())
+	for _, section := range sessionSections {
+		contents = append(contents, section)
+	}
+	return contents, nil
 }
 
 func claudeDesktopCalibrationSystemSections(model string, mainBody []byte) ([]string, error) {
@@ -260,7 +365,7 @@ func splitClaudeDesktopCalibrationSystemBlock(text string, markers []string) ([]
 	return sections, nil
 }
 
-func marshalClaudeDesktopCalibrationBody(model, content string, tools []json.RawMessage) ([]byte, error) {
+func marshalClaudeDesktopCalibrationBody(model string, content any, tools []json.RawMessage) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoder := json.NewEncoder(&encoded)
 	encoder.SetEscapeHTML(false)
