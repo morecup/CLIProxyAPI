@@ -120,7 +120,7 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 	plan.PromptID = promptID
 	plan.NativePrompt = desktopPrompt
 	plan.ClientRequestID = clientRequestID
-	facts := e.newClaudeDesktopRuntimeFacts(auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID)
+	facts := e.newClaudeDesktopRuntimeFactsForPlan(auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID, plan)
 	facts.Prompt = desktopPrompt
 	facts.ContextLease, facts.ContextError = desktopContext, desktopContextErr
 	facts.Input = desktopInput

@@ -15,13 +15,17 @@ func (e *ClaudeExecutor) claudeDesktopArtifactValues(facts claudeDesktopRuntimeF
 	if e == nil || e.desktopProfile == nil {
 		return nil, fmt.Errorf("claude desktop profile is unavailable")
 	}
+	requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(plan.Variant)
+	if errProfile != nil {
+		return nil, errProfile
+	}
 	logicalModel := strings.ToLower(strings.TrimSpace(facts.LogicalModel))
 	if logicalModel == "" {
 		logicalModel = strings.ToLower(strings.TrimSpace(plan.Variant.Key.LogicalModel))
 	}
-	displayName := strings.TrimSpace(e.desktopProfile.Environment.ModelDisplayNames[logicalModel])
+	displayName := strings.TrimSpace(requestProfile.Environment.ModelDisplayNames[logicalModel])
 	if displayName == "" {
-		displayName = strings.TrimSpace(e.desktopProfile.Environment.ModelDisplayNames[plan.Variant.Key.Model])
+		displayName = strings.TrimSpace(requestProfile.Environment.ModelDisplayNames[plan.Variant.Key.Model])
 	}
 	if displayName == "" {
 		return nil, fmt.Errorf("claude desktop profile has no display name for logical model %q", logicalModel)
@@ -32,7 +36,7 @@ func (e *ClaudeExecutor) claudeDesktopArtifactValues(facts claudeDesktopRuntimeF
 		"USER_HOME":          facts.UserHome,
 		"MEMORY_DIR":         facts.MemoryDir,
 		"SCRATCHPAD_DIR":     facts.ScratchpadDir,
-		"OS_VERSION":         e.desktopProfile.Environment.OSVersion,
+		"OS_VERSION":         requestProfile.Environment.OSVersion,
 		"MODEL_DISPLAY_NAME": displayName,
 		"UUID":               facts.PromptID,
 	}, nil
@@ -61,7 +65,7 @@ func (e *ClaudeExecutor) renderClaudeDesktopSystem(plan claudeDesktopRequestPlan
 	for _, block := range plan.Variant.System {
 		text := billing
 		if block.Kind == "artifact" {
-			artifact, errArtifact := e.desktopProfile.Artifact(block.Artifact)
+			artifact, errArtifact := e.desktopProfile.ArtifactForVariant(plan.Variant, block.Artifact)
 			if errArtifact != nil {
 				return nil, errArtifact
 			}
@@ -105,12 +109,16 @@ func (e *ClaudeExecutor) validateClaudeDesktopSystem(payload []byte, plan claude
 			return claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: fmt.Sprintf("claude desktop system.%d cache_control: %v", index, errCache)}}
 		}
 		if blockPlan.Kind == "billing" {
-			if errBilling := validateClaudeDesktopBilling(actual.Get("text").String(), e.desktopProfile.CodeVersion, plan, cchSigning); errBilling != nil {
+			requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(plan.Variant)
+			if errProfile != nil {
+				return claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errProfile.Error()}}
+			}
+			if errBilling := validateClaudeDesktopBilling(actual.Get("text").String(), requestProfile.CodeVersion, plan, cchSigning); errBilling != nil {
 				return claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: errBilling.Error()}}
 			}
 			continue
 		}
-		artifact, errArtifact := e.desktopProfile.Artifact(blockPlan.Artifact)
+		artifact, errArtifact := e.desktopProfile.ArtifactForVariant(plan.Variant, blockPlan.Artifact)
 		if errArtifact != nil {
 			return errArtifact
 		}

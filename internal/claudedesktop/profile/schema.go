@@ -13,7 +13,10 @@ import (
 	"time"
 )
 
-const SupportedSchemaVersion = 11
+const (
+	SupportedSchemaVersion        = 11
+	SupportedRequestProfileSchema = 1
+)
 
 type RequestRole string
 
@@ -144,6 +147,8 @@ type RequestVariant struct {
 	InstructionCarrier    InstructionCarrier  `json:"instruction_carrier"`
 	TopLevelSystemPolicy  string              `json:"top_level_system_policy"`
 	Headers               HeaderProfile       `json:"headers"`
+
+	requestProfileID string
 }
 
 type SoftwareProfile struct {
@@ -495,6 +500,24 @@ type StartupProfile struct {
 	Endpoints        []StartupEndpointProfile        `json:"endpoints"`
 }
 
+// RequestProfile is a request-only overlay for a newer Claude Desktop and
+// Claude Code pair. It deliberately excludes telemetry and control-plane
+// identity so a current Code request contract can coexist with an immutable
+// historical Desktop telemetry bundle.
+type RequestProfile struct {
+	SchemaVersion      int                     `json:"schema_version"`
+	ProfileID          string                  `json:"profile_id"`
+	DesktopVersion     string                  `json:"desktop_version"`
+	CodeVersion        string                  `json:"code_version"`
+	AgentSDKVersion    string                  `json:"agent_sdk_version"`
+	Software           SoftwareProfile         `json:"software"`
+	Body               BodyProfiles            `json:"body"`
+	Environment        EnvironmentProfile      `json:"environment"`
+	Artifacts          map[string]TextArtifact `json:"artifacts"`
+	Variants           []RequestVariant        `json:"variants"`
+	CountTokensCatalog string                  `json:"count_tokens_catalog,omitempty"`
+}
+
 type Bundle struct {
 	SchemaVersion      int                        `json:"schema_version"`
 	ProfileID          string                     `json:"profile_id"`
@@ -513,8 +536,11 @@ type Bundle struct {
 	Environment        EnvironmentProfile         `json:"environment"`
 	Artifacts          map[string]TextArtifact    `json:"artifacts"`
 	Variants           []RequestVariant           `json:"variants"`
+	RequestProfiles    []RequestProfile           `json:"request_profiles,omitempty"`
 
-	byKey map[RequestVariantKey]RequestVariant
+	byKey                   map[RequestVariantKey]RequestVariant
+	overlayByKey            map[RequestVariantKey]RequestVariant
+	requestProfileIndexByID map[string]int
 }
 
 var artifactPlaceholderPattern = regexp.MustCompile(`\{\{([A-Z0-9_]+)\}\}`)
@@ -581,6 +607,7 @@ func (b *Bundle) Validate() error {
 	}
 	b.byKey = make(map[RequestVariantKey]RequestVariant, len(b.Variants))
 	for index, variant := range b.Variants {
+		variant.requestProfileID = ""
 		variant.Key.Model = normalizeModel(variant.Key.Model)
 		variant.Key.LogicalModel = normalizeModel(variant.Key.LogicalModel)
 		if variant.Key.LogicalModel == "" {
@@ -682,6 +709,59 @@ func (b *Bundle) Validate() error {
 		}
 		b.Variants[index] = variant
 		b.byKey[variant.Key] = variant
+	}
+	b.overlayByKey = make(map[RequestVariantKey]RequestVariant)
+	b.requestProfileIndexByID = make(map[string]int, len(b.RequestProfiles))
+	for index := range b.RequestProfiles {
+		requestProfile := &b.RequestProfiles[index]
+		requestProfile.ProfileID = strings.TrimSpace(requestProfile.ProfileID)
+		if requestProfile.SchemaVersion != SupportedRequestProfileSchema {
+			return fmt.Errorf("claude desktop profile: request_profiles[%d] has unsupported schema version %d", index, requestProfile.SchemaVersion)
+		}
+		if requestProfile.ProfileID == "" || strings.TrimSpace(requestProfile.DesktopVersion) == "" ||
+			strings.TrimSpace(requestProfile.CodeVersion) == "" || strings.TrimSpace(requestProfile.AgentSDKVersion) == "" {
+			return fmt.Errorf("claude desktop profile: request_profiles[%d] has incomplete identity", index)
+		}
+		if requestProfile.ProfileID == b.ProfileID {
+			return fmt.Errorf("claude desktop profile: request profile %q duplicates the bundle profile id", requestProfile.ProfileID)
+		}
+		if _, exists := b.requestProfileIndexByID[requestProfile.ProfileID]; exists {
+			return fmt.Errorf("claude desktop profile: duplicate request profile %q", requestProfile.ProfileID)
+		}
+
+		// Reuse the complete request-surface validation against the overlay's
+		// own body, software, environment, artifacts, and variants. Telemetry,
+		// control-plane, and transport data remain inherited from the immutable
+		// historical bundle and are not copied into the overlay JSON.
+		surface := *b
+		surface.ProfileID = requestProfile.ProfileID
+		surface.DesktopVersion = requestProfile.DesktopVersion
+		surface.CodeVersion = requestProfile.CodeVersion
+		surface.AgentSDKVersion = requestProfile.AgentSDKVersion
+		surface.Software = requestProfile.Software
+		surface.Body = requestProfile.Body
+		surface.Environment = requestProfile.Environment
+		surface.Artifacts = requestProfile.Artifacts
+		surface.Variants = append([]RequestVariant(nil), requestProfile.Variants...)
+		surface.RequestProfiles = nil
+		surface.byKey = nil
+		surface.overlayByKey = nil
+		surface.requestProfileIndexByID = nil
+		if errSurface := surface.Validate(); errSurface != nil {
+			return fmt.Errorf("claude desktop profile: request profile %q: %w", requestProfile.ProfileID, errSurface)
+		}
+		requestProfile.Body = surface.Body
+		requestProfile.Artifacts = surface.Artifacts
+		requestProfile.Variants = surface.Variants
+		for variantIndex, variant := range requestProfile.Variants {
+			variant.requestProfileID = requestProfile.ProfileID
+			if _, exists := b.overlayByKey[variant.Key]; exists {
+				return fmt.Errorf("claude desktop profile: duplicate overlay request variant %+v", variant.Key)
+			}
+			requestProfile.Variants[variantIndex] = variant
+			b.overlayByKey[variant.Key] = variant
+		}
+		b.requestProfileIndexByID[requestProfile.ProfileID] = index
 	}
 	return nil
 }
@@ -1587,20 +1667,62 @@ func (b *Bundle) BodyForVariant(variant RequestVariant) (BodyProfile, error) {
 	if b == nil {
 		return BodyProfile{}, fmt.Errorf("claude desktop profile: bundle is nil")
 	}
+	requestProfile, errProfile := b.RequestProfileForVariant(variant)
+	if errProfile != nil {
+		return BodyProfile{}, errProfile
+	}
+	return bodyForVariant(requestProfile.Body, variant)
+}
+
+func bodyForVariant(profiles BodyProfiles, variant RequestVariant) (BodyProfile, error) {
 	role := variant.Key.Role
 	model := normalizeModel(variant.Key.Model)
-	name := strings.TrimSpace(b.Body.Bindings[string(role)+"|"+model])
+	name := strings.TrimSpace(profiles.Bindings[string(role)+"|"+model])
 	if name == "" {
-		name = strings.TrimSpace(b.Body.Bindings[string(role)+"|*"])
+		name = strings.TrimSpace(profiles.Bindings[string(role)+"|*"])
 	}
 	if name == "" {
 		return BodyProfile{}, fmt.Errorf("no body profile for role=%q model=%q", role, model)
 	}
-	body, ok := b.Body.Profiles[name]
+	body, ok := profiles.Profiles[name]
 	if !ok {
 		return BodyProfile{}, fmt.Errorf("body profile %q for role=%q model=%q does not exist", name, role, model)
 	}
 	return body, nil
+}
+
+// RequestProfileForVariant returns the request identity and artifacts that own
+// a resolved variant. Historical variants read the bundle's immutable request
+// surface; current variants read their request-only overlay.
+func (b *Bundle) RequestProfileForVariant(variant RequestVariant) (RequestProfile, error) {
+	if b == nil {
+		return RequestProfile{}, fmt.Errorf("claude desktop profile: bundle is nil")
+	}
+	profileID := strings.TrimSpace(variant.requestProfileID)
+	if profileID == "" {
+		return RequestProfile{
+			SchemaVersion:   SupportedRequestProfileSchema,
+			ProfileID:       b.ProfileID,
+			DesktopVersion:  b.DesktopVersion,
+			CodeVersion:     b.CodeVersion,
+			AgentSDKVersion: b.AgentSDKVersion,
+			Software:        b.Software,
+			Body:            b.Body,
+			Environment:     b.Environment,
+			Artifacts:       b.Artifacts,
+			Variants:        b.Variants,
+		}, nil
+	}
+	if b.requestProfileIndexByID == nil {
+		if errValidate := b.Validate(); errValidate != nil {
+			return RequestProfile{}, errValidate
+		}
+	}
+	index, ok := b.requestProfileIndexByID[profileID]
+	if !ok || index < 0 || index >= len(b.RequestProfiles) {
+		return RequestProfile{}, fmt.Errorf("claude desktop profile %q has no request profile %q", b.ProfileID, profileID)
+	}
+	return b.RequestProfiles[index], nil
 }
 
 func (b *Bundle) Resolve(key RequestVariantKey) (RequestVariant, error) {
@@ -1618,7 +1740,10 @@ func (b *Bundle) Resolve(key RequestVariantKey) (RequestVariant, error) {
 		key.LogicalModel = key.Model
 	}
 	key.ThinkingDisplay = strings.ToLower(strings.TrimSpace(key.ThinkingDisplay))
-	variant, ok := b.byKey[key]
+	variant, ok := b.overlayByKey[key]
+	if !ok {
+		variant, ok = b.byKey[key]
+	}
 	if !ok {
 		return RequestVariant{}, fmt.Errorf("claude desktop profile %q has no exact variant for model=%q role=%q diagnostics=%t", b.ProfileID, key.Model, key.Role, key.Diagnostics)
 	}
@@ -1632,6 +1757,18 @@ func (b *Bundle) Artifact(name string) (TextArtifact, error) {
 	artifact, ok := b.Artifacts[strings.TrimSpace(name)]
 	if !ok {
 		return TextArtifact{}, fmt.Errorf("claude desktop profile %q has no artifact %q", b.ProfileID, name)
+	}
+	return artifact, nil
+}
+
+func (b *Bundle) ArtifactForVariant(variant RequestVariant, name string) (TextArtifact, error) {
+	requestProfile, errProfile := b.RequestProfileForVariant(variant)
+	if errProfile != nil {
+		return TextArtifact{}, errProfile
+	}
+	artifact, ok := requestProfile.Artifacts[strings.TrimSpace(name)]
+	if !ok {
+		return TextArtifact{}, fmt.Errorf("claude desktop request profile %q has no artifact %q", requestProfile.ProfileID, name)
 	}
 	return artifact, nil
 }

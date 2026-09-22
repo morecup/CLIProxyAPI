@@ -487,7 +487,11 @@ func (e *ClaudeExecutor) applyClaudeHeadersWithProfile(
 	if apiKey != "" {
 		r.Header.Set("Authorization", "Bearer "+apiKey)
 	}
-	software := e.desktopProfile.Software
+	requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(desktopPlan.Variant)
+	if errProfile != nil {
+		return claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errProfile.Error()}}
+	}
+	software := requestProfile.Software
 	headers := desktopPlan.Variant.Headers
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set("User-Agent", software.UserAgent)

@@ -309,9 +309,18 @@ func isClaudeDesktopWebSearchHelper(tools gjson.Result) bool {
 }
 
 func (e *ClaudeExecutor) newClaudeDesktopRuntimeFacts(auth *cliproxyauth.Auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID string, metadata ...map[string]any) claudeDesktopRuntimeFacts {
+	return e.newClaudeDesktopRuntimeFactsForPlan(auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID, claudeDesktopRequestPlan{}, metadata...)
+}
+
+func (e *ClaudeExecutor) newClaudeDesktopRuntimeFactsForPlan(auth *cliproxyauth.Auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID string, plan claudeDesktopRequestPlan, metadata ...map[string]any) claudeDesktopRuntimeFacts {
 	workingDir := claudeDesktopWorkingDir(metadata...)
 	if workingDir == "" && e != nil && e.desktopProfile != nil {
 		workingDir = strings.TrimSpace(e.desktopProfile.Environment.DefaultWorkingDir)
+		if plan.Variant.Key.Model != "" {
+			if requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(plan.Variant); errProfile == nil {
+				workingDir = strings.TrimSpace(requestProfile.Environment.DefaultWorkingDir)
+			}
+		}
 	}
 	userHome, _ := os.UserHomeDir()
 	if userHome == "" {
@@ -352,6 +361,10 @@ func (e *ClaudeExecutor) applyClaudeDesktopMessageProfile(ctx context.Context, a
 	if len(runtimeFacts) > 0 {
 		facts = runtimeFacts[0]
 	}
+	requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(plan.Variant)
+	if errProfile != nil {
+		return nil, false, claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errProfile.Error()}}
+	}
 	var errBody error
 	payload, errBody = e.normalizeClaudeDesktopBody(payload, plan)
 	if errBody != nil {
@@ -380,12 +393,12 @@ func (e *ClaudeExecutor) applyClaudeDesktopMessageProfile(ctx context.Context, a
 			return nil, false, errSystem
 		}
 		var errInstructions error
-		instructions, errInstructions = e.collectClaudeDesktopCallerInstructions(gjson.GetBytes(payload, "system"), values)
+		instructions, errInstructions = e.collectClaudeDesktopCallerInstructions(gjson.GetBytes(payload, "system"), values, plan)
 		if errInstructions != nil {
 			return nil, false, errInstructions
 		}
 	}
-	billing := generateClaudeDesktopBillingHeader(cchSigning, e.desktopProfile.CodeVersion, payload, plan, facts)
+	billing := generateClaudeDesktopBillingHeader(cchSigning, requestProfile.CodeVersion, payload, plan, facts)
 	systemJSON, errRender := e.renderClaudeDesktopSystem(plan, values, billing)
 	if errRender != nil {
 		return nil, false, claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errRender.Error()}}
@@ -431,7 +444,7 @@ func (e *ClaudeExecutor) applyClaudeDesktopCountTokensProfile(payload []byte, pl
 	if errValues != nil {
 		return nil, false, errValues
 	}
-	instructions, errInstructions := e.collectClaudeDesktopCallerInstructions(gjson.GetBytes(payload, "system"), values)
+	instructions, errInstructions := e.collectClaudeDesktopCallerInstructions(gjson.GetBytes(payload, "system"), values, plan)
 	if errInstructions != nil {
 		return nil, false, errInstructions
 	}
@@ -582,9 +595,13 @@ func applyClaudeDesktopStreamPolicy(payload []byte, plan claudeDesktopRequestPla
 	return payload
 }
 
-func (e *ClaudeExecutor) collectClaudeDesktopCallerInstructions(system gjson.Result, values map[string]string) ([]string, error) {
+func (e *ClaudeExecutor) collectClaudeDesktopCallerInstructions(system gjson.Result, values map[string]string, plan claudeDesktopRequestPlan) ([]string, error) {
 	reserved := map[string]struct{}{claudeDesktopHarnessIdentity: {}}
-	for _, artifact := range e.desktopProfile.Artifacts {
+	requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(plan.Variant)
+	if errProfile != nil {
+		return nil, errProfile
+	}
+	for _, artifact := range requestProfile.Artifacts {
 		rendered, errRender := artifact.Render(values)
 		if errRender != nil {
 			return nil, errRender

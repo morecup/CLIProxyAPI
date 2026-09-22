@@ -164,7 +164,7 @@ func (e *ClaudeExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 	desktopPlan.PromptID = promptID
 	desktopPlan.NativePrompt = desktopPrompt
 	desktopPlan.ClientRequestID = clientRequestID
-	desktopFacts := e.newClaudeDesktopRuntimeFacts(auth, claudeSessionID, baseModel, promptID, clientRequestID, previousRequestID, opts.Metadata, req.Metadata)
+	desktopFacts := e.newClaudeDesktopRuntimeFactsForPlan(auth, claudeSessionID, baseModel, promptID, clientRequestID, previousRequestID, desktopPlan, opts.Metadata, req.Metadata)
 	desktopFacts.Prompt = desktopPrompt
 	desktopFacts.ContextLease, desktopFacts.ContextError = desktopContext, desktopContextErr
 	desktopFacts.Input = desktopInput
