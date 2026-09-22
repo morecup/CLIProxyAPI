@@ -1,0 +1,601 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "desktop_files": {
+    "desktop_sdk_transport": {
+      "name": "index.chunk-Clv3sLGS.js",
+      "sha256": "d0f73b3df172b9612535d0739c85f6b853f0634dc84ea8663a0ae1aadf95b6d1"
+    },
+    "desktop_ccd_sessions": {
+      "name": "index2.chunk-BjlyOolB.js",
+      "sha256": "6e3e47d9bf6e0263d0304483b26093d11490aece9275aad323e4cda93aa1a55d"
+    }
+  },
+  "modules": {
+    "cli": {
+      "name": "B:/~BUN/root/_10.js",
+      "sha256": "78b44909089cb3aad9370ee5316890b62684ff4618620939033bb9da84e6a7ed"
+    },
+    "setup": {
+      "name": "B:/~BUN/root/chunk-9rfmtz0x.js",
+      "sha256": "b0be48b9955f83a6c25d6dcfb6098f2343069d17982807dea0f35cdd7e9348de"
+    },
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "lifecycle": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    },
+    "startup_perf": {
+      "name": "B:/~BUN/root/_799.js",
+      "sha256": "25402bee09cbe74782d0a566083af336e8d35dd438943f685500229b96a2290b"
+    },
+    "ripgrep": {
+      "name": "B:/~BUN/root/_584.js",
+      "sha256": "23595543ad2dc3a35b69461882e6e0c8b45e3cab72a974f07cadfb4620424e20"
+    },
+    "stall": {
+      "name": "B:/~BUN/root/chunk-7raaejf8.js",
+      "sha256": "3958b1924b1c192d1df6eb6cc705c2529750b8b6dace54cd328f1449e7c898bc"
+    },
+    "retention": {
+      "name": "B:/~BUN/root/_427.js",
+      "sha256": "06eb0235434b0ebca6085f1675695ef8237b69cac9df4d3210c57e4a7abfb727"
+    },
+    "notifications": {
+      "name": "B:/~BUN/root/_391.js",
+      "sha256": "3b77e7fda11159a9e84a334934aaeae1f5eb25942de26ec2cc5b3add294cdf71"
+    },
+    "addressing": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    },
+    "desktop_sdk_transport": {
+      "name": "index.chunk-Clv3sLGS.js",
+      "sha256": "d0f73b3df172b9612535d0739c85f6b853f0634dc84ea8663a0ae1aadf95b6d1"
+    },
+    "desktop_ccd_sessions": {
+      "name": "index2.chunk-BjlyOolB.js",
+      "sha256": "6e3e47d9bf6e0263d0304483b26093d11490aece9275aad323e4cda93aa1a55d"
+    }
+  },
+  "definitions": [
+    {
+      "label": "concurrent_sessions_emit",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 73812,
+      "to": 73888,
+      "bytes": 76,
+      "sha256": "08377d99316abaa44bcdff5518f9a6a42b152fb56ee547d778eff1fa1e8638c7"
+    },
+    {
+      "label": "concurrent_sessions_counter",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 263900,
+      "to": 264592,
+      "bytes": 692,
+      "sha256": "0c8d41240f9cd696a66120e5e0a895c2a9f6593ce3561b7ab6cab142f2c38259"
+    },
+    {
+      "label": "shell_allow_rules_call",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 73566,
+      "to": 73888,
+      "bytes": 322,
+      "sha256": "1b10697e81359dbe991cfeaf46f56de6b1d78f40820938e3b8583de000931865"
+    },
+    {
+      "label": "timer_startup_emit",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 168496,
+      "to": 168699,
+      "bytes": 203,
+      "sha256": "9943fa6b266d3018cf0dee122321e0ffaad36c97d01d11652beffc3ad244eb2e"
+    },
+    {
+      "label": "timer_plugins_init",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 27008,
+      "to": 27286,
+      "bytes": 278,
+      "sha256": "fe534d93e5644e58a1528a94e5f0b6e1df8815074dc01b5ae19febfc1a35fe74"
+    },
+    {
+      "label": "sdk_init_handshake_emit",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 324453,
+      "to": 324673,
+      "bytes": 220,
+      "sha256": "053fa482df5d162df6c1b253824342a75700845dc307d2ebd06e444495836d75"
+    },
+    {
+      "label": "cli_flags_builder",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 12000,
+      "to": 12083,
+      "bytes": 83,
+      "sha256": "06c564a4a5cca9ff897ed1f4f7e01fa84420e51b941535f523c29b7e1666ce38"
+    },
+    {
+      "label": "cli_flags_emit",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 45391,
+      "to": 45505,
+      "bytes": 114,
+      "sha256": "6e991fff04f839f6fe98c8dd88e85f52a9a6d9b0991c7dec0a7ed9d7c045c764"
+    },
+    {
+      "label": "sdk_transport_argv",
+      "module": "index.chunk-Clv3sLGS.js",
+      "from": 871780,
+      "to": 874756,
+      "bytes": 2976,
+      "sha256": "da31a5995cc543404dd4a63736e65222190f57a51218043cdcc9a954a3a78e53"
+    },
+    {
+      "label": "ccd_session_options",
+      "module": "index2.chunk-BjlyOolB.js",
+      "from": 426560,
+      "to": 427453,
+      "bytes": 893,
+      "sha256": "d8d6d0bfb386c53629be6cf1895b9a534bd8a525d26bda10ca9c90dea739a893"
+    },
+    {
+      "label": "ccd_build_base_extra_args",
+      "module": "index2.chunk-BjlyOolB.js",
+      "from": 591749,
+      "to": 592056,
+      "bytes": 307,
+      "sha256": "93aa878ab8e1f91f7de19c27a836f4668566ff9a074508cbffab83bc1c3b5ab5"
+    },
+    {
+      "label": "session_start_subscription",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 21455,
+      "to": 21791,
+      "bytes": 336,
+      "sha256": "92b8eb64aa10f8c989661e256071fda5aac17205045f5290fd5378710c619fd9"
+    },
+    {
+      "label": "worker_permission_mode_restore",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 65191,
+      "to": 65871,
+      "bytes": 680,
+      "sha256": "51e2ada2eec894d5765af83c8a217a1a0554233398fe9080c11d6704da7c817d"
+    },
+    {
+      "label": "worker_permission_mode_restore_state",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 61903,
+      "to": 62261,
+      "bytes": 358,
+      "sha256": "ca63635d77131627563f55faf32313aa401a9afcd6f18cec3d86c92706677e79"
+    },
+    {
+      "label": "worker_permission_mode_restore_apply",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 63354,
+      "to": 63804,
+      "bytes": 450,
+      "sha256": "44fe1dc47c7cfd5523d4192b07cc6a0fbf4d02eb843a3f65f37f3c1790e67c0d"
+    },
+    {
+      "label": "worker_permission_mode_restore_call",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 330504,
+      "to": 331253,
+      "bytes": 749,
+      "sha256": "0585299d760d3d4b609206497a8d7eafc0e908ea4393853501903421bdf6b73e"
+    },
+    {
+      "label": "headless_latency_emit",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2808016,
+      "to": 2809053,
+      "bytes": 1037,
+      "sha256": "3719449357c66881166f7d21ddb0f335a7e1b48fc6bd07e689f2150c8c518bc4"
+    },
+    {
+      "label": "uds_startup_bind",
+      "module": "B:/~BUN/root/chunk-9rfmtz0x.js",
+      "from": 15660,
+      "to": 16091,
+      "bytes": 431,
+      "sha256": "38d048b7d597d2f4fcbae7184041cfda503b563b2edf5e049cd826cbd65c9b61"
+    },
+    {
+      "label": "startup_perf_emit",
+      "module": "B:/~BUN/root/_799.js",
+      "from": 4171,
+      "to": 4443,
+      "bytes": 272,
+      "sha256": "cc7f814bb3609a0426ab576bcb91eb8ad63aa6a0c726c70da24d07d51496b0e2"
+    },
+    {
+      "label": "event_loop_stall_emit",
+      "module": "B:/~BUN/root/chunk-7raaejf8.js",
+      "from": 3333,
+      "to": 3703,
+      "bytes": 370,
+      "sha256": "02a109a27e157ac3b72052d43d8c031eb15920e390f40752625f779a42ac9e1f"
+    },
+    {
+      "label": "ripgrep_first_use",
+      "module": "B:/~BUN/root/_584.js",
+      "from": 513468,
+      "to": 514309,
+      "bytes": 841,
+      "sha256": "5108a6d30b3108947b7a5f046c5ce25cc841c8e939a054003b1f819a90eb42fe"
+    },
+    {
+      "label": "retention_sweep",
+      "module": "B:/~BUN/root/_427.js",
+      "from": 26794,
+      "to": 28405,
+      "bytes": 1611,
+      "sha256": "ba2a347741eef8560efef3c8b5fb82c6ce02649453f19f398d5b30e983b91489"
+    },
+    {
+      "label": "push_reachability_emit",
+      "module": "B:/~BUN/root/_391.js",
+      "from": 3604,
+      "to": 3789,
+      "bytes": 185,
+      "sha256": "1c9560d11d24e2e171c490403c4b44902654a4a83dc8c9ab232038bb305a420f"
+    }
+  ],
+  "logger_prefix": "the native logger (_675.js) prepends subscription_type and cc_prompt_id (when a prompt is active) to every metadata object",
+  "startup_order": [
+    {
+      "event": "tengu_cli_flags",
+      "order": 50,
+      "site": "cli action handler before setup (cli_flags_emit), gated by !Vl()"
+    },
+    {
+      "event": "tengu_uds_startup_bind",
+      "order": 80,
+      "site": "setup: cross-session inbox bind"
+    },
+    {
+      "event": "tengu_shell_set_cwd",
+      "order": 90,
+      "site": "setup: launch cwd validation"
+    },
+    {
+      "event": "tengu_started",
+      "order": 100,
+      "site": "setup tail"
+    },
+    {
+      "event": "tengu_init",
+      "order": 200,
+      "site": "cli action handler iy()"
+    },
+    {
+      "event": "tengu_shell_allow_rules_at_init",
+      "order": 250,
+      "site": "cli action handler nu(ve.alwaysAllowRules)"
+    },
+    {
+      "event": "tengu_concurrent_sessions",
+      "order": 260,
+      "site": "Cd(a).then(...) in the same statement run, after the session registry record is written (Sd(a)); only when num_sessions >= 2"
+    },
+    {
+      "event": "tengu_timer",
+      "order": 270,
+      "site": "runHeadless (DJ) entry, right after the runHeadless_entry checkpoint; the handshake follows in the same module"
+    },
+    {
+      "event": "tengu_sdk_init_handshake",
+      "order": 300,
+      "site": "SDK initialize control request"
+    }
+  ],
+  "key_order": {
+    "tengu_concurrent_sessions": [
+      "num_sessions"
+    ],
+    "tengu_timer_startup": [
+      "event",
+      "durationMs",
+      "mcpNonBlocking",
+      "mcpClientCount",
+      "resumed"
+    ],
+    "tengu_timer_plugins_init": [
+      "event",
+      "durationMs",
+      "headless"
+    ],
+    "tengu_cli_flags": [
+      "flag_count",
+      "flags"
+    ],
+    "tengu_session_start": [
+      "previous_session_id",
+      "source",
+      "permissionMode",
+      "dangerouslySkipPermissionsPassed",
+      "modeIsBypass",
+      "print",
+      "...updateContext"
+    ],
+    "tengu_worker_permission_mode_restore": [
+      "source",
+      "lane",
+      "trusted_mode",
+      "recorded_mode",
+      "target_mode",
+      "had_external",
+      "had_internal",
+      "guard_enabled",
+      "record_transcript_state?",
+      "transcript_open?"
+    ],
+    "tengu_headless_latency": [
+      "<checkpoint span>_ms (streaming_setup_ms, stdin_wait_ms, ...)",
+      "time_to_system_message_ms?",
+      "time_to_query_start_ms?",
+      "time_to_first_response_ms?",
+      "query_overhead_ms?",
+      "checkpoint_count",
+      "entrypoint?"
+    ],
+    "tengu_uds_startup_bind": [
+      "durationMs",
+      "bound"
+    ],
+    "tengu_startup_perf": [
+      "<checkpoint span keys>_ms",
+      "total_time_ms",
+      "checkpoint_count",
+      "late",
+      "...resource/counters"
+    ],
+    "tengu_event_loop_stall": [
+      "stall_duration_ms",
+      "expected_interval_ms",
+      "actual_interval_ms",
+      "monotonic_stall_ms",
+      "clock_jump_ms",
+      "total_stalls",
+      "cumulative_stall_ms",
+      "cumulative_monotonic_stall_ms",
+      "likely_sleep",
+      "...cpu sample",
+      "...memory sample",
+      "...write sample",
+      "sigcont"
+    ],
+    "tengu_ripgrep_availability": [
+      "working",
+      "using_system"
+    ],
+    "tengu_retention_sweep": [
+      "phase",
+      "skipped",
+      "transcriptsDeleted",
+      "sessionFilesDeleted",
+      "artifactsDeleted",
+      "filesRetainedFresh",
+      "filesPastCutoff",
+      "errors",
+      "periodDays",
+      "usedDefault"
+    ],
+    "tengu_push_reachability": [
+      "has_active_channel",
+      "platform_count"
+    ]
+  },
+  "executed": {
+    "concurrent_sessions_cases": [
+      {
+        "num_sessions_counted": 1,
+        "event": null
+      },
+      {
+        "num_sessions_counted": 2,
+        "event": {
+          "name": "tengu_concurrent_sessions",
+          "metadata": {
+            "num_sessions": 2
+          }
+        }
+      },
+      {
+        "num_sessions_counted": 3,
+        "event": {
+          "name": "tengu_concurrent_sessions",
+          "metadata": {
+            "num_sessions": 3
+          }
+        }
+      }
+    ],
+    "timer_startup_cases": [
+      {
+        "label": "fresh_no_mcp",
+        "options": {
+          "configuredMcpServerCount": 0
+        },
+        "uptime_seconds": 1.2345,
+        "event": {
+          "name": "tengu_timer",
+          "metadata": {
+            "event": "startup",
+            "durationMs": 1235,
+            "mcpNonBlocking": true,
+            "mcpClientCount": 0,
+            "resumed": false
+          }
+        }
+      },
+      {
+        "label": "resumed_two_mcp",
+        "options": {
+          "configuredMcpServerCount": 2,
+          "resume": "abc"
+        },
+        "uptime_seconds": 0.5,
+        "event": {
+          "name": "tengu_timer",
+          "metadata": {
+            "event": "startup",
+            "durationMs": 500,
+            "mcpNonBlocking": true,
+            "mcpClientCount": 2,
+            "resumed": true
+          }
+        }
+      }
+    ],
+    "cli_flags_case": {
+      "options": {
+        "verbose": true,
+        "outputFormat": "stream-json",
+        "inputFormat": "stream-json",
+        "print": false,
+        "model": "claude-sonnet-5"
+      },
+      "sources": {
+        "verbose": "cli",
+        "outputFormat": "cli",
+        "inputFormat": "cli",
+        "print": "default",
+        "model": "env"
+      },
+      "flags": [
+        "inputFormat",
+        "outputFormat",
+        "verbose"
+      ]
+    },
+    "worker_permission_mode_restore_case": {
+      "label": "print_default_flag_true",
+      "options": {
+        "permissionModeSuppliedOnInvocation": true
+      },
+      "startup_mode": "default",
+      "tengu_tranquil_fern": true,
+      "outcome": "none",
+      "event": {
+        "name": "tengu_worker_permission_mode_restore",
+        "metadata": {
+          "source": "none",
+          "lane": "print",
+          "trusted_mode": "default",
+          "recorded_mode": "absent",
+          "target_mode": "default",
+          "had_external": false,
+          "had_internal": false,
+          "guard_enabled": true
+        }
+      }
+    },
+    "worker_permission_mode_restore_cases": [
+      {
+        "label": "print_default_flag_true",
+        "options": {
+          "permissionModeSuppliedOnInvocation": true
+        },
+        "startup_mode": "default",
+        "tengu_tranquil_fern": true,
+        "outcome": "none",
+        "event": {
+          "name": "tengu_worker_permission_mode_restore",
+          "metadata": {
+            "source": "none",
+            "lane": "print",
+            "trusted_mode": "default",
+            "recorded_mode": "absent",
+            "target_mode": "default",
+            "had_external": false,
+            "had_internal": false,
+            "guard_enabled": true
+          }
+        }
+      },
+      {
+        "label": "print_accept_edits_flag_false",
+        "options": {
+          "permissionModeSuppliedOnInvocation": true
+        },
+        "startup_mode": "acceptEdits",
+        "tengu_tranquil_fern": false,
+        "outcome": "none",
+        "event": {
+          "name": "tengu_worker_permission_mode_restore",
+          "metadata": {
+            "source": "none",
+            "lane": "print",
+            "trusted_mode": "acceptEdits",
+            "recorded_mode": "absent",
+            "target_mode": "acceptEdits",
+            "had_external": false,
+            "had_internal": false,
+            "guard_enabled": false
+          }
+        }
+      },
+      {
+        "label": "sdk_url_default",
+        "options": {
+          "sdkUrl": "wss://x",
+          "permissionModeSuppliedOnInvocation": true
+        },
+        "startup_mode": "default",
+        "tengu_tranquil_fern": true,
+        "outcome": "none",
+        "event": {
+          "name": "tengu_worker_permission_mode_restore",
+          "metadata": {
+            "source": "none",
+            "lane": "sdk_url",
+            "trusted_mode": "default",
+            "recorded_mode": "absent",
+            "target_mode": "default",
+            "had_external": false,
+            "had_internal": false,
+            "guard_enabled": true
+          }
+        }
+      }
+    ]
+  },
+  "emulated_session": {
+    "tengu_concurrent_sessions": {
+      "metadata_when_two_live": {
+        "num_sessions": 2
+      },
+      "condition": "num_sessions = this process + every other live Claude Code process of the OS user (GL counts <pid>.json registry records incl. process.pid); emitted only when >= 2. Gateway: one telemetry Manager = one emulated SDK process; count = enabled, not shut down Managers in the package registry (incl. the counting one)."
+    },
+    "tengu_timer": {
+      "metadata": {
+        "event": "startup",
+        "durationMs": "<Manager uptime ms at emission>",
+        "mcpNonBlocking": true,
+        "mcpClientCount": 0,
+        "resumed": false
+      },
+      "condition": "unconditional at runHeadless entry; durationMs = process uptime (Manager startedAt baseline, same as handshake uptime_ms), mcpNonBlocking = wa() (handshake pins true), mcpClientCount = configuredMcpServerCount (0: no MCP servers in the emulated environment, tengu_init mcpClientCount 0), resumed = !!(resume||continue) (false: each Manager starts a fresh application session)"
+    }
+  },
+  "boundary": {
+    "tengu_cli_flags": "boundary: flags = hs(commander options, source===\"cli\") over the Desktop argv. Beyond the constant prefix (inputFormat, outputFormat, verbose) and the CCD constants (model, permissionPromptTool, permissionMode, settingSources, includePartialMessages, settings, replay-user-messages extraArg), the argv carries per-conversation flags the gateway cannot observe at the emulated spawn: effort (i.effort, only visible later per request in output_config), allowedTools/allowDangerouslySkipPermissions (Desktop conversation/bypass state), thinking-display (GrowthBook snapshot + CLI capability), debugFile (lq()), managedSettings, resume/sessionId/forkSession, mcp-config/strict-mcp-config, add-dir. Captured samples show flag_count 7 and 15 with different flag sets.",
+    "tengu_timer_plugins_init": "boundary: Ri() times Ti(t) (plugin initialization) on the else branch of the action-handler statement; the gateway performs no plugin initialization to time",
+    "tengu_session_start": "boundary: Xs subscribes to session-id changes (qs) and logs only when the id changes after startup with source R(i); the emulated process keeps one application session id",
+    "tengu_worker_permission_mode_restore": "boundary: th(m.messages,r,t) is called only from fN, the print lane's prior-session hydration (r.continue branch after Hp() loaded the prior conversation); Cu() = {source:\"none\",trustedMode:undefined,recordedMode:\"absent\"}, Mu() fills trusted_mode from the live toolPermissionContext.mode (setAppState), target_mode = trusted_mode when source is \"none\", had_external/had_internal constant false, guard_enabled = Di() = GrowthBook flag tengu_tranquil_fern (default true, memoized). The gateway starts each Manager with a fresh application session (no --continue/--resume hydration) and its feature store/bundle carries no tengu_tranquil_fern value, so neither the moment nor guard_enabled is derivable.",
+    "tengu_headless_latency": "boundary: 5% per-process sample (_Zn=Math.random()<0.05) of headless profiler checkpoint spans (streaming_setup_ms, stdin_wait_ms, time_to_query_start_ms, ...) the gateway does not measure",
+    "tengu_uds_startup_bind": "boundary: durationMs/bound come from a real cross-session inbox bind (startCrossSessionInbox)",
+    "tengu_startup_perf": "boundary: 0.5% random sample or CLAUDE_CODE_PROFILE_STARTUP of measured startup checkpoint spans",
+    "tengu_event_loop_stall": "boundary: periodic stall detector samples of the native event loop",
+    "tengu_ripgrep_availability": "boundary: first native ripgrep invocation (testOnFirstUse)",
+    "tengu_retention_sweep": "boundary: real transcript/session-file storage sweep counters",
+    "tengu_push_reachability": "boundary: has_active_channel/platform_count come from the notification preferences response (r.prefs.push_reachability) which the gateway startup roles do not fetch"
+  }
+}

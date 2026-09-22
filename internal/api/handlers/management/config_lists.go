@@ -36,15 +36,41 @@ func rejectInvalidCredentialWeight(c *gin.Context, field string, weight *int) bo
 	return false
 }
 
-// rejectInvalidFingerprintProfile fails a write that carries a value the request
-// path would silently ignore, so a typo surfaces here instead of as a warning
-// behind every later request.
-func rejectInvalidFingerprintProfile(c *gin.Context, field, profile string) bool {
-	if errValidate := config.ValidateClaudeFingerprintProfile(profile); errValidate != nil {
-		c.JSON(400, gin.H{"error": fmt.Sprintf("%s: %v", field, errValidate)})
-		return true
+var removedClaudeKeyFields = []string{
+	"fingerprint-profile",
+	"cloak",
+	"rebuild-mid-system-message",
+	"experimental-cch-signing",
+}
+
+func decodeClaudeKeyItems(data []byte) ([]config.ClaudeKey, string, int, error) {
+	var rawItems []json.RawMessage
+	if errArray := json.Unmarshal(data, &rawItems); errArray != nil {
+		var object struct {
+			Items []json.RawMessage `json:"items"`
+		}
+		if errObject := json.Unmarshal(data, &object); errObject != nil || len(object.Items) == 0 {
+			return nil, "", -1, fmt.Errorf("invalid body")
+		}
+		rawItems = object.Items
 	}
-	return false
+
+	items := make([]config.ClaudeKey, len(rawItems))
+	for index, rawItem := range rawItems {
+		var fields map[string]json.RawMessage
+		if errFields := json.Unmarshal(rawItem, &fields); errFields != nil {
+			return nil, "", -1, fmt.Errorf("invalid body")
+		}
+		for _, field := range removedClaudeKeyFields {
+			if _, exists := fields[field]; exists {
+				return nil, field, index, nil
+			}
+		}
+		if errItem := json.Unmarshal(rawItem, &items[index]); errItem != nil {
+			return nil, "", -1, fmt.Errorf("invalid body")
+		}
+	}
+	return items, "", -1, nil
 }
 
 // Generic helpers for list[string]
@@ -570,23 +596,18 @@ func (h *Handler) PutClaudeKeys(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "failed to read body"})
 		return
 	}
-	var arr []config.ClaudeKey
-	if err = json.Unmarshal(data, &arr); err != nil {
-		var obj struct {
-			Items []config.ClaudeKey `json:"items"`
-		}
-		if err2 := json.Unmarshal(data, &obj); err2 != nil || len(obj.Items) == 0 {
-			c.JSON(400, gin.H{"error": "invalid body"})
-			return
-		}
-		arr = obj.Items
+	arr, legacyField, legacyIndex, errDecode := decodeClaudeKeyItems(data)
+	if errDecode != nil {
+		c.JSON(400, gin.H{"error": errDecode.Error()})
+		return
+	}
+	if legacyField != "" {
+		c.JSON(400, gin.H{"error": fmt.Sprintf("claude-api-key[%d].%s is a removed Claude Code setting; API keys now use anthropic-compatible and cannot opt into the Desktop profile", legacyIndex, legacyField)})
+		return
 	}
 	for i := range arr {
 		normalizeClaudeKey(&arr[i])
 		if rejectInvalidCredentialWeight(c, fmt.Sprintf("claude-api-key[%d].weight", i), arr[i].Weight) {
-			return
-		}
-		if rejectInvalidFingerprintProfile(c, fmt.Sprintf("claude-api-key[%d].fingerprint-profile", i), arr[i].FingerprintProfile) {
 			return
 		}
 	}
@@ -598,19 +619,21 @@ func (h *Handler) PutClaudeKeys(c *gin.Context) {
 }
 func (h *Handler) PatchClaudeKey(c *gin.Context) {
 	type claudeKeyPatch struct {
-		APIKey                  *string                          `json:"api-key"`
-		FingerprintProfile      *string                          `json:"fingerprint-profile"`
-		Weight                  json.RawMessage                  `json:"weight"`
-		Prefix                  *string                          `json:"prefix"`
-		BaseURL                 *string                          `json:"base-url"`
-		ProxyURL                *string                          `json:"proxy-url"`
-		Models                  *[]config.ClaudeModel            `json:"models"`
-		Headers                 *map[string]string               `json:"headers"`
-		ExcludedModels          *[]string                        `json:"excluded-models"`
-		RebuildMidSystemMessage *bool                            `json:"rebuild-mid-system-message"`
-		DisableCooling          json.RawMessage                  `json:"disable-cooling"`
-		RequestRetry            *int                             `json:"request-retry"`
-		RequestScopedErrors     *[]config.RequestScopedErrorRule `json:"request-scoped-errors"`
+		APIKey              *string                          `json:"api-key"`
+		Weight              json.RawMessage                  `json:"weight"`
+		Prefix              *string                          `json:"prefix"`
+		BaseURL             *string                          `json:"base-url"`
+		ProxyURL            *string                          `json:"proxy-url"`
+		Models              *[]config.ClaudeModel            `json:"models"`
+		Headers             *map[string]string               `json:"headers"`
+		ExcludedModels      *[]string                        `json:"excluded-models"`
+		DisableCooling      json.RawMessage                  `json:"disable-cooling"`
+		RequestRetry        *int                             `json:"request-retry"`
+		RequestScopedErrors *[]config.RequestScopedErrorRule `json:"request-scoped-errors"`
+		LegacyFingerprint   json.RawMessage                  `json:"fingerprint-profile"`
+		LegacyCloak         json.RawMessage                  `json:"cloak"`
+		LegacyRebuild       json.RawMessage                  `json:"rebuild-mid-system-message"`
+		LegacyCCHSigning    json.RawMessage                  `json:"experimental-cch-signing"`
 	}
 	var body struct {
 		Index *int            `json:"index"`
@@ -643,14 +666,19 @@ func (h *Handler) PatchClaudeKey(c *gin.Context) {
 	}
 
 	entry := h.cfg.ClaudeKey[targetIndex]
-	if body.Value.APIKey != nil {
-		entry.APIKey = strings.TrimSpace(*body.Value.APIKey)
-	}
-	if body.Value.FingerprintProfile != nil {
-		if rejectInvalidFingerprintProfile(c, "fingerprint-profile", *body.Value.FingerprintProfile) {
+	for field, raw := range map[string]json.RawMessage{
+		"fingerprint-profile":        body.Value.LegacyFingerprint,
+		"cloak":                      body.Value.LegacyCloak,
+		"rebuild-mid-system-message": body.Value.LegacyRebuild,
+		"experimental-cch-signing":   body.Value.LegacyCCHSigning,
+	} {
+		if len(raw) > 0 {
+			c.JSON(400, gin.H{"error": fmt.Sprintf("%s is a removed Claude Code setting; API keys now use anthropic-compatible and cannot opt into the Desktop profile", field)})
 			return
 		}
-		entry.FingerprintProfile, _ = config.NormalizeClaudeFingerprintProfile(*body.Value.FingerprintProfile)
+	}
+	if body.Value.APIKey != nil {
+		entry.APIKey = strings.TrimSpace(*body.Value.APIKey)
 	}
 	if len(body.Value.Weight) > 0 {
 		weight, errWeight := parseCredentialWeightPatch(body.Value.Weight)
@@ -677,9 +705,6 @@ func (h *Handler) PatchClaudeKey(c *gin.Context) {
 	}
 	if body.Value.ExcludedModels != nil {
 		entry.ExcludedModels = config.NormalizeExcludedModels(*body.Value.ExcludedModels)
-	}
-	if body.Value.RebuildMidSystemMessage != nil {
-		entry.RebuildMidSystemMessage = *body.Value.RebuildMidSystemMessage
 	}
 	if !applyDisableCoolingPatch(c, body.Value.DisableCooling, &entry.DisableCooling) {
 		return
@@ -1827,11 +1852,6 @@ func normalizeClaudeKey(entry *config.ClaudeKey) {
 		return
 	}
 	entry.APIKey = strings.TrimSpace(entry.APIKey)
-	if normalized, ok := config.NormalizeClaudeFingerprintProfile(entry.FingerprintProfile); ok {
-		entry.FingerprintProfile = normalized
-	} else {
-		entry.FingerprintProfile = strings.TrimSpace(entry.FingerprintProfile)
-	}
 	entry.BaseURL = strings.TrimSpace(entry.BaseURL)
 	entry.ProxyURL = strings.TrimSpace(entry.ProxyURL)
 	entry.Headers = config.NormalizeHeaders(entry.Headers)

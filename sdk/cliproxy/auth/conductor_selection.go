@@ -333,6 +333,9 @@ func (m *Manager) availableAuthsForRouteModelWithPriorityMode(auths []*Auth, pro
 	cooldownCount := 0
 	var earliest time.Time
 	for _, candidate := range auths {
+		if !m.executorAllowsSchedulingLocked(candidate) {
+			continue
+		}
 		checkModel := m.selectionModelForAuth(candidate, routeModel)
 		blocked, reason, next := isAuthBlockedForModel(candidate, checkModel, now)
 		if !blocked {
@@ -364,6 +367,20 @@ func (m *Manager) availableAuthsForRouteModelWithPriorityMode(auths []*Auth, pro
 	}
 
 	return availableAuthsFromPriorityBuckets(availableByPriority, allPriorities), nil
+}
+
+// executorAllowsSchedulingLocked applies the optional provider runtime gate.
+// Callers already hold the manager read lock while reading the executor map.
+func (m *Manager) executorAllowsSchedulingLocked(auth *Auth) bool {
+	if m == nil || auth == nil {
+		return false
+	}
+	executor := m.executors[executorKeyFromAuth(auth)]
+	gate, ok := executor.(AuthSchedulingGate)
+	if !ok || gate == nil {
+		return true
+	}
+	return gate.CanScheduleAuth(auth.Clone()) == nil
 }
 
 // availableAuthsForSelector reports the candidates handed to priority-scoped consumers such as
@@ -661,7 +678,7 @@ func (m *Manager) AvailableProviders() []string {
 	seen := make(map[string]struct{}, len(m.auths))
 	out := make([]string, 0, len(m.auths))
 	for _, auth := range m.auths {
-		if auth == nil || auth.Disabled || auth.Status == StatusDisabled {
+		if auth == nil || auth.Disabled || auth.Status == StatusDisabled || !m.executorAllowsSchedulingLocked(auth) {
 			continue
 		}
 		provider := strings.ToLower(strings.TrimSpace(auth.Provider))
@@ -692,7 +709,7 @@ func (m *Manager) HasProviderAuth(provider string) bool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	for _, auth := range m.auths {
-		if auth == nil || auth.Disabled || auth.Status == StatusDisabled {
+		if auth == nil || auth.Disabled || auth.Status == StatusDisabled || !m.executorAllowsSchedulingLocked(auth) {
 			continue
 		}
 		if strings.ToLower(strings.TrimSpace(auth.Provider)) == provider {
@@ -812,7 +829,7 @@ func (m *Manager) closestCooldownWait(providers []string, model string, attempt 
 		minWait time.Duration
 	)
 	for _, auth := range m.auths {
-		if auth == nil || auth.Disabled || auth.Status == StatusDisabled {
+		if auth == nil || auth.Disabled || auth.Status == StatusDisabled || !m.executorAllowsSchedulingLocked(auth) {
 			continue
 		}
 		if pinnedAuthID != "" && auth.ID != pinnedAuthID {
@@ -879,7 +896,7 @@ func (m *Manager) retryAllowed(attempt int, providers []string, model string, el
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	for _, auth := range m.auths {
-		if auth == nil || auth.Disabled || auth.Status == StatusDisabled {
+		if auth == nil || auth.Disabled || auth.Status == StatusDisabled || !m.executorAllowsSchedulingLocked(auth) {
 			continue
 		}
 		if pinnedAuthID != "" && auth.ID != pinnedAuthID {
@@ -1199,6 +1216,18 @@ func (m *Manager) useSchedulerFastPath() bool {
 	return isBuiltInSelector(m.selector)
 }
 
+func (m *Manager) providerUsesSchedulingGate(provider string) bool {
+	if m == nil {
+		return false
+	}
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	m.mu.RLock()
+	executor := m.executors[provider]
+	m.mu.RUnlock()
+	gate, ok := executor.(AuthSchedulingGate)
+	return ok && gate != nil
+}
+
 func shouldRetrySchedulerPick(err error) bool {
 	if err == nil {
 		return false
@@ -1487,7 +1516,7 @@ func (m *Manager) pickNext(ctx context.Context, provider, model string, opts cli
 	opts.Metadata[cliproxyexecutor.SessionAffinityProviderMetadataKey] = provider
 	opts.Metadata[cliproxyexecutor.SessionAffinityModelMetadataKey] = model
 
-	if m.hasPluginScheduler() || !m.useSchedulerFastPath() {
+	if m.hasPluginScheduler() || !m.useSchedulerFastPath() || m.providerUsesSchedulingGate(provider) {
 		return m.pickNextLegacy(ctx, provider, model, opts, tried)
 	}
 	eligibility := authSelectionEligibilityForRequest(ctx, opts)
@@ -1665,6 +1694,7 @@ func (m *Manager) pickNextMixed(ctx context.Context, providers []string, model s
 
 	eligibleProviders := make([]string, 0, len(providers))
 	seenProviders := make(map[string]struct{}, len(providers))
+	requiresRuntimeGate := false
 	for _, provider := range providers {
 		providerKey := strings.TrimSpace(strings.ToLower(provider))
 		if providerKey == "" {
@@ -1676,11 +1706,17 @@ func (m *Manager) pickNextMixed(ctx context.Context, providers []string, model s
 		if _, okExecutor := m.Executor(providerKey); !okExecutor {
 			continue
 		}
+		if m.providerUsesSchedulingGate(providerKey) {
+			requiresRuntimeGate = true
+		}
 		seenProviders[providerKey] = struct{}{}
 		eligibleProviders = append(eligibleProviders, providerKey)
 	}
 	if len(eligibleProviders) == 0 {
 		return nil, nil, "", &Error{Code: "auth_not_found", Message: "no auth available"}
+	}
+	if requiresRuntimeGate {
+		return m.pickNextMixedLegacy(ctx, providers, model, opts, tried)
 	}
 	eligibility := authSelectionEligibilityForRequest(ctx, opts)
 	if strings.TrimSpace(model) != "" {

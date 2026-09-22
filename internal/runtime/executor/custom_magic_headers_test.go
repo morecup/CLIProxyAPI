@@ -254,7 +254,7 @@ func TestCustomMagicHeaders_XAI(t *testing.T) {
 	}
 }
 
-func TestCustomMagicHeaders_Claude(t *testing.T) {
+func TestCustomMagicHeaders_AnthropicCompatible(t *testing.T) {
 	var gotHeaders http.Header
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotHeaders = r.Header.Clone()
@@ -263,9 +263,9 @@ func TestCustomMagicHeaders_Claude(t *testing.T) {
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(&config.Config{})
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
 	auth := &cliproxyauth.Auth{
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
 			"api_key":                         "sk-ant-test",

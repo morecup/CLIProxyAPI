@@ -2,23 +2,17 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"os"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claude"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
-	log "github.com/sirupsen/logrus"
 )
 
-// DoClaudeLogin triggers the Claude OAuth flow through the shared authentication manager.
-// It initiates the OAuth authentication process for Anthropic Claude services and saves
-// the authentication tokens to the configured auth directory.
+// DoClaudeLogin runs the Claude Desktop email magic-link and enrollment flow.
 //
 // Parameters:
 //   - cfg: The application configuration
-//   - options: Login options including browser behavior and prompts
+//   - options: Login options including interactive prompting
 func DoClaudeLogin(cfg *config.Config, options *LoginOptions) {
 	if options == nil {
 		options = &LoginOptions{}
@@ -32,7 +26,6 @@ func DoClaudeLogin(cfg *config.Config, options *LoginOptions) {
 	manager := newAuthManager()
 
 	authOpts := &sdkAuth.LoginOptions{
-		NoBrowser:    options.NoBrowser,
 		CallbackPort: options.CallbackPort,
 		Metadata:     map[string]string{},
 		Prompt:       promptFn,
@@ -40,14 +33,7 @@ func DoClaudeLogin(cfg *config.Config, options *LoginOptions) {
 
 	_, savedPath, err := manager.Login(context.Background(), "claude", cfg, authOpts)
 	if err != nil {
-		if authErr, ok := errors.AsType[*claude.AuthenticationError](err); ok {
-			log.Error(claude.GetUserFriendlyMessage(authErr))
-			if authErr.Type == claude.ErrPortInUse.Type {
-				os.Exit(claude.ErrPortInUse.Code)
-			}
-			return
-		}
-		fmt.Printf("Claude authentication failed: %v\n", err)
+		fmt.Printf("Claude Desktop authentication failed: %v\n", err)
 		return
 	}
 
@@ -55,5 +41,5 @@ func DoClaudeLogin(cfg *config.Config, options *LoginOptions) {
 		fmt.Printf("Authentication saved to %s\n", savedPath)
 	}
 
-	fmt.Println("Claude authentication successful!")
+	fmt.Println("Claude Desktop authentication and enrollment successful!")
 }

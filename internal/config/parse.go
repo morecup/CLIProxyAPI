@@ -15,6 +15,9 @@ func ParseConfigBytes(data []byte) (*Config, error) {
 	if len(data) == 0 {
 		return nil, fmt.Errorf("config payload is empty")
 	}
+	if errMigration := ValidateClaudeDesktopMigrationYAML(data); errMigration != nil {
+		return nil, errMigration
+	}
 
 	if errValidate := validateCredentialWeightYAML(data); errValidate != nil {
 		return nil, errValidate
@@ -100,7 +103,7 @@ func ParseConfigBytes(data []byte) (*Config, error) {
 	cfg.SanitizeCodexKeys()
 	cfg.SanitizeXAIKeys()
 	cfg.SanitizeCodexHeaderDefaults()
-	cfg.SanitizeClaudeHeaderDefaults()
+	cfg.SanitizeClaudeDesktop()
 	cfg.SanitizeClaudeKeys()
 	cfg.SanitizeOpenAICompatibility()
 	cfg.OAuthExcludedModels = NormalizeOAuthExcludedModels(cfg.OAuthExcludedModels)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -132,7 +133,7 @@ func TestFileSynthesizer_Synthesize_ValidAuthFile(t *testing.T) {
 	}
 }
 
-func TestFileSynthesizer_Synthesize_LegacyKimiFingerprintProfile(t *testing.T) {
+func TestFileSynthesizerRejectsLegacyKimiFingerprintProfile(t *testing.T) {
 	tempDir := t.TempDir()
 	authData := map[string]any{
 		"type":                "kimi",
@@ -148,29 +149,17 @@ func TestFileSynthesizer_Synthesize_LegacyKimiFingerprintProfile(t *testing.T) {
 		t.Fatalf("failed to write kimi auth file: %v", err)
 	}
 
-	auths, err := NewFileSynthesizer().Synthesize(&SynthesisContext{
+	auths, err := SynthesizeAuthFile(&SynthesisContext{
 		Config:      &config.Config{},
 		AuthDir:     tempDir,
 		Now:         time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
 		IDGenerator: NewStableIDGenerator(),
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	}, filepath.Join(tempDir, "kimi-auth.json"), data)
+	if err == nil || !strings.Contains(err.Error(), "fingerprint profile") {
+		t.Fatalf("SynthesizeAuthFile() error = %v, want migration error", err)
 	}
-	if len(auths) != 1 {
-		t.Fatalf("expected 1 auth, got %d", len(auths))
-	}
-	if auths[0].Provider != "kimi" {
-		t.Fatalf("provider = %q, want kimi", auths[0].Provider)
-	}
-	if got := auths[0].Attributes["fingerprint_profile"]; got != "claude-code-cli" {
-		t.Fatalf("attributes fingerprint_profile = %q, want claude-code-cli", got)
-	}
-	if got, _ := auths[0].Metadata["fingerprint_profile"].(string); got != "claude-code-cli" {
-		t.Fatalf("metadata fingerprint_profile = %q, want claude-code-cli", got)
-	}
-	if _, exists := auths[0].Metadata["fingerprint-profile"]; exists {
-		t.Fatalf("legacy fingerprint-profile was not normalized: %#v", auths[0].Metadata)
+	if len(auths) != 0 {
+		t.Fatalf("auth count = %d, want 0", len(auths))
 	}
 }
 

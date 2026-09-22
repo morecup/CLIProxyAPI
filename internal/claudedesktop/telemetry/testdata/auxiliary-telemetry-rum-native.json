@@ -1,0 +1,448 @@
+{
+  "schema_version": 1,
+  "lane": "W8 rum-sentry",
+  "desktop_version": "1.40609.0.0",
+  "origin": "Datadog browser RUM SDK 7.6.0 hosted by the claude.ai renderer in the Desktop webview and the Sentry Electron SDK 7.12.0 crash reporter; none of the four events has an emitting moment in the gateway, so every pin below is a boundary record",
+  "rum_sdk_version": "7.6.0",
+  "captured_sources": [
+    {
+      "id": "rum-telemetry-configuration",
+      "endpoint_role": "datadog-rum",
+      "kind": "rum-ndjson",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-auth-initial-post-logout-transition-30s/flow-012082/request-body.txt",
+      "sha256": "8e904ab1c3173ea0a793041f4b0aef75dcda7edf657664ddc50a58688707e650"
+    },
+    {
+      "id": "rum-telemetry-usage",
+      "endpoint_role": "datadog-rum",
+      "kind": "rum-ndjson",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-bypass-permissions-crash-restart-recovery-bootstrap-3m/flow-007094/request-body.txt",
+      "sha256": "5c3c4afb318b592825d5382b26a1f3d13bda94690379213adb3cb57c2625c872"
+    },
+    {
+      "id": "rum-resource-fetch",
+      "endpoint_role": "datadog-rum",
+      "kind": "rum-ndjson",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000134/request-body.txt",
+      "sha256": "bcfd99e0e69112e5de33e55ba3bbcf74be57d6d556894d91c0f358c704a85373"
+    },
+    {
+      "id": "rum-long-task",
+      "endpoint_role": "datadog-rum",
+      "kind": "rum-ndjson",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-activate-before-file-exit-trigger/flow-000001/request-body.txt",
+      "sha256": "d11d388b3df4ab5f41a93059cdf3302cdfb4da75e39fb83286550c222e68e0a2"
+    },
+    {
+      "id": "sentry-crash-envelope",
+      "endpoint_role": "sentry",
+      "kind": "sentry-envelope-gzip",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-auth-logged-out-activate-from-tray-trigger/flow-012092/request-body.raw.bin",
+      "sha256": "07b430dc38d4a13940185648f0e185709aec59071ae4f6bc3a930794c66d5c3c"
+    }
+  ],
+  "executable_events": [],
+  "events": [
+    {
+      "event_name": "telemetry",
+      "roles": [
+        "datadog-rum"
+      ],
+      "gateway_moment": null,
+      "condition": "Datadog browser RUM SDK internal telemetry (service browser-rum-sdk): `configuration` once at SDK init and `usage` once per API feature per session; both gated by the SDK telemetry session sample (12 occurrences in 3 of the captured flows, all other sessions sent none)",
+      "configuration_top_level_keys": [
+        "type",
+        "date",
+        "service",
+        "version",
+        "source",
+        "_dd",
+        "telemetry",
+        "ddtags",
+        "experimental_features",
+        "session",
+        "anonymous_id",
+        "application"
+      ],
+      "configuration_key_paths": [
+        "type",
+        "date",
+        "service",
+        "version",
+        "source",
+        "_dd",
+        "_dd.format_version",
+        "telemetry",
+        "telemetry.type",
+        "telemetry.configuration",
+        "telemetry.configuration.session_replay_sample_rate",
+        "telemetry.configuration.propagate_trace_baggage",
+        "telemetry.configuration.use_allowed_tracing_urls",
+        "telemetry.configuration.use_allowed_graph_ql_urls",
+        "telemetry.configuration.use_track_graph_ql_payload",
+        "telemetry.configuration.use_track_graph_ql_response_errors",
+        "telemetry.configuration.selected_tracing_propagators",
+        "telemetry.configuration.default_privacy_level",
+        "telemetry.configuration.enable_privacy_for_action_name",
+        "telemetry.configuration.use_excluded_activity_urls",
+        "telemetry.configuration.use_worker_url",
+        "telemetry.configuration.compress_intake_requests",
+        "telemetry.configuration.track_views_manually",
+        "telemetry.configuration.track_user_interactions",
+        "telemetry.configuration.track_resources",
+        "telemetry.configuration.track_long_task",
+        "telemetry.configuration.profiling_sample_rate",
+        "telemetry.configuration.use_remote_configuration_proxy",
+        "telemetry.configuration.session_sample_rate",
+        "telemetry.configuration.use_before_send",
+        "telemetry.configuration.use_proxy",
+        "telemetry.configuration.store_contexts_across_pages",
+        "telemetry.configuration.allow_untrusted_events",
+        "telemetry.configuration.tracking_consent",
+        "telemetry.configuration.use_allowed_tracking_origins",
+        "telemetry.runtime_env",
+        "telemetry.runtime_env.is_local_file",
+        "telemetry.runtime_env.is_worker",
+        "telemetry.connectivity",
+        "telemetry.connectivity.status",
+        "telemetry.connectivity.effective_type",
+        "telemetry.sdk_setup",
+        "ddtags",
+        "experimental_features",
+        "session",
+        "session.id",
+        "anonymous_id",
+        "application",
+        "application.id"
+      ],
+      "configuration_object_keys": [
+        "session_replay_sample_rate",
+        "propagate_trace_baggage",
+        "use_allowed_tracing_urls",
+        "use_allowed_graph_ql_urls",
+        "use_track_graph_ql_payload",
+        "use_track_graph_ql_response_errors",
+        "selected_tracing_propagators",
+        "default_privacy_level",
+        "enable_privacy_for_action_name",
+        "use_excluded_activity_urls",
+        "use_worker_url",
+        "compress_intake_requests",
+        "track_views_manually",
+        "track_user_interactions",
+        "track_resources",
+        "track_long_task",
+        "profiling_sample_rate",
+        "use_remote_configuration_proxy",
+        "session_sample_rate",
+        "use_before_send",
+        "use_proxy",
+        "store_contexts_across_pages",
+        "allow_untrusted_events",
+        "tracking_consent",
+        "use_allowed_tracking_origins"
+      ],
+      "configuration_object": {
+        "session_replay_sample_rate": 0,
+        "propagate_trace_baggage": false,
+        "use_allowed_tracing_urls": true,
+        "use_allowed_graph_ql_urls": false,
+        "use_track_graph_ql_payload": false,
+        "use_track_graph_ql_response_errors": false,
+        "selected_tracing_propagators": [
+          "tracecontext",
+          "datadog"
+        ],
+        "default_privacy_level": "mask",
+        "enable_privacy_for_action_name": true,
+        "use_excluded_activity_urls": true,
+        "use_worker_url": false,
+        "compress_intake_requests": true,
+        "track_views_manually": true,
+        "track_user_interactions": false,
+        "track_resources": true,
+        "track_long_task": true,
+        "profiling_sample_rate": 0,
+        "use_remote_configuration_proxy": false,
+        "session_sample_rate": 100,
+        "use_before_send": true,
+        "use_proxy": false,
+        "store_contexts_across_pages": false,
+        "allow_untrusted_events": false,
+        "tracking_consent": "granted",
+        "use_allowed_tracking_origins": false
+      },
+      "usage_top_level_key_sets": [
+        "type,date,service,version,source,_dd,telemetry,ddtags,experimental_features",
+        "type,date,service,version,source,_dd,telemetry,ddtags,experimental_features,session,anonymous_id,application,action,view"
+      ],
+      "usage_telemetry_keys": [
+        "type",
+        "usage",
+        "runtime_env",
+        "connectivity",
+        "sdk_setup"
+      ],
+      "usage_features_seen": [
+        "add-action",
+        "add-feature-flag-evaluation",
+        "clear-user",
+        "get-user",
+        "remove-global-context-property",
+        "set-global-context-property",
+        "set-tracking-consent",
+        "set-user",
+        "set-view-name",
+        "start-view"
+      ],
+      "constants": {
+        "service": "browser-rum-sdk",
+        "source": "browser",
+        "version": "7.6.0",
+        "_dd.format_version": 2,
+        "telemetry.sdk_setup": "npm",
+        "telemetry.runtime_env": {
+          "is_local_file": false,
+          "is_worker": false
+        },
+        "experimental_features": []
+      },
+      "ddtags_tag_keys": [
+        "sdk_version",
+        "env",
+        "service",
+        "version"
+      ],
+      "telemetry_connectivity_keys": [
+        "status",
+        "effective_type"
+      ],
+      "occurrences_checked": {
+        "configuration": 1,
+        "usage": 10
+      },
+      "boundary": "blocked fields with no gateway source: `version` / ddtags `version:` (claude.ai web build hash that varies per deployment; the emulated Desktop never loads the remote renderer bundle), `telemetry.connectivity.effective_type` (Chromium NetInfo 4g/3g/slow-2g measured by the renderer), `anonymous_id` (RUM SDK cookie-derived anonymous id) and the SDK telemetry session sampling; `usage` additionally requires the renderer calling the listed SDK APIs; not emitted"
+    },
+    {
+      "event_name": "resource",
+      "roles": [
+        "datadog-rum"
+      ],
+      "gateway_moment": null,
+      "condition": "PerformanceResourceTiming / fetch instrumentation of the renderer (track_resources true): one event per completed renderer request (js/css/font/image/document assets and fetch/xhr API calls), never for requests performed by another process",
+      "envelope_top_level_keys": [
+        "type",
+        "_dd",
+        "application",
+        "date",
+        "source",
+        "view",
+        "session",
+        "connectivity",
+        "tab",
+        "context",
+        "usr",
+        "display",
+        "service",
+        "version",
+        "resource",
+        "ddtags"
+      ],
+      "resource_keys": [
+        "id",
+        "duration",
+        "type",
+        "method",
+        "status_code",
+        "url",
+        "protocol",
+        "delivery_type",
+        "render_blocking_status",
+        "size",
+        "encoded_body_size",
+        "decoded_body_size",
+        "transfer_size",
+        "download",
+        "first_byte",
+        "response"
+      ],
+      "resource_subtiming_keys": {
+        "first_byte": [
+          "duration",
+          "start"
+        ],
+        "download": [
+          "duration",
+          "start"
+        ],
+        "response": [
+          "headers"
+        ]
+      },
+      "dd_keys": [
+        "format_version",
+        "drift",
+        "configuration",
+        "sdk_name",
+        "discarded"
+      ],
+      "session_keys": [
+        "id",
+        "type"
+      ],
+      "view_keys": [
+        "url",
+        "referrer",
+        "id",
+        "name"
+      ],
+      "usr_keys": [
+        "id",
+        "organization_id",
+        "plan",
+        "anonymous_id"
+      ],
+      "tab_keys": [
+        "id"
+      ],
+      "display_keys": [
+        "viewport"
+      ],
+      "viewport_keys": [
+        "width",
+        "height"
+      ],
+      "connectivity_keys": [
+        "status",
+        "effective_type"
+      ],
+      "context_key_count": 84,
+      "context_keys_head": [
+        "entry_cache_policy",
+        "static_composer_rendered",
+        "static_critical_css",
+        "document_variant",
+        "entry_pathname",
+        "root_path_rewritten",
+        "desktop_cold_launch",
+        "desktop_version_transition",
+        "desktop_docs_on_version",
+        "desktop_version_age_min",
+        "code_sidebar_live_latched",
+        "rq_cache_retention_arm"
+      ],
+      "constants": {
+        "service": "claude-ai",
+        "source": "browser",
+        "_dd.format_version": 2,
+        "_dd.configuration": {
+          "session_sample_rate": 100,
+          "session_replay_sample_rate": 0,
+          "profiling_sample_rate": 0,
+          "trace_sample_rate": 100
+        },
+        "_dd.discarded": false,
+        "resource.protocol": "h2",
+        "resource.delivery_type": "other",
+        "resource.render_blocking_status": "non-blocking",
+        "session.type": "user"
+      },
+      "fetch_url_hosts_in_flow": [
+        "claude.ai"
+      ],
+      "fetch_events_in_flow": 3,
+      "occurrences_checked": {
+        "fetch_in_flow": 3
+      },
+      "boundary": "blocked fields with no gateway source: `context.*` renderer page-load state (hidden_at_load, visibility_at_nav_start, activation_start_ms, build_ts, device/screen/network probes), `display.viewport`, `tab.id`, `connectivity.effective_type`, `version` / ddtags `version:` (claude.ai web build hash), `_dd.drift`, `resource.response.headers` (renderer-visible response headers) and the traced `_dd.span_id`/`_dd.trace_id` pair that the renderer injects into claude.ai requests; the gateway performs its own requests with a different client and cannot claim renderer resource timings; not emitted"
+    },
+    {
+      "event_name": "long_task",
+      "roles": [
+        "datadog-rum"
+      ],
+      "gateway_moment": null,
+      "condition": "Long Animation Frames API entry (entry_type long-animation-frame, duration >= 50 ms) observed on the renderer main thread (track_long_task true)",
+      "envelope_top_level_keys": [
+        "type",
+        "_dd",
+        "application",
+        "date",
+        "source",
+        "view",
+        "session",
+        "connectivity",
+        "tab",
+        "context",
+        "usr",
+        "display",
+        "service",
+        "version",
+        "long_task",
+        "ddtags"
+      ],
+      "long_task_keys": [
+        "id",
+        "entry_type",
+        "duration",
+        "blocking_duration",
+        "first_ui_event_timestamp",
+        "render_start",
+        "style_and_layout_start",
+        "start_time",
+        "scripts"
+      ],
+      "script_entry_keys": [],
+      "constants": {
+        "long_task.entry_type": "long-animation-frame",
+        "service": "claude-ai",
+        "source": "browser",
+        "_dd.format_version": 2
+      },
+      "boundary": "the gateway has no Chromium renderer main thread or animation frames; Go scheduler stalls are not long-animation-frame entries and would fake blocking_duration/render_start/style_and_layout_start/scripts; not emitted"
+    },
+    {
+      "event_name": "attachment",
+      "roles": [
+        "sentry"
+      ],
+      "gateway_moment": null,
+      "condition": "sentry.javascript.electron 7.12.0 crash upload: after a native crash of the Desktop Electron process the SDK sends one envelope with an `event` item followed by an `attachment` item carrying the Crashpad minidump (attachment_type event.minidump, filename <uuid>.dmp, MDMP magic)",
+      "envelope_header_keys": [
+        "event_id",
+        "sent_at",
+        "sdk",
+        "trace"
+      ],
+      "envelope_sdk": {
+        "name": "sentry.javascript.electron",
+        "version": "7.12.0"
+      },
+      "item_types_in_order": [
+        "event",
+        "attachment"
+      ],
+      "attachment_item_header_keys": [
+        "type",
+        "length",
+        "filename",
+        "attachment_type"
+      ],
+      "attachment_type": "event.minidump",
+      "filename_shape": "<uuid>.dmp",
+      "payload_magic": "MDMP",
+      "payload_length_declared_bytes": 2150912,
+      "transport": {
+        "content_encoding": "gzip",
+        "declared_incomplete_in_manifest": true
+      },
+      "occurrences_checked": 1,
+      "boundary": "the gateway is not an Electron process and never produces a Crashpad minidump; the only captured attachment is a 2 MB minidump of a real renderer/main-process crash (1 occurrence); not emitted"
+    }
+  ],
+  "envelope_constant_keys": [
+    "service",
+    "source",
+    "_dd.format_version"
+  ]
+}

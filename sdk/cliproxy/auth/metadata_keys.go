@@ -12,8 +12,6 @@ func CanonicalCredentialMetadataKey(key string) string {
 		return "disable_cooling"
 	case "excluded-models":
 		return "excluded_models"
-	case "fingerprint-profile":
-		return "fingerprint_profile"
 	case "model-aliases":
 		return "model_aliases"
 	case "proxy-url":

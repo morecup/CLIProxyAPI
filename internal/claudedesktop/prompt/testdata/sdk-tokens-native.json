@@ -1,0 +1,1042 @@
+{
+  "schema_version": 1,
+  "kind": "native_sdk_token_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "text_estimate",
+      "module": "B:/~BUN/root/_560.js",
+      "module_sha256": "ec585f3b871ae23ec4ff96ac49f595b3b0f7f13f35f871a9b66137f564c4be08",
+      "from": 1449,
+      "to": 1529,
+      "sha256": "55274b2771a82659ee373f8dd4927d419aadffb954acc77d1dca148044971707"
+    },
+    {
+      "label": "content_estimate",
+      "module": "B:/~BUN/root/_560.js",
+      "module_sha256": "ec585f3b871ae23ec4ff96ac49f595b3b0f7f13f35f871a9b66137f564c4be08",
+      "from": 1650,
+      "to": 1762,
+      "sha256": "5a74affc0471eb6e47fce911cce88ae631be7b948b1a219925fb9753bee814bd"
+    },
+    {
+      "label": "block_estimate",
+      "module": "B:/~BUN/root/_560.js",
+      "module_sha256": "ec585f3b871ae23ec4ff96ac49f595b3b0f7f13f35f871a9b66137f564c4be08",
+      "from": 1762,
+      "to": 2127,
+      "sha256": "0d5240fba13e50be2132ef442631c9f32409c6a38e6750a936890548474e1043"
+    },
+    {
+      "label": "eligible_usage",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 2524007,
+      "to": 2524195,
+      "sha256": "afb9fbf8b908e9d7cbf4a2330fba79e9e1cc316b449efd12f945e5f7aa08d7f3"
+    },
+    {
+      "label": "assistant_id",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 2524195,
+      "to": 2524303,
+      "sha256": "00590202e3a3953ce0c71a4c69fc65486775bd63b66cf0a882bc0691387d3b14"
+    },
+    {
+      "label": "total_usage",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 2524303,
+      "to": 2524422,
+      "sha256": "49a26a203d6a513ff139bb6c1f7e72894014bcfe36d4c2403d907482f745ebfd"
+    },
+    {
+      "label": "history_estimate",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 2525886,
+      "to": 2525987,
+      "sha256": "7d7eb269fded7fae10dd7108da06057a78c1457f5821134360c2a5a14716ccc4"
+    },
+    {
+      "label": "history_anchor",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 2525987,
+      "to": 2526228,
+      "sha256": "e57f76b76f807ec85e8c6b42804626ceaccf6dde3d1991b1643f6e2a564fa16a"
+    },
+    {
+      "label": "message_sum",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 5999049,
+      "to": 5999110,
+      "sha256": "140feece21816fb3a6102dac21a9cc431c37905165f3f6150f278a1390581b12"
+    },
+    {
+      "label": "message_estimate",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 5999110,
+      "to": 5999374,
+      "sha256": "c03ea38b3e007dcd045aef8c0dd69fd4275cd5ae03effd097c72e14943d1e0c6"
+    },
+    {
+      "label": "merge_usage",
+      "module": "B:/~BUN/root/_448.js",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 5722009,
+      "to": 5723308,
+      "sha256": "a63c16fb390ee62213e2aa95870ba13a8800077dfc92ce03b9009cb78bd80833"
+    }
+  ],
+  "content": [
+    {
+      "name": "ascii_0",
+      "content": "",
+      "tokens": 0
+    },
+    {
+      "name": "ascii_1",
+      "content": "x",
+      "tokens": 0
+    },
+    {
+      "name": "ascii_2",
+      "content": "xx",
+      "tokens": 1
+    },
+    {
+      "name": "ascii_3",
+      "content": "xxx",
+      "tokens": 1
+    },
+    {
+      "name": "ascii_4",
+      "content": "xxxx",
+      "tokens": 1
+    },
+    {
+      "name": "ascii_5",
+      "content": "xxxxx",
+      "tokens": 1
+    },
+    {
+      "name": "ascii_6",
+      "content": "xxxxxx",
+      "tokens": 2
+    },
+    {
+      "name": "ascii_7",
+      "content": "xxxxxxx",
+      "tokens": 2
+    },
+    {
+      "name": "ascii_8",
+      "content": "xxxxxxxx",
+      "tokens": 2
+    },
+    {
+      "name": "ascii_9",
+      "content": "xxxxxxxxx",
+      "tokens": 2
+    },
+    {
+      "name": "unicode",
+      "content": "中文😀😀",
+      "tokens": 2
+    },
+    {
+      "name": "combining",
+      "content": "áé",
+      "tokens": 1
+    },
+    {
+      "name": "lone_surrogate_text",
+      "content": "\ud800",
+      "tokens": 0
+    },
+    {
+      "name": "split_rounding",
+      "content": [
+        {
+          "type": "text",
+          "text": "a"
+        },
+        {
+          "type": "text",
+          "text": "b"
+        }
+      ],
+      "tokens": 0
+    },
+    {
+      "name": "empty_blocks",
+      "content": [],
+      "tokens": 0
+    },
+    {
+      "name": "null_content",
+      "content": null,
+      "tokens": 0
+    },
+    {
+      "name": "thinking",
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "synthetic thought",
+          "signature": "ignored"
+        }
+      ],
+      "tokens": 4
+    },
+    {
+      "name": "redacted",
+      "content": [
+        {
+          "type": "redacted_thinking",
+          "data": "synthetic data"
+        }
+      ],
+      "tokens": 4
+    },
+    {
+      "name": "image",
+      "content": [
+        {
+          "type": "image",
+          "source": {
+            "type": "url",
+            "url": "synthetic"
+          }
+        }
+      ],
+      "tokens": 2000
+    },
+    {
+      "name": "document",
+      "content": [
+        {
+          "type": "document",
+          "source": {
+            "data": "synthetic"
+          }
+        }
+      ],
+      "tokens": 2000
+    },
+    {
+      "name": "tool_result",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic",
+          "content": [
+            {
+              "type": "text",
+              "text": "ab"
+            },
+            {
+              "type": "image"
+            }
+          ]
+        }
+      ],
+      "tokens": 2001
+    },
+    {
+      "name": "missing_result",
+      "content": [
+        {
+          "type": "tool_result"
+        }
+      ],
+      "tokens": 0
+    },
+    {
+      "name": "null_result",
+      "content": [
+        {
+          "type": "tool_result",
+          "content": null
+        }
+      ],
+      "tokens": 0
+    },
+    {
+      "name": "string_blocks",
+      "content": [
+        "ab",
+        "c"
+      ],
+      "tokens": 1
+    },
+    {
+      "name": "tool_input",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "synthetic",
+          "input": {
+            "b": [
+              1,
+              true,
+              null
+            ],
+            "a": "中文😀"
+          }
+        }
+      ],
+      "tokens": 10
+    },
+    {
+      "name": "tool_default_input",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "synthetic"
+        }
+      ],
+      "tokens": 3
+    },
+    {
+      "name": "tool_null_input",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "synthetic",
+          "input": null
+        }
+      ],
+      "tokens": 3
+    },
+    {
+      "name": "json_escaping",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "x",
+          "input": {
+            "x": "\u0000\b\f\n\r\t\"\\<>&  😀"
+          }
+        }
+      ],
+      "tokens": 9
+    },
+    {
+      "name": "json_surrogates",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "x",
+          "input": {
+            "x": "\ud800",
+            "y": "\udc00",
+            "z": "𐀀"
+          }
+        }
+      ],
+      "tokens": 9
+    },
+    {
+      "name": "numbers",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "x",
+          "input": [
+            0,
+            0,
+            1e-7,
+            -1e-7,
+            0.000001,
+            100000000000000000000,
+            1e+21,
+            1.2345678901234567
+          ]
+        }
+      ],
+      "tokens": 18
+    },
+    {
+      "name": "unknown_block",
+      "content": [
+        {
+          "type": "synthetic_future",
+          "value": {
+            "x": 123,
+            "y": "test"
+          }
+        }
+      ],
+      "tokens": 14
+    },
+    {
+      "name": "missing_text",
+      "content": [
+        {
+          "type": "text"
+        }
+      ],
+      "tokens": 0
+    },
+    {
+      "name": "nonstring_text",
+      "content": [
+        {
+          "type": "text",
+          "text": 123
+        }
+      ],
+      "tokens": 0
+    },
+    {
+      "name": "surrogate_keys",
+      "content": [
+        {
+          "type": "tool_use",
+          "name": "x",
+          "input": {
+            "\ud800": 1,
+            "\ud801": 2,
+            "�": 3
+          }
+        }
+      ],
+      "tokens": 8
+    },
+    {
+      "name": "duplicate_input_key",
+      "raw": "[{\"type\":\"tool_use\",\"name\":\"x\",\"input\":{\"a\":100,\"a\":2}}]",
+      "tokens": 2
+    },
+    {
+      "name": "escaped_duplicate_keys",
+      "raw": "[{\"type\":\"tool_use\",\"name\":\"x\",\"input\":{\"a\":100,\"\\u0061\":2,\"😀\":3,\"\\ud83d\\ude00\":4}}]",
+      "tokens": 4
+    }
+  ],
+  "history": [
+    {
+      "name": "no_anchor",
+      "tokens": 13,
+      "anchor_index": -1,
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-2",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "last_usage",
+      "tokens": 161,
+      "anchor_index": 1,
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-2",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "all_cache_fields",
+      "tokens": 157,
+      "anchor_index": 0,
+      "messages": [
+        {
+          "type": "assistant",
+          "uuid": "synthetic-0",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "split_assistant_anchor",
+      "tokens": 171,
+      "anchor_index": 1,
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-2",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-3",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-4",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "rewind_skips_user_and_system",
+      "tokens": 166,
+      "anchor_index": 0,
+      "messages": [
+        {
+          "type": "assistant",
+          "uuid": "synthetic-0",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-1",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "system",
+          "uuid": "synthetic-2",
+          "token_estimate": {
+            "tokens": 0,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-3",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "rewind_stops_at_other_id",
+      "tokens": 161,
+      "anchor_index": 2,
+      "messages": [
+        {
+          "type": "assistant",
+          "uuid": "synthetic-0",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "two",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-2",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-3",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "synthetic_usage_excluded",
+      "tokens": 162,
+      "anchor_index": 0,
+      "messages": [
+        {
+          "type": "assistant",
+          "uuid": "synthetic-0",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "two",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 999,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": true,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "sentinel_usage_excluded",
+      "tokens": 163,
+      "anchor_index": 0,
+      "messages": [
+        {
+          "type": "assistant",
+          "uuid": "synthetic-0",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "two",
+          "token_estimate": {
+            "tokens": 6,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 999,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": true
+        }
+      ]
+    },
+    {
+      "name": "last_anchor_wins",
+      "tokens": 283,
+      "anchor_index": 1,
+      "messages": [
+        {
+          "type": "assistant",
+          "uuid": "synthetic-0",
+          "message_id": "one",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "message_id": "two",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 222,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-2",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "missing_id",
+      "tokens": 161,
+      "anchor_index": 1,
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1",
+          "token_estimate": {
+            "tokens": 5,
+            "known": true
+          },
+          "usage": {
+            "input_tokens": 100,
+            "output_tokens": 7,
+            "cache_creation_input_tokens": 20,
+            "cache_read_input_tokens": 30
+          },
+          "usage_known": true,
+          "synthetic": false,
+          "usage_excluded": false
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-2",
+          "token_estimate": {
+            "tokens": 4,
+            "known": true
+          },
+          "usage_known": false,
+          "synthetic": false,
+          "usage_excluded": false
+        }
+      ]
+    },
+    {
+      "name": "empty_history",
+      "tokens": 0,
+      "anchor_index": -1,
+      "messages": []
+    }
+  ],
+  "usage": [
+    {
+      "name": "normal",
+      "updates": [
+        {
+          "input_tokens": 100,
+          "output_tokens": 7,
+          "cache_creation_input_tokens": 20,
+          "cache_read_input_tokens": 30
+        },
+        {
+          "output_tokens": 13
+        }
+      ],
+      "expected": {
+        "input_tokens": 100,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 20,
+        "cache_read_input_tokens": 30
+      }
+    },
+    {
+      "name": "zero_input_retained",
+      "updates": [
+        {
+          "input_tokens": 100,
+          "output_tokens": 7,
+          "cache_creation_input_tokens": 20,
+          "cache_read_input_tokens": 30
+        },
+        {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read_input_tokens": 0
+        }
+      ],
+      "expected": {
+        "input_tokens": 100,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 20,
+        "cache_read_input_tokens": 30
+      }
+    },
+    {
+      "name": "cache_breakdown",
+      "updates": [
+        {
+          "input_tokens": 5,
+          "output_tokens": 0,
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 10,
+            "ephemeral_5m_input_tokens": 12
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 5,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 22,
+        "cache_read_input_tokens": 0
+      }
+    },
+    {
+      "name": "cache_explicit_wins",
+      "updates": [
+        {
+          "input_tokens": 5,
+          "output_tokens": 0,
+          "cache_creation_input_tokens": 3,
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 10
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 5,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 3,
+        "cache_read_input_tokens": 0
+      }
+    },
+    {
+      "name": "null_delta",
+      "updates": [
+        {
+          "input_tokens": 100,
+          "output_tokens": 7,
+          "cache_creation_input_tokens": 20,
+          "cache_read_input_tokens": 30
+        },
+        {
+          "input_tokens": null,
+          "output_tokens": null,
+          "cache_read_input_tokens": null
+        }
+      ],
+      "expected": {
+        "input_tokens": 100,
+        "output_tokens": 7,
+        "cache_creation_input_tokens": 20,
+        "cache_read_input_tokens": 30
+      }
+    }
+  ],
+  "claim_boundary": "Eleven pinned native functions with synthetic messages. JSON.stringify uses the JavaScript runtime; attachment expansion is not executed. These are local native estimates, not tokenizer results or full reactive compaction. No recorded content or installed source is exported."
+}

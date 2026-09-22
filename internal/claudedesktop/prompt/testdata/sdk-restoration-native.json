@@ -1,0 +1,1509 @@
+{
+  "schema_version": 1,
+  "kind": "native_sdk_restoration_and_hook_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "restore_context",
+      "from": 2782855,
+      "to": 2783642,
+      "sha256": "fe61a0567da9ddb3504d9b3b161d5d54b3b012eb4bbf4712af153e08ea699163"
+    },
+    {
+      "label": "restore_files",
+      "from": 2783642,
+      "to": 2784251,
+      "sha256": "11af1121241ed3b233fdfad9a2b7b5c77ba998cb83847761e7a86562b286667a"
+    },
+    {
+      "label": "restore_tasks",
+      "from": 2785342,
+      "to": 2785783,
+      "sha256": "743e4f2a37fde5990e1041d3d411db96f2987d4de30a6cb6def03576c468afed"
+    },
+    {
+      "label": "preserved_reads",
+      "from": 2785783,
+      "to": 2786324,
+      "sha256": "a16451226d0793a287f13285464a70d9d0ba3374adbaa9674efbf28622b8cff4"
+    },
+    {
+      "label": "excluded_memory",
+      "from": 2786408,
+      "to": 2786489,
+      "sha256": "9c397b2176a8b0461b0530b757f06ee7b43725b18cad6d46b78f2d16fbdf9f44"
+    },
+    {
+      "label": "excluded_file",
+      "from": 2786489,
+      "to": 2786594,
+      "sha256": "84c020ffaec5c4a1a14e9a9c3637a784f51b3511c30b2c90b162242829b82725"
+    },
+    {
+      "label": "pre_hooks",
+      "from": 5432539,
+      "to": 5433636,
+      "sha256": "7a1c5f032dc6376aeb57742653983a8f47a7ea61872c43af2039aa36361f80e4"
+    },
+    {
+      "label": "post_hooks",
+      "from": 5433636,
+      "to": 5434375,
+      "sha256": "f356050fc55d66f9b28621ea1589eacb273cd0ec144d0147d1876fc3e0b357ce"
+    },
+    {
+      "label": "restore_fallback",
+      "from": 2668064,
+      "to": 2668186,
+      "sha256": "6437271bc142c0e5056e98355bc48113d5467a18c3478c7db9a936a8682b7c91"
+    },
+    {
+      "label": "unchanged_read",
+      "file": "_584.js",
+      "from": 499900,
+      "to": 499975,
+      "sha256": "8a028d8ba52b5cbd81d65b86cbd1cde6fc8757a6edce03466847fdfdf5fbfcd2"
+    },
+    {
+      "label": "unchanged_read_prefixes",
+      "file": "_584.js",
+      "from": 502225,
+      "to": 502552,
+      "sha256": "ba949aa105363aa50822295c3caccde10348d5d25dea1df3bdd7bf427c04f860"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "empty",
+      "isolated": false,
+      "results": [],
+      "pre": {},
+      "post": {},
+      "invocationCount": 2
+    },
+    {
+      "name": "empty",
+      "isolated": true,
+      "results": [],
+      "pre": {},
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "blank_success",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": " \t﻿",
+          "succeeded": true
+        }
+      ],
+      "pre": {
+        "userDisplayMessage": "PreCompact [one] completed successfully"
+      },
+      "post": {
+        "userDisplayMessage": "PostCompact [one] completed successfully"
+      },
+      "invocationCount": 2
+    },
+    {
+      "name": "blank_success",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": " \t﻿",
+          "succeeded": true
+        }
+      ],
+      "pre": {},
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "success",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": " first ",
+          "succeeded": true
+        },
+        {
+          "command": "two",
+          "output": "\nsecond\n",
+          "succeeded": true
+        }
+      ],
+      "pre": {
+        "newCustomInstructions": "first\n\nsecond",
+        "userDisplayMessage": "PreCompact [one] completed successfully: first\nPreCompact [two] completed successfully: second"
+      },
+      "post": {
+        "userDisplayMessage": "PostCompact [one] completed successfully: first\nPostCompact [two] completed successfully: second"
+      },
+      "invocationCount": 2
+    },
+    {
+      "name": "success",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": " first ",
+          "succeeded": true
+        },
+        {
+          "command": "two",
+          "output": "\nsecond\n",
+          "succeeded": true
+        }
+      ],
+      "pre": {},
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "failure",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": " detail ",
+          "succeeded": false
+        }
+      ],
+      "pre": {
+        "userDisplayMessage": "PreCompact [one] failed: detail"
+      },
+      "post": {
+        "userDisplayMessage": "PostCompact [one] failed: detail"
+      },
+      "invocationCount": 2
+    },
+    {
+      "name": "failure",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": " detail ",
+          "succeeded": false
+        }
+      ],
+      "pre": {},
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "blocking_success",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": " stop ",
+          "succeeded": true,
+          "blocked": true
+        }
+      ],
+      "pre": {
+        "userDisplayMessage": "PreCompact [one] failed: stop",
+        "blockedBy": "[one]: stop"
+      },
+      "post": {
+        "userDisplayMessage": "PostCompact [one] completed successfully: stop"
+      },
+      "invocationCount": 2
+    },
+    {
+      "name": "blocking_success",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": " stop ",
+          "succeeded": true,
+          "blocked": true
+        }
+      ],
+      "pre": {
+        "blockedBy": "[one]: stop"
+      },
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "multiple_blockers",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": "",
+          "blocked": true
+        },
+        {
+          "command": "two",
+          "output": " reason ",
+          "blocked": true
+        }
+      ],
+      "pre": {
+        "userDisplayMessage": "PreCompact [one] failed\nPreCompact [two] failed: reason",
+        "blockedBy": "[one]\n[two]: reason"
+      },
+      "post": {
+        "userDisplayMessage": "PostCompact [one] failed\nPostCompact [two] failed: reason"
+      },
+      "invocationCount": 2
+    },
+    {
+      "name": "multiple_blockers",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": "",
+          "blocked": true
+        },
+        {
+          "command": "two",
+          "output": " reason ",
+          "blocked": true
+        }
+      ],
+      "pre": {
+        "blockedBy": "[one]\n[two]: reason"
+      },
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "cancelled_success",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": " instruction ",
+          "succeeded": true,
+          "cancelled": true
+        }
+      ],
+      "pre": {
+        "newCustomInstructions": "instruction"
+      },
+      "post": {},
+      "invocationCount": 2
+    },
+    {
+      "name": "cancelled_success",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": " instruction ",
+          "succeeded": true,
+          "cancelled": true
+        }
+      ],
+      "pre": {},
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "cancelled_blocker",
+      "isolated": false,
+      "results": [
+        {
+          "command": "one",
+          "output": " reason ",
+          "blocked": true,
+          "cancelled": true
+        }
+      ],
+      "pre": {
+        "blockedBy": "[one]: reason"
+      },
+      "post": {},
+      "invocationCount": 2
+    },
+    {
+      "name": "cancelled_blocker",
+      "isolated": true,
+      "results": [
+        {
+          "command": "one",
+          "output": " reason ",
+          "blocked": true,
+          "cancelled": true
+        }
+      ],
+      "pre": {
+        "blockedBy": "[one]: reason"
+      },
+      "post": {},
+      "invocationCount": 1
+    },
+    {
+      "name": "ecmascript_trim",
+      "isolated": false,
+      "results": [
+        {
+          "command": "unicode",
+          "output": "﻿ value ﻿",
+          "succeeded": true
+        },
+        {
+          "command": "nel",
+          "output": "",
+          "succeeded": true
+        }
+      ],
+      "pre": {
+        "newCustomInstructions": "value\n\n",
+        "userDisplayMessage": "PreCompact [unicode] completed successfully: value\nPreCompact [nel] completed successfully: "
+      },
+      "post": {
+        "userDisplayMessage": "PostCompact [unicode] completed successfully: value\nPostCompact [nel] completed successfully: "
+      },
+      "invocationCount": 2
+    },
+    {
+      "name": "ecmascript_trim",
+      "isolated": true,
+      "results": [
+        {
+          "command": "unicode",
+          "output": "﻿ value ﻿",
+          "succeeded": true
+        },
+        {
+          "command": "nel",
+          "output": "",
+          "succeeded": true
+        }
+      ],
+      "pre": {},
+      "post": {},
+      "invocationCount": 1
+    }
+  ],
+  "restorations": [
+    {
+      "options": {},
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "files"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "tasks"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_file"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "skills"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "derived"
+            }
+          }
+        ],
+        "hookResults": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "session_start"
+            }
+          }
+        ]
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived",
+        "session_start_progress",
+        "session_start"
+      ]
+    },
+    {
+      "options": {
+        "remote": true
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "files"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "tasks"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_file"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "skills"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "derived"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "remote"
+            }
+          }
+        ],
+        "hookResults": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "session_start"
+            }
+          }
+        ]
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived",
+        "remote",
+        "session_start_progress",
+        "session_start"
+      ]
+    },
+    {
+      "options": {
+        "isolated": true,
+        "remote": true
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "files"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_file"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "skills"
+            }
+          },
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "derived"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived"
+      ]
+    },
+    {
+      "options": {
+        "empty": true
+      },
+      "result": {
+        "attachments": [],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived",
+        "session_start_progress",
+        "session_start"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "files"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "diagnostic:synthetic-files",
+        "plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "tasks"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "diagnostic:synthetic-tasks",
+        "plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "plan_file"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "diagnostic:synthetic-plan_file",
+        "plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "plan_mode"
+      },
+      "result": {
+        "attachments": [],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "diagnostic:synthetic-plan_mode",
+        "plan_mode",
+        "diagnostic:synthetic-plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "skills"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "diagnostic:synthetic-skills",
+        "plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "derived"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived",
+        "diagnostic:synthetic-derived",
+        "plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "remote"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived",
+        "remote",
+        "diagnostic:synthetic-remote",
+        "plan_mode"
+      ]
+    },
+    {
+      "options": {
+        "remote": true,
+        "failure": "session_start"
+      },
+      "result": {
+        "attachments": [
+          {
+            "type": "attachment",
+            "attachment": {
+              "type": "plan_mode"
+            }
+          }
+        ],
+        "hookResults": []
+      },
+      "effects": [
+        "files",
+        "tasks",
+        "plan_file",
+        "plan_mode",
+        "skills",
+        "derived",
+        "remote",
+        "session_start_progress",
+        "session_start",
+        "diagnostic:synthetic-session_start",
+        "plan_mode"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "name": "empty",
+      "state": {},
+      "options": {},
+      "expected": [],
+      "effects": []
+    },
+    {
+      "name": "filter_sort_then_limit",
+      "state": {
+        "a": {
+          "timestamp": 0
+        },
+        "b": {
+          "timestamp": 1
+        },
+        "c": {
+          "timestamp": 2
+        },
+        "d": {
+          "timestamp": 3
+        },
+        "e": {
+          "timestamp": 4
+        },
+        "f": {
+          "timestamp": 5
+        },
+        "memory": {
+          "timestamp": 6
+        },
+        "session": {
+          "timestamp": 7
+        },
+        "synthetic-plan": {
+          "timestamp": 8
+        }
+      },
+      "options": {
+        "memoryPaths": [
+          "memory"
+        ],
+        "sessionReadPaths": [
+          "session"
+        ]
+      },
+      "excludeSessionReads": true,
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "f"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "e"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "d"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "c"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "b"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "f",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "e",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "d",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "c",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "b",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "read_without_result_still_preserved",
+      "state": {
+        "kept": {
+          "timestamp": 1
+        }
+      },
+      "preserved": [
+        {
+          "type": "assistant",
+          "message": {
+            "content": [
+              {
+                "type": "tool_use",
+                "name": "Read",
+                "id": "read",
+                "input": {
+                  "file_path": "kept"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "options": {},
+      "expected": [],
+      "effects": []
+    },
+    {
+      "name": "no_content_result_restores_file",
+      "state": {
+        "kept": {
+          "timestamp": 1
+        }
+      },
+      "preserved": [
+        {
+          "type": "assistant",
+          "message": {
+            "content": [
+              {
+                "type": "tool_use",
+                "name": "Read",
+                "id": "read",
+                "input": {
+                  "file_path": "kept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "user",
+          "message": {
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "read",
+                "content": "<system-reminder>This file is already in your context"
+              }
+            ]
+          }
+        }
+      ],
+      "options": {},
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "kept"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "kept",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "real_partial_contents_are_not_no_content_marker",
+      "state": {
+        "kept": {
+          "timestamp": 1
+        }
+      },
+      "preserved": [
+        {
+          "type": "assistant",
+          "message": {
+            "content": [
+              {
+                "type": "tool_use",
+                "name": "Read",
+                "id": "read",
+                "input": {
+                  "file_path": "kept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "user",
+          "message": {
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "read",
+                "content": "[Truncated: PARTIAL view — file body"
+              }
+            ]
+          }
+        }
+      ],
+      "options": {},
+      "expected": [],
+      "effects": []
+    },
+    {
+      "name": "block_content_does_not_match_string_marker",
+      "state": {
+        "kept": {
+          "timestamp": 1
+        }
+      },
+      "preserved": [
+        {
+          "type": "assistant",
+          "message": {
+            "content": [
+              {
+                "type": "tool_use",
+                "name": "Read",
+                "id": "read",
+                "input": {
+                  "file_path": "kept"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "user",
+          "message": {
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "read",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "<system-reminder>This file is already in your context"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "options": {},
+      "expected": [],
+      "effects": []
+    },
+    {
+      "name": "native_field_names_are_case_sensitive",
+      "state": {
+        "kept": {
+          "timestamp": 1
+        }
+      },
+      "preserved": [
+        {
+          "Type": "assistant",
+          "message": {
+            "content": [
+              {
+                "type": "tool_use",
+                "name": "Read",
+                "id": "read",
+                "input": {
+                  "file_path": "kept"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "options": {},
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "kept"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "kept",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "equal_timestamps_preserve_insertion_order",
+      "state": {
+        "second": {
+          "timestamp": 1
+        },
+        "first": {
+          "timestamp": 1
+        }
+      },
+      "options": {},
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "second"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "first"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "second",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "first",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "missing_read_does_not_refill_candidate_list",
+      "state": {
+        "a": {
+          "timestamp": 0
+        },
+        "b": {
+          "timestamp": 1
+        },
+        "c": {
+          "timestamp": 2
+        },
+        "d": {
+          "timestamp": 3
+        },
+        "e": {
+          "timestamp": 4
+        },
+        "f": {
+          "timestamp": 5
+        },
+        "memory": {
+          "timestamp": 6
+        },
+        "session": {
+          "timestamp": 7
+        },
+        "synthetic-plan": {
+          "timestamp": 8
+        }
+      },
+      "options": {},
+      "nullReads": [
+        "synthetic-plan",
+        "session",
+        "memory",
+        "f",
+        "e",
+        "d",
+        "c",
+        "b",
+        "a"
+      ],
+      "expected": [],
+      "effects": [
+        {
+          "read": "session",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "memory",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "f",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "e",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "d",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "budget_skip_does_not_stop_later_candidates",
+      "state": {
+        "large": {
+          "timestamp": 3
+        },
+        "medium": {
+          "timestamp": 2
+        },
+        "small": {
+          "timestamp": 1
+        }
+      },
+      "options": {},
+      "costs": {
+        "large": 50001,
+        "medium": 49999,
+        "small": 1
+      },
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "medium"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "small"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "large",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "medium",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "small",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "budget_exact_then_overflow",
+      "state": {
+        "first": {
+          "timestamp": 2
+        },
+        "second": {
+          "timestamp": 1
+        }
+      },
+      "options": {},
+      "costs": {
+        "first": 50000,
+        "second": 1
+      },
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "first"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "first",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "second",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "memory_path_error_discards_the_whole_exclusion_set",
+      "state": {
+        "memory": {
+          "timestamp": 2
+        },
+        "a": {
+          "timestamp": 1
+        }
+      },
+      "options": {
+        "memoryPaths": [
+          "memory"
+        ],
+        "memoryPathError": true
+      },
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "memory"
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "a"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "memory",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        },
+        {
+          "read": "a",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "plan_path_error_does_not_abort_reads",
+      "state": {
+        "synthetic-plan": {
+          "timestamp": 1
+        }
+      },
+      "options": {
+        "planPathError": true
+      },
+      "expected": [
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "file",
+            "filename": "synthetic-plan"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "read": "synthetic-plan",
+          "maxTokens": 5000,
+          "success": "tengu_post_compact_file_restore_success",
+          "failure": "tengu_post_compact_file_restore_error",
+          "source": "compact"
+        }
+      ]
+    },
+    {
+      "name": "session_read_error_rejects_before_reading",
+      "state": {
+        "a": {
+          "timestamp": 0
+        },
+        "b": {
+          "timestamp": 1
+        },
+        "c": {
+          "timestamp": 2
+        },
+        "d": {
+          "timestamp": 3
+        },
+        "e": {
+          "timestamp": 4
+        },
+        "f": {
+          "timestamp": 5
+        },
+        "memory": {
+          "timestamp": 6
+        },
+        "session": {
+          "timestamp": 7
+        },
+        "synthetic-plan": {
+          "timestamp": 8
+        }
+      },
+      "options": {
+        "sessionReadError": true
+      },
+      "excludeSessionReads": true,
+      "error": "synthetic-session-read",
+      "effects": []
+    }
+  ],
+  "noContent": [
+    {
+      "text": "File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.",
+      "expected": true
+    },
+    {
+      "text": "Wasted call — file unchanged since your last Read. Refer to that earlier tool_result instead.",
+      "expected": true
+    },
+    {
+      "text": "<system-reminder>This file is already in your context",
+      "expected": true
+    },
+    {
+      "text": "<system-reminder>This file is already in your context: synthetic path</system-reminder>",
+      "expected": true
+    },
+    {
+      "text": " <system-reminder>This file is already in your context",
+      "expected": false
+    },
+    {
+      "text": "<SYSTEM-REMINDER>THIS FILE IS ALREADY IN YOUR CONTEXT",
+      "expected": false
+    },
+    {
+      "text": "[Truncated: PARTIAL view — body",
+      "expected": false
+    },
+    {
+      "text": "ordinary body",
+      "expected": false
+    },
+    {
+      "text": "",
+      "expected": false
+    }
+  ],
+  "claim_boundary": "Pinned RL/bV/s1e/PZo, with synthetic hook execution and restoration operations. File/path/attachment normalization, native tools, storage reset, real SessionStart hook execution and lifecycle event production remain separate dependencies. No real API, filesystem, hook process, capture or product live A/B."
+}

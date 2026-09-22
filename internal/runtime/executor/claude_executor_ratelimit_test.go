@@ -44,10 +44,10 @@ func TestClaudeExecutor_HonorsAnthropicRateLimitHeaders_Execute(t *testing.T) {
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(&config.Config{})
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
 	auth := &cliproxyauth.Auth{
 		ID:       "claude-auth-1",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -102,10 +102,10 @@ func TestClaudeExecutor_HonorsAnthropicRateLimitHeaders_ExecuteStream(t *testing
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(&config.Config{})
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
 	auth := &cliproxyauth.Auth{
 		ID:       "claude-auth-1",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -154,10 +154,10 @@ func TestClaudeExecutor_RateLimit_BothRejectedUsesLongest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(&config.Config{})
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
 	auth := &cliproxyauth.Auth{
 		ID:       "claude-auth-1",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -205,10 +205,10 @@ func TestClaudeExecutor_RateLimit_CountTokensHonorsRateLimitReset(t *testing.T) 
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(&config.Config{})
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
 	auth := &cliproxyauth.Auth{
 		ID:       "claude-auth-1",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -255,10 +255,10 @@ func TestClaudeExecutor_RateLimit_CaseInsensitiveRawHeaderMap(t *testing.T) {
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(&config.Config{})
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
 	auth := &cliproxyauth.Auth{
 		ID:       "claude-auth-1",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -315,16 +315,16 @@ func TestClaudeExecutor_RateLimit_FastModeAuthoritativeRejectionHeadersOverrideB
 	manager := cliproxyauth.NewManager(nil, nil, nil)
 	manager.SetRetryConfig(0, 0, 2)
 
-	executor := NewClaudeExecutor(cfg)
+	executor := newAnthropicCompatibleTestExecutor(cfg)
 	manager.RegisterExecutor(executor)
 
 	baseID := uuid.NewString()
-	auth1 := &cliproxyauth.Auth{ID: baseID + "-fast-override-1", Provider: "claude", Attributes: map[string]string{"api_key": "k1", "base_url": server1.URL}}
-	auth2 := &cliproxyauth.Auth{ID: baseID + "-fast-override-2", Provider: "claude", Attributes: map[string]string{"api_key": "k2", "base_url": server2.URL}}
+	auth1 := &cliproxyauth.Auth{ID: baseID + "-fast-override-1", Provider: "anthropic-compatible", Attributes: map[string]string{"api_key": "k1", "base_url": server1.URL}}
+	auth2 := &cliproxyauth.Auth{ID: baseID + "-fast-override-2", Provider: "anthropic-compatible", Attributes: map[string]string{"api_key": "k2", "base_url": server2.URL}}
 
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth1.ID, "claude", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
-	reg.RegisterClient(auth2.ID, "claude", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
+	reg.RegisterClient(auth1.ID, "anthropic-compatible", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
+	reg.RegisterClient(auth2.ID, "anthropic-compatible", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
 	t.Cleanup(func() {
 		reg.UnregisterClient(auth1.ID)
 		reg.UnregisterClient(auth2.ID)
@@ -338,7 +338,7 @@ func TestClaudeExecutor_RateLimit_FastModeAuthoritativeRejectionHeadersOverrideB
 	}
 
 	payload := []byte(`{"speed":"fast","messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-	resp, err := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	resp, err := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-5-sonnet-20241022",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -379,14 +379,14 @@ func TestClaudeExecutor_RateLimit_FastEntitlementWithRetryAfterRemainsRequestSco
 	manager := cliproxyauth.NewManager(nil, nil, nil)
 	manager.SetRetryConfig(0, 0, 2)
 
-	executor := NewClaudeExecutor(cfg)
+	executor := newAnthropicCompatibleTestExecutor(cfg)
 	manager.RegisterExecutor(executor)
 
 	baseID := uuid.NewString()
-	auth := &cliproxyauth.Auth{ID: baseID + "-fast-entitlement", Provider: "claude", Attributes: map[string]string{"api_key": "k1", "base_url": server.URL}}
+	auth := &cliproxyauth.Auth{ID: baseID + "-fast-entitlement", Provider: "anthropic-compatible", Attributes: map[string]string{"api_key": "k1", "base_url": server.URL}}
 
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth.ID, "claude", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
+	reg.RegisterClient(auth.ID, "anthropic-compatible", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
 	t.Cleanup(func() {
 		reg.UnregisterClient(auth.ID)
 	})
@@ -396,7 +396,7 @@ func TestClaudeExecutor_RateLimit_FastEntitlementWithRetryAfterRemainsRequestSco
 	}
 
 	payload := []byte(`{"speed":"fast","messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-	_, err := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, err := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-5-sonnet-20241022",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -436,13 +436,13 @@ func TestClaudeExecutor_AuthManager_CredentialScopeBlocksAllModelsAndAliases(t *
 	manager := cliproxyauth.NewManager(nil, nil, nil)
 	manager.SetRetryConfig(0, 0, 0)
 
-	executor := NewClaudeExecutor(cfg)
+	executor := newAnthropicCompatibleTestExecutor(cfg)
 	manager.RegisterExecutor(executor)
 
 	baseID := uuid.NewString()
 	auth := &cliproxyauth.Auth{
 		ID:       baseID + "-claude-cred",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -450,7 +450,7 @@ func TestClaudeExecutor_AuthManager_CredentialScopeBlocksAllModelsAndAliases(t *
 	}
 
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth.ID, "claude", []*registry.ModelInfo{
+	reg.RegisterClient(auth.ID, "anthropic-compatible", []*registry.ModelInfo{
 		{ID: "claude-3-5-sonnet-20241022"},
 		{ID: "claude-3-opus-20240229"},
 		{ID: "claude-3-7-sonnet-20250219"},
@@ -465,7 +465,7 @@ func TestClaudeExecutor_AuthManager_CredentialScopeBlocksAllModelsAndAliases(t *
 
 	// 1. Initial request on sonnet triggers 429 and records 7d cooldown
 	payload := []byte(`{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-	_, err := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, err := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-5-sonnet-20241022",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -478,7 +478,7 @@ func TestClaudeExecutor_AuthManager_CredentialScopeBlocksAllModelsAndAliases(t *
 	}
 
 	// 2. Try requesting a completely different model (opus) on the same credential -> must be blocked locally
-	_, errOpus := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, errOpus := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-opus-20240229",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -490,7 +490,7 @@ func TestClaudeExecutor_AuthManager_CredentialScopeBlocksAllModelsAndAliases(t *
 	}
 
 	// 3. Try requesting a thinking suffix alias on the same credential -> must also be blocked locally
-	_, errThinking := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, errThinking := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-7-sonnet-20250219-thinking-16k",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -502,7 +502,7 @@ func TestClaudeExecutor_AuthManager_CredentialScopeBlocksAllModelsAndAliases(t *
 	}
 
 	// 4. Try streaming execution for opus on the same cooling credential -> must also be blocked locally
-	_, errStream := manager.ExecuteStream(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, errStream := manager.ExecuteStream(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-opus-20240229",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -540,13 +540,13 @@ func TestClaudeExecutor_AuthManager_OrdinaryModel429DoesNotBlockSiblingModels(t 
 	manager := cliproxyauth.NewManager(nil, nil, nil)
 	manager.SetRetryConfig(0, 0, 0)
 
-	executor := NewClaudeExecutor(cfg)
+	executor := newAnthropicCompatibleTestExecutor(cfg)
 	manager.RegisterExecutor(executor)
 
 	baseID := uuid.NewString()
 	auth := &cliproxyauth.Auth{
 		ID:       baseID + "-ordinary-429",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
@@ -554,7 +554,7 @@ func TestClaudeExecutor_AuthManager_OrdinaryModel429DoesNotBlockSiblingModels(t 
 	}
 
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth.ID, "claude", []*registry.ModelInfo{
+	reg.RegisterClient(auth.ID, "anthropic-compatible", []*registry.ModelInfo{
 		{ID: "claude-3-5-sonnet-20241022"},
 		{ID: "claude-3-opus-20240229"},
 	})
@@ -568,7 +568,7 @@ func TestClaudeExecutor_AuthManager_OrdinaryModel429DoesNotBlockSiblingModels(t 
 
 	// 1. Initial request on sonnet triggers ordinary model 429
 	payloadSonnet := []byte(`{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-	_, errSonnet := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, errSonnet := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-5-sonnet-20241022",
 		Payload: payloadSonnet,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -581,7 +581,7 @@ func TestClaudeExecutor_AuthManager_OrdinaryModel429DoesNotBlockSiblingModels(t 
 
 	// 2. Request on opus MUST succeed on the same credential (not blocked by ordinary model-level 429)
 	payloadOpus := []byte(`{"messages":[{"role":"user","content":[{"type":"text","text":"hi opus"}]}]}`)
-	respOpus, errOpus := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	respOpus, errOpus := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-opus-20240229",
 		Payload: payloadOpus,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -627,13 +627,13 @@ func TestClaudeExecutor_AuthManager_AlternativeCredentialCanBeSelected(t *testin
 	manager := cliproxyauth.NewManager(nil, nil, nil)
 	manager.SetRetryConfig(0, 0, 2)
 
-	executor := NewClaudeExecutor(cfg)
+	executor := newAnthropicCompatibleTestExecutor(cfg)
 	manager.RegisterExecutor(executor)
 
 	baseID := uuid.NewString()
 	auth1 := &cliproxyauth.Auth{
 		ID:       baseID + "-claude-cred-1",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key-1",
 			"base_url": server1.URL,
@@ -641,7 +641,7 @@ func TestClaudeExecutor_AuthManager_AlternativeCredentialCanBeSelected(t *testin
 	}
 	auth2 := &cliproxyauth.Auth{
 		ID:       baseID + "-claude-cred-2",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "test-key-2",
 			"base_url": server2.URL,
@@ -649,8 +649,8 @@ func TestClaudeExecutor_AuthManager_AlternativeCredentialCanBeSelected(t *testin
 	}
 
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth1.ID, "claude", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
-	reg.RegisterClient(auth2.ID, "claude", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
+	reg.RegisterClient(auth1.ID, "anthropic-compatible", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
+	reg.RegisterClient(auth2.ID, "anthropic-compatible", []*registry.ModelInfo{{ID: "claude-3-5-sonnet-20241022"}})
 	t.Cleanup(func() {
 		reg.UnregisterClient(auth1.ID)
 		reg.UnregisterClient(auth2.ID)
@@ -664,7 +664,7 @@ func TestClaudeExecutor_AuthManager_AlternativeCredentialCanBeSelected(t *testin
 	}
 
 	payload := []byte(`{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-	resp, err := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	resp, err := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-5-sonnet-20241022",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -683,7 +683,7 @@ func TestClaudeExecutor_AuthManager_AlternativeCredentialCanBeSelected(t *testin
 	}
 
 	// Next request should directly use cred2 without attempting cred1 (which is cooling down)
-	resp2, err2 := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	resp2, err2 := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-3-5-sonnet-20241022",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -730,26 +730,26 @@ func TestClaudeExecutor_AuthManager_MultiModelPoolStreamStopsProbingOn429(t *tes
 	manager.SetRetryConfig(0, 0, 2)
 
 	manager.SetOAuthModelAlias(map[string][]config.OAuthModelAlias{
-		"claude": {
+		"anthropic-compatible": {
 			{Name: "claude-3-5-sonnet-20241022", Alias: "claude-pool-alias"},
 			{Name: "claude-3-opus-20240229", Alias: "claude-pool-alias"},
 		},
 	})
 
-	executor := NewClaudeExecutor(cfg)
+	executor := newAnthropicCompatibleTestExecutor(cfg)
 	manager.RegisterExecutor(executor)
 
 	baseID := uuid.NewString()
-	auth1 := &cliproxyauth.Auth{ID: baseID + "-pool-1", Provider: "claude", Attributes: map[string]string{"api_key": "k1", "base_url": server1.URL}}
-	auth2 := &cliproxyauth.Auth{ID: baseID + "-pool-2", Provider: "claude", Attributes: map[string]string{"api_key": "k2", "base_url": server2.URL}}
+	auth1 := &cliproxyauth.Auth{ID: baseID + "-pool-1", Provider: "anthropic-compatible", Attributes: map[string]string{"api_key": "k1", "base_url": server1.URL}}
+	auth2 := &cliproxyauth.Auth{ID: baseID + "-pool-2", Provider: "anthropic-compatible", Attributes: map[string]string{"api_key": "k2", "base_url": server2.URL}}
 
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth1.ID, "claude", []*registry.ModelInfo{
+	reg.RegisterClient(auth1.ID, "anthropic-compatible", []*registry.ModelInfo{
 		{ID: "claude-pool-alias"},
 		{ID: "claude-3-5-sonnet-20241022"},
 		{ID: "claude-3-opus-20240229"},
 	})
-	reg.RegisterClient(auth2.ID, "claude", []*registry.ModelInfo{
+	reg.RegisterClient(auth2.ID, "anthropic-compatible", []*registry.ModelInfo{
 		{ID: "claude-pool-alias"},
 		{ID: "claude-3-5-sonnet-20241022"},
 		{ID: "claude-3-opus-20240229"},
@@ -767,7 +767,7 @@ func TestClaudeExecutor_AuthManager_MultiModelPoolStreamStopsProbingOn429(t *tes
 	}
 
 	payload := []byte(`{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-	res, err := manager.ExecuteStream(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	res, err := manager.ExecuteStream(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-pool-alias",
 		Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})

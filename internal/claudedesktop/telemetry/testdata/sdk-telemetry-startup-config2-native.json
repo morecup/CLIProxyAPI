@@ -1,0 +1,463 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "desktop_chunk": {
+    "name": "index.chunk-Clv3sLGS.js",
+    "sha256": "d0f73b3df172b9612535d0739c85f6b853f0634dc84ea8663a0ae1aadf95b6d1"
+  },
+  "modules": {
+    "headless": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    },
+    "addressing": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    },
+    "host": {
+      "name": "B:/~BUN/root/_839.js",
+      "sha256": "ea566f3d083a6df61245989ac4ba0d82c1389e6885c2a9b8ede8ec79889c8771"
+    },
+    "arrays": {
+      "name": "B:/~BUN/root/_843.js",
+      "sha256": "c9c0bbdd114c08703bb16c9808c600e03a5ce1ab9b57a328e190bac03b7c9b64"
+    },
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "orgmem": {
+      "name": "B:/~BUN/root/_649.js",
+      "sha256": "4952033461316aaa14b02679dcb4c6d91e829908c96b907e9641ac5c74d221cb"
+    },
+    "memwatch": {
+      "name": "B:/~BUN/root/_510.js",
+      "sha256": "e707305516b787f38c4d1b5dbefa51812f9d353e6cf193bd7656c295829f5203"
+    },
+    "memdir": {
+      "name": "B:/~BUN/root/_585.js",
+      "sha256": "6fac27860327b986f332fe9a546378f1d6dde916f20b55b29f22aaaff436980a"
+    },
+    "bootstrap": {
+      "name": "B:/~BUN/root/_395.js",
+      "sha256": "2c1363e74f44adffdebd1ab4d9218a77b00946c8023637ea6b94ceab54667052"
+    }
+  },
+  "definitions": [
+    {
+      "label": "prewait_options",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 317606,
+      "to": 317781,
+      "bytes": 175,
+      "sha256": "c40d102fc725f914c4fec7cfa71c980ea7818c18056816f88b2e5a049fbba46c"
+    },
+    {
+      "label": "prewait_fn",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 317799,
+      "to": 318882,
+      "bytes": 1083,
+      "sha256": "c8ebd9b23c7fcfdf4113ba3a449fd87882c38850b8b05e630234281f4d841916"
+    },
+    {
+      "label": "prewait_call",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 218489,
+      "to": 218664,
+      "bytes": 175,
+      "sha256": "86790ca505313408fdb1e4e0eeb19ac81530bc915d1772ac588d47e56c1895e1"
+    },
+    {
+      "label": "prewait_await",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 230051,
+      "to": 230320,
+      "bytes": 269,
+      "sha256": "c415fe3e575a2d912a5382120e9c76244fbb50bca756b1f9ea20199b1249996b"
+    },
+    {
+      "label": "handshake_literal",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 324564,
+      "to": 324672,
+      "bytes": 108,
+      "sha256": "6aa601fc2e7238ad1f8935b2eab3e9c5095246622ad4bc4fc5c8a17ec9e06800"
+    },
+    {
+      "label": "mcp_non_blocking",
+      "module": "B:/~BUN/root/_839.js",
+      "from": 60828,
+      "to": 60896,
+      "bytes": 68,
+      "sha256": "896f56e120d98dbe6c474acbd7440478717f1db2de7602d864ccb90a77558a60"
+    },
+    {
+      "label": "count_by",
+      "module": "B:/~BUN/root/_843.js",
+      "from": 714,
+      "to": 773,
+      "bytes": 59,
+      "sha256": "384b426da65a90defac9022c0188563037c94be05efeee4e747d85e9235606e3"
+    },
+    {
+      "label": "datadog_known_events",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 396390,
+      "to": 396432,
+      "bytes": 42,
+      "sha256": "23c5460ed6ed8ad1ea6c7c0cd5e1ed89a6d013b8e901ce7d497b96b683591099"
+    },
+    {
+      "label": "prompt_suggestion_init",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2858905,
+      "to": 2859560,
+      "bytes": 655,
+      "sha256": "ae4a0c599273c4446d679d6137cd90f5a230e160ebfe7121523e7f85bd70e51b"
+    },
+    {
+      "label": "org_memory_connected_mode",
+      "module": "B:/~BUN/root/_510.js",
+      "from": 75861,
+      "to": 76122,
+      "bytes": 261,
+      "sha256": "62d41fb81c10e4383b17ff375dbdbf2b5ef2756f1602368301e3ad67f2f9c667"
+    },
+    {
+      "label": "org_memory_decision_off",
+      "module": "B:/~BUN/root/_649.js",
+      "from": 12994,
+      "to": 13185,
+      "bytes": 191,
+      "sha256": "726b473c9654f67f938a84a8a2eb8f1705178c13ae90c146390798274615a58c"
+    },
+    {
+      "label": "memdir_loaded",
+      "module": "B:/~BUN/root/_585.js",
+      "from": 60695,
+      "to": 61097,
+      "bytes": 402,
+      "sha256": "7fdad06bb05963a5ead48db038d9d82c49397f4da159ac1d672706b72f9904b5"
+    },
+    {
+      "label": "config_cache_stats",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 357466,
+      "to": 357606,
+      "bytes": 140,
+      "sha256": "2b172e2c9a4601e6494d0cb116aa2c870fc919e23da2374b99b1a2d4e3de2ba0"
+    },
+    {
+      "label": "config_lock_contention",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 367267,
+      "to": 367416,
+      "bytes": 149,
+      "sha256": "bb4a09fc5d7809dfb3cdf4877a50e18e8ef2b005e1cf32acc8cae65d42bff84f"
+    },
+    {
+      "label": "config_stale_write",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 367474,
+      "to": 367693,
+      "bytes": 219,
+      "sha256": "bbb2c08fb848b623574dc9a72ea5801bed6d19440252a87cfbdd69ebea5ad947"
+    },
+    {
+      "label": "config_fallback_write",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 365086,
+      "to": 365153,
+      "bytes": 67,
+      "sha256": "9f24df8a2ac52c853260b8dae532d3e660376d9e795c733b07d3fc1192d97b40"
+    },
+    {
+      "label": "penguin_fetch_failed",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 153507,
+      "to": 153722,
+      "bytes": 215,
+      "sha256": "dcfed3a91dca6a461a3d82a1949a2f39c39b70ada608f85c784750973641f715"
+    },
+    {
+      "label": "client_data_cache_key",
+      "module": "B:/~BUN/root/_395.js",
+      "from": 7567,
+      "to": 7888,
+      "bytes": 321,
+      "sha256": "86838b97f4b78e7b0a72f2a5365a01e12af4352979e43e71421a9179483926df"
+    },
+    {
+      "label": "desktop_mcp_config_flag",
+      "module": "index.chunk-Clv3sLGS.js",
+      "from": 873326,
+      "to": 873398,
+      "bytes": 72,
+      "sha256": "302e8a33a8c339f8593aa7f00f52cacfe475d7fe0b27d75ab219b3c1a3db74b5"
+    },
+    {
+      "label": "desktop_permission_prompt_tool",
+      "module": "index.chunk-Clv3sLGS.js",
+      "from": 872721,
+      "to": 872931,
+      "bytes": 210,
+      "sha256": "f9a5402ee87e4deb3da1ec4cce8d195424b77d5866c6048039dc51daaba95a34"
+    }
+  ],
+  "logger_prefix": [
+    "subscription_type"
+  ],
+  "startup_order": {
+    "tengu_started": 100,
+    "tengu_init": 200,
+    "tengu_headless_plugin_install": 210,
+    "tengu_headless_mcp_prewait": 260,
+    "tengu_sdk_init_handshake": 300
+  },
+  "events": [
+    {
+      "fact": "headless_mcp_prewait",
+      "event_name": "tengu_headless_mcp_prewait",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "slices": [
+        "prewait_options",
+        "prewait_fn",
+        "prewait_call",
+        "prewait_await",
+        "handshake_literal",
+        "mcp_non_blocking",
+        "count_by",
+        "desktop_mcp_config_flag"
+      ],
+      "mirror_roles": [
+        "datadog-logs"
+      ],
+      "order": 260,
+      "position": "headless print flow: gC(i,Sg,{waitForDeferrable:!0,...}) runs synchronously to its emit when no client is pending (no await is reached), after installPluginsForHeadless and the shell allow-rule init, before the tengu_sdk_init_handshake emit (function bodies at chunk offsets 318500 vs 324439)",
+      "condition": "unconditional in headless (-p / stream-json) mode: skipTelemetry is false at the first call site (captured in 99/99 sessions; datadog-logs mirror 101 occurrences)",
+      "keys": [
+        "localOnly",
+        "willDeferMcp",
+        "waitForDeferrable",
+        "deadlineMs",
+        "pendingBefore",
+        "pendingWaitedBefore",
+        "toolsBefore",
+        "waitedMs",
+        "permissionPromptServerPendingBefore",
+        "permissionPromptWaitedMs",
+        "pendingAfter",
+        "pendingWaitedAfter",
+        "permissionPromptServerPendingAfter",
+        "toolsAfter",
+        "mcpNonBlocking"
+      ],
+      "metadata": {
+        "localOnly": false,
+        "willDeferMcp": false,
+        "waitForDeferrable": true,
+        "deadlineMs": 2000,
+        "pendingBefore": 0,
+        "pendingWaitedBefore": 0,
+        "toolsBefore": 0,
+        "waitedMs": 0,
+        "permissionPromptServerPendingBefore": false,
+        "permissionPromptWaitedMs": 0,
+        "pendingAfter": 0,
+        "pendingWaitedAfter": 0,
+        "permissionPromptServerPendingAfter": false,
+        "toolsAfter": 0,
+        "mcpNonBlocking": true
+      },
+      "metadata_json": "{\"localOnly\":false,\"willDeferMcp\":false,\"waitForDeferrable\":true,\"deadlineMs\":2000,\"pendingBefore\":0,\"pendingWaitedBefore\":0,\"toolsBefore\":0,\"waitedMs\":0,\"permissionPromptServerPendingBefore\":false,\"permissionPromptWaitedMs\":0,\"pendingAfter\":0,\"pendingWaitedAfter\":0,\"permissionPromptServerPendingAfter\":false,\"toolsAfter\":0,\"mcpNonBlocking\":true}",
+      "derivations": {
+        "localOnly": "tN(d).localOnly = Boolean(d.sdkUrl)&&CLAUDE_CODE_ENVIRONMENT_KIND!==\"bridge\" && !coordinator; the Desktop spawn argv never passes --sdk-url (no sdkUrl in the three main-process chunks) => false",
+        "willDeferMcp": "p=!a&&ZM()&&JM(Mt())&&!XM(Aw(Mt())); a=waitForDeferrable is !0 at both call sites => false without evaluating the tool-search gates",
+        "waitForDeferrable": "call-site option waitForDeferrable:!0 => true",
+        "deadlineMs": "gC parameter t (default 2000); tN(d).deadlineMs is qf() only when d.explicitMcpConfigFlag (Desktop pushes --mcp-config only when Object.keys(mcpServers).length>0); zero configured servers (handshake mcp_client_count 0) => undefined => 2000",
+        "pendingBefore": "Bs(d.clients, type===\"pending\") over zero clients => 0",
+        "pendingWaitedBefore": "Bs(d.clients, C) => 0",
+        "toolsBefore": "d.tools.length => 0",
+        "waitedMs": "G stays 0 when pendingWaitedBefore===0 (no wait loop)",
+        "permissionPromptServerPendingBefore": "d.clients.some(b) => false",
+        "permissionPromptWaitedMs": "z stays 0 when no permission-prompt server is pending",
+        "pendingAfter": "Bs(_.clients, type===\"pending\") => 0",
+        "pendingWaitedAfter": "Bs(_.clients, C) => 0",
+        "permissionPromptServerPendingAfter": "_.clients.some(b) => false",
+        "toolsAfter": "_.tools.length => 0",
+        "mcpNonBlocking": "wa() = host.mcpProcessWiring.connectNonBlocking(), the same flag the pinned tengu_sdk_init_handshake reports as true for the emulated session"
+      },
+      "emulated": "no MCP servers configured, no --mcp-config, no --sdk-url => all counts 0, waits 0, deadline 2000, localOnly/willDeferMcp false, waitForDeferrable true, mcpNonBlocking true"
+    }
+  ],
+  "controls": {
+    "prewait_pending_client": {
+      "localOnly": false,
+      "willDeferMcp": false,
+      "waitForDeferrable": true,
+      "deadlineMs": 100,
+      "pendingBefore": 1,
+      "pendingWaitedBefore": 1,
+      "toolsBefore": 0,
+      "waitedMs": 100,
+      "permissionPromptServerPendingBefore": false,
+      "permissionPromptWaitedMs": 0,
+      "pendingAfter": 1,
+      "pendingWaitedAfter": 1,
+      "permissionPromptServerPendingAfter": false,
+      "toolsAfter": 0,
+      "mcpNonBlocking": true
+    }
+  },
+  "boundaries": [
+    {
+      "event_name": "tengu_prompt_suggestion_init",
+      "slice": "prompt_suggestion_init",
+      "keys": [
+        "enabled",
+        "source"
+      ],
+      "condition": "rLl(): env CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION unset => `if(!we(\"tengu_chomp_inflection\",!1))return D(...,{enabled:!1,source:de(\"growthbook\")}),!1;if(xt())return D(...,{enabled:!1,source:de(\"non_interactive\")}),!1`",
+      "reason": "source depends on the GrowthBook gate tengu_chomp_inflection; the gateway bundle/feature store holds no value for it (grep chomp: none)"
+    },
+    {
+      "event_name": "tengu_prompt_suggestion",
+      "condition": "sLl/yA/ZCe: emitted when a generated prompt suggestion is accepted, ignored or suppressed (interactive REPL / fleetview / sdk suggestion flows)",
+      "reason": "prompt suggestions are disabled in the non-interactive Desktop session (rLl returns false), so no outcome event exists"
+    },
+    {
+      "event_name": "tengu_org_memory_connected_mode",
+      "slice": "org_memory_connected_mode",
+      "keys": [
+        "active"
+      ],
+      "condition": "MemoryWatcher.start: `if(!Os())return;if(!kt())return;if(!F.CLAUDE_MEMORY_STORES){L(\"tengu_org_memory_connected_mode\",{active:Is()})`",
+      "reason": "Os()=workspace trust accepted (_675.js gt), kt()=_597.js F (allow_memory_sync gate + store discovery), Is()=_585.js bt (memory access mode \"tools\" via tengu_linen_orbit/settings, orgMemoryRead) — not resolvable from gateway state within the lane budget"
+    },
+    {
+      "event_name": "tengu_org_memory_decision",
+      "slice": "org_memory_decision_off",
+      "keys": [
+        "outcome",
+        "cause"
+      ],
+      "condition": "settleOff(e): `this.decision={state:\"off\",cause:e},...,m(\"tengu_org_memory_decision\",{outcome:q(\"off\"),cause:S(e)})`",
+      "reason": "the off cause string is set by the settleOff caller (org-memory discovery outcome); not pinned within the lane budget"
+    },
+    {
+      "event_name": "tengu_org_penguin_mode_fetch_failed",
+      "slice": "penguin_fetch_failed",
+      "keys": [],
+      "condition": "catch of the org fast-mode fetch (api/claude_code_penguin_mode): `p(`Failed to fetch org fast mode status...`,{level:\"error\"}),E(\"tengu_org_penguin_mode_fetch_failed\",{})`",
+      "reason": "the gateway startup roles do not perform the penguin-mode fetch (no penguin reference under internal/claudedesktop/startup)"
+    },
+    {
+      "event_name": "tengu_memdir_loaded",
+      "slice": "memdir_loaded",
+      "keys": [
+        "...caller fields",
+        "memory_access_mode",
+        "total_file_count",
+        "total_subdir_count"
+      ],
+      "condition": "ae(e,t,n): readdir of the auto-memory directory; captured in 27 of ~99 sessions",
+      "reason": "conditional on the memory-directory load (memory access mode/settings); caller-provided fields t not pinned"
+    },
+    {
+      "event_name": "tengu_config_cache_stats",
+      "slice": "config_cache_stats",
+      "keys": [
+        "cache_hits",
+        "cache_misses",
+        "hit_rate"
+      ],
+      "condition": "wH(): `let{hits:e,misses:t}=m.takeCacheStats(),n=e+t;if(n>0)E(\"tengu_config_cache_stats\",{cache_hits:e,cache_misses:t,hit_rate:e/n})`",
+      "reason": "counts are the native process config-file cache counters; the gateway has no config cache and zero counts would not fire the event (n>0)"
+    },
+    {
+      "event_name": "tengu_config_lock_contention",
+      "slice": "config_lock_contention",
+      "keys": [
+        "lock_time_ms"
+      ],
+      "condition": "`if(h>100)...E(\"tengu_config_lock_contention\",{lock_time_ms:h})` (lock acquisition slower than 100 ms) or storage LockContended/LockSuspect",
+      "reason": "no config lock in the gateway"
+    },
+    {
+      "event_name": "tengu_config_stale_write",
+      "slice": "config_stale_write",
+      "keys": [
+        "read_mtime",
+        "write_mtime",
+        "read_size",
+        "write_size"
+      ],
+      "condition": "`if(x.mtimeMs!==m.lastReadFileStats.mtime||x.size!==m.lastReadFileStats.size)E(\"tengu_config_stale_write\",{...})`",
+      "reason": "no config file in the gateway"
+    },
+    {
+      "event_name": "tengu_config_fallback_write",
+      "slice": "config_fallback_write",
+      "keys": [
+        "caller",
+        "disk_ok"
+      ],
+      "condition": "Sc(): fallback path after `Failed to save config with lock`",
+      "reason": "no config file in the gateway"
+    },
+    {
+      "event_name": "tengu_client_data_cache_key",
+      "slice": "client_data_cache_key",
+      "keys": [
+        "slot_hit",
+        "slot_changed",
+        "legacy_fallback",
+        "slot_stale"
+      ],
+      "condition": "bootstrap fetch success path in _395.js after Ae(c,o) resolves, over r.clientDataCacheSlots",
+      "reason": "the gateway performs no bootstrap fetch and keeps no clientDataCacheSlots state"
+    },
+    {
+      "event_name": "tengu_mcp_sdk_generation",
+      "condition": "per SDK MCP server generation change (setMcpServers / sdk-type servers)",
+      "reason": "no sdk-type MCP servers in the emulated session"
+    },
+    {
+      "event_name": "tengu_mcp_tools_listed",
+      "condition": "per connected MCP server tools/list result",
+      "reason": "zero MCP servers"
+    },
+    {
+      "event_name": "tengu_mcp_reconcile",
+      "condition": "per MCP config reconcile with changed server set",
+      "reason": "zero MCP servers"
+    },
+    {
+      "event_name": "tengu_mcp_registry_fetch",
+      "condition": "per MCP registry fetch attempt",
+      "reason": "the gateway performs no registry fetch"
+    },
+    {
+      "event_name": "tengu_mcp_instructions_pool_change",
+      "condition": "per change of the MCP server-instructions pool",
+      "reason": "zero MCP servers"
+    },
+    {
+      "event_name": "tengu_plugin_enabled_for_session",
+      "condition": "per enabled plugin at session start",
+      "reason": "no plugins"
+    },
+    {
+      "event_name": "tengu_plugin_name_collision",
+      "condition": "per plugin name collision across marketplaces",
+      "reason": "no plugins"
+    },
+    {
+      "event_name": "tengu_skill_loaded",
+      "condition": "per loaded skill",
+      "reason": "no skills"
+    }
+  ],
+  "boundary": "Executed the pinned gC body in vm over the zero-client state with synthetic Bs (pinned _843.js count-by), a frozen Date.now, throwing stubs for every gate the short-circuits must not reach (ZM/JM/XM/Aw/Mt/Fe/ba/qf/Tt) and wa() fixed to the handshake-pinned connectNonBlocking() value. deadlineMs 2000 rests on the handshake mcp_client_count 0 pin (no configured servers => no --mcp-config). Position is a call-site reading, not a captured timestamp."
+}

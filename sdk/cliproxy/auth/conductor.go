@@ -42,6 +42,25 @@ type ExecutionSessionCloser interface {
 	CloseExecutionSession(sessionID string)
 }
 
+// AuthResourceCloser releases resources owned by one credential without
+// disrupting other credentials registered under the same provider.
+type AuthResourceCloser interface {
+	CloseAuth(authID string)
+}
+
+// AuthSchedulingGate lets a provider exclude credentials whose provider-level
+// runtime is not eligible even though the credential remains in the registry.
+// The manager invokes it before handing candidates to any selector.
+type AuthSchedulingGate interface {
+	CanScheduleAuth(auth *Auth) error
+}
+
+// AuthLifecycleSynchronizer lets a provider start, stop, or quarantine
+// account-scoped resources after persisted auth lifecycle changes.
+type AuthLifecycleSynchronizer interface {
+	SyncAuth(auth *Auth)
+}
+
 // Result captures execution outcome used to adjust auth state.
 type Result struct {
 	// AuthID references the auth that produced this result.

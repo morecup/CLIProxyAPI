@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "profile_id": "claude-desktop/windows-x64/1.40609.0.0",
+  "source": "historical v140609 raw recorder records selected by hash-verified published clock reports",
+  "sanitization": "Identity-bearing values are omitted; only event names, field shapes, order, types, counts, controlled route classes, and evidence hashes are retained.",
+  "extractor_sha256": "1ec8f37b689bfa742d5ea8348a7dfa67d214a2e38dd85e817362631e00271126",
+  "source_day": "2026-09-05",
+  "target_event_count": 11,
+  "occurrence_count": 68,
+  "desktop_observation_count": 34,
+  "segment_observation_count": 34,
+  "program_property_order": [
+    "account_uuid",
+    "organization_uuid",
+    "billing_type",
+    "surface",
+    "deployment_mode",
+    "app_version",
+    "version"
+  ],
+  "desktop_suffix_order": [
+    "_dual_fire",
+    "anonymous_id",
+    "service_name",
+    "path"
+  ],
+  "controlled_routes": {
+    "new": "/new",
+    "shell": "/epitaxy",
+    "session": "/epitaxy/$sessionId"
+  },
+  "reports": [
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-clocked-navigation-quit-20260905.json",
+      "sha256": "0ede2012a73d235281174451d6722964f0de2d29d5324335136eea9176a76f4c",
+      "selected_request_index_sha256": "a08a3650cbacc850299e78c7930c1694026e73ba561346595acb65806c1fb658"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-clocked-start-mcp-r01-20260905.json",
+      "sha256": "8db278dad45af952f5980b3c91fb96c490bdaf41ca62b8ae2942c3c6dd0c138f",
+      "selected_request_index_sha256": "38df965d7cf0e029ae985612ddec7c71aec920bd026d90fd49a88606ed8c283f"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-governor-r03-clocks-20260905.json",
+      "sha256": "ad2842d777ba6dfe3b3bf922938502c027ad7428ae5c60729e40050995adf0ba",
+      "selected_request_index_sha256": "1258fdc16561e3d8b672dc8142b4027ae564810145d108bbea2d301519fef67f"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-governor-r04-clocks-20260905.json",
+      "sha256": "c58d07eb5d9ae9eda4717719f03f60ec51caa7d0cc6e3a0fd68ff55bf23f0d1e",
+      "selected_request_index_sha256": "82faa5eefba53eae4d623ce146b970d3f242444885d4d3f5e566b20dffd6bc47"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-governor-r05-clocks-20260905.json",
+      "sha256": "000e17dcb3599ba6087631aa6dadae536d63fc93eb83b0d68c1d46b3abe4e69f",
+      "selected_request_index_sha256": "5be6e95377418c65b48788e88df2f2481276f50e4b94f1f8d623da1037d93b9e"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-governor-r06-clocks-20260905.json",
+      "sha256": "d375b232659ee9454e758a99825a1d619891975b3b899f5c6537db21060a9c61",
+      "selected_request_index_sha256": "add447456d671a6db1354dbddfaf71dbb8dd255ef7cce36991a4fb6099157b6b"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-mcp-stale-focus-r01-clocks-20260905.json",
+      "sha256": "9effd61cecdf2c23e611d896f4a2e407ff2cbb5b928ea2ce2f06424a73b90894",
+      "selected_request_index_sha256": "ffcdcb2aead8377a2af65cc46238a3e3bfae3dd3deab1116f148bf410631a6b7"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-sdk-datadog-clocked-r01-20260905.json",
+      "sha256": "c2fd3cf595e8d1566147c92634c0588c66c61b3d63477ffa7b6b45d56951d98c",
+      "selected_request_index_sha256": "b441ed1b9b4a4b3b23d965c58e838c4e955d1d2d76d6308c0bc3eea6c020b86d"
+    }
+  ],
+  "events": [
+    {
+      "kind": "chorus_ideas_suggestions_shown",
+      "event_name": "chorus.ideas.suggestions_shown",
+      "desktop_observed_count": 9,
+      "segment_observed_count": 9,
+      "event_property_order": ["idea_id", "position", "ideas_variant", "list_variant", "client_platform"],
+      "desktop_routes": ["new"],
+      "fields": {
+        "idea_id": {"types": ["string"], "required": true},
+        "position": {"types": ["number"], "required": true},
+        "ideas_variant": {"types": ["string"], "required": true},
+        "list_variant": {"types": ["string"], "required": true},
+        "client_platform": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_cowork_model_update_banner_displayed",
+      "event_name": "claudeai.cowork_model_update_banner.displayed",
+      "desktop_observed_count": 5,
+      "segment_observed_count": 5,
+      "event_property_order": [],
+      "desktop_routes": ["shell"],
+      "fields": {}
+    },
+    {
+      "kind": "claudeai_cowork_model_update_composer_warning_displayed",
+      "event_name": "claudeai.cowork_model_update_composer_warning.displayed",
+      "desktop_observed_count": 3,
+      "segment_observed_count": 3,
+      "event_property_order": ["update_available"],
+      "desktop_routes": ["new"],
+      "fields": {
+        "update_available": {"types": ["bool"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_desktop_sidebar_design_entry_shown",
+      "event_name": "claudeai.desktop.sidebar.design_entry_shown",
+      "desktop_observed_count": 2,
+      "segment_observed_count": 2,
+      "event_property_order": ["open_behavior", "frame_mode", "tabs"],
+      "desktop_routes": ["session", "new"],
+      "fields": {
+        "open_behavior": {"types": ["string"], "required": true},
+        "frame_mode": {"types": ["string"], "required": true},
+        "tabs": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_desktop_sidebar_mode_pill_selected",
+      "event_name": "claudeai.desktop.sidebar.mode_pill_selected",
+      "desktop_observed_count": 3,
+      "segment_observed_count": 3,
+      "event_property_order": ["to_mode", "from_mode", "via", "sidebar_state", "compact", "to_tab_activity", "from_tab_activity"],
+      "desktop_routes": ["session", "shell", "new"],
+      "fields": {
+        "to_mode": {"types": ["string"], "required": true},
+        "from_mode": {"types": ["string"], "required": true},
+        "via": {"types": ["string"], "required": true},
+        "sidebar_state": {"types": ["string"], "required": true},
+        "compact": {"types": ["bool"], "required": true},
+        "to_tab_activity": {"types": ["string"], "required": true},
+        "from_tab_activity": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_epitaxy_sidebar_group_new_session_clicked",
+      "event_name": "claudeai.epitaxy.sidebar.group_new_session_clicked",
+      "desktop_observed_count": 2,
+      "segment_observed_count": 2,
+      "event_property_order": ["prefill_kind", "session_count", "archived_only", "group_kind", "source"],
+      "desktop_routes": ["session"],
+      "fields": {
+        "prefill_kind": {"types": ["string"], "required": true},
+        "session_count": {"types": ["number"], "required": true},
+        "archived_only": {"types": ["bool"], "required": true},
+        "group_kind": {"types": ["string"], "required": true},
+        "source": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_model_selector_model_selected",
+      "event_name": "claudeai.model_selector.model_selected",
+      "desktop_observed_count": 1,
+      "segment_observed_count": 1,
+      "event_property_order": ["model", "previous_model", "model_surface"],
+      "desktop_routes": ["shell"],
+      "fields": {
+        "model": {"types": ["string"], "required": true},
+        "previous_model": {"types": ["string"], "required": true},
+        "model_surface": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_model_selector_opened",
+      "event_name": "claudeai.model_selector.opened",
+      "desktop_observed_count": 1,
+      "segment_observed_count": 1,
+      "event_property_order": ["model_surface"],
+      "desktop_routes": ["shell"],
+      "fields": {
+        "model_surface": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_yukon_gold_activation_checklist_v2_in_viewport",
+      "event_name": "claudeai.yukon_gold.activation_checklist_v2_in_viewport",
+      "desktop_observed_count": 3,
+      "segment_observed_count": 3,
+      "event_property_order": ["session_type", "variant", "route_surface", "position"],
+      "desktop_routes": ["new"],
+      "fields": {
+        "session_type": {"types": ["string"], "required": true},
+        "variant": {"types": ["string"], "required": true},
+        "route_surface": {"types": ["string"], "required": true},
+        "position": {"types": ["string"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_yukon_gold_activation_checklist_v2_shown",
+      "event_name": "claudeai.yukon_gold.activation_checklist_v2_shown",
+      "desktop_observed_count": 3,
+      "segment_observed_count": 3,
+      "event_property_order": ["session_type", "variant", "route_surface", "position", "max_visible", "assigned_items", "initial_completion"],
+      "desktop_routes": ["new"],
+      "fields": {
+        "session_type": {"types": ["string"], "required": true},
+        "variant": {"types": ["string"], "required": true},
+        "route_surface": {"types": ["string"], "required": true},
+        "position": {"types": ["string"], "required": true},
+        "max_visible": {"types": ["number"], "required": true},
+        "assigned_items": {"types": ["array"], "required": true, "items": {"types": ["string"], "required": true}},
+        "initial_completion": {"types": ["array"], "required": true}
+      }
+    },
+    {
+      "kind": "claudeai_yukon_gold_enabled",
+      "event_name": "claudeai.yukon_gold.enabled",
+      "desktop_observed_count": 2,
+      "segment_observed_count": 2,
+      "event_property_order": [],
+      "desktop_routes": ["session", "shell"],
+      "fields": {}
+    }
+  ]
+}

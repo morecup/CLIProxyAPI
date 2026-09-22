@@ -18,11 +18,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	claudewire "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/wire"
 	claudemodels "github.com/router-for-me/CLIProxyAPI/v7/internal/client/claude/models"
 	. "github.com/router-for-me/CLIProxyAPI/v7/internal/constant"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
+	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -80,8 +83,23 @@ func (h *ClaudeCodeAPIHandler) ClaudeMessages(c *gin.Context) {
 		return
 	}
 
+	// A request that already carries Claude Desktop Code's current wire identity
+	// must not be sent through the generic Claude translator. The account-local
+	// Desktop executor owns canonical headers, system rendering, history recovery,
+	// credentials, and transport for this input.
+	if claudewire.IsCodeRequest(c.Request.Header) {
+		if !h.validateClaudeRequestModel(c, rawJSON) {
+			return
+		}
+		h.handleClaudeDesktopCodeRequest(c, rawJSON)
+		return
+	}
+
 	// Decode claude-fable-5-dd-<reversed> model IDs back to the real model name for routing.
 	rawJSON = rewriteClaudeDDModelInBody(rawJSON)
+	if !h.validateClaudeRequestModel(c, rawJSON) {
+		return
+	}
 
 	// Check if the client requested a streaming response.
 	streamResult := gjson.GetBytes(rawJSON, "stream")
@@ -89,6 +107,165 @@ func (h *ClaudeCodeAPIHandler) ClaudeMessages(c *gin.Context) {
 		h.handleNonStreamingResponse(c, rawJSON)
 	} else {
 		h.handleStreamingResponse(c, rawJSON)
+	}
+}
+
+const claudeDesktopCodeMessagesURL = "https://api.anthropic.com/v1/messages"
+
+// handleClaudeDesktopCodeRequest keeps Code input out of the generic translator.
+// The account executor canonicalizes the final request; this handler only selects
+// an eligible Claude OAuth account and relays the upstream response.
+func (h *ClaudeCodeAPIHandler) handleClaudeDesktopCodeRequest(c *gin.Context, rawJSON []byte) {
+	if h == nil || h.BaseAPIHandler == nil || h.AuthManager == nil {
+		h.WriteErrorResponse(c, &interfaces.ErrorMessage{
+			StatusCode: http.StatusServiceUnavailable,
+			Error:      fmt.Errorf("Claude Desktop Code auth manager unavailable"),
+		})
+		return
+	}
+
+	modelName := gjson.GetBytes(rawJSON, "model").String()
+	requestHeaders := claudewire.ForwardHeaders(c.Request.Header)
+	selectionOptions := coreexecutor.Options{
+		Stream:          gjson.GetBytes(rawJSON, "stream").Bool(),
+		OriginalRequest: bytes.Clone(rawJSON),
+		Headers:         requestHeaders.Clone(),
+	}
+	if c.Request != nil && c.Request.URL != nil {
+		selectionOptions.Query = c.Request.URL.Query()
+	}
+
+	cliCtx, cliCancel := h.GetContextWithCancel(h, c, context.Background())
+	terminalErr := error(nil)
+	defer func() {
+		if terminalErr != nil {
+			cliCancel(terminalErr)
+			return
+		}
+		cliCancel()
+	}()
+
+	cliCtx, selectedAuth, finishSelection, errSelect := h.selectClaudeDesktopCodeAuth(cliCtx, modelName, selectionOptions)
+	if errSelect != nil {
+		terminalErr = errSelect
+		h.WriteErrorResponse(c, handlers.ExecutionErrorMessage(errSelect))
+		return
+	}
+	selectionReason := "completed"
+	defer func() { finishSelection(selectionReason) }()
+
+	targetURL := claudeDesktopCodeMessagesURL
+	if c.Request != nil && c.Request.URL != nil && c.Request.URL.RawQuery != "" {
+		targetURL += "?" + c.Request.URL.RawQuery
+	}
+	upstreamRequest, errRequest := http.NewRequestWithContext(cliCtx, http.MethodPost, targetURL, bytes.NewReader(rawJSON))
+	if errRequest != nil {
+		selectionReason = "request_create_failed"
+		terminalErr = errRequest
+		h.WriteErrorResponse(c, handlers.ExecutionErrorMessage(errRequest))
+		return
+	}
+	upstreamRequest.Header = requestHeaders
+
+	response, errHTTP := h.AuthManager.HttpRequest(cliCtx, selectedAuth, upstreamRequest)
+	if errHTTP != nil {
+		selectionReason = "request_failed"
+		terminalErr = errHTTP
+		h.WriteErrorResponse(c, handlers.ExecutionErrorMessage(errHTTP))
+		return
+	}
+	if response == nil || response.Body == nil {
+		selectionReason = "empty_response"
+		terminalErr = fmt.Errorf("Claude Desktop Code upstream returned an empty response")
+		h.WriteErrorResponse(c, handlers.ExecutionErrorMessage(terminalErr))
+		return
+	}
+	defer func() {
+		if errClose := response.Body.Close(); errClose != nil && terminalErr == nil {
+			terminalErr = errClose
+		}
+	}()
+
+	if errWrite := writeClaudeDesktopCodeResponse(c, response); errWrite != nil {
+		selectionReason = "response_write_failed"
+		terminalErr = errWrite
+		return
+	}
+}
+
+// selectClaudeDesktopCodeAuth retains Home dispatch ownership until the raw
+// response stream finishes, while keeping the normal local scheduler path for
+// installations that do not use Home.
+func (h *ClaudeCodeAPIHandler) selectClaudeDesktopCodeAuth(ctx context.Context, modelName string, options coreexecutor.Options) (context.Context, *coreauth.Auth, func(string), error) {
+	if h == nil || h.AuthManager == nil {
+		return ctx, nil, func(string) {}, fmt.Errorf("Claude Desktop Code auth manager unavailable")
+	}
+	if h.AuthManager.HomeEnabled() {
+		selection, errSelect := h.AuthManager.SelectHomeAuthByKind(ctx, h.HandlerType(), modelName, coreauth.AuthKindOAuth, options)
+		if errSelect != nil {
+			return ctx, nil, func(string) {}, errSelect
+		}
+		selectedAuth := selection.CloneAuth()
+		if selectedAuth == nil {
+			selection.End("missing_auth")
+			return ctx, nil, func(string) {}, fmt.Errorf("Claude Desktop Code selected an empty auth")
+		}
+		attemptCtx, releaseAttempt, errBind := selection.AttemptContext(ctx)
+		if errBind != nil {
+			selection.End("attempt_bind_failed")
+			return ctx, nil, func(string) {}, errBind
+		}
+		return attemptCtx, selectedAuth, func(reason string) {
+			releaseAttempt()
+			selection.End(reason)
+		}, nil
+	}
+
+	selectedAuth, errSelect := h.AuthManager.SelectAuthByKind(ctx, h.HandlerType(), modelName, coreauth.AuthKindOAuth, options)
+	if errSelect != nil {
+		return ctx, nil, func(string) {}, errSelect
+	}
+	if selectedAuth == nil {
+		return ctx, nil, func(string) {}, fmt.Errorf("Claude Desktop Code selected an empty auth")
+	}
+	return ctx, selectedAuth, func(string) {}, nil
+}
+
+// writeClaudeDesktopCodeResponse deliberately relays raw response bytes. This
+// keeps Code's SSE framing and upstream error envelopes intact rather than
+// trying to translate a response that the request path never translated.
+func writeClaudeDesktopCodeResponse(c *gin.Context, response *http.Response) error {
+	if c == nil || response == nil || response.Body == nil {
+		return fmt.Errorf("Claude Desktop Code upstream response is unavailable")
+	}
+	responseHeaders := handlers.FilterUpstreamHeaders(response.Header)
+	if encodings := response.Header.Values("Content-Encoding"); len(encodings) > 0 {
+		if responseHeaders == nil {
+			responseHeaders = make(http.Header)
+		}
+		responseHeaders["Content-Encoding"] = append([]string(nil), encodings...)
+	}
+	handlers.WriteUpstreamHeaders(c.Writer.Header(), responseHeaders)
+	c.Status(response.StatusCode)
+
+	flusher, _ := c.Writer.(http.Flusher)
+	buffer := make([]byte, 32*1024)
+	for {
+		read, errRead := response.Body.Read(buffer)
+		if read > 0 {
+			if _, errWrite := c.Writer.Write(buffer[:read]); errWrite != nil {
+				return errWrite
+			}
+			if flusher != nil {
+				flusher.Flush()
+			}
+		}
+		if errRead == io.EOF {
+			return nil
+		}
+		if errRead != nil {
+			return errRead
+		}
 	}
 }
 
@@ -114,6 +291,9 @@ func (h *ClaudeCodeAPIHandler) ClaudeCountTokens(c *gin.Context) {
 
 	// Decode claude-fable-5-dd-<reversed> model IDs back to the real model name for routing.
 	rawJSON = rewriteClaudeDDModelInBody(rawJSON)
+	if !h.validateClaudeRequestModel(c, rawJSON) {
+		return
+	}
 
 	c.Header("Content-Type", "application/json")
 
@@ -131,6 +311,34 @@ func (h *ClaudeCodeAPIHandler) ClaudeCountTokens(c *gin.Context) {
 	handlers.WriteUpstreamHeaders(c.Writer.Header(), upstreamHeaders)
 	_, _ = c.Writer.Write(resp)
 	cliCancel()
+}
+
+func (h *ClaudeCodeAPIHandler) validateClaudeRequestModel(c *gin.Context, rawJSON []byte) bool {
+	if !json.Valid(rawJSON) {
+		h.WriteErrorResponse(c, &interfaces.ErrorMessage{
+			StatusCode: http.StatusBadRequest,
+			Error:      fmt.Errorf("Invalid request: request body must be valid JSON"),
+		})
+		return false
+	}
+	model := gjson.GetBytes(rawJSON, "model")
+	message := ""
+	switch {
+	case !model.Exists():
+		message = "model: Field required"
+	case model.Type != gjson.String:
+		message = "model: Input should be a valid string"
+	case strings.TrimSpace(model.String()) == "":
+		message = "model: String should have at least 1 character"
+	}
+	if message == "" {
+		return true
+	}
+	h.WriteErrorResponse(c, &interfaces.ErrorMessage{
+		StatusCode: http.StatusBadRequest,
+		Error:      fmt.Errorf("%s", message),
+	})
+	return false
 }
 
 // rewriteClaudeDDModelInBody decodes model IDs of the form claude-fable-5-dd-<reversed>

@@ -1,0 +1,1301 @@
+{
+  "schema_version": 1,
+  "kind": "native_sdk_wire_content_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "start",
+      "from": 5692039,
+      "to": 5693147,
+      "sha256": "d922a99d80d4e544ef8460e34e8df95f2a19ab90907fed5b01d8af774978eaf2"
+    },
+    {
+      "label": "delta",
+      "from": 5693147,
+      "to": 5694739,
+      "sha256": "caf81471a2902c74505217c93781a7b03471b234e1acf0cf77d7ed4b6aa2ce08"
+    },
+    {
+      "label": "normalize",
+      "from": 6608802,
+      "to": 6610762,
+      "sha256": "c467810fe315a9a3fe0fcb70e696abefda85da3e3bcebf6d076a56bdd8017f05"
+    },
+    {
+      "label": "strip_media",
+      "from": 2761220,
+      "to": 2761926,
+      "sha256": "39a892d60eaa315651bfabd608da3de85bcf676e68f5a8073f3e0e9ec1b63d98"
+    },
+    {
+      "label": "api_user_merge",
+      "from": 6604936,
+      "to": 6605112,
+      "sha256": "60924c9efc6b459e6a0d87f472f8c360d93f53a34c589c68dbe657b1df8046cc"
+    },
+    {
+      "label": "tool_result_order",
+      "from": 6607268,
+      "to": 6607382,
+      "sha256": "e54d84a2e16cda236c5013070191f91d9ebb694e3903c09fd2d245ea9c7345a5"
+    },
+    {
+      "label": "content_to_blocks",
+      "from": 6607382,
+      "to": 6607459,
+      "sha256": "9c714243ac1e8f344a9b1ce2f46e1845cad4113c799c66d3731673376844b8a8"
+    },
+    {
+      "label": "result_text_fold",
+      "from": 6607608,
+      "to": 6608279,
+      "sha256": "95b70dd1687df9f01d029a758d979428f7160a59d265ad2d88c12573f876a775"
+    },
+    {
+      "label": "api_content_merge",
+      "from": 6608279,
+      "to": 6608802,
+      "sha256": "14c289e57accd4530dba128ec30c8627f18df137ef0a2b93b8e5c7a689ebea09"
+    },
+    {
+      "label": "poll_result",
+      "from": 6594300,
+      "to": 6594487,
+      "sha256": "df98e63351a748fb730f49e8c95c50538f4b5ee54b11e1fdbb20319cd13384a4"
+    },
+    {
+      "label": "protected_text",
+      "from": 6593577,
+      "to": 6593653,
+      "sha256": "cfcc90fcde442d601031a7fc1ddce451d27920f0e5b9d9552e267bb5ac120a06"
+    },
+    {
+      "label": "poll_event",
+      "from": 142021,
+      "to": 142087,
+      "sha256": "823f60c70917507ef9a917d09f0d2c6d0f43e88b0b9c74c29456e1fc7867d62c"
+    }
+  ],
+  "cases": [
+    {
+      "name": "text_initial_and_citations",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "text",
+            "text": "discarded",
+            "citations": []
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "text_delta",
+            "text": "synthetic "
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "citations_delta",
+            "citation": {
+              "type": "char_location",
+              "start_char_index": 1
+            }
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "text_delta",
+            "text": "reply😀"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "text",
+          "text": "synthetic reply😀",
+          "citations": []
+        }
+      ]
+    },
+    {
+      "name": "thinking_signature_replacement",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "thinking",
+            "thinking": "discarded",
+            "signature": "discarded"
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "thinking_delta",
+            "thinking": "synthetic "
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "signature_delta",
+            "signature": "replaced"
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "thinking_delta",
+            "thinking": "thought"
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "signature_delta",
+            "signature": "final-signature"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "thinking",
+          "thinking": "synthetic thought",
+          "signature": "final-signature"
+        }
+      ]
+    },
+    {
+      "name": "redacted_thinking_delta_ignored",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "redacted_thinking",
+            "data": "synthetic-encrypted"
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "thinking_delta",
+            "thinking": "ignored"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "redacted_thinking",
+          "data": "synthetic-encrypted"
+        }
+      ]
+    },
+    {
+      "name": "tool_input_deltas",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "tool_use",
+            "id": "synthetic-tool",
+            "name": "Custom",
+            "input": {
+              "discarded": true
+            }
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "input_json_delta",
+            "partial_json": "{\"cache_control\":{\"keep\":true},"
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "input_json_delta",
+            "partial_json": "\"nested\":[1,{\"text\":\"synthetic\"}]}"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "tool_use",
+          "id": "synthetic-tool",
+          "name": "Custom",
+          "input": {
+            "cache_control": {
+              "keep": true
+            },
+            "nested": [
+              1,
+              {
+                "text": "synthetic"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "tool_input_empty",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "tool_use",
+            "id": "synthetic-empty",
+            "name": "Custom",
+            "input": {
+              "ignored": 1
+            }
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "tool_use",
+          "id": "synthetic-empty",
+          "name": "Custom",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "name": "tool_input_null",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "tool_use",
+            "id": "synthetic-null",
+            "name": "Custom",
+            "input": {}
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "input_json_delta",
+            "partial_json": " null "
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "tool_use",
+          "id": "synthetic-null",
+          "name": "Custom",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "name": "server_tool_input",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "server_tool_use",
+            "id": "synthetic-server",
+            "name": "web_search",
+            "input": {}
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "input_json_delta",
+            "partial_json": "{\"query\":\"synthetic\"}"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "server_tool_use",
+          "id": "synthetic-server",
+          "name": "web_search",
+          "input": {
+            "query": "synthetic"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mixed_blocks",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "thinking",
+            "thinking": "",
+            "signature": ""
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "thinking_delta",
+            "thinking": "synthetic thought"
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "signature_delta",
+            "signature": "synthetic-signature"
+          }
+        },
+        {
+          "type": "content_block_start",
+          "index": 1,
+          "content_block": {
+            "type": "text",
+            "text": ""
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 1,
+          "delta": {
+            "type": "text_delta",
+            "text": "synthetic reply"
+          }
+        },
+        {
+          "type": "content_block_start",
+          "index": 2,
+          "content_block": {
+            "type": "tool_use",
+            "id": "synthetic-mixed",
+            "name": "Custom",
+            "input": {}
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 2,
+          "delta": {
+            "type": "input_json_delta",
+            "partial_json": "{\"value\":1}"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "thinking",
+          "thinking": "synthetic thought",
+          "signature": "synthetic-signature"
+        },
+        {
+          "type": "text",
+          "text": "synthetic reply"
+        },
+        {
+          "type": "tool_use",
+          "id": "synthetic-mixed",
+          "name": "Custom",
+          "input": {
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "unknown_delta_ignored",
+      "events": [
+        {
+          "type": "content_block_start",
+          "index": 0,
+          "content_block": {
+            "type": "text",
+            "text": ""
+          }
+        },
+        {
+          "type": "content_block_delta",
+          "index": 0,
+          "delta": {
+            "type": "future_delta",
+            "value": "ignored"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "type": "text",
+          "text": ""
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "name": "direct",
+      "rows": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "keep"
+            },
+            {
+              "type": "image",
+              "source": {
+                "type": "base64",
+                "media_type": "image/png",
+                "data": "synthetic"
+              },
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            },
+            {
+              "type": "document",
+              "title": "synthetic title",
+              "source": {
+                "type": "text",
+                "media_type": "text/plain",
+                "data": "synthetic"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "keep"
+            },
+            {
+              "type": "text",
+              "text": "[image]"
+            },
+            {
+              "type": "text",
+              "text": "[document]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tool_result",
+      "rows": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "tool_use_id": "synthetic-tool",
+              "is_error": true,
+              "content": [
+                {
+                  "type": "image",
+                  "source": {
+                    "type": "base64",
+                    "media_type": "image/png",
+                    "data": "synthetic"
+                  },
+                  "cache_control": {
+                    "type": "ephemeral"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "keep"
+                },
+                {
+                  "type": "document",
+                  "title": "synthetic title",
+                  "source": {
+                    "type": "text",
+                    "media_type": "text/plain",
+                    "data": "synthetic"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "tool_use_id": "synthetic-tool",
+              "is_error": true,
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[image]"
+                },
+                {
+                  "type": "text",
+                  "text": "keep"
+                },
+                {
+                  "type": "text",
+                  "text": "[document]"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "assistant_unchanged",
+      "rows": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "image",
+              "source": {
+                "type": "base64",
+                "media_type": "image/png",
+                "data": "synthetic"
+              },
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            },
+            {
+              "type": "document",
+              "title": "synthetic title",
+              "source": {
+                "type": "text",
+                "media_type": "text/plain",
+                "data": "synthetic"
+              }
+            }
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "image",
+              "source": {
+                "type": "base64",
+                "media_type": "image/png",
+                "data": "synthetic"
+              },
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            },
+            {
+              "type": "document",
+              "title": "synthetic title",
+              "source": {
+                "type": "text",
+                "media_type": "text/plain",
+                "data": "synthetic"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "text_unchanged",
+      "rows": [
+        {
+          "role": "user",
+          "content": "synthetic"
+        }
+      ],
+      "expected": [
+        {
+          "role": "user",
+          "content": "synthetic"
+        }
+      ]
+    }
+  ],
+  "merges": [
+    {
+      "name": "text",
+      "left": "first",
+      "right": [
+        {
+          "type": "text",
+          "text": "second"
+        }
+      ],
+      "known": true,
+      "expected": [
+        {
+          "type": "text",
+          "text": "first"
+        },
+        {
+          "type": "text",
+          "text": "second"
+        }
+      ],
+      "outcomes": [
+        [
+          {
+            "type": "text",
+            "text": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "tool_string",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": " first "
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": " second "
+        }
+      ],
+      "known": true,
+      "expected": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first\n\nsecond"
+        }
+      ],
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "tool_string_js_trim",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "﻿first"
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "second﻿"
+        }
+      ],
+      "known": true,
+      "expected": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first\n\nsecond"
+        }
+      ],
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "tool_result_only",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first"
+        }
+      ],
+      "right": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-other",
+          "content": "second"
+        }
+      ],
+      "known": true,
+      "expected": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first"
+        },
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-other",
+          "content": "second"
+        }
+      ],
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "second"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "poll_result",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "poll_synthetic",
+          "content": "first"
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "second"
+        }
+      ],
+      "known": true,
+      "expected": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "poll_synthetic",
+          "content": "first"
+        },
+        {
+          "type": "text",
+          "text": "second"
+        }
+      ],
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "poll_synthetic",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "poll_synthetic",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "poll_synthetic",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "poll_synthetic",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "protected_text",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first"
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "<system-reminder>\n<event synthetic"
+        }
+      ],
+      "known": true,
+      "expected": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first"
+        },
+        {
+          "type": "text",
+          "text": "<system-reminder>\n<event synthetic"
+        }
+      ],
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "<system-reminder>\n<event synthetic"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "<system-reminder>\n<event synthetic"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "<system-reminder>\n<event synthetic"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "text",
+            "text": "<system-reminder>\n<event synthetic"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "ambiguous_media",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first"
+        }
+      ],
+      "right": [
+        {
+          "type": "image",
+          "source": {
+            "type": "base64",
+            "media_type": "image/png",
+            "data": "synthetic"
+          },
+          "cache_control": {
+            "type": "ephemeral"
+          }
+        }
+      ],
+      "known": false,
+      "expected": null,
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "synthetic"
+            },
+            "cache_control": {
+              "type": "ephemeral"
+            }
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "synthetic"
+            },
+            "cache_control": {
+              "type": "ephemeral"
+            }
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": [
+              {
+                "type": "text",
+                "text": "first"
+              },
+              {
+                "type": "image",
+                "source": {
+                  "type": "base64",
+                  "media_type": "image/png",
+                  "data": "synthetic"
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": [
+              {
+                "type": "text",
+                "text": "first"
+              },
+              {
+                "type": "image",
+                "source": {
+                  "type": "base64",
+                  "media_type": "image/png",
+                  "data": "synthetic"
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "name": "ambiguous_mixed",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "first"
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "second"
+        },
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-other",
+          "content": "third"
+        }
+      ],
+      "known": false,
+      "expected": null,
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "third"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "third"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "third"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "first\n\nsecond"
+          },
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-other",
+            "content": "third"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "ambiguous_poll",
+      "left": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "synthetic-tool",
+          "content": "<event synthetic"
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "second"
+        }
+      ],
+      "known": false,
+      "expected": null,
+      "outcomes": [
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "<event synthetic\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "<event synthetic"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "<event synthetic\n\nsecond"
+          }
+        ],
+        [
+          {
+            "type": "tool_result",
+            "tool_use_id": "synthetic-tool",
+            "content": "<event synthetic"
+          },
+          {
+            "type": "text",
+            "text": "second"
+          }
+        ]
+      ]
+    }
+  ],
+  "claim_boundary": "Pinned stream initialization/deltas and Mke with an empty tool catalog. No native tool schema coercion, batch decomposition, host tools, hook execution, live traffic or complete Desktop alignment."
+}

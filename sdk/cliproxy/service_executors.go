@@ -11,6 +11,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	log "github.com/sirupsen/logrus"
 )
 
 type openAICompatibilityRegistrationCache struct {
@@ -202,6 +203,7 @@ func baselineExecutorAuths() []*coreauth.Auth {
 	providers := []string{
 		"codex",
 		"claude",
+		constant.AnthropicCompatible,
 		constant.Gemini,
 		constant.GeminiInteractions,
 		"vertex",
@@ -289,7 +291,28 @@ func (s *Service) registerExecutorForAuth(a *coreauth.Auth, forceReplace bool) {
 	case "antigravity":
 		s.coreManager.RegisterExecutor(executor.NewAntigravityExecutor(cfg))
 	case "claude":
-		s.coreManager.RegisterExecutor(executor.NewClaudeExecutor(cfg))
+		// A config reload forces replacement of the old provider router, but every
+		// Claude auth in the same registration batch must converge on the one
+		// router created for the new immutable config snapshot.
+		if existing, okExisting := s.coreManager.Executor("claude"); okExisting {
+			if accountExecutor, okAccount := existing.(*executor.ClaudeAccountExecutor); okAccount && accountExecutor.UsesConfig(cfg) {
+				if len(a.Metadata) > 0 {
+					if errProvision := accountExecutor.Provision(a); errProvision != nil {
+						log.WithError(errProvision).WithField("auth_id", a.ID).Warn("claude desktop: account runtime could not be provisioned")
+					}
+				}
+				return
+			}
+		}
+		accountExecutor := executor.NewClaudeAccountExecutorWithOptions(cfg, executor.ClaudeAccountExecutorOptions{CredentialManager: s.coreManager})
+		s.coreManager.RegisterExecutor(accountExecutor)
+		if len(a.Metadata) > 0 {
+			if errProvision := accountExecutor.Provision(a); errProvision != nil {
+				log.WithError(errProvision).WithField("auth_id", a.ID).Warn("claude desktop: account runtime could not be provisioned")
+			}
+		}
+	case constant.AnthropicCompatible:
+		s.coreManager.RegisterExecutor(executor.NewAnthropicCompatibleExecutor(cfg))
 	case "kimi":
 		s.coreManager.RegisterExecutor(executor.NewKimiExecutor(cfg))
 	case "xai":

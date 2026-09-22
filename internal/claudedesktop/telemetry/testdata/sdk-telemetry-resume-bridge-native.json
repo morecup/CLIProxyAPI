@@ -1,0 +1,1234 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "print_resume": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    },
+    "bridge_skip": {
+      "name": "B:/~BUN/root/_665.js",
+      "sha256": "1927a571255fc1baa38f59f7e04a284e48a71d9a089cd4438a3b6eab08a1a08f"
+    },
+    "logger": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    },
+    "namespace": {
+      "name": "B:/~BUN/root/_837.js",
+      "sha256": "9dbff35abe606147b3ce3527593ff741b57db38ff6d401794794052fadc3f9e0"
+    }
+  },
+  "definitions": [
+    {
+      "label": "bridge_started",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 4080867,
+      "to": 4081004,
+      "bytes": 137,
+      "sha256": "49641ffcc17e557572c19970fc72d335bf086ce1cf9cc13ab0d11f6def21c761"
+    },
+    {
+      "label": "bridge_ws_connected",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 4065883,
+      "to": 4065966,
+      "bytes": 83,
+      "sha256": "06e23a6d3048f1514ba9d8944e8bf1645c07fda9072b97f29b8f6117c75fa667"
+    },
+    {
+      "label": "bridge_ws_closed",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 4067595,
+      "to": 4067733,
+      "bytes": 138,
+      "sha256": "02f1ad218373de21088ef6468b91b86cb66762ae94c91a86d9f407c03f7846e4"
+    },
+    {
+      "label": "bridge_teardown_then_started",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 4080826,
+      "to": 4080896,
+      "bytes": 70,
+      "sha256": "164dcc59814bb75e5e362b5a5efa770a9b123f22b6d295512386303575e09a24"
+    },
+    {
+      "label": "bridge_skipped",
+      "module": "B:/~BUN/root/_665.js",
+      "from": 1979,
+      "to": 2078,
+      "bytes": 99,
+      "sha256": "a1334aae902dcc60c49a8f30994d30745473fed3eb2a41385af9cca77a924f1c"
+    },
+    {
+      "label": "namespace_gates",
+      "module": "B:/~BUN/root/_837.js",
+      "from": 4241,
+      "to": 4318,
+      "bytes": 77,
+      "sha256": "32b1aff8468f126a9f7e18394e1aa63a020f7407843751ced421d355ad2c7f3b"
+    },
+    {
+      "label": "namespace_spread",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3966494,
+      "to": 3966594,
+      "bytes": 100,
+      "sha256": "fc80d8ace966d5d970b7d417dfe79a166272930622fe4bb5d3441cc594633a4b"
+    },
+    {
+      "label": "resume_print",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 332862,
+      "to": 332996,
+      "bytes": 134,
+      "sha256": "a33f82f06c6d2ebbfbb9660254bd883a68decfba78a53b949d2f6a40e88efbd2"
+    },
+    {
+      "label": "session_resumed_print_success",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 338432,
+      "to": 338610,
+      "bytes": 178,
+      "sha256": "f9cd5d09faafae1dce180151525da0c2c1e5424cb3ed710f8a3df885780c0fef"
+    },
+    {
+      "label": "session_resumed_print_failure",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 338940,
+      "to": 339080,
+      "bytes": 140,
+      "sha256": "8561abe7ba222735458f45a54c9a225f6478a1237cb99b837fad7484af67c4bb"
+    },
+    {
+      "label": "session_resumed_print_not_found",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 336489,
+      "to": 336605,
+      "bytes": 116,
+      "sha256": "d0c1c6d0b164658ca01ce70a6d7e1da86aa75c48ff52da535b1f83c933de365e"
+    },
+    {
+      "label": "session_file_read",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5334278,
+      "to": 5334532,
+      "bytes": 254,
+      "sha256": "ad66cc89840379312ab2a5a6c9cccf38c94c66a07e271e644c929805632273dc"
+    },
+    {
+      "label": "reactive_compact_succeeded",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2666805,
+      "to": 2667946,
+      "bytes": 1141,
+      "sha256": "f8c95b2935d757c964b227761a0d1886beb8c0091b67368665d35812b526309a"
+    },
+    {
+      "label": "repl_hook_finished",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5503638,
+      "to": 5503831,
+      "bytes": 193,
+      "sha256": "c801681cfe2a1edc8e6c0c250d342b1281cb45523837b210b9001aa96d9024fd"
+    },
+    {
+      "label": "repl_hook_finished_callbacks",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5485472,
+      "to": 5485626,
+      "bytes": 154,
+      "sha256": "3b57cdffc4bfb65b9efe324d8186f493072959143a85c3f3d64235c4cbe9d1fa"
+    },
+    {
+      "label": "run_hook",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5484172,
+      "to": 5484331,
+      "bytes": 159,
+      "sha256": "4bd9344e90f19a49a8b96c65aae765d523245f0385a69870328a7322d6162d12"
+    },
+    {
+      "label": "run_hook_direct",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5505773,
+      "to": 5505929,
+      "bytes": 156,
+      "sha256": "83ab7fd23f9b4ee3a8658056159877535b7e0c9df55090aee1fd2b9f4798a9b5"
+    },
+    {
+      "label": "file_activity",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 278296,
+      "to": 278493,
+      "bytes": 197,
+      "sha256": "b27d80a2ca7a478d9d688b5f811b9203ba0208cb8099d0968ca8236783042e31"
+    },
+    {
+      "label": "file_changed",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2161666,
+      "to": 2161719,
+      "bytes": 53,
+      "sha256": "5386c2c552ca928eaf97f74d16f97d4a575172701833ffe557520a12297b61c8"
+    },
+    {
+      "label": "file_operation",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2163008,
+      "to": 2163419,
+      "bytes": 411,
+      "sha256": "59e413addbb60e124c8c136f5d2b24aed5951b9ed73bc299f16964e9c02f7f72"
+    },
+    {
+      "label": "dir_search",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 930157,
+      "to": 930321,
+      "bytes": 164,
+      "sha256": "d89015c84ec124945af8041f9852d9525091468d678b19541f8f03119fc19e28"
+    },
+    {
+      "label": "bash_executed",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 6566424,
+      "to": 6567049,
+      "bytes": 625,
+      "sha256": "d4c1967506d01e8c27f6e90eaa8d38f0a0b33cd7c23f8e12cd2c5ff8f89cb9df"
+    },
+    {
+      "label": "powershell_executed",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5296379,
+      "to": 5296707,
+      "bytes": 328,
+      "sha256": "793d2f179ea1678f9a1cd0624cd16e3af38a440bc35099671621d59cf3f65b64"
+    }
+  ],
+  "logger_prefix": [
+    "subscription_type",
+    "cc_prompt_id"
+  ],
+  "events": {
+    "tengu_bridge_repl_started": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "bridge_started",
+      "keys": [
+        {
+          "key": "has_initial_messages",
+          "derivation": "!!(E&&E.length>0)",
+          "conditional": false
+        },
+        {
+          "key": "v2",
+          "derivation": "!0",
+          "conditional": false
+        },
+        {
+          "key": "expires_in_s",
+          "derivation": "kr.expires_in",
+          "conditional": false
+        },
+        {
+          "key": "inProtectedNamespace",
+          "derivation": "ax()",
+          "conditional": false
+        },
+        {
+          "spread": "MSr()",
+          "conditional": true
+        }
+      ],
+      "condition": "once per bridge session, inline in the bridge setup right after the teardown closure (E7e) is defined and before ce(\"bridge_connect\"); E = initial history rows handed to the bridge, kr = the minted bridge credential response (expires_in)",
+      "order": "after the bridge credential mint, before tengu_bridge_repl_ws_connected, tengu_bridge_placeholder_used_session and tengu_bridge_repl_teardown of the same session; independent of tengu_init (query lifecycle)",
+      "constants": {
+        "v2": true,
+        "inProtectedNamespace": "ax() = _837.js le() => false on every host",
+        "spread_MSr": "ISr() = _837.js Ne() => {namespace: undefined, cluster: undefined} so MSr() contributes no keys"
+      },
+      "executed_cases": [
+        {
+          "label": "fresh_session",
+          "initial_messages": 0,
+          "expires_in": 3600,
+          "event": {
+            "name": "tengu_bridge_repl_started",
+            "metadata": {
+              "has_initial_messages": false,
+              "v2": true,
+              "expires_in_s": 3600,
+              "inProtectedNamespace": false
+            }
+          }
+        },
+        {
+          "label": "resumed_history",
+          "initial_messages": 12,
+          "expires_in": 900,
+          "event": {
+            "name": "tengu_bridge_repl_started",
+            "metadata": {
+              "has_initial_messages": true,
+              "v2": true,
+              "expires_in_s": 900,
+              "inProtectedNamespace": false
+            }
+          }
+        },
+        {
+          "label": "undefined_history",
+          "initial_messages": null,
+          "expires_in": 3600,
+          "event": {
+            "name": "tengu_bridge_repl_started",
+            "metadata": {
+              "has_initial_messages": false,
+              "v2": true,
+              "expires_in_s": 3600,
+              "inProtectedNamespace": false
+            }
+          }
+        }
+      ]
+    },
+    "tengu_bridge_repl_ws_connected": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "bridge_ws_connected",
+      "keys": [
+        {
+          "key": "v2",
+          "derivation": "!0",
+          "conditional": false
+        },
+        {
+          "key": "cause",
+          "derivation": "X(b_)",
+          "conditional": false
+        },
+        {
+          "key": "remint_attempts",
+          "derivation": "Mv",
+          "conditional": true,
+          "condition": "Mv>0"
+        }
+      ],
+      "condition": "v2 transport onConnect callback (zt.setOnConnect), not while torn down (qs); cause b_ = the connect cause label, remint_attempts only when Mv > 0",
+      "order": "after tengu_bridge_repl_started; before tengu_bridge_repl_ws_closed",
+      "executed_cases": [
+        {
+          "label": "initial",
+          "remint_attempts": 0,
+          "event": {
+            "name": "tengu_bridge_repl_ws_connected",
+            "metadata": {
+              "v2": true,
+              "cause": "initial"
+            }
+          }
+        },
+        {
+          "label": "after_remint",
+          "remint_attempts": 2,
+          "event": {
+            "name": "tengu_bridge_repl_ws_connected",
+            "metadata": {
+              "v2": true,
+              "cause": "initial",
+              "remint_attempts": 2
+            }
+          }
+        }
+      ]
+    },
+    "tengu_bridge_repl_ws_closed": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "bridge_ws_closed",
+      "keys": [
+        {
+          "key": "code",
+          "derivation": "Ue",
+          "conditional": false
+        },
+        {
+          "key": "v2",
+          "derivation": "!0",
+          "conditional": false
+        },
+        {
+          "key": "close_cause",
+          "derivation": "An(Tt)",
+          "conditional": false
+        },
+        {
+          "key": "recovery_in_flight",
+          "derivation": "zn",
+          "conditional": false
+        },
+        {
+          "key": "reject_source",
+          "derivation": "X(Nt.rejectSource)",
+          "conditional": true,
+          "condition": "Nt!==void 0"
+        }
+      ],
+      "condition": "v2 transport onClose handler Mn(code, cause, detail, replay=false): emitted only when the close is not a replayed close (!on) and the bridge is neither torn down (Dn) nor stopped (qs)",
+      "order": "after tengu_bridge_repl_ws_connected; before tengu_bridge_repl_teardown",
+      "executed_cases": [
+        {
+          "label": "plain",
+          "event": {
+            "name": "tengu_bridge_repl_ws_closed",
+            "metadata": {
+              "code": 1000,
+              "v2": true,
+              "close_cause": "normal",
+              "recovery_in_flight": false
+            }
+          }
+        },
+        {
+          "label": "rejected",
+          "event": {
+            "name": "tengu_bridge_repl_ws_closed",
+            "metadata": {
+              "code": 4093,
+              "v2": true,
+              "close_cause": "superseded_by_worker",
+              "recovery_in_flight": true,
+              "reject_source": "worker"
+            }
+          }
+        }
+      ]
+    },
+    "tengu_bridge_repl_skipped": {
+      "module": "B:/~BUN/root/_665.js",
+      "slice": "bridge_skipped",
+      "keys": [
+        {
+          "key": "reason",
+          "derivation": "e",
+          "conditional": false
+        },
+        {
+          "key": "v2",
+          "derivation": "n",
+          "conditional": true,
+          "condition": "n!==void 0"
+        },
+        {
+          "spread": "r",
+          "conditional": true
+        }
+      ],
+      "condition": "_665.js h(reason, logLine, v2, extra): the bridge was not started; v2 only when the caller passes it, extra keys spread verbatim from the caller",
+      "order": "instead of tengu_bridge_repl_started (mutually exclusive for one session)",
+      "executed_cases": [
+        {
+          "label": "reason_only",
+          "event": {
+            "name": "tengu_bridge_repl_skipped",
+            "metadata": {
+              "reason": "disabled"
+            }
+          }
+        },
+        {
+          "label": "v2_with_extra",
+          "event": {
+            "name": "tengu_bridge_repl_skipped",
+            "metadata": {
+              "reason": "no_token",
+              "v2": true,
+              "attempt": 1
+            }
+          }
+        }
+      ]
+    },
+    "tengu_resume_print": {
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "slice": "resume_print",
+      "keys": [],
+      "condition": "print / sdk_url lane with r.resume set, emitted before the session lookup (empty native object; only the logger prefix)",
+      "order": "before tengu_session_resumed(print); the resume lane runs before the query loop (before tengu_init)"
+    },
+    "tengu_session_resumed": {
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "slices": [
+        "session_resumed_print_success",
+        "session_resumed_print_failure",
+        "session_resumed_print_not_found"
+      ],
+      "success_keys": [
+        {
+          "key": "entrypoint",
+          "derivation": "rt(\"print\")",
+          "conditional": false
+        },
+        {
+          "key": "success",
+          "derivation": "!0",
+          "conditional": false
+        },
+        {
+          "key": "interruption_kind",
+          "derivation": "Oe(D.turnInterruptionState?.kind??\"none\")",
+          "conditional": false
+        },
+        {
+          "key": "resume_duration_ms",
+          "derivation": "Math.round(performance.now()-m)",
+          "conditional": false
+        }
+      ],
+      "failure_keys": [
+        {
+          "key": "entrypoint",
+          "derivation": "rt(\"print\")",
+          "conditional": false
+        },
+        {
+          "key": "success",
+          "derivation": "!1",
+          "conditional": false
+        },
+        {
+          "key": "failure_reason",
+          "derivation": "Oe(i)",
+          "conditional": false
+        },
+        {
+          "key": "error_name",
+          "derivation": "as(p).name",
+          "conditional": false
+        },
+        {
+          "key": "error_code",
+          "derivation": "XC(p)",
+          "conditional": false
+        }
+      ],
+      "not_found_keys": [
+        {
+          "key": "entrypoint",
+          "derivation": "rt(\"print\")",
+          "conditional": false
+        },
+        {
+          "key": "success",
+          "derivation": "!1",
+          "conditional": false
+        },
+        {
+          "key": "failure_reason",
+          "derivation": "rt(\"not_found_explicit_id\")}",
+          "conditional": false
+        }
+      ],
+      "condition": "print / sdk_url lane resume: success after the transcript is hydrated (interruption_kind from turnInterruptionState.kind ?? \"none\", resume_duration_ms from the lane start m); failure with failure_reason load_error|processing_error plus error_name/error_code; not_found_explicit_id when no session matches",
+      "order": "after tengu_resume_print, before the query loop (tengu_init)",
+      "executed_cases": [
+        {
+          "label": "no_interruption",
+          "event": {
+            "name": "tengu_session_resumed",
+            "metadata": {
+              "entrypoint": "print",
+              "success": true,
+              "interruption_kind": "none",
+              "resume_duration_ms": 235
+            }
+          }
+        },
+        {
+          "label": "interrupted_turn",
+          "event": {
+            "name": "tengu_session_resumed",
+            "metadata": {
+              "entrypoint": "print",
+              "success": true,
+              "interruption_kind": "interrupted",
+              "resume_duration_ms": 34
+            }
+          }
+        }
+      ],
+      "failure_case_keys": [
+        "entrypoint",
+        "success",
+        "failure_reason",
+        "error_name",
+        "error_code"
+      ]
+    },
+    "tengu_session_file_read": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "session_file_read",
+      "keys": [
+        {
+          "key": "totalLines",
+          "derivation": "S",
+          "conditional": false
+        },
+        {
+          "key": "readLines",
+          "derivation": "C",
+          "conditional": false
+        },
+        {
+          "key": "totalBytes",
+          "derivation": "k",
+          "conditional": false
+        },
+        {
+          "key": "readBytes",
+          "derivation": "P!==void 0?Buffer.byteLength(E,\"utf8\"):T",
+          "conditional": false
+        },
+        {
+          "key": "offset",
+          "derivation": "s",
+          "conditional": false
+        },
+        {
+          "key": "limit",
+          "derivation": "i",
+          "conditional": true,
+          "condition": "i!==void 0"
+        },
+        {
+          "key": "ext",
+          "derivation": "Z",
+          "conditional": true,
+          "condition": "Z!==void 0"
+        },
+        {
+          "key": "messageID",
+          "derivation": "yt(d)",
+          "conditional": true,
+          "condition": "d!==void 0"
+        },
+        {
+          "key": "is_session_transcript",
+          "derivation": "q===\"session_transcript\"",
+          "conditional": false
+        }
+      ],
+      "condition": "FileReadTool text read completion (native tool execution)",
+      "order": "during tool execution, after tengu_api_query of the producing request"
+    },
+    "tengu_reactive_compact_succeeded": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "reactive_compact_succeeded",
+      "keys": [
+        {
+          "key": "effort_level",
+          "derivation": "X(x)",
+          "conditional": true,
+          "condition": "x"
+        },
+        {
+          "key": "querySource",
+          "derivation": "Va(s)",
+          "conditional": false
+        },
+        {
+          "key": "attempts",
+          "derivation": "t.attempt",
+          "conditional": false
+        },
+        {
+          "key": "groupsPreserved",
+          "derivation": "t.groupsPreserved",
+          "conditional": false
+        },
+        {
+          "key": "totalGroups",
+          "derivation": "t.totalGroups",
+          "conditional": false
+        },
+        {
+          "key": "preservedUuidCount",
+          "derivation": "T.compactMetadata.preservedMessages?.uuids.length??0",
+          "conditional": false
+        },
+        {
+          "key": "preservedMessageCount",
+          "derivation": "b.length",
+          "conditional": false
+        },
+        {
+          "key": "forkAssistantMessageCount",
+          "derivation": "t.forkAssistantMessageCount",
+          "conditional": false
+        },
+        {
+          "key": "trigger",
+          "derivation": "X(i)",
+          "conditional": false
+        },
+        {
+          "key": "thresholdSource",
+          "derivation": "An(a)",
+          "conditional": false
+        },
+        {
+          "key": "preCompactTokens",
+          "derivation": "f",
+          "conditional": false
+        },
+        {
+          "key": "postCompactTokens",
+          "derivation": "E",
+          "conditional": false
+        },
+        {
+          "key": "restoredAttachmentCount",
+          "derivation": "S.attachments.length+S.hookResults.length",
+          "conditional": false
+        },
+        {
+          "key": "durationMs",
+          "derivation": "Math.round(performance.now()-r)",
+          "conditional": false
+        },
+        {
+          "key": "userWaitMs",
+          "derivation": "Math.round(performance.now()-r)",
+          "conditional": false
+        },
+        {
+          "key": "precomputed",
+          "derivation": "l",
+          "conditional": false
+        },
+        {
+          "key": "manualPrecomputeReuse",
+          "derivation": "An(c)",
+          "conditional": false
+        },
+        {
+          "key": "precomputeBorrowed",
+          "derivation": "u?.borrowed",
+          "conditional": false
+        },
+        {
+          "key": "precomputeStatusAtPTL",
+          "derivation": "An(u?.statusAtPTL)",
+          "conditional": false
+        },
+        {
+          "key": "precomputeLeadMs",
+          "derivation": "u?Math.round(u.leadMs):void 0",
+          "conditional": false
+        },
+        {
+          "key": "precomputeTotalMs",
+          "derivation": "u?Math.round(u.totalMs):void 0",
+          "conditional": false
+        },
+        {
+          "key": "messagesSincePrecompute",
+          "derivation": "l?b.length-t.messagesToPreserve.length:void 0",
+          "conditional": false
+        },
+        {
+          "key": "messagesSinceTokens",
+          "derivation": "u?.messagesSinceTokens",
+          "conditional": false
+        },
+        {
+          "key": "compactionInputTokens",
+          "derivation": "R.input_tokens",
+          "conditional": false
+        },
+        {
+          "key": "compactionOutputTokens",
+          "derivation": "R.output_tokens",
+          "conditional": false
+        },
+        {
+          "key": "compactionCacheReadTokens",
+          "derivation": "R.cache_read_input_tokens",
+          "conditional": false
+        },
+        {
+          "key": "compactionCacheCreationTokens",
+          "derivation": "R.cache_creation_input_tokens",
+          "conditional": false
+        },
+        {
+          "key": "compactionTotalTokens",
+          "derivation": "P+R.output_tokens",
+          "conditional": false
+        },
+        {
+          "key": "cacheHitRate",
+          "derivation": "P>0?R.cache_read_input_tokens/P:0",
+          "conditional": false
+        }
+      ],
+      "condition": "reactive compaction result applied: boundary marker built (DAt), post tokens estimated (wp(yV(v))), attachments/hook results restored (S), summary usage R; emitted after ce(\"compact_reactive\")",
+      "order": "after tengu_reactive_compact_triggered and every tengu_reactive_compact_attempt of the same recovery"
+    },
+    "tengu_repl_hook_finished": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "repl_hook_finished",
+      "keys": [
+        {
+          "key": "hookName",
+          "derivation": "y",
+          "conditional": false
+        },
+        {
+          "key": "numCommands",
+          "derivation": "R.length",
+          "conditional": false
+        },
+        {
+          "key": "numSuccess",
+          "derivation": "B.success",
+          "conditional": false
+        },
+        {
+          "key": "numBlocking",
+          "derivation": "B.blocking",
+          "conditional": false
+        },
+        {
+          "key": "numNonBlockingError",
+          "derivation": "B.non_blocking_error",
+          "conditional": false
+        },
+        {
+          "key": "numCancelled",
+          "derivation": "B.cancelled",
+          "conditional": false
+        },
+        {
+          "key": "totalDurationMs",
+          "derivation": "re",
+          "conditional": false
+        }
+      ],
+      "callbacks_only_keys": [
+        {
+          "key": "hookName",
+          "derivation": "y",
+          "conditional": false
+        },
+        {
+          "key": "numCommands",
+          "derivation": "R.length",
+          "conditional": false
+        },
+        {
+          "key": "numSuccess",
+          "derivation": "R.length-ne",
+          "conditional": false
+        },
+        {
+          "key": "numBlocking",
+          "derivation": "ne",
+          "conditional": false
+        },
+        {
+          "key": "numNonBlockingError",
+          "derivation": "0",
+          "conditional": false
+        },
+        {
+          "key": "numCancelled",
+          "derivation": "0",
+          "conditional": false
+        },
+        {
+          "key": "totalDurationMs",
+          "derivation": "Q",
+          "conditional": false
+        }
+      ],
+      "condition": "hook batch completion (configured hooks; callback-only batches use the second literal)",
+      "order": "after tengu_run_hook of the same batch"
+    },
+    "tengu_run_hook": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "run_hook",
+      "keys": [
+        {
+          "key": "hookName",
+          "derivation": "y",
+          "conditional": false
+        },
+        {
+          "key": "numCommands",
+          "derivation": "P.length",
+          "conditional": false
+        },
+        {
+          "key": "numMatchAllMatchers",
+          "derivation": "oe",
+          "conditional": false
+        },
+        {
+          "key": "numSpecificMatchers",
+          "derivation": "P.length-oe",
+          "conditional": false
+        },
+        {
+          "key": "hookTypeCounts",
+          "derivation": "le(ne)",
+          "conditional": false
+        },
+        {
+          "key": "pluginHookCounts",
+          "derivation": "le(W)",
+          "conditional": true,
+          "condition": "W"
+        }
+      ],
+      "direct_keys": [
+        {
+          "key": "hookName",
+          "derivation": "u",
+          "conditional": false
+        },
+        {
+          "key": "numCommands",
+          "derivation": "f.length",
+          "conditional": false
+        },
+        {
+          "key": "numMatchAllMatchers",
+          "derivation": "T",
+          "conditional": false
+        },
+        {
+          "key": "numSpecificMatchers",
+          "derivation": "f.length-T",
+          "conditional": false
+        },
+        {
+          "key": "hookTypeCounts",
+          "derivation": "le(k)",
+          "conditional": false
+        },
+        {
+          "key": "pluginHookCounts",
+          "derivation": "le(S)",
+          "conditional": true,
+          "condition": "S"
+        }
+      ],
+      "condition": "non-callback hooks matched for an event (configured hooks present)",
+      "order": "before tengu_repl_hook_finished"
+    },
+    "tengu_file_activity": {
+      "module": "B:/~BUN/root/_675.js",
+      "slice": "file_activity",
+      "keys": [
+        {
+          "key": "messageID",
+          "derivation": "e.messageID",
+          "conditional": false
+        },
+        {
+          "key": "activity",
+          "derivation": "Xe(e.activity)",
+          "conditional": false
+        },
+        {
+          "key": "fileExtension",
+          "derivation": "e.fileExtension",
+          "conditional": false
+        },
+        {
+          "key": "toolName",
+          "derivation": "lU(e.toolName)",
+          "conditional": false
+        },
+        {
+          "key": "isNewFile",
+          "derivation": "e.isNewFile",
+          "conditional": false
+        },
+        {
+          "key": "deliverChannel",
+          "derivation": "sr(e.deliverChannel)",
+          "conditional": false
+        }
+      ],
+      "condition": "file tool activity (edit/deliver/...) observed by the native tool result reporter",
+      "order": "during tool execution"
+    },
+    "tengu_file_changed": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "file_changed",
+      "keys": [
+        {
+          "key": "lines_added",
+          "derivation": "o",
+          "conditional": false
+        },
+        {
+          "key": "lines_removed",
+          "derivation": "s",
+          "conditional": false
+        }
+      ],
+      "condition": "edit/write diff computed (lines added/removed)",
+      "order": "during tool execution"
+    },
+    "tengu_file_operation": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "file_operation",
+      "keys": [
+        {
+          "key": "operation",
+          "derivation": "X(e.operation)",
+          "conditional": false
+        },
+        {
+          "key": "tool",
+          "derivation": "X(e.tool)",
+          "conditional": false
+        },
+        {
+          "key": "filePathHash",
+          "derivation": "H2o(e.filePath)",
+          "conditional": false
+        },
+        {
+          "key": "contentHash",
+          "derivation": "W2o(e.content)",
+          "conditional": true,
+          "condition": "e.content!==void 0&&e.content.length<=q2o"
+        },
+        {
+          "key": "type",
+          "derivation": "X(e.type)",
+          "conditional": true,
+          "condition": "e.type!==void 0"
+        },
+        {
+          "key": "skill_file_name",
+          "derivation": "K2o(e.filePath).skill_file_name",
+          "conditional": true,
+          "condition": "e.operation!==\"read\" and defined"
+        },
+        {
+          "key": "skill_file_scope",
+          "derivation": "K2o(e.filePath).skill_file_scope",
+          "conditional": true,
+          "condition": "e.operation!==\"read\" and defined"
+        }
+      ],
+      "condition": "WR(): file read/write/edit operation with hashed path and optional content hash / skill file facts",
+      "order": "during tool execution"
+    },
+    "tengu_dir_search": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "dir_search",
+      "keys": [
+        {
+          "key": "durationMs",
+          "derivation": "Date.now()-r",
+          "conditional": false
+        },
+        {
+          "key": "managedFilesFound",
+          "derivation": "f.length",
+          "conditional": false
+        },
+        {
+          "key": "userFilesFound",
+          "derivation": "m.length",
+          "conditional": false
+        },
+        {
+          "key": "projectFilesFound",
+          "derivation": "y.length",
+          "conditional": false
+        },
+        {
+          "key": "projectDirsSearched",
+          "derivation": "i.length",
+          "conditional": false
+        },
+        {
+          "key": "subdir",
+          "derivation": "X(e)",
+          "conditional": false
+        }
+      ],
+      "condition": "CLAUDE.md / memory directory search of a subdirectory during context loading",
+      "order": "session startup and directory changes"
+    },
+    "tengu_bash_tool_command_executed": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "bash_executed",
+      "keys": [
+        {
+          "key": "command_type",
+          "derivation": "rTe(e.command)",
+          "conditional": false
+        },
+        {
+          "key": "stdout_length",
+          "derivation": "H.length",
+          "conditional": false
+        },
+        {
+          "key": "stderr_length",
+          "derivation": "0",
+          "conditional": false
+        },
+        {
+          "key": "exit_code",
+          "derivation": "y.code",
+          "conditional": false
+        },
+        {
+          "key": "interrupted",
+          "derivation": "g",
+          "conditional": false
+        },
+        {
+          "key": "executor_shell",
+          "derivation": "await LTt()",
+          "conditional": false
+        },
+        {
+          "key": "executor_shell_overridden",
+          "derivation": "Boolean(process.env.CLAUDE_CODE_SHELL)",
+          "conditional": false
+        },
+        {
+          "key": "sandboxed",
+          "derivation": "P",
+          "conditional": false
+        },
+        {
+          "key": "sandbox_enabled",
+          "derivation": "C",
+          "conditional": false
+        },
+        {
+          "key": "dangerously_disable_sandbox",
+          "derivation": "e.dangerouslyDisableSandbox??!1",
+          "conditional": false
+        },
+        {
+          "key": "filesystem_policy",
+          "derivation": "X(R)",
+          "conditional": false
+        },
+        {
+          "key": "call_origin",
+          "derivation": "X(k?\"remote\":\"local\")",
+          "conditional": false
+        },
+        {
+          "spread": "Oro(e)",
+          "conditional": true
+        },
+        {
+          "key": "had_sandbox_violation",
+          "derivation": "P&&h",
+          "conditional": false
+        },
+        {
+          "key": "was_backgrounded",
+          "derivation": "Boolean(y.backgroundTaskId)",
+          "conditional": false
+        },
+        {
+          "key": "tool_use_id",
+          "derivation": "O",
+          "conditional": false
+        },
+        {
+          "key": "destructive_category",
+          "derivation": "X(x??\"none\")",
+          "conditional": false
+        },
+        {
+          "key": "destructive_target_scope",
+          "derivation": "X(QP(e.command,ze(),x))",
+          "conditional": false
+        },
+        {
+          "key": "git_destructive_target",
+          "derivation": "X(uq(e.command,x))",
+          "conditional": false
+        },
+        {
+          "key": "permission_mode",
+          "derivation": "X(Le(t).mode)",
+          "conditional": false
+        }
+      ],
+      "condition": "Bash tool command completed locally",
+      "order": "during tool execution"
+    },
+    "tengu_powershell_tool_command_executed": {
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "powershell_executed",
+      "keys": [
+        {
+          "key": "command_type",
+          "derivation": "X(Xne(e.command))",
+          "conditional": false
+        },
+        {
+          "key": "stdout_length",
+          "derivation": "O.length",
+          "conditional": false
+        },
+        {
+          "key": "stderr_length",
+          "derivation": "H.length",
+          "conditional": false
+        },
+        {
+          "key": "exit_code",
+          "derivation": "f.code",
+          "conditional": false
+        },
+        {
+          "key": "interrupted",
+          "derivation": "f.interrupted",
+          "conditional": false
+        },
+        {
+          "key": "powershell_edition",
+          "derivation": "X(await gle()??\"unknown\")",
+          "conditional": false
+        },
+        {
+          "key": "destructive_category",
+          "derivation": "X(h??\"none\")",
+          "conditional": false
+        },
+        {
+          "key": "destructive_target_scope",
+          "derivation": "X(QP(e.command,ze(),h))",
+          "conditional": false
+        },
+        {
+          "key": "permission_mode",
+          "derivation": "X(Le(t).mode)",
+          "conditional": false
+        }
+      ],
+      "condition": "PowerShell tool command completed locally",
+      "order": "during tool execution"
+    }
+  },
+  "boundary": "Executed in vm: the tengu_bridge_repl_started, tengu_bridge_repl_ws_connected, tengu_bridge_repl_ws_closed literals (with ax()/MSr() from the pinned _837.js gates), _665.js h() for tengu_bridge_repl_skipped and the print-lane tengu_session_resumed success/failure literals with synthetic clocks. Recorded statically (key order and derivation text only): tengu_session_file_read, tengu_reactive_compact_succeeded, tengu_repl_hook_finished, tengu_run_hook, tengu_file_activity, tengu_file_changed, tengu_file_operation, tengu_dir_search, tengu_bash_tool_command_executed, tengu_powershell_tool_command_executed. Not established: the connect cause labels (b_), close cause vocabulary (An(Tt)), the bridge_repl_skipped reason vocabulary of the callers, resume failure reason vocabulary beyond load_error/processing_error/not_found_explicit_id/drop_guard_refused, and live native acceptance."
+}

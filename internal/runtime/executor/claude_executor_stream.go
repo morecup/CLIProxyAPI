@@ -8,7 +8,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
+	claudeprompt "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/prompt"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
@@ -19,6 +21,9 @@ import (
 )
 
 func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+	if errEligibility := e.validateClaudeDesktopAuth(auth); errEligibility != nil {
+		return nil, errEligibility
+	}
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
 	}
@@ -30,15 +35,14 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		baseURL = "https://api.anthropic.com"
 	}
 	url := fmt.Sprintf("%s/v1/messages?beta=true", baseURL)
-	fp := resolveClaudeFingerprintPolicy(e.cfg, auth, apiKey)
+	desktopCapabilities := e.desktopCapabilities()
+	callerContext := ctx
 	defer func() {
-		if cancelErr := newClaudeOAuthCancellationError(ctx, fp.OAuthCancellation, err); cancelErr != nil {
+		if cancelErr := newClaudeDesktopCancellationError(callerContext, desktopCapabilities.Cancellation, err); cancelErr != nil {
 			err = cancelErr
 		}
 	}()
-	// Same split as Execute: OAuth signs everywhere, an opted-in API key only on
-	// upstreams the native gate accepts.
-	cchSigning := claudeCCHSigningEnabled(apiKey, claudeCCHUpstreamAnthropic, fp.ProfileClaudeCodeCLI, url)
+	cchSigning := e.desktopOnly && claudeDesktopCCHSigningEnabled(apiKey, url)
 
 	reporter := helps.NewExecutorUsageReporter(ctx, e, baseModel, auth)
 	defer reporter.TrackFailure(ctx, &err)
@@ -59,73 +63,78 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		originalPayloadSource = opts.OriginalRequest
 	}
 	originalPayload := originalPayloadSource
-	incomingHeaders, claudeCodeDetection := detectIncomingClaudeCodeRequest(ctx, opts.Headers, originalPayload, false, e.cfg)
-	confirmedClaudeCode := claudeCodeDetection.Confirmed
+	incomingHeaders := resolveIncomingClaudeHeaders(ctx, opts.Headers)
 	claudeSessionID := ""
-	if fp.ProfileClaudeCodeCLI {
-		claudeSessionID = helps.ClaudeAgentSessionUUIDForRequest(incomingHeaders, originalPayload, req.Payload, confirmedClaudeCode, opts.Metadata, req.Metadata)
+	if desktopCapabilities.CredentialMetadata {
+		claudeSessionID = helps.ClaudeAgentSessionUUIDForRequest(incomingHeaders, originalPayload, req.Payload, false, opts.Metadata, req.Metadata)
 	}
+	promptID, clientRequestID := claudeDesktopRequestUUID(opts.Metadata, req.Metadata)
+	lineageState := claudeDesktopLineageRequestState{}
+	previousRequestID := ""
 	originalTranslated := helps.TranslateRequestWithAPIKeyModelCompatibility(ctx, opts.Headers, e.cfg, from, to, baseModel, originalPayload, true, helps.APIKeyModelIsCompat(req))
 	body := helps.TranslateRequestWithAPIKeyModelCompatibility(ctx, opts.Headers, e.cfg, from, to, baseModel, req.Payload, true, helps.APIKeyModelIsCompat(req))
+	desktopInput := claudeprompt.Submission{}
+	if e.desktopOnly {
+		desktopInput = claudeprompt.ObserveSubmissionContext(ctx, body, time.Now())
+	}
 	body = helps.SetStringIfDifferent(body, "model", upstreamModel)
 
-	body, err = helps.ApplyRequestThinking(body, req, opts, from.String(), to.String(), e.Identifier())
+	body, err = helps.ApplyRequestThinking(body, req, opts, from.String(), to.String(), e.thinkingProvider())
 	if err != nil {
 		return nil, err
 	}
-	if rebuildMidSystemMessageEnabled(e.cfg, auth) {
-		body = rebuildMidSystemMessagesToTopLevel(body)
+	desktopRole := e.ownedClaudeDesktopRequestRole(ctx, body)
+	ctx, claudeSessionID = e.bindClaudeDesktopQueryContext(ctx, auth, claudeSessionID, desktopRole, opts.Metadata, req.Metadata)
+	ctx, releaseQuery := e.beginClaudeDesktopQueryLifetime(ctx)
+	queryHandedOff := false
+	defer func() {
+		if !queryHandedOff {
+			releaseQuery()
+		}
+	}()
+	inputLease, errInput := e.beginClaudeDesktopInput(ctx, desktopRole)
+	if errInput != nil {
+		return nil, &claudeDesktopCancellationError{cause: errInput}
 	}
-
-	// Apply cloaking (system prompt injection, fake user ID, sensitive word obfuscation)
-	// based on client type and configuration.
-	bodyBeforeCloaking := body
-	var cloaked bool
-	body, cloaked, err = applyCloaking(
-		ctx,
-		e.cfg,
-		auth,
-		body,
-		apiKey,
-		confirmedClaudeCode,
-		cchSigning,
-	)
-	if err != nil {
-		return nil, err
+	defer inputLease.Close()
+	if e.desktopOnly && ctx.Err() != nil {
+		return nil, claudeDesktopRequestContextError(ctx)
 	}
-	systemPlacementState := captureClaudeCodeSystemPlacement(bodyBeforeCloaking, body, cloaked)
+	if e.desktopOnly && (desktopRole == "main" || desktopRole == "compaction") {
+		lineageState, previousRequestID, err = e.beginClaudeDesktopRequestLineage(auth, claudeSessionID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	desktopPlan := claudeDesktopRequestPlan{}
+	var desktopProfileApplied bool
 	// Only the Messages endpoint on Anthropic itself was captured; count_tokens
 	// keeps its own shape and other gateways never see this field.
 	diagnosticsState := claudeDiagnosticsRequestState{}
-	contextManagementState := claudeCodeContextManagementState{
-		eligible:    cloaked && isAnthropicUpstreamBase(baseURL),
+	contextManagementState := claudeDesktopContextManagementState{
+		eligible:    e.desktopOnly && isAnthropicUpstreamBase(baseURL),
 		callerOwned: gjson.GetBytes(body, "context_management").Exists(),
 	}
 	if contextManagementState.eligible {
-		body, contextManagementState.automaticallyInjected = injectClaudeCodeContextManagement(body)
-		if fp.InjectDiagnostics {
-			body, diagnosticsState = injectClaudeDiagnostics(body, auth, claudeSessionID)
+		body, contextManagementState.automaticallyInjected = injectClaudeDesktopContextManagement(body)
+		if desktopCapabilities.Diagnostics {
+			body, diagnosticsState = injectClaudeDiagnosticsForRole(body, auth, claudeSessionID, desktopRole)
 		}
 	}
 
 	requestedModel := helps.PayloadRequestedModel(opts, req.Model)
 	requestPath := helps.PayloadRequestPath(opts)
 	body, contextManagementState.payloadRuleTouched = helps.ApplyPayloadConfigWithRequestTracked(e.cfg, baseModel, to.String(), from.String(), "", body, originalTranslated, requestedModel, requestPath, opts.Headers, "context_management")
-	body = reconcileClaudeCodeSystemPlacementAfterPayload(body, systemPlacementState)
 	body = ensureModelMaxTokens(body, baseModel)
 
 	// Disable thinking if tool_choice forces tool use (Anthropic API constraint)
 	body = disableThinkingIfToolChoiceForced(body)
-	body = reconcileClaudeCodeContextManagement(body, contextManagementState)
-	body = normalizeClaudeSamplingForUpstream(body, confirmedClaudeCode)
+	body = reconcileClaudeDesktopContextManagement(body, contextManagementState)
+	body = normalizeClaudeSamplingForUpstream(body, e.desktopOnly)
 
-	// Default cache_control for translated entrypoints (Responses/Chat/Gemini) and other
-	// non-native callers. Confirmed native Claude Code owns its marker placement and must
-	// not be rewritten. Cloaked requests always run section-independent ensure so cloaking's
-	// first-user marker cannot suppress system/latest-user breakpoints.
-	// cloaked and confirmedClaudeCode are mutually exclusive: resolveClaudeWirePolicy
-	// forces Cloak off for a confirmed native client.
-	cpaOwnsCacheControl := shouldEnsureCacheControl(body, cloaked, confirmedClaudeCode)
+	// The compatibility provider adds cache breakpoints only when the caller did
+	// not provide any. Desktop placement is owned by the selected bundle variant.
+	cpaOwnsCacheControl := !e.desktopOnly && shouldEnsureCacheControl(body)
 	if cpaOwnsCacheControl {
 		body = ensureCacheControl(body)
 	}
@@ -133,23 +142,53 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	// Enforce Anthropic's cache_control block limit (max 4 breakpoints per request).
 	body = enforceCacheControlLimit(body, 4)
 
-	// Native selects the 1h cache pool only for OAuth credentials and pairs it with
-	// extended-cache-ttl-2025-04-11, which claudeCodeCLIBetas emits on exactly the
-	// same credential condition. Upgrading after placement is settled mirrors the
-	// native ttl helper.
-	//
-	// This runs only while CPA owns placement, and it then owns the ttl of every
-	// breakpoint it can reach: a marker carrying no ttl is the wire default, not an
-	// opt-in to 5m, so a cloaked caller's bare {"type":"ephemeral"} is upgraded too.
-	// Only a ttl the caller wrote out explicitly survives, because
-	// upgradeClaudeCacheControlTTL skips any block that already has one.
-	// claude-code-cli fingerprint profiles emit extended-cache-ttl and must use the same 1h pool.
-	if cpaOwnsCacheControl && fp.ProfileClaudeCodeCLI {
-		body = upgradeClaudeCacheControlTTL(body, claudeCacheControlTTL1h)
-	}
-
 	// Normalize TTL values to prevent ordering violations under prompt-caching-scope-2026-01-05.
 	body = normalizeCacheControlTTL(body)
+	var errPlan error
+	desktopPlan, errPlan = e.planClaudeDesktopRequestWithHints(body, desktopRole, baseModel, incomingHeaders)
+	if errPlan != nil {
+		return nil, errPlan
+	}
+	var desktopPrompt *claudeprompt.Request
+	var desktopContext *helps.ClaudeDesktopContextLease
+	var desktopContextErr error
+	if e.desktopOnly && e.desktopProfile != nil {
+		if desktopRole == "main" {
+			desktopContext, body, desktopContextErr = e.desktopContexts.Resume(ctx, auth, e.desktopProfile.ProfileID, claudeSessionID, body)
+			ctx, body, promptID, clientRequestID = helps.ResumeClaudeDesktopContinuation(ctx, auth, e.desktopProfile.ProfileID, claudeSessionID, promptID, clientRequestID, body)
+		}
+		if errInput := inputLease.Accept(); errInput != nil {
+			return nil, &claudeDesktopCancellationError{cause: errInput}
+		}
+		desktopPrompt = helps.BeginClaudeDesktopPrompt(&e.desktopPrompts, ctx, auth, e.desktopProfile.ProfileID, string(desktopRole), claudeSessionID, promptID, clientRequestID, body, opts.Metadata, req.Metadata)
+		if desktopPrompt != nil {
+			promptID = desktopPrompt.Identity().PromptID
+		}
+	}
+	desktopPlan.PromptID = promptID
+	desktopPlan.NativePrompt = desktopPrompt
+	desktopPlan.ClientRequestID = clientRequestID
+	desktopFacts := e.newClaudeDesktopRuntimeFacts(auth, claudeSessionID, baseModel, promptID, clientRequestID, previousRequestID, opts.Metadata, req.Metadata)
+	desktopFacts.Prompt = desktopPrompt
+	desktopFacts.ContextLease, desktopFacts.ContextError = desktopContext, desktopContextErr
+	desktopFacts.Input = desktopInput
+	desktopSourceBody := body
+	desktopTelemetrySpan := e.beginClaudeDesktopTelemetry(ctx, auth, desktopRole, desktopFacts, body, opts.Metadata, req.Metadata)
+	desktopTelemetryHandedOff := false
+	defer func() {
+		if desktopTelemetryHandedOff || desktopTelemetrySpan == nil || !desktopTelemetrySpan.Active() {
+			return
+		}
+		finishClaudeDesktopTelemetryFailure(ctx, desktopTelemetrySpan, err)
+		err = attachClaudeDesktopRetryTelemetry(err, desktopTelemetrySpan)
+	}()
+	body, desktopProfileApplied, err = e.applyClaudeDesktopMessageProfile(ctx, auth, body, cchSigning, desktopPlan, desktopFacts)
+	if err != nil {
+		return nil, err
+	}
+	if e.desktopOnly {
+		body = applyClaudeDesktopStreamPolicy(body, desktopPlan, true)
+	}
 
 	// Extract betas from body and convert to header
 	var extraBetas []string
@@ -157,53 +196,57 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	bodyForTranslation := body
 	bodyForUpstream := body
 	var oauthToolNamesReverseMap map[string]string
-	if fp.MCPAlias && cloaked {
+	if desktopCapabilities.ToolAliases && desktopProfileApplied {
 		mcpAliases := resolveClaudeMCPAliasOptions(ctx)
-		bodyForUpstream, oauthToolNamesReverseMap = prepareClaudeOAuthToolNamesForUpstream(bodyForUpstream, mcpAliases)
+		bodyForUpstream, oauthToolNamesReverseMap = prepareClaudeDesktopToolNamesForUpstream(bodyForUpstream, mcpAliases)
 	}
 	bodyForUpstream = sanitizeClaudeMessagesForClaudeUpstreamWithDebug(ctx, bodyForUpstream, baseModel, helps.APIKeyModelIsCompat(req))
-	if fp.ApplyCLIIdentity {
-		bodyForUpstream, err = applyClaudeCLIIdentity(bodyForUpstream, auth, apiKey, url, claudeSessionID, fp.SynthesizeIdentity)
+	if desktopCapabilities.CredentialMetadata {
+		bodyForUpstream, err = e.applyClaudeDesktopIdentity(bodyForUpstream, auth, claudeSessionID)
 		if err != nil {
 			return nil, err
 		}
 	}
-	cchBilling := ""
 	if cchSigning {
-		if !claudeCodeDetection.HelperProfile || claudeBodyNeedsBillingFallback(bodyForUpstream) {
-			cchBilling = claudeCCHFallbackBillingHeader(ctx, e.cfg, bodyForUpstream, claudeCodeDetection.Entrypoint)
-		}
-		bodyForUpstream, err = finalizeAnthropicMessagesBodyCCH(bodyForUpstream, cchBilling)
+		bodyForUpstream, err = finalizeAnthropicMessagesBodyCCH(bodyForUpstream)
 		if err != nil {
 			return nil, fmt.Errorf("finalize Claude CCH: %w", err)
 		}
 	}
-	bodyForUpstream = stripDefaultKimiClaudeCodeAttribution(auth, url, fp.ProfileClaudeCodeCLI, bodyForUpstream)
+	if e.desktopOnly {
+		bodyForUpstream, err = e.finalizeClaudeDesktopBody(bodyForUpstream, desktopPlan)
+		if err != nil {
+			return nil, err
+		}
+	}
 	// Runs on the finished body: payload rules can rewrite model and messages
 	// long after translation, so an earlier check would not describe the request
 	// that is about to be sent.
-	if errMidSystem := validateClaudeMidSystemMessageModel(bodyForUpstream, confirmedClaudeCode, isAnthropicUpstreamBase(baseURL)); errMidSystem != nil {
-		return nil, errMidSystem
+	if e.desktopOnly {
+		if errMidSystem := validateClaudeDesktopMidSystemMessageModel(bodyForUpstream); errMidSystem != nil {
+			return nil, errMidSystem
+		}
 	}
 	reporter.SetTranslatedReasoningEffort(bodyForUpstream, to.String())
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyForUpstream))
 	if err != nil {
 		return nil, err
 	}
-	if errHeaders := applyClaudeHeadersWithNativeProfile(
+	if errHeaders := e.applyClaudeHeadersWithProfile(
 		httpReq,
 		auth,
 		apiKey,
 		true,
 		extraBetas,
 		bodyForUpstream,
-		e.cfg,
+		desktopPlan,
 		incomingHeaders,
-		confirmedClaudeCode && !cloaked,
-		claudeCodeDetection.HelperProfile,
 		claudeSessionID,
 	); errHeaders != nil {
 		return nil, errHeaders
+	}
+	if desktopTelemetrySpan != nil {
+		desktopTelemetrySpan.ObserveRequest(bodyForUpstream, httpReq.Header)
 	}
 	fastRequest := isAnthropicUpstreamBase(baseURL) && claudeRequestIsFast(httpReq, bodyForUpstream)
 	authID, authLabel, authType, authValue := claudeAuthLogIdentity(auth)
@@ -219,9 +262,16 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		AuthValue: authValue,
 	})
 
-	httpClient := helps.NewUtlsHTTPClient(ctx, e.cfg, auth, 0)
+	httpClient, err := e.newClaudeUpstreamHTTPClient(ctx, auth, desktopPlan)
+	if err != nil {
+		return nil, err
+	}
 	httpClient = reporter.TrackHTTPClient(httpClient)
-	httpResp, err := doClaudeUpstreamRequest(httpClient, httpReq)
+	execution := claudeDesktopRequestExecution{ctx: ctx, body: bodyForUpstream, sourceBody: desktopSourceBody, plan: desktopPlan, facts: desktopFacts,
+		span: desktopTelemetrySpan, lineage: lineageState, diagnostics: diagnosticsState}
+	httpResp, err := e.doClaudeDesktopRecoverableRequest(httpClient, httpReq, auth, &execution, opts.Metadata, req.Metadata)
+	ctx, bodyForUpstream, desktopTelemetrySpan = execution.ctx, execution.body, execution.span
+	lineageState, diagnosticsState = execution.lineage, execution.diagnostics
 	if err != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, err)
 		return nil, wrapClaudeFastRequestError(fastRequest, 0, err)
@@ -268,18 +318,38 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		return nil, wrapClaudeFastRequestError(fastRequest, httpResp.StatusCode, err)
 	}
 	out := make(chan cliproxyexecutor.StreamChunk, 1)
+	upstreamRequestID := claudeDesktopResponseRequestID(httpResp.Header)
 	go func() {
 		defer close(out)
+		defer releaseQuery()
+		telemetryCompleted := false
+		var telemetryErr error
+		defer func() {
+			if telemetryCompleted {
+				e.runClaudeDesktopCountTokensCalibration(ctx, auth, desktopRole, claudeSessionID, bodyForUpstream)
+			}
+		}()
+		defer func() {
+			if desktopTelemetrySpan == nil || !desktopTelemetrySpan.Active() {
+				return
+			}
+			if telemetryCompleted {
+				desktopTelemetrySpan.FinishSuccess(ctx)
+				return
+			}
+			finishClaudeDesktopTelemetryFailure(ctx, desktopTelemetrySpan, telemetryErr)
+		}()
 		defer func() {
 			if errClose := decodedBody.Close(); errClose != nil {
 				log.Errorf("response body close error: %v", errClose)
 			}
 		}()
 		emitCancellation := func(cause error) bool {
-			cancelErr := newClaudeOAuthCancellationError(ctx, fp.OAuthCancellation, cause)
+			cancelErr := newClaudeDesktopCancellationError(ctx, desktopCapabilities.Cancellation, cause)
 			if cancelErr == nil {
 				return false
 			}
+			telemetryErr = cancelErr
 			helps.RecordAPIResponseError(ctx, e.cfg, cancelErr)
 			reporter.PublishFailure(ctx, cancelErr)
 			select {
@@ -290,10 +360,12 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		}
 		emitResponseError := func(errResponse error) {
 			errResponse = wrapClaudeFastRequestError(fastRequest, httpResp.StatusCode, errResponse)
+			telemetryErr = errResponse
+			streamErr := attachClaudeDesktopRetryTelemetry(errResponse, desktopTelemetrySpan)
 			helps.RecordAPIResponseError(ctx, e.cfg, errResponse)
 			reporter.PublishFailure(ctx, errResponse)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errResponse}:
+			case out <- cliproxyexecutor.StreamChunk{Err: streamErr}:
 			case <-ctx.Done():
 			}
 		}
@@ -304,6 +376,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			scanner.Buffer(nil, 52_428_800) // 50MB
 			var event bytes.Buffer
 			var upstreamMessageID string
+			responseMetrics := claudeDesktopResponseMetricState{}
 			upstreamCompleted := false
 			flushEvent := func() bool {
 				if event.Len() == 0 {
@@ -321,14 +394,19 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			for scanner.Scan() {
 				line := scanner.Bytes()
 				observeClaudeStreamLine(line, &upstreamMessageID, &upstreamCompleted)
+				responseMetrics.observeStreamLine(line)
 				helps.AppendAPIResponseChunk(ctx, e.cfg, line)
 				if detail, ok := helps.ParseClaudeStreamUsage(line); ok {
 					reporter.Publish(ctx, detail)
+					observeClaudeDesktopTelemetryUsage(desktopTelemetrySpan, detail)
 				}
-				restoredLine, errRestore := restoreClaudeOAuthToolNamesFromStreamLine(line, oauthToolNamesReverseMap)
+				restoredLine, errRestore := restoreClaudeDesktopToolNamesFromStreamLine(line, oauthToolNamesReverseMap)
 				if errRestore != nil {
 					emitResponseError(fmt.Errorf("restore Claude OAuth tool name from streaming response: %w", errRestore))
 					return
+				}
+				if desktopTelemetrySpan != nil {
+					desktopTelemetrySpan.ObserveStreamLine(restoredLine)
 				}
 				line = e.restoreResponseModel(restoredLine, req.Model)
 				event.Write(line)
@@ -346,17 +424,20 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 				return
 			}
 			if errScan := scanner.Err(); errScan != nil {
-				errScan = wrapClaudeFastRequestError(fastRequest, httpResp.StatusCode, errScan)
-				helps.RecordAPIResponseError(ctx, e.cfg, errScan)
-				reporter.PublishFailure(ctx, errScan)
-				select {
-				case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
-				case <-ctx.Done():
-				}
+				emitResponseError(errScan)
 				return
 			}
 			if upstreamCompleted {
+				if errLineage := e.commitClaudeDesktopRequestLineage(lineageState, upstreamRequestID); errLineage != nil {
+					helps.LogWithRequestID(ctx).WithError(errLineage).Warn("claude desktop: failed to persist request lineage")
+				}
 				commitClaudeDiagnostics(diagnosticsState, upstreamMessageID)
+				if desktopTelemetrySpan != nil {
+					desktopTelemetrySpan.ObserveResponseContentMetrics(upstreamRequestID, responseMetrics.stopReason, responseMetrics.textContentLength, responseMetrics.thinkingLength(), responseMetrics.toolUseContentLengths())
+				}
+				telemetryCompleted = true
+			} else if e.desktopOnly {
+				emitResponseError(errClaudeDesktopStreamIncomplete)
 			}
 			return
 		}
@@ -366,18 +447,24 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		scanner.Buffer(nil, 52_428_800) // 50MB
 		var param any
 		var upstreamMessageID string
+		responseMetrics := claudeDesktopResponseMetricState{}
 		upstreamCompleted := false
 		for scanner.Scan() {
 			line := scanner.Bytes()
 			observeClaudeStreamLine(line, &upstreamMessageID, &upstreamCompleted)
+			responseMetrics.observeStreamLine(line)
 			helps.AppendAPIResponseChunk(ctx, e.cfg, line)
 			if detail, ok := helps.ParseClaudeStreamUsage(line); ok {
 				reporter.Publish(ctx, detail)
+				observeClaudeDesktopTelemetryUsage(desktopTelemetrySpan, detail)
 			}
-			restoredLine, errRestore := restoreClaudeOAuthToolNamesFromStreamLine(line, oauthToolNamesReverseMap)
+			restoredLine, errRestore := restoreClaudeDesktopToolNamesFromStreamLine(line, oauthToolNamesReverseMap)
 			if errRestore != nil {
 				emitResponseError(fmt.Errorf("restore Claude OAuth tool name from streaming response: %w", errRestore))
 				return
+			}
+			if desktopTelemetrySpan != nil {
+				desktopTelemetrySpan.ObserveStreamLine(restoredLine)
 			}
 			line = e.restoreResponseModel(restoredLine, req.Model)
 			chunks := sdktranslator.TranslateStream(
@@ -408,23 +495,28 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			return
 		}
 		if errScan := scanner.Err(); errScan != nil {
-			errScan = wrapClaudeFastRequestError(fastRequest, httpResp.StatusCode, errScan)
-			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
-			reporter.PublishFailure(ctx, errScan)
-			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
-			case <-ctx.Done():
-			}
+			emitResponseError(errScan)
 			return
 		}
 		if upstreamCompleted {
+			if errLineage := e.commitClaudeDesktopRequestLineage(lineageState, upstreamRequestID); errLineage != nil {
+				helps.LogWithRequestID(ctx).WithError(errLineage).Warn("claude desktop: failed to persist request lineage")
+			}
 			commitClaudeDiagnostics(diagnosticsState, upstreamMessageID)
+			if desktopTelemetrySpan != nil {
+				desktopTelemetrySpan.ObserveResponseContentMetrics(upstreamRequestID, responseMetrics.stopReason, responseMetrics.textContentLength, responseMetrics.thinkingLength(), responseMetrics.toolUseContentLengths())
+			}
+			telemetryCompleted = true
+		} else if e.desktopOnly {
+			emitResponseError(errClaudeDesktopStreamIncomplete)
 		}
 	}()
 	result := &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}
 	if replayScope.valid() {
 		result = wrapClaudeThinkingReplayStream(ctx, result, replayScope)
 	}
+	desktopTelemetryHandedOff = true
+	queryHandedOff = true
 	return result, nil
 }
 

@@ -287,6 +287,11 @@ func (s *Service) Shutdown(ctx context.Context) error {
 		}
 		if s.coreManager != nil {
 			s.coreManager.StopAutoRefresh()
+			if claudeExecutor, okExecutor := s.coreManager.Executor("claude"); okExecutor {
+				if closer, okCloser := claudeExecutor.(coreauth.ExecutionSessionCloser); okCloser {
+					closer.CloseExecutionSession(coreauth.CloseAllExecutionSessionsID)
+				}
+			}
 		}
 		if s.watcher != nil {
 			if err := s.watcher.Stop(); err != nil {

@@ -1,0 +1,1338 @@
+{
+  "schema_version": 1,
+  "kind": "native_reactive_attempt_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "reactive_attempts",
+      "source_code_unit_from": 2732837,
+      "source_code_unit_to": 2735226,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 2389,
+      "sha256": "cd8fa9a413e9526ec0c40a1232a5134abd13c4ab00ea15529191ab8fe836cdb7"
+    },
+    {
+      "label": "group_messages",
+      "from": 2713533,
+      "to": 2713867,
+      "sha256": "c46b0005c76c0fa7e48568e89164605230f988a2901c441b95a64799d0ff42d2"
+    },
+    {
+      "label": "group_active_history",
+      "from": 2713867,
+      "to": 2713941,
+      "sha256": "de72089d2f37f2054f95757884de736a96321d8f39a33d620a07a0f6797817e6"
+    },
+    {
+      "label": "gap_step",
+      "from": 2732588,
+      "to": 2732723,
+      "sha256": "a56ce45b515a241af0705d6fd93e009d05f80d24d9bffaefc7795e43d58a5455"
+    },
+    {
+      "label": "retry_step",
+      "from": 2732723,
+      "to": 2732837,
+      "sha256": "b11bf5a2875df5545507cf718c024190cec8c7e8ff8c590a135182dd5fee8edb"
+    },
+    {
+      "label": "is_boundary",
+      "from": 6659249,
+      "to": 6659322,
+      "sha256": "7b5bb222268db9cdce3fc2dbdcb2b76e58264e51e1f09d648bd6f1e52f7a3960"
+    },
+    {
+      "label": "last_boundary",
+      "from": 6659393,
+      "to": 6659481,
+      "sha256": "c22a19e1404966b0f68a99506f56531194425ff350d062ebc86c74ba542e1b23"
+    },
+    {
+      "label": "active_history",
+      "from": 6659481,
+      "to": 6659538,
+      "sha256": "89116b2907d1f785d62e7afc695d603ca480a582393caeb61b271a6ad41f5096"
+    }
+  ],
+  "cases": [
+    {
+      "name": "success",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 1,
+        "total_groups": 5,
+        "groups_preserved": 1,
+        "preserved_uuids": [
+          "synthetic-assistant-3"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "empty",
+      "messages": [],
+      "outcomes": [],
+      "attempts": [],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "too_few_groups",
+        "attempts": 0,
+        "total_groups": 0,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "one_group",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [],
+      "attempts": [],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "too_few_groups",
+        "attempts": 0,
+        "total_groups": 1,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "no_assistant_to_summarize",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [],
+      "attempts": [],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "too_few_groups",
+        "attempts": 0,
+        "total_groups": 2,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "unknown_gap",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "prompt_too_long"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 2,
+          "groupsToSummarize": 3,
+          "groupsToPreserve": 2,
+          "messagesToSummarize": 3,
+          "strippedMedia": false,
+          "stepMode": "gap_unparseable",
+          "stepSize": 1
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 2,
+        "total_groups": 5,
+        "groups_preserved": 2,
+        "preserved_uuids": [
+          "synthetic-assistant-2",
+          "synthetic-assistant-3"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "guided_gap",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-4",
+          "message_id": "synthetic-message-4",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-5",
+          "message_id": "synthetic-message-5",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-6",
+          "message_id": "synthetic-message-6",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "prompt_too_long",
+          "tokenGap": 25
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 7,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 7,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 2,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 4,
+          "messagesToSummarize": 4,
+          "strippedMedia": false,
+          "stepMode": "gap_guided",
+          "stepSize": 3,
+          "tokenGap": 25
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 2,
+        "total_groups": 8,
+        "groups_preserved": 4,
+        "preserved_uuids": [
+          "synthetic-assistant-3",
+          "synthetic-assistant-4",
+          "synthetic-assistant-5",
+          "synthetic-assistant-6"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "huge_gap_halves",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-4",
+          "message_id": "synthetic-message-4",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-5",
+          "message_id": "synthetic-message-5",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-6",
+          "message_id": "synthetic-message-6",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "prompt_too_long",
+          "tokenGap": 100000
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 7,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 7,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 2,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 4,
+          "messagesToSummarize": 4,
+          "strippedMedia": false,
+          "stepMode": "gap_guided",
+          "stepSize": 3,
+          "tokenGap": 100000
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 2,
+        "total_groups": 8,
+        "groups_preserved": 4,
+        "preserved_uuids": [
+          "synthetic-assistant-3",
+          "synthetic-assistant-4",
+          "synthetic-assistant-5",
+          "synthetic-assistant-6"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "seeded",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-4",
+          "message_id": "synthetic-message-4",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "initial_token_gap": 25,
+      "outcomes": [],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 3,
+          "groupsToPreserve": 3,
+          "messagesToSummarize": 3,
+          "strippedMedia": false,
+          "stepMode": "seeded",
+          "stepSize": 2,
+          "tokenGap": 25
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 1,
+        "total_groups": 6,
+        "groups_preserved": 3,
+        "preserved_uuids": [
+          "synthetic-assistant-2",
+          "synthetic-assistant-3",
+          "synthetic-assistant-4"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "seed_less_than_last_group",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-4",
+          "message_id": "synthetic-message-4",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "initial_token_gap": 5,
+      "outcomes": [],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 5,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 5,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 1,
+        "total_groups": 6,
+        "groups_preserved": 1,
+        "preserved_uuids": [
+          "synthetic-assistant-4"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "seed_ignored_for_three_groups",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "initial_token_gap": 1000,
+      "outcomes": [],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 2,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 2,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 1,
+        "total_groups": 3,
+        "groups_preserved": 1,
+        "preserved_uuids": [
+          "synthetic-assistant-1"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "media_then_success",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "media_too_large"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": true
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 1,
+        "total_groups": 5,
+        "groups_preserved": 1,
+        "preserved_uuids": [
+          "synthetic-assistant-3"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "media_twice_terminal",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "media_too_large"
+        },
+        {
+          "reason": "media_too_large"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": true
+        }
+      ],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "media_unstrippable",
+        "attempts": 1,
+        "total_groups": 5,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "media_then_ptl",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-4",
+          "message_id": "synthetic-message-4",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "media_too_large"
+        },
+        {
+          "reason": "prompt_too_long"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 5,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 5,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 1,
+          "groupsToSummarize": 5,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 5,
+          "strippedMedia": true
+        },
+        {
+          "attempt": 2,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 2,
+          "messagesToSummarize": 4,
+          "strippedMedia": true,
+          "stepMode": "gap_unparseable",
+          "stepSize": 1
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 2,
+        "total_groups": 6,
+        "groups_preserved": 2,
+        "preserved_uuids": [
+          "synthetic-assistant-3",
+          "synthetic-assistant-4"
+        ],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "ptl_exhaustion",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "prompt_too_long"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 2,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 2,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "exhausted",
+        "attempts": 1,
+        "total_groups": 3,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "error_terminal",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "error"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "error",
+        "attempts": 1,
+        "total_groups": 5,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "aborted_terminal",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "aborted"
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "aborted",
+        "attempts": 1,
+        "total_groups": 5,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": false
+      }
+    },
+    {
+      "name": "credits_rescue",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-2",
+          "message_id": "synthetic-message-2",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-3",
+          "message_id": "synthetic-message-3",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "prompt_too_long",
+          "viaCreditsBoundary": true
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 4,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 4,
+          "strippedMedia": false
+        },
+        {
+          "attempt": 2,
+          "groupsToSummarize": 3,
+          "groupsToPreserve": 2,
+          "messagesToSummarize": 3,
+          "strippedMedia": false,
+          "stepMode": "gap_unparseable",
+          "stepSize": 1
+        }
+      ],
+      "expected": {
+        "ready_to_apply": true,
+        "reason": "",
+        "attempts": 2,
+        "total_groups": 5,
+        "groups_preserved": 2,
+        "preserved_uuids": [
+          "synthetic-assistant-2",
+          "synthetic-assistant-3"
+        ],
+        "credits_rescue": true
+      }
+    },
+    {
+      "name": "credits_exhaustion",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-user",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-0",
+          "message_id": "synthetic-message-0",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-assistant-1",
+          "message_id": "synthetic-message-1",
+          "token_estimate": {
+            "tokens": 10,
+            "known": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "reason": "prompt_too_long",
+          "viaCreditsBoundary": true
+        }
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "groupsToSummarize": 2,
+          "groupsToPreserve": 1,
+          "messagesToSummarize": 2,
+          "strippedMedia": false
+        }
+      ],
+      "expected": {
+        "ready_to_apply": false,
+        "reason": "exhausted",
+        "attempts": 1,
+        "total_groups": 3,
+        "groups_preserved": 0,
+        "preserved_uuids": [],
+        "credits_rescue": true
+      }
+    }
+  ],
+  "claim_boundary": "Native r1e/group/gap control flow with synthetic queries and per-message estimates. Product token estimates have separate native vectors. Summary selection is not application, a real API query, precomputation, restoration or lifecycle telemetry coverage."
+}

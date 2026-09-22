@@ -179,3 +179,28 @@ func TestOAuthTabStaleStartIsIgnored(t *testing.T) {
 		t.Fatalf("stale start should not set authState, got %q", updated.authState)
 	}
 }
+
+func TestOAuthTabAcceptsMagicLinkFlowWithoutURL(t *testing.T) {
+	m := newOAuthTabModel(nil)
+	m.state = oauthPending
+	m.pollGeneration = 4
+	m.ready = true
+	m.viewport = viewport.New(80, 24)
+	m.viewport.SetContent(m.renderContent())
+
+	updated, cmd := m.Update(oauthStartMsg{
+		state:         "desktop-state",
+		providerName:  "Claude (Anthropic)",
+		magicLinkFlow: true,
+		generation:    4,
+	})
+	if updated.state != oauthRemote || !updated.magicLinkFlow {
+		t.Fatalf("magic-link flow state = %v, magicLinkFlow = %v", updated.state, updated.magicLinkFlow)
+	}
+	if !updated.inputActive || !updated.callbackInput.Focused() {
+		t.Fatal("magic-link flow did not activate the magic-link input")
+	}
+	if cmd == nil {
+		t.Fatal("magic-link flow did not start status polling")
+	}
+}

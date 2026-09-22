@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "kind": "native_generated_synthetic_compaction_vectors",
+  "desktop_version": "1.40609.0.0",
+  "code_version": "2.1.247",
+  "source_definitions": [
+    {
+      "label": "normalize_summary",
+      "source_code_unit_from": 2715351,
+      "source_code_unit_to": 2715603,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 252,
+      "sha256": "212438945c56881727fbd69b70368589fc526a4456408bd8d98a976414976cf3"
+    },
+    {
+      "label": "wrap_summary",
+      "source_code_unit_from": 2715603,
+      "source_code_unit_to": 2716613,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 1010,
+      "sha256": "65110196b48e51c3e5c0f8ff61ebf73582fa7f2b2ada5de231ccfc4e7022cb31"
+    },
+    {
+      "label": "select_summary",
+      "source_code_unit_from": 2714244,
+      "source_code_unit_to": 2714337,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 93,
+      "sha256": "741319a583dbfb315de7dee6afdb8ae9f78befe7319781293d3d498b27354d0e"
+    }
+  ],
+  "response_text": "<analysis>synthetic analysis</analysis><summary> synthetic summary 😀\n\n\nsecond line </summary>",
+  "normalized_summary": "Summary:\nsynthetic summary 😀\n\nsecond line",
+  "normalization": [
+    {
+      "input": "",
+      "expected": ""
+    },
+    {
+      "input": "  first\n\n\nsecond  ",
+      "expected": "first\n\nsecond"
+    },
+    {
+      "input": "<analysis>synthetic</analysis>visible",
+      "expected": "visible"
+    },
+    {
+      "input": "<analysis>first</analysis><analysis>second</analysis>",
+      "expected": "<analysis>second</analysis>"
+    },
+    {
+      "input": "<summary> value </summary>",
+      "expected": "Summary:\nvalue"
+    },
+    {
+      "input": "<summary>first</summary><summary>second</summary>",
+      "expected": "Summary:\nfirst<summary>second</summary>"
+    },
+    {
+      "input": "<summary></summary>",
+      "expected": "Summary:"
+    },
+    {
+      "input": "﻿ value ﻿",
+      "expected": "value"
+    },
+    {
+      "input": "value",
+      "expected": "value"
+    },
+    {
+      "input": "first\r\n\r\n\r\nsecond",
+      "expected": "first\r\n\r\n\r\nsecond"
+    },
+    {
+      "input": "<summary> $& $1 \\value </summary>",
+      "expected": "Summary:\n<summary> $& $1 \\value </summary> $1 \\value"
+    },
+    {
+      "input": "<ANALYSIS>literal</ANALYSIS> 😀 中文",
+      "expected": "<ANALYSIS>literal</ANALYSIS> 😀 中文"
+    }
+  ],
+  "wrappers": [
+    {
+      "variant": 0,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line"
+    },
+    {
+      "variant": 1,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nRecent messages are preserved verbatim."
+    },
+    {
+      "variant": 2,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need."
+    },
+    {
+      "variant": 3,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nRecent messages are preserved verbatim.\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need."
+    },
+    {
+      "variant": 4,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 5,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nRecent messages are preserved verbatim.\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 6,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need.\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 7,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nRecent messages are preserved verbatim.\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need.\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 8,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl"
+    },
+    {
+      "variant": 9,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\n\nRecent messages are preserved verbatim."
+    },
+    {
+      "variant": 10,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need."
+    },
+    {
+      "variant": 11,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\n\nRecent messages are preserved verbatim.\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need."
+    },
+    {
+      "variant": 12,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 13,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\n\nRecent messages are preserved verbatim.\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 14,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need.\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    },
+    {
+      "variant": 15,
+      "text": "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.\n\nSummary:\nsynthetic summary 😀\n\nsecond line\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\\synthetic\\session.jsonl\n\nRecent messages are preserved verbatim.\n\nYour REPL VM state has been cleared as part of this compaction. Variables defined in REPL calls before this point are no longer accessible — redefine any you still need.\nContinue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with \"I'll continue\" or similar. Pick up the last task as if the break never happened."
+    }
+  ],
+  "claim_boundary": "Pure native functions with synthetic text and a nonexistent synthetic path. No installed source code, private record, identity or credential is included."
+}

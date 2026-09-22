@@ -164,7 +164,7 @@ func compileAPIKeyModelCapabilitiesForAuth(cfg *internalconfig.Config, auth *Aut
 		if entry := resolveInteractionsAPIKeyConfig(cfg, auth); entry != nil {
 			compileConfiguredModelCapabilities(out, entry.Models, "interactions")
 		}
-	case "claude":
+	case "claude", "anthropic-compatible":
 		if entry := resolveClaudeAPIKeyConfig(cfg, auth); entry != nil {
 			compileConfiguredModelCapabilities(out, entry.Models, "claude")
 		}

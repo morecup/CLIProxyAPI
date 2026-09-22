@@ -43,19 +43,62 @@ func (cfg *Config) SanitizeCodexHeaderDefaults() {
 	cfg.CodexHeaderDefaults.BetaFeatures = strings.TrimSpace(cfg.CodexHeaderDefaults.BetaFeatures)
 }
 
-// SanitizeClaudeHeaderDefaults trims surrounding whitespace from the
-// configured Claude fingerprint baseline values.
-func (cfg *Config) SanitizeClaudeHeaderDefaults() {
+func (cfg *Config) SanitizeClaudeDesktop() {
 	if cfg == nil {
 		return
 	}
-	cfg.ClaudeHeaderDefaults.UserAgent = strings.TrimSpace(cfg.ClaudeHeaderDefaults.UserAgent)
-	cfg.ClaudeHeaderDefaults.PackageVersion = strings.TrimSpace(cfg.ClaudeHeaderDefaults.PackageVersion)
-	cfg.ClaudeHeaderDefaults.RuntimeVersion = strings.TrimSpace(cfg.ClaudeHeaderDefaults.RuntimeVersion)
-	cfg.ClaudeHeaderDefaults.OS = strings.TrimSpace(cfg.ClaudeHeaderDefaults.OS)
-	cfg.ClaudeHeaderDefaults.Arch = strings.TrimSpace(cfg.ClaudeHeaderDefaults.Arch)
-	cfg.ClaudeHeaderDefaults.Timeout = strings.TrimSpace(cfg.ClaudeHeaderDefaults.Timeout)
-	cfg.ClaudeHeaderDefaults.Timezone = strings.TrimSpace(cfg.ClaudeHeaderDefaults.Timezone)
+	cfg.ClaudeDesktop.BundlePath = strings.TrimSpace(cfg.ClaudeDesktop.BundlePath)
+	cfg.ClaudeDesktop.StatePath = strings.TrimSpace(cfg.ClaudeDesktop.StatePath)
+	clean := make([]string, 0, len(cfg.ClaudeDesktop.RolloutAuthIDs))
+	seen := make(map[string]struct{}, len(cfg.ClaudeDesktop.RolloutAuthIDs))
+	for _, authID := range cfg.ClaudeDesktop.RolloutAuthIDs {
+		authID = strings.TrimSpace(authID)
+		if authID == "" {
+			continue
+		}
+		if _, exists := seen[authID]; exists {
+			continue
+		}
+		seen[authID] = struct{}{}
+		clean = append(clean, authID)
+	}
+	cfg.ClaudeDesktop.RolloutAuthIDs = clean
+
+	profiles := make([]ClaudeDesktopMachineProfile, 0, len(cfg.ClaudeDesktop.MachineProfiles))
+	profileIDs := make(map[string]struct{}, len(cfg.ClaudeDesktop.MachineProfiles))
+	for _, profile := range cfg.ClaudeDesktop.MachineProfiles {
+		profile.ID = strings.TrimSpace(profile.ID)
+		if profile.ID == "" {
+			continue
+		}
+		if _, exists := profileIDs[profile.ID]; exists {
+			continue
+		}
+		profile.CPUModel = strings.TrimSpace(profile.CPUModel)
+		profile.OSBuild = strings.TrimSpace(profile.OSBuild)
+		profile.OSRelease = strings.TrimSpace(profile.OSRelease)
+		profile.OSVersion = strings.TrimSpace(profile.OSVersion)
+		if profile.TotalMemoryBytes > 0 && profile.AvailableMemoryBytes > profile.TotalMemoryBytes {
+			profile.AvailableMemoryBytes = profile.TotalMemoryBytes
+		}
+		profileIDs[profile.ID] = struct{}{}
+		profiles = append(profiles, profile)
+	}
+	cfg.ClaudeDesktop.MachineProfiles = profiles
+
+	bindings := make(map[string]string, len(cfg.ClaudeDesktop.MachineProfileBindings))
+	for authID, profileID := range cfg.ClaudeDesktop.MachineProfileBindings {
+		authID = strings.TrimSpace(authID)
+		profileID = strings.TrimSpace(profileID)
+		if authID == "" || profileID == "" {
+			continue
+		}
+		bindings[authID] = profileID
+	}
+	if len(bindings) == 0 {
+		bindings = nil
+	}
+	cfg.ClaudeDesktop.MachineProfileBindings = bindings
 }
 
 // SanitizeOAuthModelAlias normalizes and deduplicates global OAuth model name aliases.
@@ -223,14 +266,6 @@ func (cfg *Config) SanitizeClaudeKeys() {
 		entry.Prefix = normalizeModelPrefix(entry.Prefix)
 		entry.Headers = NormalizeHeaders(entry.Headers)
 		entry.ExcludedModels = NormalizeExcludedModels(entry.ExcludedModels)
-		// Only a recognized value is rewritten. An unrecognized one is preserved as
-		// written so sanitizing a config file never destroys operator input; the
-		// request path falls back to the default profile and reports it once.
-		if normalized, ok := NormalizeClaudeFingerprintProfile(entry.FingerprintProfile); ok {
-			entry.FingerprintProfile = normalized
-		} else {
-			entry.FingerprintProfile = strings.TrimSpace(entry.FingerprintProfile)
-		}
 	}
 }
 

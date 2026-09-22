@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	claudeauth "github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claude"
+	claudeprofile "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/profile"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 	"github.com/tidwall/gjson"
@@ -14,6 +15,18 @@ import (
 type claudeDiagnosticsRequestState struct {
 	key      string
 	sequence uint64
+}
+
+// Only the captured main/subagent variants have diagnostics. Helper and
+// compaction responses must not reserve or commit the main diagnostic chain.
+func injectClaudeDiagnosticsForRole(body []byte, auth *cliproxyauth.Auth, sessionID string, role claudeprofile.RequestRole) ([]byte, claudeDiagnosticsRequestState) {
+	if role == claudeprofile.RoleMain || role == claudeprofile.RoleSubagent {
+		return injectClaudeDiagnostics(body, auth, sessionID)
+	}
+	if updated, errDelete := sjson.DeleteBytes(body, "diagnostics"); errDelete == nil {
+		body = updated
+	}
+	return body, claudeDiagnosticsRequestState{}
 }
 
 func injectClaudeDiagnostics(body []byte, auth *cliproxyauth.Auth, sessionID string) ([]byte, claudeDiagnosticsRequestState) {

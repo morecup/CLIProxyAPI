@@ -168,20 +168,14 @@ func (s *ConfigSynthesizer) synthesizeClaudeKeys(ctx *SynthesisContext) []*corea
 		if base != "" {
 			attrs["base_url"] = base
 		}
-		if ck.RebuildMidSystemMessage {
-			attrs["rebuild_mid_system_message"] = "true"
-		}
-		if profile := strings.ToLower(strings.TrimSpace(ck.FingerprintProfile)); profile != "" {
-			attrs["fingerprint_profile"] = profile
-		}
 		if hash := diff.ComputeClaudeModelsHash(ck.Models); hash != "" {
 			attrs["models_hash"] = hash
 		}
 		addConfigHeadersToAttrs(ck.Headers, attrs)
 		a := &coreauth.Auth{
 			ID:         id,
-			Provider:   "claude",
-			Label:      "claude-apikey",
+			Provider:   "anthropic-compatible",
+			Label:      "anthropic-compatible-apikey",
 			Prefix:     prefix,
 			Status:     coreauth.StatusActive,
 			ProxyURL:   proxyURL,

@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "definitions": [
+    {
+      "file": "_457.js",
+      "label": "capability_prefix",
+      "from": 710,
+      "to": 741,
+      "sha256": "c4f51759a5454a0e2d985f4f065b3247da55adf94116c106861a5c7a46282821"
+    },
+    {
+      "file": "_457.js",
+      "label": "capability_match",
+      "from": 741,
+      "to": 898,
+      "sha256": "74bff926c9570f65bdde3131da7151bc63b55ea247dc7082ca4d70ed1ea5f411"
+    },
+    {
+      "file": "_457.js",
+      "label": "too_long",
+      "from": 950,
+      "to": 1079,
+      "sha256": "6d6ae16bff2994fe0e7e9456fe24ef217fd089579eb2a21fc233491297aa1ee9"
+    },
+    {
+      "file": "_457.js",
+      "label": "media",
+      "from": 2049,
+      "to": 2472,
+      "sha256": "a906ceccbad805cfdb5b313d12bcb37279075e29ce6e34aad0383ed75cf7a2cc"
+    },
+    {
+      "file": "_448.js",
+      "label": "gap",
+      "from": 1994551,
+      "to": 1994725,
+      "sha256": "ee8a5bfc0a95644d6c06f002431cd9368b8e8f3d2dc2c3c313adf4c35e95d6ca"
+    },
+    {
+      "file": "_448.js",
+      "label": "media_capability",
+      "from": 120583,
+      "to": 120755,
+      "sha256": "9db41d296c6e24fdbf77d59175a401a2cb1f330827ac184a692827faef423cbe"
+    },
+    {
+      "file": "_448.js",
+      "label": "media_error",
+      "from": 1995873,
+      "to": 1995945,
+      "sha256": "90093ba50822c06c7e7329c9ae56d08225c3c9f161226626413730b47dd7c85e"
+    },
+    {
+      "file": "_457.js",
+      "label": "initialization",
+      "from": 3719,
+      "to": 4239,
+      "sha256": "ee2617899e49b6a91325cfa31aa24da384d983df508c741f1a0f1677925de700",
+      "module_sha256": "403f60b1a8ac242dff8c473f49f9d38bb8442a2376756fe120d6529d9d12e68f"
+    }
+  ],
+  "cases": [
+    {
+      "text": "prompt is too long: 250000 tokens > 200000 maximum",
+      "reason": "prompt_too_long",
+      "token_gap": 50000
+    },
+    {
+      "text": "PROMPT IS TOO LONG 201 tokens > 200",
+      "reason": "prompt_too_long",
+      "token_gap": 1
+    },
+    {
+      "text": "prompt is too long: 200 tokens > 200",
+      "reason": "prompt_too_long"
+    },
+    {
+      "text": "prompt is too long: 199 tokens > 200",
+      "reason": "prompt_too_long"
+    },
+    {
+      "text": "prompt is too long",
+      "reason": "prompt_too_long"
+    },
+    {
+      "text": "input is too long for requested model",
+      "reason": "prompt_too_long"
+    },
+    {
+      "text": "capability_rejected: prompt_too_long",
+      "reason": "prompt_too_long"
+    },
+    {
+      "text": "capability_rejected: prompt_too_long_extra",
+      "reason": "error"
+    },
+    {
+      "text": "capability_rejected: prompt_too_long:subtype",
+      "reason": "error"
+    },
+    {
+      "text": "capability_rejected: prompt_too_long.x; capability_rejected: prompt_too_long!",
+      "reason": "prompt_too_long"
+    },
+    {
+      "text": "prompt is too long: 21﻿tokens >　20",
+      "reason": "prompt_too_long",
+      "token_gap": 1
+    },
+    {
+      "text": "request_too_large",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "REQUEST_TOO_LARGE",
+      "reason": "error"
+    },
+    {
+      "text": "capability_rejected: image_block",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "capability_rejected: document_block",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "capability_rejected: media_budget",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "capability_rejected: media_budget_extra",
+      "reason": "error"
+    },
+    {
+      "text": "messages.4.content.2.image.source: invalid",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "messages[4].content[2].tool_result.content[1].document: invalid",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "messages[1].content[2].pdf: invalid",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "Image dimensions exceed allowed size",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "The PDF specified is password protected",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "too much media",
+      "reason": "media_too_large"
+    },
+    {
+      "text": "API error: type=server_error status=502",
+      "reason": "error"
+    },
+    {
+      "text": "synthetic unavailable",
+      "reason": "error"
+    }
+  ],
+  "claim_boundary": "Pinned API failure helpers and positive token-gap extraction only. Native error-message construction and feature-gated credits rescue are not executed. No live API query or raw captured text."
+}

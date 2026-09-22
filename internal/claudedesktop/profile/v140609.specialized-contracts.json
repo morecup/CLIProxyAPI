@@ -1,0 +1,927 @@
+{
+  "schema_version": 1,
+  "profile_id": "claude-desktop/windows-x64/1.40609.0.0",
+  "source_artifacts": [
+    {
+      "artifact": "telemetry/testdata/desktop-telemetry-renderer-inventory-native.json",
+      "sha256": "349974c3f580dc8fb3bce9bb8bf9314609c97dae286d2a8adb62fa5dc5a1dbd1"
+    },
+    {
+      "artifact": "telemetry/testdata/sdk-telemetry-resume-bridge-native.json",
+      "sha256": "8cb03b4efc56c8186229e6a2da5d6a4c9990951e9490066849d5d0ac44880d3c"
+    },
+    {
+      "artifact": "telemetry/testdata/sdk-telemetry-startup-session-native.json",
+      "sha256": "4b9f697561b250d278df763b1692181b90df79f94c9d5f59dbb8a20f5117352e"
+    },
+    {
+      "artifact": "telemetry/testdata/auxiliary-telemetry-rum-native.json",
+      "sha256": "e7bd34711e76176822c7d027bc3729473c4a1c268cddcc8a90822efc33745464"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-clocked-start-mcp-r01-20260905.json",
+      "sha256": "8db278dad45af952f5980b3c91fb96c490bdaf41ca62b8ae2942c3c6dd0c138f"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-governor-r03-clocks-20260905.json",
+      "sha256": "ad2842d777ba6dfe3b3bf922938502c027ad7428ae5c60729e40050995adf0ba"
+    },
+    {
+      "artifact": "knowledge-kit/evidence/h9-v140609-governor-r03-20260905.json",
+      "sha256": "b248c9d52eb22f910b3e68dee4b3136f1eeb3743934cad86bc1503ad2025117f"
+    },
+    {
+      "artifact": "telemetry/testdata/desktop-telemetry-endpoint-contracts-native.json",
+      "sha256": "c7b7732477cb3cc36e7f57d934f86d4c12625003cca6711537719d756eb26301"
+    }
+  ],
+  "event_count": 25,
+  "events": {
+    "login": {
+      "event_name": "/login",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 2,
+      "field_order": [
+        "path",
+        "referrer",
+        "search",
+        "url",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "name",
+        "canonical_path",
+        "canonical_url",
+        "canonical_referrer"
+      ],
+      "fields": {
+        "path": {"types": ["string"], "required": true, "owner": "program", "const": "/login"},
+        "referrer": {"types": ["string"], "required": true},
+        "search": {"types": ["string"], "required": true},
+        "url": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "name": {"types": ["string"], "required": true, "owner": "program", "const": "/login"},
+        "canonical_path": {"types": ["string"], "required": true, "owner": "program", "const": "/login"},
+        "canonical_url": {"types": ["string"], "required": true, "owner": "program"},
+        "canonical_referrer": {"types": ["string"], "required": true, "owner": "program"}
+      }
+    },
+    "upgrade": {
+      "event_name": "/upgrade",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 2,
+      "field_order": [
+        "path",
+        "referrer",
+        "search",
+        "url",
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "name",
+        "canonical_path",
+        "canonical_url"
+      ],
+      "fields": {
+        "path": {"types": ["string"], "required": true, "owner": "program", "const": "/upgrade"},
+        "referrer": {"types": ["string"], "required": true},
+        "search": {"types": ["string"], "required": true},
+        "url": {"types": ["string"], "required": true, "owner": "program"},
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "name": {"types": ["string"], "required": true, "owner": "program", "const": "/upgrade"},
+        "canonical_path": {"types": ["string"], "required": true, "owner": "program", "const": "/upgrade"},
+        "canonical_url": {"types": ["string"], "required": true, "owner": "program"}
+      }
+    },
+    "upgrade_max_from_existing": {
+      "event_name": "/upgrade/max/from-existing",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 1,
+      "field_order": [
+        "path",
+        "referrer",
+        "search",
+        "url",
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "name",
+        "canonical_path",
+        "canonical_url"
+      ],
+      "fields": {
+        "path": {"types": ["string"], "required": true, "owner": "program", "const": "/upgrade/max/from-existing"},
+        "referrer": {"types": ["string"], "required": true},
+        "search": {"types": ["string"], "required": true},
+        "url": {"types": ["string"], "required": true, "owner": "program"},
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "name": {"types": ["string"], "required": true, "owner": "program", "const": "/upgrade/max/from-existing"},
+        "canonical_path": {"types": ["string"], "required": true, "owner": "program", "const": "/upgrade/max/from-existing"},
+        "canonical_url": {"types": ["string"], "required": true, "owner": "program"}
+      }
+    },
+    "cowork_remote_attestation": {
+      "event_name": "cowork_remote_attestation",
+      "source": "main_process",
+      "payload_field": "metadata",
+      "observed_count": 1,
+      "fields": {
+        "surface": {"types": ["string"], "required": true, "non_empty": true},
+        "outcome": {"types": ["string"], "required": true, "non_empty": true},
+        "proof_kind": {"types": ["string"], "required": true, "non_empty": true},
+        "hw_attestation": {"types": ["string"], "required": true},
+        "hw_unavailable_reason": {"types": ["string"], "required": true},
+        "row_pk_resolved": {"types": ["bool"], "required": true},
+        "duration_ms": {"types": ["number"], "required": true}
+      }
+    },
+    "desktop_ccd_governor_yielded": {
+      "event_name": "desktop_ccd_governor_yielded",
+      "source": "main_process",
+      "payload_field": "metadata",
+      "observed_count": 1,
+      "fields": {
+        "reason": {"types": ["string"], "required": true, "non_empty": true},
+        "cap": {"types": ["number"], "required": true},
+        "effective": {"types": ["number"], "required": true},
+        "count_active": {"types": ["number"], "required": true},
+        "in_flight": {"types": ["number"], "required": true},
+        "total_mem_gb": {"types": ["number"], "required": true},
+        "had_evictable": {"types": ["bool"], "required": true}
+      }
+    },
+    "device_registry_no_tpm_probe_code": {
+      "event_name": "device_registry_no_tpm_probe_code",
+      "source": "main_process",
+      "payload_field": "metadata",
+      "observed_count": 1,
+      "fields": {
+        "no_tpm_probe_code": {"types": ["string"], "required": true, "non_empty": true}
+      }
+    },
+    "tengu_bridge_repl_ws_closed": {
+      "event_name": "tengu_bridge_repl_ws_closed",
+      "source": "sdk",
+      "payload_field": "metadata",
+      "observed_count": 2,
+      "fields": {
+        "code": {"types": ["number"], "required": true},
+        "v2": {"types": ["bool"], "required": true},
+        "recovery_in_flight": {"types": ["bool"], "required": true},
+        "close_cause": {"types": ["string"], "required": false, "non_empty": true},
+        "reject_source": {"types": ["string"], "required": false, "non_empty": true}
+      }
+    },
+    "tengu_plugin_name_collision": {
+      "event_name": "tengu_plugin_name_collision",
+      "source": "sdk",
+      "payload_field": "metadata",
+      "observed_count": 1,
+      "fields": {
+        "item_type": {"types": ["string"], "required": true, "non_empty": true},
+        "item_name_hash": {"types": ["string"], "required": true, "non_empty": true},
+        "sources": {"types": ["string"], "required": true, "non_empty": true},
+        "source_count": {"types": ["number"], "required": true},
+        "winner_source": {"types": ["string"], "required": false, "non_empty": true}
+      },
+      "event_fields": {
+        "skill_name": {"types": ["string"], "required": true, "non_empty": true}
+      }
+    },
+    "tengu_session_start": {
+      "event_name": "tengu_session_start",
+      "source": "sdk",
+      "payload_field": "metadata",
+      "observed_count": 6,
+      "fields": {
+        "previous_session_id": {"types": ["string"], "required": true, "non_empty": true},
+        "source": {"types": ["string"], "required": true, "non_empty": true},
+        "permissionMode": {"types": ["string"], "required": true, "non_empty": true},
+        "dangerouslySkipPermissionsPassed": {"types": ["bool"], "required": true},
+        "modeIsBypass": {"types": ["bool"], "required": true},
+        "print": {"types": ["bool"], "required": true}
+      }
+    },
+    "tengu_worker_permission_mode_restore": {
+      "event_name": "tengu_worker_permission_mode_restore",
+      "source": "sdk",
+      "payload_field": "metadata",
+      "observed_count": 4,
+      "fields": {
+        "source": {"types": ["string"], "required": true, "non_empty": true},
+        "lane": {"types": ["string"], "required": true, "non_empty": true},
+        "trusted_mode": {"types": ["string"], "required": true, "non_empty": true},
+        "recorded_mode": {"types": ["string"], "required": true, "non_empty": true},
+        "target_mode": {"types": ["string"], "required": true, "non_empty": true},
+        "had_external": {"types": ["bool"], "required": true},
+        "had_internal": {"types": ["bool"], "required": true},
+        "guard_enabled": {"types": ["bool"], "required": true},
+        "record_transcript_state": {"types": ["string"], "required": false, "non_empty": true},
+        "transcript_open": {"types": ["bool"], "required": false}
+      }
+    },
+    "resource": {
+      "event_name": "resource",
+      "source": "performance",
+      "payload_field": "data",
+      "observed_count": 3,
+      "fields": {
+        "date": {"types": ["number"], "required": true, "owner": "program"},
+        "type": {"types": ["string"], "required": true, "owner": "program", "const": "resource"},
+        "service": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "source": {"types": ["string"], "required": true, "owner": "program", "const": "browser"},
+        "application": {"types": ["object"], "required": true, "owner": "program"},
+        "session": {"types": ["object"], "required": true, "owner": "program"},
+        "usr": {"types": ["object"], "required": true, "owner": "program"},
+        "_dd": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "format_version": {"types": ["number"], "required": true, "owner": "program", "const": 2},
+            "drift": {"types": ["number"], "required": true},
+            "configuration": {"types": ["object"], "required": true, "owner": "program"},
+            "sdk_name": {"types": ["string"], "required": true, "owner": "program", "const": "rum"},
+            "discarded": {"types": ["bool"], "required": true, "owner": "program", "const": false},
+            "trace_id": {"types": ["string"], "required": false, "non_empty": true},
+            "span_id": {"types": ["string"], "required": false, "non_empty": true}
+          }
+        },
+        "view": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "url": {"types": ["string"], "required": true, "non_empty": true},
+            "referrer": {"types": ["string"], "required": true},
+            "id": {"types": ["string"], "required": true, "non_empty": true},
+            "name": {"types": ["string"], "required": true, "non_empty": true}
+          }
+        },
+        "connectivity": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "status": {"types": ["string"], "required": true, "enum": ["connected", "not_connected"]},
+            "effective_type": {"types": ["string"], "required": true, "enum": ["slow-2g", "2g", "3g", "4g", "unknown"]}
+          }
+        },
+        "tab": {
+          "types": ["object"],
+          "required": true,
+          "fields": {"id": {"types": ["string"], "required": true, "non_empty": true}}
+        },
+        "context": {"types": ["object"], "required": true, "additional_properties": true},
+        "display": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "viewport": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "width": {"types": ["number"], "required": true},
+                "height": {"types": ["number"], "required": true}
+              }
+            }
+          }
+        },
+        "version": {"types": ["string"], "required": true, "non_empty": true},
+        "resource": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "id": {"types": ["string"], "required": true, "non_empty": true},
+            "duration": {"types": ["number"], "required": true},
+            "type": {"types": ["string"], "required": true, "non_empty": true},
+            "method": {"types": ["string"], "required": true, "non_empty": true},
+            "status_code": {"types": ["number"], "required": true},
+            "url": {"types": ["string"], "required": true, "non_empty": true},
+            "protocol": {"types": ["string"], "required": true, "const": "h2"},
+            "delivery_type": {"types": ["string"], "required": true, "const": "other"},
+            "render_blocking_status": {"types": ["string"], "required": true, "const": "non-blocking"},
+            "size": {"types": ["number"], "required": true},
+            "encoded_body_size": {"types": ["number"], "required": true},
+            "decoded_body_size": {"types": ["number"], "required": true},
+            "transfer_size": {"types": ["number"], "required": true},
+            "download": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "duration": {"types": ["number"], "required": true},
+                "start": {"types": ["number"], "required": true}
+              }
+            },
+            "first_byte": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "duration": {"types": ["number"], "required": true},
+                "start": {"types": ["number"], "required": true}
+              }
+            },
+            "response": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "headers": {"types": ["object"], "required": true, "additional_properties": true}
+              }
+            }
+          }
+        },
+        "ddtags": {"types": ["string"], "required": true, "non_empty": true}
+      }
+    },
+    "long_task": {
+      "event_name": "long_task",
+      "source": "performance",
+      "payload_field": "data",
+      "observed_count": 1,
+      "fields": {
+        "date": {"types": ["number"], "required": true, "owner": "program"},
+        "type": {"types": ["string"], "required": true, "owner": "program", "const": "long_task"},
+        "service": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "source": {"types": ["string"], "required": true, "owner": "program", "const": "browser"},
+        "application": {"types": ["object"], "required": true, "owner": "program"},
+        "session": {"types": ["object"], "required": true, "owner": "program"},
+        "usr": {"types": ["object"], "required": true, "owner": "program"},
+        "_dd": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "format_version": {"types": ["number"], "required": true, "owner": "program", "const": 2},
+            "drift": {"types": ["number"], "required": true},
+            "configuration": {"types": ["object"], "required": true, "owner": "program"},
+            "sdk_name": {"types": ["string"], "required": true, "owner": "program", "const": "rum"},
+            "discarded": {"types": ["bool"], "required": true, "owner": "program", "const": false}
+          }
+        },
+        "view": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "url": {"types": ["string"], "required": true, "non_empty": true},
+            "referrer": {"types": ["string"], "required": true},
+            "id": {"types": ["string"], "required": true, "non_empty": true},
+            "name": {"types": ["string"], "required": true, "non_empty": true}
+          }
+        },
+        "connectivity": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "status": {"types": ["string"], "required": true, "enum": ["connected", "not_connected"]},
+            "effective_type": {"types": ["string"], "required": true, "enum": ["slow-2g", "2g", "3g", "4g", "unknown"]}
+          }
+        },
+        "tab": {
+          "types": ["object"],
+          "required": true,
+          "fields": {"id": {"types": ["string"], "required": true, "non_empty": true}}
+        },
+        "context": {"types": ["object"], "required": true, "additional_properties": true},
+        "display": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "viewport": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "width": {"types": ["number"], "required": true},
+                "height": {"types": ["number"], "required": true}
+              }
+            }
+          }
+        },
+        "version": {"types": ["string"], "required": true, "non_empty": true},
+        "long_task": {
+          "types": ["object"],
+          "required": true,
+          "fields": {
+            "id": {"types": ["string"], "required": true, "non_empty": true},
+            "entry_type": {"types": ["string"], "required": true, "const": "long-animation-frame"},
+            "duration": {"types": ["number"], "required": true},
+            "blocking_duration": {"types": ["number"], "required": true},
+            "first_ui_event_timestamp": {"types": ["number"], "required": true},
+            "render_start": {"types": ["number"], "required": true},
+            "style_and_layout_start": {"types": ["number"], "required": true},
+            "start_time": {"types": ["number"], "required": true},
+            "scripts": {
+              "types": ["array"],
+              "required": true,
+              "items": {"types": ["object"], "required": true, "additional_properties": true}
+            }
+          }
+        },
+        "ddtags": {"types": ["string"], "required": true, "non_empty": true}
+      }
+    },
+    "telemetry": {
+      "event_name": "telemetry",
+      "source": "performance",
+      "payload_field": "data",
+      "observed_count": 11,
+      "variants": [
+        {
+          "name": "configuration",
+          "fields": {
+            "date": {"types": ["number"], "required": true, "owner": "program"},
+            "type": {"types": ["string"], "required": true, "owner": "program", "const": "telemetry"},
+            "service": {"types": ["string"], "required": true, "owner": "program", "const": "browser-rum-sdk"},
+            "version": {"types": ["string"], "required": true, "owner": "program", "const": "7.6.0"},
+            "source": {"types": ["string"], "required": true, "owner": "program", "const": "browser"},
+            "_dd": {"types": ["object"], "required": true, "owner": "program"},
+            "ddtags": {"types": ["string"], "required": true, "non_empty": true},
+            "experimental_features": {"types": ["array"], "required": true, "owner": "program"},
+            "session": {"types": ["object"], "required": true, "owner": "program"},
+            "application": {"types": ["object"], "required": true, "owner": "program"},
+            "anonymous_id": {"types": ["string"], "required": true, "non_empty": true},
+            "telemetry": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "type": {"types": ["string"], "required": true, "const": "configuration"},
+                "configuration": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "session_replay_sample_rate": {"types": ["number"], "required": true, "const": 0},
+                    "propagate_trace_baggage": {"types": ["bool"], "required": true, "const": false},
+                    "use_allowed_tracing_urls": {"types": ["bool"], "required": true, "const": true},
+                    "use_allowed_graph_ql_urls": {"types": ["bool"], "required": true, "const": false},
+                    "use_track_graph_ql_payload": {"types": ["bool"], "required": true, "const": false},
+                    "use_track_graph_ql_response_errors": {"types": ["bool"], "required": true, "const": false},
+                    "selected_tracing_propagators": {"types": ["array"], "required": true, "const": ["tracecontext", "datadog"]},
+                    "default_privacy_level": {"types": ["string"], "required": true, "const": "mask"},
+                    "enable_privacy_for_action_name": {"types": ["bool"], "required": true, "const": true},
+                    "use_excluded_activity_urls": {"types": ["bool"], "required": true, "const": true},
+                    "use_worker_url": {"types": ["bool"], "required": true, "const": false},
+                    "compress_intake_requests": {"types": ["bool"], "required": true, "const": true},
+                    "track_views_manually": {"types": ["bool"], "required": true, "const": true},
+                    "track_user_interactions": {"types": ["bool"], "required": true, "const": false},
+                    "track_resources": {"types": ["bool"], "required": true, "const": true},
+                    "track_long_task": {"types": ["bool"], "required": true, "const": true},
+                    "profiling_sample_rate": {"types": ["number"], "required": true, "const": 0},
+                    "use_remote_configuration_proxy": {"types": ["bool"], "required": true, "const": false},
+                    "session_sample_rate": {"types": ["number"], "required": true, "const": 100},
+                    "use_before_send": {"types": ["bool"], "required": true, "const": true},
+                    "use_proxy": {"types": ["bool"], "required": true, "const": false},
+                    "store_contexts_across_pages": {"types": ["bool"], "required": true, "const": false},
+                    "allow_untrusted_events": {"types": ["bool"], "required": true, "const": false},
+                    "tracking_consent": {"types": ["string"], "required": true, "const": "granted"},
+                    "use_allowed_tracking_origins": {"types": ["bool"], "required": true, "const": false}
+                  }
+                },
+                "runtime_env": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "is_local_file": {"types": ["bool"], "required": true, "const": false},
+                    "is_worker": {"types": ["bool"], "required": true, "const": false}
+                  }
+                },
+                "connectivity": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "status": {"types": ["string"], "required": true, "enum": ["connected", "not_connected"]},
+                    "effective_type": {"types": ["string"], "required": true, "enum": ["slow-2g", "2g", "3g", "4g", "unknown"]}
+                  }
+                },
+                "sdk_setup": {"types": ["string"], "required": true, "const": "npm"}
+              }
+            }
+          }
+        },
+        {
+          "name": "usage",
+          "fields": {
+            "date": {"types": ["number"], "required": true, "owner": "program"},
+            "type": {"types": ["string"], "required": true, "owner": "program", "const": "telemetry"},
+            "service": {"types": ["string"], "required": true, "owner": "program", "const": "browser-rum-sdk"},
+            "version": {"types": ["string"], "required": true, "owner": "program", "const": "7.6.0"},
+            "source": {"types": ["string"], "required": true, "owner": "program", "const": "browser"},
+            "_dd": {"types": ["object"], "required": true, "owner": "program"},
+            "ddtags": {"types": ["string"], "required": true, "non_empty": true},
+            "experimental_features": {"types": ["array"], "required": true, "owner": "program"},
+            "telemetry": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "type": {"types": ["string"], "required": true, "const": "usage"},
+                "usage": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "feature": {"types": ["string"], "required": true, "non_empty": true},
+                    "tracking_consent": {"types": ["string"], "required": false, "enum": ["granted", "not-granted"]}
+                  }
+                },
+                "runtime_env": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "is_local_file": {"types": ["bool"], "required": true, "const": false},
+                    "is_worker": {"types": ["bool"], "required": true, "const": false}
+                  }
+                },
+                "connectivity": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "status": {"types": ["string"], "required": true, "enum": ["connected", "not_connected"]},
+                    "effective_type": {"types": ["string"], "required": true, "enum": ["slow-2g", "2g", "3g", "4g", "unknown"]}
+                  }
+                },
+                "sdk_setup": {"types": ["string"], "required": true, "const": "npm"}
+              }
+            }
+          }
+        },
+        {
+          "name": "usage-contextual",
+          "fields": {
+            "date": {"types": ["number"], "required": true, "owner": "program"},
+            "type": {"types": ["string"], "required": true, "owner": "program", "const": "telemetry"},
+            "service": {"types": ["string"], "required": true, "owner": "program", "const": "browser-rum-sdk"},
+            "version": {"types": ["string"], "required": true, "owner": "program", "const": "7.6.0"},
+            "source": {"types": ["string"], "required": true, "owner": "program", "const": "browser"},
+            "_dd": {"types": ["object"], "required": true, "owner": "program"},
+            "ddtags": {"types": ["string"], "required": true, "non_empty": true},
+            "experimental_features": {"types": ["array"], "required": true, "owner": "program"},
+            "session": {"types": ["object"], "required": true, "owner": "program"},
+            "application": {"types": ["object"], "required": true, "owner": "program"},
+            "anonymous_id": {"types": ["string"], "required": true, "non_empty": true},
+            "action": {
+              "types": ["object"],
+              "required": true,
+              "fields": {"id": {"types": ["array", "string"], "required": true}}
+            },
+            "view": {
+              "types": ["object"],
+              "required": true,
+              "fields": {"id": {"types": ["string"], "required": true, "non_empty": true}}
+            },
+            "telemetry": {
+              "types": ["object"],
+              "required": true,
+              "fields": {
+                "type": {"types": ["string"], "required": true, "const": "usage"},
+                "usage": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "feature": {"types": ["string"], "required": true, "non_empty": true},
+                    "tracking_consent": {"types": ["string"], "required": false, "enum": ["granted", "not-granted"]}
+                  }
+                },
+                "runtime_env": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "is_local_file": {"types": ["bool"], "required": true, "const": false},
+                    "is_worker": {"types": ["bool"], "required": true, "const": false}
+                  }
+                },
+                "connectivity": {
+                  "types": ["object"],
+                  "required": true,
+                  "fields": {
+                    "status": {"types": ["string"], "required": true, "enum": ["connected", "not_connected"]},
+                    "effective_type": {"types": ["string"], "required": true, "enum": ["slow-2g", "2g", "3g", "4g", "unknown"]}
+                  }
+                },
+                "sdk_setup": {"types": ["string"], "required": true, "const": "npm"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "chorus_ideas_suggestions_shown": {
+      "event_name": "chorus.ideas.suggestions_shown",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 9,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "idea_id", "position", "ideas_variant", "list_variant", "client_platform",
+        "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "idea_id": {"types": ["string"], "required": true, "non_empty": true},
+        "position": {"types": ["number"], "required": true},
+        "ideas_variant": {"types": ["string"], "required": true, "non_empty": true},
+        "list_variant": {"types": ["string"], "required": true, "non_empty": true},
+        "client_platform": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/new"]}
+      }
+    },
+    "claudeai_cowork_model_update_banner_displayed": {
+      "event_name": "claudeai.cowork_model_update_banner.displayed",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 5,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy"]}
+      }
+    },
+    "claudeai_cowork_model_update_composer_warning_displayed": {
+      "event_name": "claudeai.cowork_model_update_composer_warning.displayed",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 3,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "update_available", "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "update_available": {"types": ["bool"], "required": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/new"]}
+      }
+    },
+    "claudeai_desktop_sidebar_design_entry_shown": {
+      "event_name": "claudeai.desktop.sidebar.design_entry_shown",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 2,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "open_behavior", "frame_mode", "tabs", "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "open_behavior": {"types": ["string"], "required": true, "non_empty": true},
+        "frame_mode": {"types": ["string"], "required": true, "non_empty": true},
+        "tabs": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy/$sessionId", "/new"]}
+      }
+    },
+    "claudeai_desktop_sidebar_mode_pill_selected": {
+      "event_name": "claudeai.desktop.sidebar.mode_pill_selected",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 3,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "to_mode", "from_mode", "via", "sidebar_state", "compact", "to_tab_activity", "from_tab_activity",
+        "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "to_mode": {"types": ["string"], "required": true, "non_empty": true},
+        "from_mode": {"types": ["string"], "required": true, "non_empty": true},
+        "via": {"types": ["string"], "required": true, "non_empty": true},
+        "sidebar_state": {"types": ["string"], "required": true, "non_empty": true},
+        "compact": {"types": ["bool"], "required": true},
+        "to_tab_activity": {"types": ["string"], "required": true, "non_empty": true},
+        "from_tab_activity": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy/$sessionId", "/epitaxy", "/new"]}
+      }
+    },
+    "claudeai_epitaxy_sidebar_group_new_session_clicked": {
+      "event_name": "claudeai.epitaxy.sidebar.group_new_session_clicked",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 2,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "prefill_kind", "session_count", "archived_only", "group_kind", "source",
+        "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "prefill_kind": {"types": ["string"], "required": true, "non_empty": true},
+        "session_count": {"types": ["number"], "required": true},
+        "archived_only": {"types": ["bool"], "required": true},
+        "group_kind": {"types": ["string"], "required": true, "non_empty": true},
+        "source": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy/$sessionId"]}
+      }
+    },
+    "claudeai_model_selector_model_selected": {
+      "event_name": "claudeai.model_selector.model_selected",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 1,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "model", "previous_model", "model_surface", "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "model": {"types": ["string"], "required": true, "non_empty": true},
+        "previous_model": {"types": ["string"], "required": true, "non_empty": true},
+        "model_surface": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy"]}
+      }
+    },
+    "claudeai_model_selector_opened": {
+      "event_name": "claudeai.model_selector.opened",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 1,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "model_surface", "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "model_surface": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy"]}
+      }
+    },
+    "claudeai_yukon_gold_activation_checklist_v2_in_viewport": {
+      "event_name": "claudeai.yukon_gold.activation_checklist_v2_in_viewport",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 3,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "session_type", "variant", "route_surface", "position", "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "session_type": {"types": ["string"], "required": true, "non_empty": true},
+        "variant": {"types": ["string"], "required": true, "non_empty": true},
+        "route_surface": {"types": ["string"], "required": true, "non_empty": true},
+        "position": {"types": ["string"], "required": true, "non_empty": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/new"]}
+      }
+    },
+    "claudeai_yukon_gold_activation_checklist_v2_shown": {
+      "event_name": "claudeai.yukon_gold.activation_checklist_v2_shown",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 3,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "session_type", "variant", "route_surface", "position", "max_visible", "assigned_items", "initial_completion",
+        "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "session_type": {"types": ["string"], "required": true, "non_empty": true},
+        "variant": {"types": ["string"], "required": true, "non_empty": true},
+        "route_surface": {"types": ["string"], "required": true, "non_empty": true},
+        "position": {"types": ["string"], "required": true, "non_empty": true},
+        "max_visible": {"types": ["number"], "required": true},
+        "assigned_items": {"types": ["array"], "required": true, "items": {"types": ["string"], "required": true, "non_empty": true}},
+        "initial_completion": {"types": ["array"], "required": true},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/new"]}
+      }
+    },
+    "claudeai_yukon_gold_enabled": {
+      "event_name": "claudeai.yukon_gold.enabled",
+      "source": "renderer",
+      "payload_field": "properties",
+      "observed_count": 2,
+      "field_order": [
+        "account_uuid", "organization_uuid", "billing_type", "surface", "deployment_mode", "app_version", "version",
+        "_dual_fire", "anonymous_id", "service_name", "path"
+      ],
+      "fields": {
+        "account_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "organization_uuid": {"types": ["string"], "required": true, "owner": "program"},
+        "billing_type": {"types": ["string"], "required": true, "owner": "program"},
+        "surface": {"types": ["string"], "required": true, "owner": "program", "const": "claude-ai"},
+        "deployment_mode": {"types": ["string"], "required": true, "owner": "program", "const": "1p"},
+        "app_version": {"types": ["string"], "required": true, "owner": "program"},
+        "version": {"types": ["number"], "required": true, "owner": "program", "const": 1},
+        "_dual_fire": {"types": ["bool"], "required": true, "owner": "program", "const": true},
+        "anonymous_id": {"types": ["string"], "required": true, "owner": "program"},
+        "service_name": {"types": ["string"], "required": true, "owner": "program", "const": "claude_ai"},
+        "path": {"types": ["string"], "required": true, "owner": "program", "enum": ["/epitaxy/$sessionId", "/epitaxy"]}
+      }
+    },
+    "attachment": {
+      "event_name": "attachment",
+      "source": "crash",
+      "payload_field": "binary",
+      "observed_count": 1,
+      "binary": {
+        "filename_shape": "uuid.dmp",
+        "magic_ascii": "MDMP",
+        "minimum_bytes": 4,
+        "maximum_bytes": 3145728
+      }
+    }
+  }
+}

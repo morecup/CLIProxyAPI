@@ -139,23 +139,11 @@ func (s *Server) setupRoutes() {
 		})
 	})
 
-	// OAuth callback endpoints (reuse main server port)
-	// These endpoints receive provider redirects and persist
-	// the short-lived code/state for the waiting goroutine.
-	s.engine.GET("/anthropic/callback", func(c *gin.Context) {
-		code := c.Query("code")
-		state := c.Query("state")
-		errStr := c.Query("error")
-		if errStr == "" {
-			errStr = c.Query("error_description")
-		}
-		if state != "" {
-			_, _ = managementHandlers.WriteOAuthCallbackFileForPendingSession(s.cfg.AuthDir, "anthropic", state, code, errStr)
-		}
-		c.Header("Content-Type", "text/html; charset=utf-8")
-		c.String(http.StatusOK, oauthCallbackSuccessHTML)
-	})
-
+	// OAuth callback endpoints (reuse main server port). Claude Desktop does
+	// not use a browser callback: it accepts an emailed magic link through the
+	// management flow and exchanges it after WebView2 obtains its attestation.
+	// The remaining endpoints receive provider redirects and persist the
+	// short-lived code/state for their waiting goroutines.
 	s.engine.GET("/codex/callback", func(c *gin.Context) {
 		code := c.Query("code")
 		state := c.Query("state")

@@ -192,25 +192,25 @@ func TestClaudeExecutor_AuthManager_FableOnlyRejectionDoesNotBlockOpus(t *testin
 
 	manager := cliproxyauth.NewManager(nil, nil, nil)
 	manager.SetRetryConfig(0, 0, 0)
-	manager.RegisterExecutor(NewClaudeExecutor(&config.Config{DisableCooling: false}))
+	manager.RegisterExecutor(newAnthropicCompatibleTestExecutor(&config.Config{DisableCooling: false}))
 
 	auth := &cliproxyauth.Auth{
 		ID:       uuid.NewString() + "-fable-model-scope",
-		Provider: "claude",
+		Provider: "anthropic-compatible",
 		Attributes: map[string]string{
 			"api_key":  "sanitized-test-key",
 			"base_url": server.URL,
 		},
 	}
 	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(auth.ID, "claude", []*registry.ModelInfo{{ID: "claude-fable-5"}, {ID: "claude-opus-5"}})
+	reg.RegisterClient(auth.ID, "anthropic-compatible", []*registry.ModelInfo{{ID: "claude-fable-5"}, {ID: "claude-opus-5"}})
 	t.Cleanup(func() { reg.UnregisterClient(auth.ID) })
 	if _, err := manager.Register(context.Background(), auth); err != nil {
 		t.Fatalf("register auth: %v", err)
 	}
 
 	payloadFable := []byte(`{"model":"claude-fable-5","messages":[{"role":"user","content":[{"type":"text","text":"test"}]}]}`)
-	_, errFable := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, errFable := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-fable-5",
 		Payload: payloadFable,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
@@ -235,7 +235,7 @@ func TestClaudeExecutor_AuthManager_FableOnlyRejectionDoesNotBlockOpus(t *testin
 	}
 
 	payloadOpus := []byte(`{"model":"claude-opus-5","messages":[{"role":"user","content":[{"type":"text","text":"test"}]}]}`)
-	_, errOpus := manager.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{
+	_, errOpus := manager.Execute(context.Background(), []string{"anthropic-compatible"}, cliproxyexecutor.Request{
 		Model:   "claude-opus-5",
 		Payload: payloadOpus,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})

@@ -1,0 +1,596 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "desktop_files": {
+    "desktop_sdk_transport": {
+      "name": "index.chunk-Clv3sLGS.js",
+      "sha256": "d0f73b3df172b9612535d0739c85f6b853f0634dc84ea8663a0ae1aadf95b6d1"
+    },
+    "desktop_ccd_sessions": {
+      "name": "index2.chunk-BjlyOolB.js",
+      "sha256": "6e3e47d9bf6e0263d0304483b26093d11490aece9275aad323e4cda93aa1a55d"
+    }
+  },
+  "cli_flags": {
+    "builder": "hs(options, source): commander option attribute names whose getOptionValueSource(name) === \"cli\", sorted; flag_count = length, flags = join(\",\")",
+    "argv_prefix_constant": [
+      "--output-format stream-json",
+      "--verbose",
+      "--input-format stream-json"
+    ],
+    "ccd_always_present": [
+      "--model (i.model || \"default\")",
+      "--permission-prompt-tool stdio (canUseTool callback)",
+      "--permission-mode <ie>",
+      "--setting-sources=user,project,local",
+      "--include-partial-messages",
+      "--settings <json> (extraArgs.settings, always an object)"
+    ],
+    "session_dependent": [
+      "--effort (i.effort)",
+      "--agent (i.agent)",
+      "--allow-dangerously-skip-permissions (R)",
+      "--thinking-display / violin-bow extraArgs (buildBaseExtraArgs over snapshot + CLI capability)",
+      "--managed-settings (t.ou(...))",
+      "--resume=<id> / --session-id=<id> / --fork-session / --resume-session-at (new vs resumed conversation)",
+      "--mcp-config / --strict-mcp-config (connectors)",
+      "--add-dir (additional directories)",
+      "--fallback-model",
+      "--betas",
+      "--debug-file (lq() when no custom spawn)",
+      "--max-turns / --max-budget-usd / --task-budget",
+      "systemPrompt/hooks are not argv flags"
+    ],
+    "verdict": "boundary: flag_count/flags depend on per-session Desktop state (effort, agent, skip-permissions, thinking-display, resume vs session-id, connectors, add-dir, managed settings, debug-file); only the argv prefix and the CCD constants are pinned"
+  },
+  "concurrent_sessions": {
+    "counter": "Cd(a) = GL(e): lists the per-user session registry directory (wn()), counts <pid>.json records for process.pid and every live pid (oC), sweeping dead records only when isRegistrySweepPermitted()",
+    "scope": "machine-wide: every live Claude Code process of the OS user regardless of account, entrypoint or Desktop conversation",
+    "condition": "emitted once per process start when num_sessions >= 2",
+    "verdict": "boundary: the gateway has no per-machine process registry (its SDK hosts are per-account turn executors, not Desktop conversations); a gateway-side count would be a lower bound, not the native value"
+  },
+  "modules": {
+    "cli": {
+      "name": "B:/~BUN/root/_10.js",
+      "sha256": "78b44909089cb3aad9370ee5316890b62684ff4618620939033bb9da84e6a7ed"
+    },
+    "setup": {
+      "name": "B:/~BUN/root/chunk-9rfmtz0x.js",
+      "sha256": "b0be48b9955f83a6c25d6dcfb6098f2343069d17982807dea0f35cdd7e9348de"
+    },
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "lifecycle": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    },
+    "startup_perf": {
+      "name": "B:/~BUN/root/_799.js",
+      "sha256": "25402bee09cbe74782d0a566083af336e8d35dd438943f685500229b96a2290b"
+    },
+    "ripgrep": {
+      "name": "B:/~BUN/root/_584.js",
+      "sha256": "23595543ad2dc3a35b69461882e6e0c8b45e3cab72a974f07cadfb4620424e20"
+    },
+    "stall": {
+      "name": "B:/~BUN/root/chunk-7raaejf8.js",
+      "sha256": "3958b1924b1c192d1df6eb6cc705c2529750b8b6dace54cd328f1449e7c898bc"
+    },
+    "retention": {
+      "name": "B:/~BUN/root/_427.js",
+      "sha256": "06eb0235434b0ebca6085f1675695ef8237b69cac9df4d3210c57e4a7abfb727"
+    },
+    "notifications": {
+      "name": "B:/~BUN/root/_391.js",
+      "sha256": "3b77e7fda11159a9e84a334934aaeae1f5eb25942de26ec2cc5b3add294cdf71"
+    },
+    "addressing": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    },
+    "desktop_sdk_transport": {
+      "name": "index.chunk-Clv3sLGS.js",
+      "sha256": "d0f73b3df172b9612535d0739c85f6b853f0634dc84ea8663a0ae1aadf95b6d1"
+    },
+    "desktop_ccd_sessions": {
+      "name": "index2.chunk-BjlyOolB.js",
+      "sha256": "6e3e47d9bf6e0263d0304483b26093d11490aece9275aad323e4cda93aa1a55d"
+    }
+  },
+  "definitions": [
+    {
+      "label": "shell_allow_rules_builder",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3263018,
+      "to": 3263569,
+      "bytes": 551,
+      "sha256": "c617b5ecd99ba2e11b79be766626192e1fa4e35e36451bbe25d869ad790ca791"
+    },
+    {
+      "label": "shell_allow_rule_sources",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3263926,
+      "to": 3264013,
+      "bytes": 87,
+      "sha256": "b1ec4439b55f8a60022f6adafeae85a4d700492fff75cf3943e75ff6a5e498db"
+    },
+    {
+      "label": "shell_allow_rules_call",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 73566,
+      "to": 73888,
+      "bytes": 322,
+      "sha256": "1b10697e81359dbe991cfeaf46f56de6b1d78f40820938e3b8583de000931865"
+    },
+    {
+      "label": "init_call_then_allow_rules",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 72717,
+      "to": 73569,
+      "bytes": 852,
+      "sha256": "fd6c5757d341c3e680fbf9ae11d46d7f31717ce63efaca9683957b20ef41c90b"
+    },
+    {
+      "label": "init_emit",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 40913,
+      "to": 40949,
+      "bytes": 36,
+      "sha256": "9fcba49571bd541ba87167e8d0d9348db39bf9cbd8a5eb5584c63a418b0280e7"
+    },
+    {
+      "label": "shell_set_cwd_builder",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2264783,
+      "to": 2264890,
+      "bytes": 107,
+      "sha256": "a0597f1925c0d6b84b33313dd85150b7ef1f40f87c9a5de958c66da880fa32b1"
+    },
+    {
+      "label": "shell_set_cwd_setup_call",
+      "module": "B:/~BUN/root/chunk-9rfmtz0x.js",
+      "from": 17180,
+      "to": 17290,
+      "bytes": 110,
+      "sha256": "b77fcfaa2b04e23e6ff25ad02faa03002d3c74bfcc431146e0c1a32293b92059"
+    },
+    {
+      "label": "setup_started_emit",
+      "module": "B:/~BUN/root/chunk-9rfmtz0x.js",
+      "from": 20258,
+      "to": 20412,
+      "bytes": 154,
+      "sha256": "5d216609613e5af3886cfe98cd078c19ddacf015639e9ac97fb7c8f651aa3a90"
+    },
+    {
+      "label": "uds_startup_bind",
+      "module": "B:/~BUN/root/chunk-9rfmtz0x.js",
+      "from": 15660,
+      "to": 16091,
+      "bytes": 431,
+      "sha256": "38d048b7d597d2f4fcbae7184041cfda503b563b2edf5e049cd826cbd65c9b61"
+    },
+    {
+      "label": "cli_flags_builder",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 12000,
+      "to": 12083,
+      "bytes": 83,
+      "sha256": "06c564a4a5cca9ff897ed1f4f7e01fa84420e51b941535f523c29b7e1666ce38"
+    },
+    {
+      "label": "cli_flags_emit",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 45391,
+      "to": 45505,
+      "bytes": 114,
+      "sha256": "6e991fff04f839f6fe98c8dd88e85f52a9a6d9b0991c7dec0a7ed9d7c045c764"
+    },
+    {
+      "label": "concurrent_sessions_emit",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 73812,
+      "to": 73888,
+      "bytes": 76,
+      "sha256": "08377d99316abaa44bcdff5518f9a6a42b152fb56ee547d778eff1fa1e8638c7"
+    },
+    {
+      "label": "session_start_subscription",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 21455,
+      "to": 21791,
+      "bytes": 336,
+      "sha256": "92b8eb64aa10f8c989661e256071fda5aac17205045f5290fd5378710c619fd9"
+    },
+    {
+      "label": "startup_perf_emit",
+      "module": "B:/~BUN/root/_799.js",
+      "from": 4171,
+      "to": 4443,
+      "bytes": 272,
+      "sha256": "cc7f814bb3609a0426ab576bcb91eb8ad63aa6a0c726c70da24d07d51496b0e2"
+    },
+    {
+      "label": "ripgrep_first_use",
+      "module": "B:/~BUN/root/_584.js",
+      "from": 513468,
+      "to": 514309,
+      "bytes": 841,
+      "sha256": "5108a6d30b3108947b7a5f046c5ce25cc841c8e939a054003b1f819a90eb42fe"
+    },
+    {
+      "label": "ripgrep_config",
+      "module": "B:/~BUN/root/_584.js",
+      "from": 507556,
+      "to": 507946,
+      "bytes": 390,
+      "sha256": "9d85a14d957f8a0759483cdbcef0ccb780c811a83a72c8e88e720dab79420492"
+    },
+    {
+      "label": "ripgrep_trigger",
+      "module": "B:/~BUN/root/_584.js",
+      "from": 511414,
+      "to": 511491,
+      "bytes": 77,
+      "sha256": "ba35f8368ba0ad4922210019128861c4dc943a2be7ae04c01fc71354cf1f0c9f"
+    },
+    {
+      "label": "event_loop_stall_emit",
+      "module": "B:/~BUN/root/chunk-7raaejf8.js",
+      "from": 3333,
+      "to": 3703,
+      "bytes": 370,
+      "sha256": "02a109a27e157ac3b72052d43d8c031eb15920e390f40752625f779a42ac9e1f"
+    },
+    {
+      "label": "retention_sweep",
+      "module": "B:/~BUN/root/_427.js",
+      "from": 26794,
+      "to": 28405,
+      "bytes": 1611,
+      "sha256": "ba2a347741eef8560efef3c8b5fb82c6ce02649453f19f398d5b30e983b91489"
+    },
+    {
+      "label": "push_reachability_emit",
+      "module": "B:/~BUN/root/_391.js",
+      "from": 3604,
+      "to": 3789,
+      "bytes": 185,
+      "sha256": "1c9560d11d24e2e171c490403c4b44902654a4a83dc8c9ab232038bb305a420f"
+    },
+    {
+      "label": "rotunda_pennant_strip_emit",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5671087,
+      "to": 5671463,
+      "bytes": 376,
+      "sha256": "2d03bb013636d04e8f4ec0dd36aa1b4087d988fd2705356ca0a326abf27090b6"
+    },
+    {
+      "label": "prompt_suggestion_init_builder",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2858905,
+      "to": 2859560,
+      "bytes": 655,
+      "sha256": "ae4a0c599273c4446d679d6137cd90f5a230e160ebfe7121523e7f85bd70e51b"
+    },
+    {
+      "label": "prompt_suggestion_outcome",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2864303,
+      "to": 2864765,
+      "bytes": 462,
+      "sha256": "f3a9c6ea8f2e26fe8322989b23bda10c6a735263be2db40203af1c58ecae956f"
+    },
+    {
+      "label": "sdk_init_handshake_emit",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 324453,
+      "to": 324673,
+      "bytes": 220,
+      "sha256": "053fa482df5d162df6c1b253824342a75700845dc307d2ebd06e444495836d75"
+    },
+    {
+      "label": "concurrent_sessions_counter",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 263900,
+      "to": 264592,
+      "bytes": 692,
+      "sha256": "0c8d41240f9cd696a66120e5e0a895c2a9f6593ce3561b7ab6cab142f2c38259"
+    },
+    {
+      "label": "sdk_transport_argv",
+      "module": "index.chunk-Clv3sLGS.js",
+      "from": 871780,
+      "to": 874756,
+      "bytes": 2976,
+      "sha256": "da31a5995cc543404dd4a63736e65222190f57a51218043cdcc9a954a3a78e53"
+    },
+    {
+      "label": "ccd_session_options",
+      "module": "index2.chunk-BjlyOolB.js",
+      "from": 426560,
+      "to": 427453,
+      "bytes": 893,
+      "sha256": "d8d6d0bfb386c53629be6cf1895b9a534bd8a525d26bda10ca9c90dea739a893"
+    }
+  ],
+  "logger_prefix": "the native logger (_675.js) prepends subscription_type and cc_prompt_id (when a prompt is active) to every metadata object",
+  "startup_order": [
+    {
+      "event": "tengu_cli_flags",
+      "order": 50,
+      "site": "cli action handler before setup (cli_flags_emit), gated by !Vl()"
+    },
+    {
+      "event": "tengu_uds_startup_bind",
+      "order": 80,
+      "site": "setup Rr: cross-session inbox bind (uds_startup_bind)"
+    },
+    {
+      "event": "tengu_shell_set_cwd",
+      "order": 90,
+      "site": "setup Rr: W(t) = XR(cwd) validating the launch cwd (shell_set_cwd_setup_call)"
+    },
+    {
+      "event": "tengu_started",
+      "order": 100,
+      "site": "setup Rr tail (setup_started_emit)"
+    },
+    {
+      "event": "tengu_init",
+      "order": 200,
+      "site": "cli action handler iy() (init_emit)"
+    },
+    {
+      "event": "tengu_shell_allow_rules_at_init",
+      "order": 250,
+      "site": "cli action handler nu(ve.alwaysAllowRules) in the statement run that follows iy() (shell_allow_rules_call)"
+    },
+    {
+      "event": "tengu_concurrent_sessions",
+      "order": 260,
+      "site": "Cd(a).then(...) after the allow-rule report, only when num_sessions >= 2"
+    },
+    {
+      "event": "tengu_sdk_init_handshake",
+      "order": 300,
+      "site": "SDK initialize control request (sdk_init_handshake_emit)"
+    }
+  ],
+  "key_order": {
+    "tengu_session_start": [
+      "previous_session_id",
+      "source",
+      "permissionMode",
+      "dangerouslySkipPermissionsPassed",
+      "modeIsBypass",
+      "print",
+      "...updateContext"
+    ],
+    "tengu_cli_flags": [
+      "flag_count",
+      "flags"
+    ],
+    "tengu_startup_perf": [
+      "<checkpoint span keys>_ms",
+      "total_time_ms",
+      "checkpoint_count",
+      "late",
+      "...resource/counters (ccr_session_id, node_boot_ms, spawn_to_first_checkpoint_ms)"
+    ],
+    "tengu_concurrent_sessions": [
+      "num_sessions"
+    ],
+    "tengu_uds_startup_bind": [
+      "durationMs",
+      "bound"
+    ],
+    "tengu_shell_allow_rules_at_init": [
+      "<source>_<Bash|PowerShell>_<bare|scoped|dangerous_prefix> (per non-empty category)",
+      "total_shell_allow_rules"
+    ],
+    "tengu_shell_set_cwd": [
+      "success"
+    ],
+    "tengu_ripgrep_availability": [
+      "working",
+      "using_system"
+    ],
+    "tengu_event_loop_stall": [
+      "stall_duration_ms",
+      "expected_interval_ms",
+      "actual_interval_ms",
+      "monotonic_stall_ms",
+      "clock_jump_ms",
+      "total_stalls",
+      "cumulative_stall_ms",
+      "cumulative_monotonic_stall_ms",
+      "likely_sleep",
+      "...cpu sample",
+      "...memory sample",
+      "...write sample",
+      "sigcont"
+    ],
+    "tengu_retention_sweep": [
+      "phase",
+      "skipped",
+      "transcriptsDeleted",
+      "sessionFilesDeleted",
+      "artifactsDeleted",
+      "filesRetainedFresh",
+      "filesPastCutoff",
+      "errors",
+      "periodDays",
+      "usedDefault"
+    ],
+    "tengu_push_reachability": [
+      "has_active_channel",
+      "platform_count"
+    ],
+    "tengu_rotunda_pennant_strip": [
+      "shape",
+      "mode",
+      "non_streaming",
+      "query_source",
+      "sticky_scope"
+    ],
+    "tengu_prompt_suggestion_init": [
+      "enabled",
+      "source"
+    ],
+    "tengu_prompt_suggestion": [
+      "source",
+      "outcome",
+      "prompt_id",
+      "generationRequestId?",
+      "timeToAcceptMs?|timeToIgnoreMs?",
+      "similarity"
+    ]
+  },
+  "executed": {
+    "shell_allow_rules_cases": [
+      {
+        "label": "empty_context",
+        "rules": {},
+        "event": {
+          "name": "tengu_shell_allow_rules_at_init",
+          "metadata": {
+            "total_shell_allow_rules": 0
+          }
+        }
+      },
+      {
+        "label": "empty_sources",
+        "rules": {
+          "userSettings": [],
+          "projectSettings": [],
+          "localSettings": [],
+          "flagSettings": [],
+          "cliArg": [],
+          "session": []
+        },
+        "event": {
+          "name": "tengu_shell_allow_rules_at_init",
+          "metadata": {
+            "total_shell_allow_rules": 0
+          }
+        }
+      },
+      {
+        "label": "one_bash_bare",
+        "rules": {
+          "userSettings": [
+            {
+              "toolName": "Bash"
+            }
+          ]
+        },
+        "event": {
+          "name": "tengu_shell_allow_rules_at_init",
+          "metadata": {
+            "userSettings_Bash_bare": 1,
+            "total_shell_allow_rules": 1
+          }
+        }
+      },
+      {
+        "label": "mixed",
+        "rules": {
+          "projectSettings": [
+            {
+              "toolName": "Bash",
+              "ruleContent": "npm run *"
+            },
+            {
+              "toolName": "Read",
+              "ruleContent": ""
+            }
+          ],
+          "session": [
+            {
+              "toolName": "PowerShell",
+              "ruleContent": ""
+            }
+          ]
+        },
+        "event": {
+          "name": "tengu_shell_allow_rules_at_init",
+          "metadata": {
+            "projectSettings_Bash_scoped": 1,
+            "session_PowerShell_bare": 1,
+            "total_shell_allow_rules": 2
+          }
+        }
+      }
+    ],
+    "shell_set_cwd_event": {
+      "name": "tengu_shell_set_cwd",
+      "metadata": {
+        "success": true
+      }
+    },
+    "cli_flags_case": {
+      "options": {
+        "verbose": true,
+        "outputFormat": "stream-json",
+        "inputFormat": "stream-json",
+        "print": false,
+        "model": "claude-sonnet-5"
+      },
+      "sources": {
+        "verbose": "cli",
+        "outputFormat": "cli",
+        "inputFormat": "cli",
+        "print": "default",
+        "model": "env"
+      },
+      "flags": [
+        "inputFormat",
+        "outputFormat",
+        "verbose"
+      ]
+    },
+    "prompt_suggestion_init_cases": [
+      {
+        "tengu_chomp_inflection": false,
+        "enabled": false,
+        "event": {
+          "name": "tengu_prompt_suggestion_init",
+          "metadata": {
+            "enabled": false,
+            "source": "growthbook"
+          }
+        }
+      },
+      {
+        "tengu_chomp_inflection": true,
+        "enabled": false,
+        "event": {
+          "name": "tengu_prompt_suggestion_init",
+          "metadata": {
+            "enabled": false,
+            "source": "non_interactive"
+          }
+        }
+      }
+    ]
+  },
+  "emulated_session": {
+    "tengu_shell_set_cwd": {
+      "metadata": {
+        "success": true
+      },
+      "condition": "unconditional in setup once the launch cwd resolves (a failure exits the process before any event)"
+    },
+    "tengu_shell_allow_rules_at_init": {
+      "metadata": {
+        "total_shell_allow_rules": 0
+      },
+      "condition": "unconditional after tengu_init; the emulated session has no Bash/PowerShell allow rules (tengu_init numAllowedTools=0; captured field set carries no category keys)"
+    }
+  },
+  "boundary": "Executable in the gateway: tengu_shell_set_cwd and tengu_shell_allow_rules_at_init (pure builders executed above). Boundaries: tengu_cli_flags (flags = sorted commander options with source \"cli\"; the Desktop spawn argument list is conditional and not pinned here), tengu_uds_startup_bind (durationMs/bound come from a real inbox bind), tengu_concurrent_sessions (num_sessions counted from other live sessions, only >= 2), tengu_session_start (only on session-id change), tengu_startup_perf (0.5% random sample or CLAUDE_CODE_PROFILE_STARTUP, measured spans), tengu_ripgrep_availability (first native ripgrep invocation through Ree/testOnFirstUse), tengu_event_loop_stall (periodic stall detector samples), tengu_retention_sweep (real storage sweep counters), tengu_push_reachability (server notification preferences payload), tengu_rotunda_pennant_strip (400 attributed to a server-side fallback beta header; retry path), tengu_prompt_suggestion_init (source depends on the unpinned tengu_chomp_inflection gate: growthbook vs non_interactive), tengu_prompt_suggestion (prompt-suggestion generation outcome)."
+}

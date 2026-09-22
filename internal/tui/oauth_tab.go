@@ -39,15 +39,16 @@ type oauthTabModel struct {
 	height   int
 	ready    bool
 
-	// Remote browser / device-code mode
+	// Remote browser, magic-link, or device-code mode
 	authURL       string // auth URL to display
 	authState     string // OAuth state parameter
 	providerName  string // current provider name
 	userCode      string // device-code user_code (optional)
 	deviceFlow    bool   // true when waiting on device authorization
+	magicLinkFlow bool   // true when Claude requires an emailed magic link
 	expiresIn     int    // device-code / poll timeout in seconds
 	callbackInput textinput.Model
-	inputActive   bool // true when user is typing callback URL
+	inputActive   bool // true when user is typing an auth callback or magic link
 
 	// pollGeneration invalidates in-flight start/poll commands after cancel or restart.
 	pollGeneration int
@@ -72,14 +73,15 @@ const (
 
 // Messages
 type oauthStartMsg struct {
-	url          string
-	state        string
-	providerName string
-	userCode     string
-	deviceFlow   bool
-	expiresIn    int
-	generation   int
-	err          error
+	url           string
+	state         string
+	providerName  string
+	userCode      string
+	deviceFlow    bool
+	magicLinkFlow bool
+	expiresIn     int
+	generation    int
+	err           error
 }
 
 type oauthPollMsg struct {
@@ -96,7 +98,7 @@ type oauthCallbackSubmitMsg struct {
 
 func newOAuthTabModel(client *Client) oauthTabModel {
 	ti := textinput.New()
-	ti.Placeholder = "http://localhost:.../auth/callback?code=...&state=..."
+	ti.Placeholder = T("oauth_callback_placeholder")
 	ti.CharLimit = 2048
 	ti.Prompt = "  回调 URL: "
 	return oauthTabModel{
@@ -134,6 +136,7 @@ func (m oauthTabModel) Update(msg tea.Msg) (oauthTabModel, tea.Cmd) {
 		m.providerName = msg.providerName
 		m.userCode = msg.userCode
 		m.deviceFlow = msg.deviceFlow
+		m.magicLinkFlow = msg.magicLinkFlow
 		m.expiresIn = msg.expiresIn
 		m.state = oauthRemote
 		m.callbackInput.SetValue("")
@@ -143,6 +146,13 @@ func (m oauthTabModel) Update(msg tea.Msg) (oauthTabModel, tea.Cmd) {
 			m.callbackInput.Blur()
 			m.viewport.SetContent(m.renderContent())
 			return m, m.pollOAuthStatus(msg.state, msg.expiresIn, true, msg.generation)
+		}
+		if m.magicLinkFlow {
+			m.callbackInput.Placeholder = T("oauth_magic_link_placeholder")
+			m.callbackInput.Prompt = "  " + T("oauth_magic_link") + ": "
+		} else {
+			m.callbackInput.Placeholder = T("oauth_callback_placeholder")
+			m.callbackInput.Prompt = "  " + T("oauth_callback_url") + " "
 		}
 		m.callbackInput.Focus()
 		m.inputActive = true
@@ -180,7 +190,7 @@ func (m oauthTabModel) Update(msg tea.Msg) (oauthTabModel, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		// ---- Input active: typing callback URL (web flow only) ----
+		// ---- Input active: typing a callback URL or magic link ----
 		if m.inputActive && !m.deviceFlow {
 			switch msg.String() {
 			case "enter":
@@ -287,7 +297,8 @@ func (m oauthTabModel) startOAuth(provider oauthProvider, generation int) tea.Cm
 
 		authURL := getString(data, "url")
 		state := getString(data, "state")
-		if authURL == "" {
+		magicLinkFlow := strings.EqualFold(strings.TrimSpace(getString(data, "flow")), "magic_link")
+		if authURL == "" && !magicLinkFlow {
 			return oauthStartMsg{generation: generation, err: fmt.Errorf("no auth URL returned for %s", provider.name)}
 		}
 
@@ -296,17 +307,20 @@ func (m oauthTabModel) startOAuth(provider oauthProvider, generation int) tea.Cm
 		expiresIn := int(getFloat(data, "expires_in"))
 		deviceFlow := provider.deviceFlow || flow == "device" || userCode != ""
 
-		// Try to open browser (best effort)
-		_ = openBrowser(authURL)
+		// Try to open browser only for external OAuth and device-code flows.
+		if !magicLinkFlow {
+			_ = openBrowser(authURL)
+		}
 
 		return oauthStartMsg{
-			url:          authURL,
-			state:        state,
-			providerName: provider.name,
-			userCode:     userCode,
-			deviceFlow:   deviceFlow,
-			expiresIn:    expiresIn,
-			generation:   generation,
+			url:           authURL,
+			state:         state,
+			providerName:  provider.name,
+			userCode:      userCode,
+			deviceFlow:    deviceFlow,
+			magicLinkFlow: magicLinkFlow,
+			expiresIn:     expiresIn,
+			generation:    generation,
 		}
 	}
 }
@@ -321,6 +335,7 @@ func (m *oauthTabModel) cancelRemoteOAuth() tea.Cmd {
 	m.authState = ""
 	m.userCode = ""
 	m.deviceFlow = false
+	m.magicLinkFlow = false
 	m.expiresIn = 0
 	m.inputActive = false
 	m.callbackInput.Blur()
@@ -363,10 +378,11 @@ func (m oauthTabModel) submitCallback(callbackURL string) tea.Cmd {
 			}
 		}
 
-		body := map[string]string{
-			"provider":     providerKey,
-			"redirect_url": callbackURL,
-			"state":        m.authState,
+		body := map[string]string{"provider": providerKey, "state": m.authState}
+		if m.magicLinkFlow {
+			body["magic_link"] = callbackURL
+		} else {
+			body["redirect_url"] = callbackURL
 		}
 		err := m.client.postJSON("/v0/management/oauth-callback", body)
 		if err != nil {
@@ -498,9 +514,11 @@ func (m oauthTabModel) renderContent() string {
 		sb.WriteString("\n\n")
 	}
 
-	// ---- Remote browser / device-code mode ----
+	// ---- Remote browser, magic-link, or device-code mode ----
 	if m.state == oauthRemote {
-		if m.deviceFlow {
+		if m.magicLinkFlow {
+			sb.WriteString(m.renderMagicLinkMode())
+		} else if m.deviceFlow {
 			sb.WriteString(m.renderDeviceMode())
 		} else {
 			sb.WriteString(m.renderRemoteMode())
@@ -536,6 +554,27 @@ func (m oauthTabModel) renderContent() string {
 	sb.WriteString("\n")
 	sb.WriteString(helpStyle.Render(T("oauth_help")))
 
+	return sb.String()
+}
+
+func (m oauthTabModel) renderMagicLinkMode() string {
+	var sb strings.Builder
+	providerStyle := lipgloss.NewStyle().Bold(true).Foreground(colorHighlight)
+	sb.WriteString(providerStyle.Render(fmt.Sprintf("  ✦ %s OAuth", m.providerName)))
+	sb.WriteString("\n\n")
+	sb.WriteString(helpStyle.Render(T("oauth_magic_link_hint")))
+	sb.WriteString("\n\n")
+	sb.WriteString(lipgloss.NewStyle().Bold(true).Foreground(colorInfo).Render(T("oauth_magic_link")))
+	sb.WriteString("\n")
+	if m.inputActive {
+		sb.WriteString(m.callbackInput.View())
+		sb.WriteString("\n")
+		sb.WriteString(helpStyle.Render("  " + T("enter_submit") + " • " + T("esc_cancel")))
+	} else {
+		sb.WriteString(helpStyle.Render(T("oauth_magic_link_press_c")))
+	}
+	sb.WriteString("\n\n")
+	sb.WriteString(warningStyle.Render(T("oauth_waiting")))
 	return sb.String()
 }
 

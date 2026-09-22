@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,56 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
 	"github.com/tidwall/gjson"
 )
+
+func TestClaudeHandlersRejectInvalidOrMissingModelAtIngress(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	tests := []struct {
+		name        string
+		body        string
+		wantMessage string
+	}{
+		{name: "missing", body: `{"messages":[]}`, wantMessage: "model: Field required"},
+		{name: "null", body: `{"model":null,"messages":[]}`, wantMessage: "model: Input should be a valid string"},
+		{name: "number", body: `{"model":42,"messages":[]}`, wantMessage: "model: Input should be a valid string"},
+		{name: "blank", body: `{"model":"  ","messages":[]}`, wantMessage: "model: String should have at least 1 character"},
+		{name: "invalid json", body: `{`, wantMessage: "Invalid request: request body must be valid JSON"},
+	}
+	endpoints := []struct {
+		name string
+		path string
+		run  func(*ClaudeCodeAPIHandler, *gin.Context)
+	}{
+		{name: "messages", path: "/v1/messages", run: func(h *ClaudeCodeAPIHandler, c *gin.Context) { h.ClaudeMessages(c) }},
+		{name: "count_tokens", path: "/v1/messages/count_tokens", run: func(h *ClaudeCodeAPIHandler, c *gin.Context) { h.ClaudeCountTokens(c) }},
+	}
+
+	for _, endpoint := range endpoints {
+		for _, test := range tests {
+			t.Run(endpoint.name+"/"+test.name, func(t *testing.T) {
+				recorder := httptest.NewRecorder()
+				ctx, _ := gin.CreateTestContext(recorder)
+				ctx.Request = httptest.NewRequest(http.MethodPost, endpoint.path, strings.NewReader(test.body))
+				handler := NewClaudeCodeAPIHandler(&handlers.BaseAPIHandler{})
+
+				endpoint.run(handler, ctx)
+
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want %d; body=%s", recorder.Code, http.StatusBadRequest, recorder.Body.String())
+				}
+				body := recorder.Body.Bytes()
+				if got := gjson.GetBytes(body, "type").String(); got != "error" {
+					t.Fatalf("type = %q, want error; body=%s", got, body)
+				}
+				if got := gjson.GetBytes(body, "error.type").String(); got != "invalid_request_error" {
+					t.Fatalf("error.type = %q, want invalid_request_error; body=%s", got, body)
+				}
+				if got := gjson.GetBytes(body, "error.message").String(); got != test.wantMessage {
+					t.Fatalf("error.message = %q, want %q; body=%s", got, test.wantMessage, body)
+				}
+			})
+		}
+	}
+}
 
 func TestClaudeErrorExtractsOpenAIStyleUpstreamJSON(t *testing.T) {
 	handler := &ClaudeCodeAPIHandler{}

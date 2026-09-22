@@ -598,7 +598,7 @@ func proxyURLFromAPIKeyConfig(cfg *config.Config, auth *coreauth.Auth) string {
 		if entry := resolveAPIKeyConfig(cfg.InteractionsKey, auth); entry != nil {
 			return strings.TrimSpace(entry.ProxyURL)
 		}
-	case "claude":
+	case "claude", "anthropic-compatible":
 		if entry := resolveAPIKeyConfig(cfg.ClaudeKey, auth); entry != nil {
 			return strings.TrimSpace(entry.ProxyURL)
 		}

@@ -29,7 +29,7 @@ func TestNormalizeCredentialMetadata(t *testing.T) {
 		"base_url":              "https://legacy.example",
 		"disable_cooling":       true,
 		"excluded_models":       []any{"legacy-model"},
-		"fingerprint_profile":   "claude-code-cli",
+		"fingerprint-profile":   "claude-code-cli",
 		"model_aliases":         []any{map[string]any{"name": "upstream", "alias": "public"}},
 		"proxy_url":             "http://legacy-proxy.example",
 		"request_retry":         0,

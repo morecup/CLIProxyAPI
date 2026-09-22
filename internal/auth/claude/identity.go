@@ -1,3 +1,6 @@
+// Package claude contains concurrency-safe credential metadata helpers used by
+// the Claude Desktop executor. OAuth login and token storage live in the
+// claudedesktop package.
 package claude
 
 import (
@@ -276,7 +279,7 @@ func SelectDeviceID(deviceIDs []string, sessionID string) (string, error) {
 	return deviceIDs[0], nil
 }
 
-// ValidDeviceID reports whether a value matches Claude Code's lowercase 64-hex device format.
+// ValidDeviceID reports whether a value matches the Desktop request identity's lowercase 64-hex format.
 func ValidDeviceID(value string) bool {
 	if len(value) != claudeDeviceIDByteSize*2 || value != strings.ToLower(value) {
 		return false

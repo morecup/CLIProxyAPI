@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "query_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+  "definitions": [
+    {
+      "name": "Aj",
+      "sha256": "a63c16fb390ee62213e2aa95870ba13a8800077dfc92ce03b9009cb78bd80833",
+      "start": 5722009,
+      "end": 5723308
+    },
+    {
+      "name": "usage_seed",
+      "sha256": "fa526e677c9bc781d924bc048b7d506aaa0394107a9f191673e075c11f029fc6",
+      "module": "B:/~BUN/root/_667.js",
+      "module_sha256": "132703fd0186cc8064aa7cb463ff4247a1d29d79cf021b85db95322ad312aedc"
+    }
+  ],
+  "cases": [
+    {
+      "name": "seed",
+      "updates": [],
+      "expected": {
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0,
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      }
+    },
+    {
+      "name": "ordinary",
+      "updates": [
+        {
+          "input_tokens": 12,
+          "output_tokens": 0
+        },
+        {
+          "output_tokens": 8
+        }
+      ],
+      "expected": {
+        "input_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 8,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      }
+    },
+    {
+      "name": "zero_input_does_not_erase",
+      "updates": [
+        {
+          "input_tokens": 12,
+          "cache_read_input_tokens": 6
+        },
+        {
+          "input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0
+        }
+      ],
+      "expected": {
+        "input_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 6,
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      }
+    },
+    {
+      "name": "cache_duration_sum",
+      "updates": [
+        {
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 4
+          }
+        },
+        {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 7
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 7,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 7,
+          "ephemeral_5m_input_tokens": 4
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      }
+    },
+    {
+      "name": "explicit_cache_total",
+      "updates": [
+        {
+          "cache_creation_input_tokens": 20,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 4
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 20,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 4
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      }
+    },
+    {
+      "name": "nested_and_nullable",
+      "updates": [
+        {
+          "server_tool_use": {
+            "web_search_requests": 2
+          },
+          "output_tokens_details": {
+            "thinking_tokens": 5
+          },
+          "service_tier": "synthetic",
+          "inference_geo": "synthetic",
+          "speed": "fast"
+        },
+        {
+          "server_tool_use": {
+            "web_fetch_requests": 3
+          },
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "service_tier": null,
+          "inference_geo": "",
+          "speed": null,
+          "iterations": [
+            {
+              "type": "synthetic"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 2,
+          "web_fetch_requests": 3
+        },
+        "service_tier": "synthetic",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [
+          {
+            "type": "synthetic"
+          }
+        ],
+        "speed": "fast"
+      }
+    },
+    {
+      "name": "null_usage",
+      "updates": [
+        null,
+        {
+          "input_tokens": 2
+        },
+        null
+      ],
+      "expected": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      }
+    }
+  ]
+}

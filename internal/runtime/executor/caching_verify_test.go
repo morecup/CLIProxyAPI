@@ -3,10 +3,8 @@ package executor
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/tidwall/gjson"
 )
 
@@ -351,7 +349,7 @@ func TestEnsureCacheControl(t *testing.T) {
 			t.Errorf("cloaking first-user marker lost: %s", string(output))
 		}
 		if got := gjson.GetBytes(output, "messages.4.content.0.cache_control.type").String(); got != "ephemeral" {
-			t.Errorf("latest user missing rolling cache_control after cloaking marker. Output: %s", string(output))
+			t.Errorf("latest user missing rolling cache_control after existing marker. Output: %s", string(output))
 		}
 		if gjson.GetBytes(output, "tools.0.cache_control").Exists() {
 			t.Errorf("a payload with a system prompt must not stamp tools[*].cache_control: %s", string(output))
@@ -430,22 +428,17 @@ func TestShouldEnsureCacheControl(t *testing.T) {
 	markerless := []byte(`{"messages":[{"role":"user","content":"x"}]}`)
 	withMarker := []byte(`{"messages":[{"role":"user","content":[{"type":"text","text":"x","cache_control":{"type":"ephemeral"}}]}]}`)
 	tests := []struct {
-		name                string
-		payload             []byte
-		cloaked             bool
-		confirmedClaudeCode bool
-		want                bool
+		name    string
+		payload []byte
+		want    bool
 	}{
-		{name: "confirmed native markerless", payload: markerless, confirmedClaudeCode: true, want: false},
-		{name: "confirmed native with marker", payload: withMarker, confirmedClaudeCode: true, want: false},
-		{name: "cloaked with marker", payload: withMarker, cloaked: true, want: true},
-		{name: "unconfirmed markerless", payload: markerless, want: true},
-		{name: "unconfirmed with marker", payload: withMarker, want: false},
+		{name: "markerless", payload: markerless, want: true},
+		{name: "existing marker", payload: withMarker, want: false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := shouldEnsureCacheControl(tt.payload, tt.cloaked, tt.confirmedClaudeCode); got != tt.want {
+			if got := shouldEnsureCacheControl(tt.payload); got != tt.want {
 				t.Fatalf("shouldEnsureCacheControl() = %t, want %t", got, tt.want)
 			}
 		})
@@ -645,56 +638,3 @@ func TestUpgradeClaudeCacheControlTTL(t *testing.T) {
 // section, freezing the rolling breakpoint on messages[0] for the whole
 // conversation. Section-independent ensure has to keep that breakpoint advancing
 // as the history grows, so a reintroduced global short-circuit fails here.
-func TestClaudeExecutorCloakedRollingCacheBreakpointAdvances(t *testing.T) {
-	buildConversation := func(exchanges int) []byte {
-		messages := make([]string, 0, exchanges*2)
-		for i := 0; i < exchanges; i++ {
-			messages = append(messages,
-				fmt.Sprintf(`{"role":"user","content":"question number %d"}`, i),
-				fmt.Sprintf(`{"role":"assistant","content":"answer number %d"}`, i),
-			)
-		}
-		return []byte(`{"model":"claude-opus-5","max_tokens":100,` +
-			`"system":"You are a helpful assistant.",` +
-			`"messages":[` + strings.Join(messages, ",") + `]}`)
-	}
-
-	// lastMarkedMessage reports the highest message index carrying a breakpoint.
-	lastMarkedMessage := func(body []byte) int {
-		last := -1
-		gjson.GetBytes(body, "messages").ForEach(func(msgIdx, message gjson.Result) bool {
-			message.Get("content").ForEach(func(_, block gjson.Result) bool {
-				if block.Get("cache_control").Exists() {
-					last = int(msgIdx.Int())
-				}
-				return true
-			})
-			return true
-		})
-		return last
-	}
-
-	cfg := &config.Config{}
-	shortBody := executeClaudeContextManagementRequest(t, cfg, buildConversation(2), false)
-	longBody := executeClaudeContextManagementRequest(t, cfg, buildConversation(6), false)
-
-	shortMarked := lastMarkedMessage(shortBody)
-	longMarked := lastMarkedMessage(longBody)
-	if shortMarked <= 0 {
-		t.Fatalf("short conversation kept its only breakpoint at index %d: %s", shortMarked, shortBody)
-	}
-	if longMarked <= shortMarked {
-		t.Fatalf("rolling breakpoint did not advance with history: short=%d long=%d\n%s", shortMarked, longMarked, longBody)
-	}
-	// The rolling marker must land on the final turn, not an early frozen prefix.
-	if want := int(gjson.GetBytes(longBody, "messages.#").Int()) - 1; longMarked != want {
-		t.Fatalf("rolling breakpoint at message %d, want final message %d: %s", longMarked, want, longBody)
-	}
-	// Cloaking's own first-user marker must still be present alongside it.
-	if !gjson.GetBytes(longBody, "messages.0.content.1.cache_control").Exists() {
-		t.Fatalf("cloak first-user breakpoint lost: %s", longBody)
-	}
-	if total := countCacheControls(longBody); total > 4 {
-		t.Fatalf("cache_control count = %d, want at most 4: %s", total, longBody)
-	}
-}

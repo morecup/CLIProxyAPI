@@ -115,20 +115,26 @@ PackyCode provides special discounts for our software users: register using <a h
 
 - OpenAI/Gemini/Claude/Grok compatible API endpoints for CLI models
 - OpenAI Codex support (GPT models) via OAuth login
-- Claude Code support via OAuth login
+- Claude Desktop subscription support via Desktop OAuth enrollment
 - Grok Build support via OAuth login
 - Streaming, non-streaming, and WebSocket responses where supported
 - Function calling/tools support
 - Multimodal input support (text and images)
 - Multiple accounts with round-robin load balancing (Gemini, OpenAI, Claude, Grok)
-- Simple CLI authentication flows (Gemini, OpenAI, Claude, Grok)
+- Authentication flows for Gemini, OpenAI, Claude Desktop, and Grok
 - Generative Language API Key support
 - AI Studio Build multi-account load balancing
-- Claude Code multi-account load balancing
+- Claude Desktop multi-account load balancing
 - OpenAI Codex multi-account load balancing
 - Grok Build multi-account load balancing
 - OpenAI-compatible upstream providers via config (e.g., OpenRouter)
 - Reusable Go SDK for embedding the proxy (see `docs/sdk-usage.md`)
+
+### Claude Desktop alignment branch
+
+On `feature/claude-desktop-alignment`, the `claude` provider is reserved for independently enrolled Claude Desktop OAuth accounts. API keys and custom Anthropic-compatible gateways use `anthropic-compatible` instead. Requests are rendered from the captured Desktop profile, and Renderer, embedded SDK, Segment, Datadog logs, Datadog RUM, and Sentry delivery paths are isolated per enrolled account.
+
+The embedded v140609 bundle uses schema 8 and pins the captured event-state transition artifact. Enrollment discovers auxiliary telemetry material from the locally installed official Desktop package and stores it only in the protected credential envelope. If material is missing, management telemetry reports `awaiting-enrollment-material`; model traffic remains available and the management UI exposes the degraded endpoint instead of silently hiding it.
 
 ## Getting Started
 

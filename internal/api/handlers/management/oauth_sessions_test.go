@@ -1,6 +1,7 @@
 package management
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -201,6 +202,84 @@ func TestOAuthSessionStoreCancelIgnoresErrorSession(t *testing.T) {
 	}
 	if store.Cancel("error-state") {
 		t.Fatal("Cancel() error session = true, want false")
+	}
+}
+
+func TestOAuthSessionStoreSubmitInputOnce(t *testing.T) {
+	store := newOAuthSessionStore(time.Minute)
+	store.Register("magic-state", "anthropic")
+
+	if errSubmit := store.SubmitInput("magic-state", "anthropic", "  magic-link  "); errSubmit != nil {
+		t.Fatalf("first SubmitInput() error = %v", errSubmit)
+	}
+	if errSubmit := store.SubmitInput("magic-state", "anthropic", "second-link"); !errors.Is(errSubmit, errOAuthSessionNotPending) {
+		t.Fatalf("duplicate SubmitInput() error = %v, want %v", errSubmit, errOAuthSessionNotPending)
+	}
+	value, errWait := store.WaitInput(context.Background(), "magic-state", "anthropic")
+	if errWait != nil {
+		t.Fatalf("WaitInput() error = %v", errWait)
+	}
+	if value != "magic-link" {
+		t.Fatalf("WaitInput() = %q, want trimmed magic link", value)
+	}
+}
+
+func TestOAuthSessionStoreTerminalStatesWakeInputWaiter(t *testing.T) {
+	tests := []struct {
+		name      string
+		terminate func(*oauthSessionStore, string)
+	}{
+		{name: "cancel", terminate: func(store *oauthSessionStore, state string) { store.Cancel(state) }},
+		{name: "complete", terminate: func(store *oauthSessionStore, state string) { store.Complete(state) }},
+		{name: "error", terminate: func(store *oauthSessionStore, state string) { store.SetError(state, "failed") }},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			store := newOAuthSessionStore(time.Minute)
+			state := test.name + "-magic-state"
+			store.Register(state, "anthropic")
+			result := make(chan error, 1)
+			go func() {
+				_, errWait := store.WaitInput(context.Background(), state, "anthropic")
+				result <- errWait
+			}()
+
+			test.terminate(store, state)
+			select {
+			case errWait := <-result:
+				if !errors.Is(errWait, errOAuthSessionNotPending) {
+					t.Fatalf("WaitInput() error = %v, want %v", errWait, errOAuthSessionNotPending)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("terminal state did not wake WaitInput")
+			}
+
+			// Repeating terminal operations must not close the waiter channel twice.
+			test.terminate(store, state)
+		})
+	}
+}
+
+func TestOAuthSessionStoreExpiryWakesInputWaiter(t *testing.T) {
+	store := newOAuthSessionStore(20 * time.Millisecond)
+	store.Register("expiring-magic-state", "anthropic")
+
+	result := make(chan error, 1)
+	go func() {
+		_, errWait := store.WaitInput(context.Background(), "expiring-magic-state", "anthropic")
+		result <- errWait
+	}()
+
+	select {
+	case errWait := <-result:
+		if !errors.Is(errWait, errOAuthSessionNotPending) {
+			t.Fatalf("WaitInput() expiry error = %v, want %v", errWait, errOAuthSessionNotPending)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("session expiry did not wake WaitInput")
+	}
+	if _, ok := store.Get("expiring-magic-state"); ok {
+		t.Fatal("expired input session remained in store")
 	}
 }
 

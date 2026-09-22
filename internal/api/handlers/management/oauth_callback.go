@@ -13,6 +13,7 @@ import (
 type oauthCallbackRequest struct {
 	Provider    string `json:"provider"`
 	RedirectURL string `json:"redirect_url"`
+	MagicLink   string `json:"magic_link"`
 	Code        string `json:"code"`
 	State       string `json:"state"`
 	Error       string `json:"error"`
@@ -52,7 +53,7 @@ func (h *Handler) handleOAuthCallback(c *gin.Context, req oauthCallbackRequest) 
 	code := strings.TrimSpace(req.Code)
 	errMsg := strings.TrimSpace(req.Error)
 
-	if rawRedirect := strings.TrimSpace(req.RedirectURL); rawRedirect != "" {
+	if rawRedirect := strings.TrimSpace(req.RedirectURL); rawRedirect != "" && strings.TrimSpace(req.MagicLink) == "" {
 		u, errParse := url.Parse(rawRedirect)
 		if errParse != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "invalid redirect_url"})
@@ -81,11 +82,6 @@ func (h *Handler) handleOAuthCallback(c *gin.Context, req oauthCallbackRequest) 
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "invalid state"})
 		return
 	}
-	if code == "" && errMsg == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "code or error is required"})
-		return
-	}
-
 	sessionProvider, sessionStatus, isPlugin, _, completed, ok := GetOAuthSessionDetails(state)
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "error": "unknown or expired state"})
@@ -116,6 +112,30 @@ func (h *Handler) handleOAuthCallback(c *gin.Context, req oauthCallbackRequest) 
 	}
 	if !strings.EqualFold(sessionProvider, canonicalProvider) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "provider does not match state"})
+		return
+	}
+	if !isPlugin && canonicalProvider == "anthropic" {
+		magicLink := strings.TrimSpace(req.MagicLink)
+		if magicLink == "" {
+			magicLink = strings.TrimSpace(req.RedirectURL)
+		}
+		if magicLink == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "magic_link is required"})
+			return
+		}
+		if errSubmit := SubmitOAuthSessionInput(state, canonicalProvider, magicLink); errSubmit != nil {
+			if errors.Is(errSubmit, errOAuthSessionNotPending) {
+				c.JSON(http.StatusConflict, gin.H{"status": "error", "error": "oauth flow is not pending"})
+				return
+			}
+			c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "invalid magic_link"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		return
+	}
+	if code == "" && errMsg == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "code or error is required"})
 		return
 	}
 

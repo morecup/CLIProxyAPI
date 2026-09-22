@@ -339,8 +339,28 @@ func (m *Manager) markRefreshPending(id string, now time.Time) bool {
 }
 
 type authRefreshLock struct {
-	mu sync.Mutex
+	once sync.Once
+	gate chan struct{}
 }
+
+func (l *authRefreshLock) acquire(ctx context.Context) error {
+	l.once.Do(func() { l.gate = make(chan struct{}, 1) })
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	select {
+	case l.gate <- struct{}{}:
+		if err := ctx.Err(); err != nil {
+			l.release()
+			return err
+		}
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (l *authRefreshLock) release() { <-l.gate }
 
 func authAccessToken(auth *Auth) string {
 	if token := authMetadataString(auth, "access_token"); token != "" {
@@ -505,8 +525,10 @@ func (m *Manager) refreshAuthForRequest(ctx context.Context, id, failedAccessTok
 		lock = &authRefreshLock{}
 		m.refreshLocks.Store(id, lock)
 	}
-	lock.mu.Lock()
-	defer lock.mu.Unlock()
+	if err := lock.acquire(ctx); err != nil {
+		return nil, err
+	}
+	defer lock.release()
 
 	m.mu.RLock()
 	auth := m.auths[id]

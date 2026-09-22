@@ -104,6 +104,45 @@ func TestRegisterAvailableExecutors(t *testing.T) {
 	}
 }
 
+func TestClaudeExecutorRegistrationReusesRouterForConfigSnapshot(t *testing.T) {
+	manager := coreauth.NewManager(nil, nil, nil)
+	firstConfig := &config.Config{}
+	firstConfig.ClaudeDesktop.StatePath = t.TempDir()
+	service := &Service{cfg: firstConfig, coreManager: manager}
+	authA := &coreauth.Auth{ID: "claude-a", Provider: "claude"}
+	authB := &coreauth.Auth{ID: "claude-b", Provider: "claude"}
+
+	service.registerExecutorForAuth(authA, true)
+	firstExecutor, okFirst := manager.Executor("claude")
+	firstRouter, isFirstRouter := firstExecutor.(*runtimeexecutor.ClaudeAccountExecutor)
+	if !okFirst || !isFirstRouter {
+		t.Fatalf("first Claude executor = %T, want *executor.ClaudeAccountExecutor", firstExecutor)
+	}
+	service.registerExecutorForAuth(authB, true)
+	secondExecutor, _ := manager.Executor("claude")
+	if secondExecutor != firstRouter {
+		t.Fatal("force registration replaced the Claude router within one config snapshot")
+	}
+
+	secondConfig := firstConfig.CloneForRuntime()
+	secondConfig.ClaudeDesktop.StatePath = t.TempDir()
+	service.cfgMu.Lock()
+	service.cfg = secondConfig
+	service.cfgMu.Unlock()
+	service.registerExecutorForAuth(authA, true)
+	reloadedExecutor, _ := manager.Executor("claude")
+	reloadedRouter, isReloadedRouter := reloadedExecutor.(*runtimeexecutor.ClaudeAccountExecutor)
+	if !isReloadedRouter || reloadedRouter == firstRouter || !reloadedRouter.UsesConfig(secondConfig) {
+		t.Fatalf("reloaded Claude executor = %T (%p), want one router for new config", reloadedExecutor, reloadedRouter)
+	}
+	service.registerExecutorForAuth(authB, true)
+	afterSecondAuth, _ := manager.Executor("claude")
+	if afterSecondAuth != reloadedRouter {
+		t.Fatal("second auth created another Claude router during config reload")
+	}
+	t.Cleanup(reloadedRouter.Close)
+}
+
 func TestSyncPluginModelRuntimePreservesSDKExecutorUnlessForced(t *testing.T) {
 	manager := coreauth.NewManager(nil, nil, nil)
 	custom := serviceTestSDKExecutor{}

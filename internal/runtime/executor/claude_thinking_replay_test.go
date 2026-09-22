@@ -146,7 +146,7 @@ func TestClaudeExecutorCompatThinkingReplayRestoresOmittedBlock(t *testing.T) {
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(nil)
+	executor := newAnthropicCompatibleTestExecutor(nil)
 	auth := claudeReplayTestAuth(server.URL)
 	firstPayload := []byte(`{"messages":[{"role":"user","content":"inspect"}]}`)
 	firstRequest, firstOptions := claudeReplayTestRequest(firstPayload, "nonstream-replay", true, sdktranslator.FormatClaude)
@@ -205,7 +205,7 @@ func TestClaudeExecutorCompatThinkingReplayRestoresOmittedBlockInStream(t *testi
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(nil)
+	executor := newAnthropicCompatibleTestExecutor(nil)
 	auth := claudeReplayTestAuth(server.URL)
 	firstPayload := []byte(`{"messages":[{"role":"user","content":"inspect"}]}`)
 	firstRequest, firstOptions := claudeReplayTestRequest(firstPayload, "stream-replay", true, sdktranslator.FormatClaude)
@@ -283,7 +283,7 @@ func TestClaudeExecutorCompatThinkingReplayClearsAfterUpstreamBadRequest(t *test
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(nil)
+	executor := newAnthropicCompatibleTestExecutor(nil)
 	auth := claudeReplayTestAuth(server.URL)
 	firstRequest, firstOptions := claudeReplayTestRequest([]byte(`{"messages":[{"role":"user","content":"inspect"}]}`), "bad-request-replay", true, sdktranslator.FormatClaude)
 	if _, errExecute := executor.Execute(context.Background(), auth, firstRequest, firstOptions); errExecute != nil {
@@ -333,7 +333,7 @@ func TestClaudeExecutorCompatThinkingReplayRestoresMultipleOmittedBlocks(t *test
 	}))
 	defer server.Close()
 
-	executor := NewClaudeExecutor(nil)
+	executor := newAnthropicCompatibleTestExecutor(nil)
 	auth := claudeReplayTestAuth(server.URL)
 	firstRequest, firstOptions := claudeReplayTestRequest([]byte(`{"messages":[{"role":"user","content":"inspect"}]}`), "multi-turn-replay", true, sdktranslator.FormatClaude)
 	if _, errExecute := executor.Execute(context.Background(), auth, firstRequest, firstOptions); errExecute != nil {

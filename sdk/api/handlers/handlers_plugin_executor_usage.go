@@ -14,7 +14,7 @@ func parsePluginExecutorResponseUsage(protocol string, payload []byte) usage.Det
 		return usage.Detail{}
 	}
 	switch strings.ToLower(strings.TrimSpace(protocol)) {
-	case "claude":
+	case "claude", "anthropic-compatible":
 		return parseClaudePayloadUsage(payload)
 	case "gemini":
 		return helps.ParseGeminiUsage(payload)
@@ -37,7 +37,7 @@ func observePluginExecutorStreamUsage(protocol string, payload []byte, buffer *h
 		return
 	}
 	switch strings.ToLower(strings.TrimSpace(protocol)) {
-	case "claude":
+	case "claude", "anthropic-compatible":
 		iterateStreamLines(payload, func(line []byte) {
 			if detail, ok := parseClaudeStreamLine(line); ok {
 				observeMergedStreamUsage(buffer, detail)

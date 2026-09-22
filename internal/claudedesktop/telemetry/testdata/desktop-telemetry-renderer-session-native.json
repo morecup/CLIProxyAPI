@@ -1,0 +1,2221 @@
+{
+  "schema_version": 1,
+  "lane": "W6 renderer-session",
+  "desktop_version": "1.40609.0.0",
+  "origin": "claude.ai web renderer hosted in the Desktop webview; event names are absent from the local Electron .vite chunks, so contracts are pinned on every captured occurrence (field names, key order, value types, non-identifying constants; values are never copied)",
+  "corpora": [
+    "h9-v140609-20260904-r03-corpus-staging",
+    "v140609-corpus-staging"
+  ],
+  "captured_flow_count": 170,
+  "captured_flow_manifest_sha256": "5ad33f93029ba404a451787c269fcafed2466397434326b758a4ce6a8011e6c8",
+  "captured_flows": [
+    {
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-main-query-r01-20260904-1840/flow-000061/request-body.txt",
+      "sha256": "0b074cce929fb99d6c78e9ccd2459d7cd4ba92cb93077a5036b1de26cd17108f"
+    },
+    {
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-main-query-r01-20260904-1840/flow-000139/request-body.txt",
+      "sha256": "5e657a255fcab957c650040abea7bbee55bea439dd0deb5334d3f876205a876c"
+    },
+    {
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-main-query-r01-20260904-1840/flow-000141/request-body.txt",
+      "sha256": "3300355f64dd063eab0b4346e72f12b198529165631bc584904ae977208d424a"
+    },
+    {
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-multi-turn-r01-20260904-1846/flow-000197/request-body.txt",
+      "sha256": "482b9d36b6c861997bbcb907af2a3fea64cef6ed3c9ed71ddc7fd00718dc3b3d"
+    },
+    {
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-multi-turn-r01-20260904-1846/flow-000198/request-body.txt",
+      "sha256": "7a2b8504a7f6c48e58c0b29c1e42d5c9caf90486746bd0a21ac5d23484517f1e"
+    },
+    {
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-read-tool-r01-20260904-1922/flow-000269/request-body.txt",
+      "sha256": "8221523c732afce72c5a61146c8c11d400f03fd23cd60199b41c178f28aedc39"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-auth-initial-post-logout-transition-30s/flow-011907/request-body.txt",
+      "sha256": "ec7220ffab9aabaf1f336e4c60f6e4b9661dcf960c9b194dc558a7a836591191"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-authenticated-token-refresh-watch-4h/flow-011467/request-body.txt",
+      "sha256": "0245e179abd101428ac64a24127934e9e0f829f7275706256b38d564cb21ebf2"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-authenticated-token-refresh-watch-4h/flow-011522/request-body.txt",
+      "sha256": "c03767f0158ed2e34c88726543e0d74dc2b47b5f1e5fa0dc8b696adbb73bada8"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-authenticated-token-refresh-watch-4h/flow-011524/request-body.txt",
+      "sha256": "02188f3d4ca37143edcf116dd6bac7823f8cac7cc9c58c2ef1a93b068e53b052"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-crash-recovery-bootstrap-3m/flow-000325/request-body.txt",
+      "sha256": "bbd94fbf2dd372e818646ddbe9e1f0336eabd96746f2549a78ce8f1452586219"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-crash-recovery-bootstrap-3m/flow-000328/request-body.txt",
+      "sha256": "3bd17d74e1a9bd9776eb83cbb261121895843874112e2ef7afffa8ba8f74b8b1"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000145/request-body.txt",
+      "sha256": "97b5214c69da8a32dfc3a106b530de8e89936e5ffec4c642fb04c511db3669d7"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000147/request-body.txt",
+      "sha256": "f58433f623e327dcef592a0c481179210cf1dc1766b196d768fb49f14446c4e6"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-haiku-single-turn/flow-001099/request-body.txt",
+      "sha256": "077d945f93730d84d36e645eaa23cdaed73517518491b878194559b8a628ffd3"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-haiku-single-turn/flow-001101/request-body.txt",
+      "sha256": "baba43cdb5a7400cb9d63c91dfaf22023851e721a89081b00722815e697b672e"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-haiku-thinking/flow-001125/request-body.txt",
+      "sha256": "3312f7c8c486c8a8543f46c671e93933dcea6e913236d652e5af735ea33ec27e"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-historical-opus-47-single-turn/flow-001419/request-body.txt",
+      "sha256": "85db92d32fd09ff8571c97cdd675dacca718243a377ab631bc7135ab0c8e2cf5"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-historical-sonnet-46-r03-single-turn/flow-001866/request-body.txt",
+      "sha256": "8d5e5943722f8aa1e4e56a6bbccc3cd8ffce232fd51df670d42e638340eb7457"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-historical-sonnet-46-r03-single-turn/flow-001868/request-body.txt",
+      "sha256": "1e04e94da3ececc0431cb4bd1c27d614ca90eaa03c2b4fad4816910807638bcb"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-01-r02/flow-005969/request-body.txt",
+      "sha256": "2a73491d33e59e884b2a8a5bd60a7dbc38b9547e911ad7fb7c2b6e221111c91f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-02-r02/flow-006000/request-body.txt",
+      "sha256": "22ca85f020067cbcb22a0eca813af36f130bd6d25044a3eb49521569193ffa2e"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-02-r02/flow-006003/request-body.txt",
+      "sha256": "6750cda70e78392795bbf1b42676e19b6e2188f397fcab6384725b5b14924334"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-03-r02/flow-006034/request-body.txt",
+      "sha256": "9c27f0a50df95d008fd24276e0ac0efaa654ae416f389296c7db68a98cce0c94"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-03-r02/flow-006037/request-body.txt",
+      "sha256": "a3e016e320019fce4246af6051c1fe604d03236a17f7c286e24d3f2e33494a5d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-04-r02/flow-006069/request-body.txt",
+      "sha256": "1b3d8f2159730ada4675303214dea1f068efd3fe6ddad1e4573a0ca3592f4a87"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-04-r02/flow-006073/request-body.txt",
+      "sha256": "256382564b1c1b904cd8a5a834246026667857308198b0b48a0cd30569729723"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-05-r02/flow-006101/request-body.txt",
+      "sha256": "fe31edd76d2f1bef04f5dd00e555dc67307c417199442c8b98341241613651bb"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-05-r02/flow-006103/request-body.txt",
+      "sha256": "7ff9528f8e35d9998f5c44614f3851268e1fee19e41f79f107fbd809deedbdba"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-06-r02/flow-006141/request-body.txt",
+      "sha256": "fd7983b9b823f9e65295aa26b0f13247f66716a4506565025738ae4cea8d96ee"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-07/flow-006174/request-body.txt",
+      "sha256": "0f7f3d8c689bc9af4073cab32f701017f888cbedbb6a02b2c533a1a3dfe850f1"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-07/flow-006178/request-body.txt",
+      "sha256": "4c34e136740245b651d5125136c7b53186d1149857053d12dba4e889b9b03446"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-08/flow-006211/request-body.txt",
+      "sha256": "baef6841bd1477929c8fa5d838d882d909a9c115411401a794e5cd0d8aaa972c"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-08/flow-006214/request-body.txt",
+      "sha256": "df5eb15e6196c5d93f362f504ed77c098f1fc50bf7ac9f81ddb1d3e8c7da5e77"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-09/flow-006245/request-body.txt",
+      "sha256": "f8ac4870c3b31111f126a8b737b4756c2e2c437a47c5481d71b32657ccd171b7"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-09/flow-006247/request-body.txt",
+      "sha256": "d8e3ff2f9d75968bec342084ddd9b9cbd63515f265b6b20112ca2edc4bbf4c2a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-10/flow-006281/request-body.txt",
+      "sha256": "8e539923ae843d31e05c4ee1bbba1cb233a65e7f6774da393076ef44ba7b699c"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-11/flow-006311/request-body.txt",
+      "sha256": "23171bbdb42b28158162e3e00f56b3b6c088eeecaede176761ecf647ce6976de"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-12/flow-006373/request-body.txt",
+      "sha256": "f5b0b12dcd509652f0c119bd1afbe6dfeef7be238922e70ae34de0be2da5ce12"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-12/flow-006399/request-body.txt",
+      "sha256": "f3b581a8c94c8bc15352845ba2914639dc68b38de856f14ae4a675b01279591e"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-13/flow-006432/request-body.txt",
+      "sha256": "9d7ce1ea688991f9712a2c109dee13d809e122f914199c8bf36d774e7fdc599d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-13/flow-006435/request-body.txt",
+      "sha256": "680335344aab70207977e5054fc6ec407f551be4cab4cb3818d43c5a56cd360d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-compaction-chunk-14/flow-006469/request-body.txt",
+      "sha256": "863128866267d1dcce8cf071f5a9eb0cce24d6b54d9516baab5807cbaa3951cc"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-image-input-r04/flow-004778/request-body.txt",
+      "sha256": "b537436c15932c2409bb376af07b6857904c445c8848144227a5f2f3fdb205c7"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-accept-edits-r02/flow-002522/request-body.txt",
+      "sha256": "0c435f56dd7f3f3b800de33c32c37ee896005406f896f5c9b68a0e56daf4d7b2"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-auto/flow-003064/request-body.txt",
+      "sha256": "f3a62d78971cb46afeacd5116e5a8a90b603dfbb15f4f68770ade6a25df6c998"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-auto/flow-003138/request-body.txt",
+      "sha256": "6b41d73172d0782f0ac1e5810070cd9b409deed5d7aff86afa3d88ae0f5bcdf3"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-auto/flow-003158/request-body.txt",
+      "sha256": "0aac811a544566758ea6f48f2b4abc970dbcfdb8a93e975e2e8d6709bd267807"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-bypass-permissions-r08/flow-004335/request-body.txt",
+      "sha256": "8254d14bc796df89c3d208c12a97e5eec22a946b019701608e8e9ae77a47a6b2"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-bypass-permissions-r08/flow-004433/request-body.txt",
+      "sha256": "3a6683da2731f6ec5ebb60067eacbb0f2fc70350bc44645a4b164cb15fd78e43"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-bypass-permissions-r08/flow-004435/request-body.txt",
+      "sha256": "e12071f6c1f6eb098b41a62c0549e28f85cfbf0c109c52c81b83e161778d37f1"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-manual/flow-002367/request-body.txt",
+      "sha256": "9b345c0b516661cbc8eff711ea790b41f7a27780acc1f7a38791e8add5576caf"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-manual/flow-002368/request-body.txt",
+      "sha256": "f38a20398a47bd1b41a756be5abaa447e9c4a825443eb3684d28505e090d14db"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-plan/flow-002791/request-body.txt",
+      "sha256": "6b8c2d06612c000cb322ba77049c42270b15d0f2633b18f0a57277389638a379"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-plan/flow-002889/request-body.txt",
+      "sha256": "fba84d7d389701413274b05239df28741eb80570b9234424010f60dcb1c32a98"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-plan/flow-002892/request-body.txt",
+      "sha256": "829af1727a7076e9e83ee07f7eaa5602149ce9bcc0bf146652ffc8300f8bd52a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-multi-turn/flow-000634/request-body.txt",
+      "sha256": "56d0a822a185d481f3e5b659031ec97a7c8a2f45e60e2d51119ae66e65a13085"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-single-turn/flow-000571/request-body.txt",
+      "sha256": "1e47d2abe8a0c32f029eeba28f25f264672ec4f36f2c3745d86d849b68060bd6"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-single-turn/flow-000572/request-body.txt",
+      "sha256": "9e1509c510865a878548c792df2baff2cc412af72ba0ee097e4a307957389723"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-startup-approval-auto-post-normal-r03-submit-tool-request/flow-003619/request-body.txt",
+      "sha256": "313ba2a63e14f6643759c695bf39f1a45c081ee1f3e571e422ce54cdbc9112de"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-startup-approval-bypass-permissions-pre-restart-submit-tool-request/flow-006570/request-body.txt",
+      "sha256": "f1c53b4be247243a248dae65eb0ee08027fa5f2aa1e559a282fc40631f98103d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-subagent-r04/flow-004923/request-body.txt",
+      "sha256": "90808063c50e36ba89e880048304ceafc2a7e974644286ddd37dce5075f2dc45"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-thinking/flow-000651/request-body.txt",
+      "sha256": "d00749c3a42328df84487df7f726daa6796dcee87965f20e30dfeab960ca5c2c"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-thinking/flow-000663/request-body.txt",
+      "sha256": "0b5c25e8198d9b76aea02caeed2130bb62f8e89ee5c8b16016c34ca5d0780ecb"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-tool-read-advanced-replicate-r04/flow-004497/request-body.txt",
+      "sha256": "2d1ef191f3af88eb100c4e26ec39791413ea867edecf3ea75471f8a293d0220c"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-tool-read-advanced-replicate-r04/flow-004498/request-body.txt",
+      "sha256": "8548b4a5ae42114eb791b25c23e66491312f98e9db841da48fff3f54d7d7e012"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-tool-write-advanced-replicate-r04/flow-004598/request-body.txt",
+      "sha256": "288afa1f3c7e3ddbba98c41500454c7164752b5fb6af27af4a1af6d6a824cc28"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-tool-write/flow-000692/request-body.txt",
+      "sha256": "c0bb731261b067cc5d57b59465e6ab3f3f7549078ed0a1f3906da15a2bf7558d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-tool-write/flow-000699/request-body.txt",
+      "sha256": "8e6d2487b7762171eede1938d04295efcc1282c655386c5478ea5194bdc7b64f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-web-search-r04/flow-004668/request-body.txt",
+      "sha256": "cc81120340555220c88218bc750b804de8eb5785ea41a27841cde6e06f21db1a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r01-offline-window-10s/flow-005021/request-body.txt",
+      "sha256": "391ad2033751d56431d335949cbbc00c20740fa7e53d2f965fcf1865969ec694"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r01-offline-window-10s/flow-005034/request-body.txt",
+      "sha256": "b7214ef99c46172c480c4a051aa424dc91cccb6001dd728b800d99560ff5a366"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r01-post-recovery-idle-30s/flow-005133/request-body.txt",
+      "sha256": "e515aee2847e8fefb137ef803b1b82ef657d73c0a007ab7e5e3094ed85684991"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r01-submit-while-offline/flow-005003/request-body.txt",
+      "sha256": "391ad2033751d56431d335949cbbc00c20740fa7e53d2f965fcf1865969ec694"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r02-offline-window-30s/flow-005215/request-body.txt",
+      "sha256": "f21d462aff89352a28ba38a45eb410a35625e406e0a613af43c5033f5a4355c9"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r02-offline-window-30s/flow-005231/request-body.txt",
+      "sha256": "9c51c14c2c5f3f2d8569e61ece834064468f740aafec4edd5554ae89c65c0d36"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r02-offline-window-30s/flow-005233/request-body.txt",
+      "sha256": "9c51c14c2c5f3f2d8569e61ece834064468f740aafec4edd5554ae89c65c0d36"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r02-offline-window-30s/flow-005236/request-body.txt",
+      "sha256": "9c51c14c2c5f3f2d8569e61ece834064468f740aafec4edd5554ae89c65c0d36"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r02-post-recovery-idle-30s/flow-005308/request-body.txt",
+      "sha256": "dcfb9a4a8bb3c6fca4b4d42cec3c5ce7463961e7552ca0d2f2d265f07bd123f4"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-offline-window-60s/flow-005418/request-body.txt",
+      "sha256": "7e139084c141b889c2f04d72db9851b1fa29110806ed2899ccff6f05b2ced1fe"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-offline-window-60s/flow-005478/request-body.txt",
+      "sha256": "609ebc849914d6872f090f55e50b8c3f3b37ac26b7a94ee99b409c28c842c289"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-offline-window-60s/flow-005480/request-body.txt",
+      "sha256": "8f17e374b6625b1d934c59063147d3ec8ba241d84da714820f23dad14c473c7f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-offline-window-60s/flow-005484/request-body.txt",
+      "sha256": "8f17e374b6625b1d934c59063147d3ec8ba241d84da714820f23dad14c473c7f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-offline-window-60s/flow-005487/request-body.txt",
+      "sha256": "8f17e374b6625b1d934c59063147d3ec8ba241d84da714820f23dad14c473c7f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-offline-window-60s/flow-005491/request-body.txt",
+      "sha256": "8f17e374b6625b1d934c59063147d3ec8ba241d84da714820f23dad14c473c7f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-retry-r03-post-recovery-idle-30s/flow-005586/request-body.txt",
+      "sha256": "0e1fdef2c7e8c67d21fec63736d7eb9ce68c94e26ba47fd4497c66fc9dfe59d4"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-session-base-first-turn-r03/flow-005633/request-body.txt",
+      "sha256": "26fa2c172f2ac24ba7ebfd653e1987ada180dd90a6d3f139ed95dcc6dd8f8e87"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-session-resume-turn-r03/flow-005765/request-body.txt",
+      "sha256": "d93e6a5cfac9d4fb44ae2be482b3194ac111656226644a032564bfe63c5d8920"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-sonnet-r02-single-turn/flow-000861/request-body.txt",
+      "sha256": "02107d78959d05257715f3b7bc5aa9c5076f77de6ec1baed398a10e4315c20af"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-sonnet-r02-single-turn/flow-000862/request-body.txt",
+      "sha256": "c949bfaf916d3f2b3e2ec32ed092c8cc068aa8e6ebc03e5978292897b954b3ef"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-sonnet-r02-thinking/flow-000889/request-body.txt",
+      "sha256": "84b061867878eb8a1c0fd53a6c2a56239b31942d46b93355fbc9d423e75e76be"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-sonnet-r02-tool-read/flow-000912/request-body.txt",
+      "sha256": "71ab1fffe85eab7f2a755fa50f114593a5d4896e7115d82483b0364f0b78c412"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-sonnet-r02-tool-read/flow-000914/request-body.txt",
+      "sha256": "b052ba994f953b2cc3d12f2ed829486306f7894343cc9cde67b2d6228b4b74c4"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-sonnet-r02-tool-write/flow-000938/request-body.txt",
+      "sha256": "f19643946b868193c61077356e0b19c538b977f00456898d72520e8cacbed8bd"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-auto-crash-restart-recovery-bootstrap-3m/flow-003860/request-body.txt",
+      "sha256": "135d48b9f90fac1c8ee995eb455b963eb788601f180d72d80234807218dc8e7d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-auto-crash-restart-recovery-bootstrap-3m/flow-003862/request-body.txt",
+      "sha256": "87fe1d6a705cbe85bd5e4a0d892ac4e590b78fee1a5301793290d3dd37f47eeb"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-auto-normal-restart-bootstrap-3m/flow-003590/request-body.txt",
+      "sha256": "8de43f35847370eaac1956710bf99b73b4a3d85be425fc43f860f0e6f9021443"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-auto-normal-restart-bootstrap-3m/flow-003592/request-body.txt",
+      "sha256": "fe89bd895062d4ea41d2f0c8611a9ad56b80736cade7de7d51502ea7ee5b164f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-bypass-permissions-crash-restart-recovery-bootstrap-3m/flow-007098/request-body.txt",
+      "sha256": "e3c1a783730d2234a2f4e80930d0545686a86e9c44d574fb1c37a93291aac3cf"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-bypass-permissions-crash-restart-recovery-bootstrap-3m/flow-007100/request-body.txt",
+      "sha256": "263fedc5a165ff0a9babc11d7c04bcfc0faa0466feb927619d1db5aafaac1e25"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-bypass-permissions-normal-restart-bootstrap-3m/flow-006850/request-body.txt",
+      "sha256": "7bceeab3ca178a1b7d4e307aeaa1e0a86f0a57e3c4a9f8e372fb8c81f7b373e5"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-startup-approval-bypass-permissions-normal-restart-bootstrap-3m/flow-006852/request-body.txt",
+      "sha256": "8ecfba1dbe9e96137b78bd04cccd7ae3d4e6624493c78846c7b3c4522ca2e919"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-steady-state-r03-bootstrap-after-stopped-deep-idle-3m/flow-008912/request-body.txt",
+      "sha256": "34999324f46f444e273db5872718a3c827090db7af0a3cd71c1eefe2a22ffcec"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-steady-state-r03-bootstrap-after-stopped-deep-idle-3m/flow-009042/request-body.txt",
+      "sha256": "986e39611e4d96710688214c0792bfdbfdbea0b998af23f4d2b277bbd2cfa5da"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r01-bootstrap-after-normal-quit-3m/flow-009198/request-body.txt",
+      "sha256": "ad6489ccff21cff34154e9f1b95622715f1d1ffeaf2cb1b6e340ef30a65d4403"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r01-bootstrap-after-normal-quit-3m/flow-009202/request-body.txt",
+      "sha256": "020d2d5b2553fb4fa5ff03ef61b1094260813293d4227e57012eb6f7867dda91"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r01-crash-recovery-bootstrap-3m/flow-009274/request-body.txt",
+      "sha256": "af6df73439af66b825ef23bb667157f6288410de79309b59632bd2f1fb3799b2"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r01-crash-recovery-bootstrap-3m/flow-009279/request-body.txt",
+      "sha256": "50cd2bcda285385246438a82f9aa505aedab7902d1435f93325295812a837326"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r02-bootstrap-after-normal-quit-3m/flow-009726/request-body.txt",
+      "sha256": "29795cbb5d446a338a0146e6c7eed2ad76b6645e41605b38eb2289d181e540c4"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r02-bootstrap-after-normal-quit-3m/flow-009730/request-body.txt",
+      "sha256": "767daae826463ece44198829c2560a984381132a79ef499e660d139681cb04f6"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r02-crash-recovery-bootstrap-3m/flow-009795/request-body.txt",
+      "sha256": "fc6bde3e1d7846b6631afef705bf263d92c922d4951074378451ae1c04ce67d8"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r02-crash-recovery-bootstrap-3m/flow-009800/request-body.txt",
+      "sha256": "e028783e09e39e31c3983b79b7c327cd08efea8f2417850dc3e3297ae8a85433"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r03-bootstrap-after-normal-quit-3m/flow-010027/request-body.txt",
+      "sha256": "3336eba3c8229bc84409b7c1750555b3b83f4349f851e538dd4b5174c53d8389"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r03-bootstrap-after-normal-quit-3m/flow-010029/request-body.txt",
+      "sha256": "049a5221ccb618f18d69050711a42738c94ab4b156ed466c79a2470b10360bba"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r03-crash-recovery-bootstrap-3m/flow-010102/request-body.txt",
+      "sha256": "b71187820f20dcfcc6cb48b4322d5a02070e94d1037a4e14d63284b6d06b4196"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r03-crash-recovery-bootstrap-3m/flow-010106/request-body.txt",
+      "sha256": "9f7061c7274119e6da5b68dfb02348f3eaf919b16ae466c33658bc1428307b6d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r04-bootstrap-after-normal-quit-3m/flow-010558/request-body.txt",
+      "sha256": "c9782deef6ed7d2e8f93a17ece8c54a1f9563989d71d16d9e38be6eb8dbfb637"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r04-bootstrap-after-normal-quit-3m/flow-010562/request-body.txt",
+      "sha256": "5ad7a1079ce808bee2fd8330ac8532890d89de7d08e098f9b7a628c4a01b3b4b"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r04-crash-recovery-bootstrap-3m/flow-010654/request-body.txt",
+      "sha256": "de92db28ec144b9d763acb8214495cedf9695c19b79919b7f0f4212d9cfa425a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r04-crash-recovery-bootstrap-3m/flow-010659/request-body.txt",
+      "sha256": "a2989b4b56baee7696209bae5ef54cc56b5912ad85c90c23e652a5d1c9c85c09"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r05-bootstrap-after-normal-quit-3m/flow-010904/request-body.txt",
+      "sha256": "efcffeac43f77ec274acf2e64e1f159cf740f74191d620ee8a1b774d98a60ca8"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r05-bootstrap-after-normal-quit-3m/flow-010908/request-body.txt",
+      "sha256": "1c1b1973872adb8b8043af03245b287412a656ff7937ed8f77a93c30690e2511"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r05-crash-recovery-bootstrap-3m/flow-010986/request-body.txt",
+      "sha256": "ead51b2848614d87b3be0f889b5f4b337024e256d4b22d1f82115084d0fd3bec"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-transition-r05-replicate-r05-crash-recovery-bootstrap-3m/flow-010992/request-body.txt",
+      "sha256": "510bc7abe05c5f09ba49c812413ef8a555b02df8a341e77ca15aa058a3ea3076"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-compaction-new-chat-r02/flow-005848/request-body.txt",
+      "sha256": "eb3bf321cf0e9975206d3843ee942fef5ce4b1cdebe0a51134cae476b0608469"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-compaction-paste-chunk-12/flow-006371/request-body.txt",
+      "sha256": "2c78ced32add26ba6f9a56d349601c22556d89f731902d77862ff05abec127a1"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-compaction-select-environment-test-r02/flow-005851/request-body.txt",
+      "sha256": "10c24685359ee647a2e722da1fbeb2e10c184373e4d796fa3d0d138281254bd0"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-compaction-usage-after-chunk-12/flow-006402/request-body.txt",
+      "sha256": "3459f0c17630c24439010461fc50bfe876c32e9cb434d8f81639ea477f2ab03a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-haiku-select-model/flow-000990/request-body.txt",
+      "sha256": "7e03458bb21fa3eafda2ca614f37755de4f1563613b9cfa1f2280d402d0a1ec9"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-opus-46-select-environment-test/flow-001552/request-body.txt",
+      "sha256": "09627f15d8f04fa91abe7ca6ad5c4692057d810d8367bd41a30e31dfe463d69b"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-opus-46-select-model/flow-001560/request-body.txt",
+      "sha256": "9be0fc6af4ef8bcc644078ca6d2aaeeaed4deccd7d9283784d908de010807d34"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-opus-47-new-chat/flow-001384/request-body.txt",
+      "sha256": "affc5044d70777579be80e659910fd685ea3a68f655da49b41c94d0eac33dbb5"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-opus-47-select-environment-test/flow-001388/request-body.txt",
+      "sha256": "53a4da50e34b497c33e1cad9c28b36dfcc7f20ffdae16c19bf77340806f4e02f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-opus-48-select-environment-test/flow-001235/request-body.txt",
+      "sha256": "d49bfaccd788ac4eaf8fa7a6eb767c5aabb40f530a50afbac872c9224c2cc80a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-opus-48-select-model/flow-001242/request-body.txt",
+      "sha256": "afb37ea70dfd27aa5a4dbb2294532eea7bf5401f79c2af5cfd31660b5129bd60"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-sonnet-46-r03-new-chat/flow-001745/request-body.txt",
+      "sha256": "d4dc35ff475e40ed186359e12552aa99ae4e15319d5fb812ac036d3ba2172efd"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-historical-sonnet-46-r03-select-environment-test/flow-001750/request-body.txt",
+      "sha256": "ccba53c5416fef7d72e6cf2405a4fbbf7efc4f5f164660322a843fee3be37df1"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-image-new-chat-r04/flow-004744/request-body.txt",
+      "sha256": "c2bf5c9b1b0b66f837421cef91d2783037b5342cfba6cc1a9262d31faa7129dd"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-image-new-chat-r04/flow-004745/request-body.txt",
+      "sha256": "6e3bcd1929f301d8013afcc08af963275487aea813eb2dcb76f365ffcba41f6f"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-auto-select-environment-test/flow-002915/request-body.txt",
+      "sha256": "dbea177915ce9a51b030417b85e1691a625351506a5f2ce4c2b0967fa50260e2"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-auto-select-model-opus/flow-002919/request-body.txt",
+      "sha256": "d3a3a75ae5117cdd1629968d1ba84998965db5bf147b2a6ee2db0e351de7d544"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-bypass-permissions-r08-select-environment-test/flow-004000/request-body.txt",
+      "sha256": "3cbe136c1f667046b9ef1bcce9e45c0cf5d7754fbd2b72f82cfadfa5bcba3fd3"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-bypass-permissions-r08-select-model-opus/flow-004006/request-body.txt",
+      "sha256": "86f825011e7cf194f8c9777c9848197f180971c003040b42b177be75d700a858"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-manual-new-chat/flow-001903/request-body.txt",
+      "sha256": "ae63c5d5832186384a41f995ce0fe4cd3c4ac088d1a618220d5881d74cc9efec"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-manual-select-environment-test/flow-001907/request-body.txt",
+      "sha256": "8b032f854d5509b00be36160b3adf121eb3abddd9b0c6bdf13640f03767c2ef0"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-plan-select-environment-test/flow-002548/request-body.txt",
+      "sha256": "24fe8940eec8c189fbef7b3b562b05e31f1da91f8d2bc0f46e9f6c3154ecc7be"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-mode-plan-select-model-opus/flow-002552/request-body.txt",
+      "sha256": "0ecc1a53377722122dd3bd2444b30f01f6b05e25e243571f2ff3fef6091c704d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-opus-fast-mode-enable/flow-000718/request-body.txt",
+      "sha256": "3b89eb2a89f92fcce22d60f14272e6fa48987b4ea7abf3f9bb7d015eb7506dee"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-retry-r01-proxy-upstream-offline-trigger/flow-004999/request-body.txt",
+      "sha256": "391ad2033751d56431d335949cbbc00c20740fa7e53d2f965fcf1865969ec694"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-session-away-new-chat-r03/flow-005730/request-body.txt",
+      "sha256": "bcba6ca1482d47d742cec4289a653293a3abd8846922eb3f30aa40b9c10e6973"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-session-base-select-environment-test-r03/flow-005610/request-body.txt",
+      "sha256": "f1db05519c095a57f935ffcbcfd70f7e1002aa19f71889ad0171b09114b63c74"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-sonnet-r02-new-chat/flow-000760/request-body.txt",
+      "sha256": "9574bee39296145a0cb00eedb7fabb989f46b06a282a31d7686975180303e932"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-sonnet-r02-select-model/flow-000770/request-body.txt",
+      "sha256": "39dde2d5fdee2ba0d45a22fe2683ca9d7b22e038f827cf1811f2f8687fa3468d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-auto-post-crash-permission-outcome/flow-003968/request-body.txt",
+      "sha256": "4dfdc52361221d6440d9ce2c6779d866881fc886e44edae9893dca561921de8a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-auto-post-crash-permission-outcome/flow-003969/request-body.txt",
+      "sha256": "d056d4167f5eff26efcd7fab1096c822fc573ca9c8d5911e02600fae16ec3d9a"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-auto-post-normal-r03-conditional-permission-resolution/flow-003723/request-body.txt",
+      "sha256": "ffd0235ee00f7c7c9a6e3388e9bf07c25745d33d0ee107aa22b206f87999a725"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-auto-post-normal-r03-permission-outcome/flow-003719/request-body.txt",
+      "sha256": "60e06e67eb5bf6a839ce7022b1c819e6a31c528535dbb2e41a8b9c4de1c23a1d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-auto-pre-restart-r04-permission-outcome/flow-003360/request-body.txt",
+      "sha256": "f17efc25b71468920374240fb5fe328e1e45fe62a1d35f6559d656ef481f2e6c"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-arm-select-environment-test/flow-006501/request-body.txt",
+      "sha256": "5f0a6934d1d01fe4b46d0d12ae967fded8b4549d9ea36899fa65d9c7f06a2e32"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-arm-select-model-opus/flow-006505/request-body.txt",
+      "sha256": "73621b71d70353884c805b6d4c1605ac6b9a575bdafc65850bb4ef6c644e0828"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-post-crash-permission-outcome/flow-007157/request-body.txt",
+      "sha256": "59a8981f14c75617c819d144c060a4902617d19e25ffd777e69d38a1d82010a6"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-post-crash-permission-outcome/flow-007214/request-body.txt",
+      "sha256": "a9dd609fc3a6fe10b26b97268b6d2f372c399e39be3d3ccdda0566bcb8f3ff47"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-post-crash-restore-manual-trigger/flow-007223/request-body.txt",
+      "sha256": "ff369302221edc0ebbfcb815dc2691bf543d45fba4273e2e4c23eead30570590"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-post-normal-permission-outcome/flow-006925/request-body.txt",
+      "sha256": "5cdfcf4c07f063de19043b27e9dd2a765b3987ef393eb0607f019146d970e4e5"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-post-normal-permission-outcome/flow-006927/request-body.txt",
+      "sha256": "c86775137e9ac6d84a12079ef5721f179d8623fcb079a5169cffb3096d23a608"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-startup-approval-bypass-permissions-pre-restart-permission-outcome/flow-006629/request-body.txt",
+      "sha256": "f45a3cb76122ecaf37b96751d2cf6362708979d472b1c3975fc48cde9ed2520d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-subagent-select-environment-test-r04/flow-004869/request-body.txt",
+      "sha256": "45239513e54625b0d747c4cb322d804a56b33a55a757bf8c85d4a93493636f44"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-subagent-select-environment-test-r04/flow-004872/request-body.txt",
+      "sha256": "0e880531b229bfed1bb0569c53e2203bfabbc8b6590a353d0a18371c6751ef58"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-web-search-new-chat-r04/flow-004623/request-body.txt",
+      "sha256": "2bd7844fd9d966e5c72eca445b726e245f84206c95d79bab89b171d361a7c91d"
+    },
+    {
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-ui-web-search-new-chat-r04/flow-004625/request-body.txt",
+      "sha256": "77bab89f36325176393a5756869207a998a8ca350a2e70bda12096c90e15ffbf"
+    }
+  ],
+  "events": [
+    {
+      "event_name": "/epitaxy/:redacted",
+      "segment_type": "page",
+      "fact": "renderer_session_page",
+      "roles": [
+        "segment"
+      ],
+      "gateway_moment": "session_first_turn",
+      "condition": "renderer navigates to /epitaxy/<sessionId> when a new local session opens (analytics.js page call; the id segment is redacted by the renderer itself)",
+      "lifecycle_position": "first call of the session-open batch: before claudeai.desktop.code.landing.session_created, claudeai.epitaxy.session.opened and claudeai.epitaxy.session.meta_resolved",
+      "boundary": null,
+      "occurrences": {
+        "segment": 25,
+        "desktop-event-logging": 0
+      },
+      "occurrence_flows": {
+        "segment": 25,
+        "desktop-event-logging": 0
+      },
+      "property_keys": [
+        "path",
+        "referrer",
+        "search",
+        "url",
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "name",
+        "canonical_path",
+        "canonical_url"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 0
+      },
+      "dominant_order_share": {
+        "segment": "25/25",
+        "desktop-event-logging": null
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "path": [
+          "string"
+        ],
+        "referrer": [
+          "string"
+        ],
+        "search": [
+          "string"
+        ],
+        "url": [
+          "string"
+        ],
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "canonical_path": [
+          "string"
+        ],
+        "canonical_url": [
+          "string"
+        ]
+      },
+      "constants": {
+        "path": "/epitaxy/:redacted",
+        "referrer": "",
+        "search": "",
+        "url": "https://claude.ai/epitaxy/:redacted",
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "name": "/epitaxy/:redacted",
+        "canonical_path": "/epitaxy/:redacted",
+        "canonical_url": "https://claude.ai/epitaxy/:redacted"
+      },
+      "value_derivation": {
+        "path": "constant",
+        "referrer": "constant empty string",
+        "search": "constant empty string",
+        "url": "constant",
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "name": "constant",
+        "canonical_path": "constant",
+        "canonical_url": "constant"
+      },
+      "dual_fire_suffix_keys": null,
+      "desktop_path": null,
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.epitaxy.session.opened",
+      "segment_type": "track",
+      "fact": "renderer_session_opened",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "session_first_turn",
+      "condition": "renderer session view mounted for a new local session",
+      "lifecycle_position": "after the /epitaxy/:redacted page call and claudeai.desktop.code.landing.session_created; before claudeai.epitaxy.session.meta_resolved",
+      "boundary": null,
+      "occurrences": {
+        "segment": 24,
+        "desktop-event-logging": 46
+      },
+      "occurrence_flows": {
+        "segment": 24,
+        "desktop-event-logging": 28
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_type",
+        "renderer_surface"
+      ],
+      "property_key_order_variants": {
+        "segment": 2,
+        "desktop-event-logging": 2
+      },
+      "dominant_order_share": {
+        "segment": "23/24",
+        "desktop-event-logging": "45/46"
+      },
+      "outlier_keys": [
+        "is_mobile_web"
+      ],
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "session_type": [
+          "string"
+        ],
+        "renderer_surface": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "session_type": "local",
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "version": "constant",
+        "session_type": "constant (local Desktop session)",
+        "renderer_surface": "constant"
+      },
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy/$sessionId",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.epitaxy.session.meta_resolved",
+      "segment_type": "track",
+      "fact": "renderer_session_meta_resolved",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "session_first_turn",
+      "condition": "renderer resolved the session metadata of a new local session",
+      "lifecycle_position": "immediately after claudeai.epitaxy.session.opened; before claudeai.code.session.first_text / ttft",
+      "boundary": null,
+      "occurrences": {
+        "segment": 25,
+        "desktop-event-logging": 46
+      },
+      "occurrence_flows": {
+        "segment": 25,
+        "desktop-event-logging": 28
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_id",
+        "session_type",
+        "session_origin",
+        "is_agent_owned",
+        "project_enabled",
+        "renderer_surface"
+      ],
+      "property_key_order_variants": {
+        "segment": 2,
+        "desktop-event-logging": 2
+      },
+      "dominant_order_share": {
+        "segment": "24/25",
+        "desktop-event-logging": "45/46"
+      },
+      "outlier_keys": [
+        "is_mobile_web"
+      ],
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "session_id": [
+          "string"
+        ],
+        "session_type": [
+          "string"
+        ],
+        "session_origin": [
+          "null"
+        ],
+        "is_agent_owned": [
+          "boolean"
+        ],
+        "project_enabled": [
+          "boolean"
+        ],
+        "renderer_surface": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "session_type": "local",
+        "session_origin": null,
+        "is_agent_owned": false,
+        "project_enabled": false,
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "version": "constant",
+        "session_id": "rendererRecordID(facts)",
+        "session_type": "constant",
+        "session_origin": "constant null",
+        "is_agent_owned": "constant",
+        "project_enabled": "constant",
+        "renderer_surface": "constant"
+      },
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy/$sessionId",
+      "route_markers": null
+    },
+    {
+      "event_name": "page_viewed",
+      "segment_type": null,
+      "fact": "renderer_page_viewed",
+      "roles": [
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "activation_and_session_first_turn",
+      "condition": "Desktop event-logging copy of the /epitaxy (activation) and /epitaxy/:redacted (session open) page calls; emitted only after the Segment page call was persisted, so _dual_fire is true (the 5/54 captured shell copies with _dual_fire false have no Segment twin and are not reproduced)",
+      "lifecycle_position": "Desktop copy of a renderer page call, right after the Segment page call of the same route",
+      "boundary": null,
+      "occurrences": {
+        "segment": 0,
+        "desktop-event-logging": 104
+      },
+      "occurrence_flows": {
+        "segment": 0,
+        "desktop-event-logging": 62
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "_dual_fire",
+        "url",
+        "path",
+        "page_name",
+        "anonymous_id",
+        "service_name",
+        "canonical_path",
+        "canonical_url"
+      ],
+      "property_key_order_variants": {
+        "segment": 0,
+        "desktop-event-logging": 2
+      },
+      "dominant_order_share": {
+        "segment": null,
+        "desktop-event-logging": "103/104"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "_dual_fire": [
+          "boolean"
+        ],
+        "url": [
+          "string"
+        ],
+        "path": [
+          "string"
+        ],
+        "page_name": [
+          "string"
+        ],
+        "anonymous_id": [
+          "string"
+        ],
+        "service_name": [
+          "string"
+        ],
+        "canonical_path": [
+          "string"
+        ],
+        "canonical_url": [
+          "string"
+        ]
+      },
+      "constants": {
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "service_name": "claude_ai"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "_dual_fire": "true (Segment twin persisted)",
+        "url": "route marker (see route_markers)",
+        "path": "route marker",
+        "page_name": "route marker",
+        "anonymous_id": "Segment anonymousId of the page call",
+        "service_name": "constant",
+        "canonical_path": "route marker",
+        "canonical_url": "route marker"
+      },
+      "dual_fire_suffix_keys": null,
+      "desktop_path": null,
+      "route_markers": {
+        "/epitaxy": {
+          "occurrences": 54,
+          "url": "https://claude.ai/epitaxy",
+          "path": "/epitaxy",
+          "page_name": "/epitaxy",
+          "canonical_path": "/epitaxy",
+          "canonical_url": "https://claude.ai/epitaxy",
+          "dual_fire_true": 49,
+          "dual_fire_false": 5
+        },
+        "/epitaxy/$sessionId": {
+          "occurrences": 46,
+          "url": "https://claude.ai/epitaxy/$sessionId",
+          "path": "/epitaxy/$sessionId",
+          "page_name": "/epitaxy/$sessionId",
+          "canonical_path": "/epitaxy/*",
+          "canonical_url": "https://claude.ai/epitaxy/*",
+          "dual_fire_true": 46,
+          "dual_fire_false": 0
+        }
+      }
+    },
+    {
+      "event_name": "/epitaxy",
+      "segment_type": "page",
+      "fact": "renderer_shell_page",
+      "roles": [
+        "segment"
+      ],
+      "gateway_moment": "activation",
+      "condition": "renderer shell page call once per application activation (registerRendererActivationHook after the Segment identify)",
+      "lifecycle_position": "renderer shell load, next to the Segment identify of the application activation",
+      "boundary": null,
+      "occurrences": {
+        "segment": 32,
+        "desktop-event-logging": 0
+      },
+      "occurrence_flows": {
+        "segment": 32,
+        "desktop-event-logging": 0
+      },
+      "property_keys": [
+        "path",
+        "referrer",
+        "search",
+        "url",
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "name",
+        "canonical_path",
+        "canonical_url"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 0
+      },
+      "dominant_order_share": {
+        "segment": "32/32",
+        "desktop-event-logging": null
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "path": [
+          "string"
+        ],
+        "referrer": [
+          "string"
+        ],
+        "search": [
+          "string"
+        ],
+        "url": [
+          "string"
+        ],
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "canonical_path": [
+          "string"
+        ],
+        "canonical_url": [
+          "string"
+        ]
+      },
+      "constants": {
+        "path": "/epitaxy",
+        "referrer": "",
+        "search": "",
+        "url": "https://claude.ai/epitaxy",
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "name": "/epitaxy",
+        "canonical_path": "/epitaxy",
+        "canonical_url": "https://claude.ai/epitaxy"
+      },
+      "value_derivation": {
+        "path": "constant",
+        "referrer": "constant empty string",
+        "search": "constant empty string",
+        "url": "constant",
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "name": "constant",
+        "canonical_path": "constant",
+        "canonical_url": "constant"
+      },
+      "dual_fire_suffix_keys": null,
+      "desktop_path": null,
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.epitaxy.page.viewed",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "shell inventory at activation: total_session_count equals local_session_count in 54/54 occurrences (5..33, never 0), i.e. the persisted sidebar session list of the account; the retention semantics of the gateway per-account session markers were not verified in the time box, so the count has no pinned gateway source; not emitted",
+      "occurrences": {
+        "segment": 37,
+        "desktop-event-logging": 54
+      },
+      "occurrence_flows": {
+        "segment": 37,
+        "desktop-event-logging": 43
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "attention_session_count",
+        "pr_count",
+        "project_count",
+        "total_session_count",
+        "local_session_count",
+        "remote_session_count",
+        "bridge_session_count",
+        "running_session_count",
+        "archived_session_count",
+        "panel_count",
+        "renderer_surface"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 1
+      },
+      "dominant_order_share": {
+        "segment": "37/37",
+        "desktop-event-logging": "54/54"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "attention_session_count": [
+          "number"
+        ],
+        "pr_count": [
+          "number"
+        ],
+        "project_count": [
+          "number"
+        ],
+        "total_session_count": [
+          "number"
+        ],
+        "local_session_count": [
+          "number"
+        ],
+        "remote_session_count": [
+          "number"
+        ],
+        "bridge_session_count": [
+          "number"
+        ],
+        "running_session_count": [
+          "number"
+        ],
+        "archived_session_count": [
+          "number"
+        ],
+        "panel_count": [
+          "number"
+        ],
+        "renderer_surface": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "attention_session_count": 0,
+        "pr_count": 0,
+        "project_count": 0,
+        "remote_session_count": 0,
+        "bridge_session_count": 0,
+        "running_session_count": 0,
+        "archived_session_count": 0,
+        "panel_count": 1,
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": null,
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.desktop.code.landing.session_created",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "has_repo (git repository check of the landing directory) has no gateway source and version differs between captures (2 and 3); not emitted",
+      "occurrences": {
+        "segment": 24,
+        "desktop-event-logging": 46
+      },
+      "occurrence_flows": {
+        "segment": 24,
+        "desktop-event-logging": 28
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_type",
+        "model",
+        "environment_kind",
+        "has_repo",
+        "is_scratch",
+        "message_length",
+        "post_band_switch",
+        "renderer_surface"
+      ],
+      "property_key_order_variants": {
+        "segment": 2,
+        "desktop-event-logging": 2
+      },
+      "dominant_order_share": {
+        "segment": "23/24",
+        "desktop-event-logging": "45/46"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "session_type": [
+          "string"
+        ],
+        "model": [
+          "string"
+        ],
+        "environment_kind": [
+          "string"
+        ],
+        "has_repo": [
+          "boolean"
+        ],
+        "is_scratch": [
+          "boolean"
+        ],
+        "message_length": [
+          "number"
+        ],
+        "post_band_switch": [
+          "boolean"
+        ],
+        "renderer_surface": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "session_type": "local",
+        "environment_kind": "local",
+        "has_repo": true,
+        "is_scratch": false,
+        "post_band_switch": false,
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": null,
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.code.permission_mode.changed",
+      "segment_type": "track",
+      "fact": "renderer_permission_mode_changed",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "request_permission_mode_changed",
+      "condition": "a later prompt-starting main request of a session carries a different PermissionMode than the previous prompt (renderer mode dropdown; change_method mode_dropdown and surface ccd in 7/7 occurrences); Desktop copy path /epitaxy",
+      "lifecycle_position": "between two prompts of a session, before the next claudeai.code.message.submitted",
+      "boundary": null,
+      "occurrences": {
+        "segment": 3,
+        "desktop-event-logging": 4
+      },
+      "occurrence_flows": {
+        "segment": 3,
+        "desktop-event-logging": 4
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "previous_mode",
+        "current_mode",
+        "change_method",
+        "renderer_surface"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 1
+      },
+      "dominant_order_share": {
+        "segment": "3/3",
+        "desktop-event-logging": "4/4"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "previous_mode": [
+          "string"
+        ],
+        "current_mode": [
+          "string"
+        ],
+        "change_method": [
+          "string"
+        ],
+        "renderer_surface": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "ccd",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "change_method": "mode_dropdown",
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant ccd",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "version": "constant",
+        "previous_mode": "PermissionMode of the previous prompt of the session",
+        "current_mode": "PermissionMode of this request",
+        "change_method": "constant",
+        "renderer_surface": "constant"
+      },
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.epitaxy.session.pending_turn_stuck_idle",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "reactive renderer watchdog (pending_age_ms about 30000 with meta_is_running true) fired when a pending turn shows no progress; the gateway has no such watchdog; not emitted",
+      "occurrences": {
+        "segment": 4,
+        "desktop-event-logging": 16
+      },
+      "occurrence_flows": {
+        "segment": 4,
+        "desktop-event-logging": 8
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_id",
+        "session_type",
+        "pending_age_ms",
+        "meta_is_running",
+        "renderer_surface"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 1
+      },
+      "dominant_order_share": {
+        "segment": "4/4",
+        "desktop-event-logging": "16/16"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "session_id": [
+          "string"
+        ],
+        "session_type": [
+          "string"
+        ],
+        "pending_age_ms": [
+          "number"
+        ],
+        "meta_is_running": [
+          "boolean"
+        ],
+        "renderer_surface": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "session_type": "local",
+        "meta_is_running": true,
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": null,
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy/$sessionId",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.code.sessions.heartbeat_check_batch",
+      "segment_type": "track",
+      "fact": "renderer_sessions_heartbeat_check_batch",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "visible_code_workbench_periodic_tick",
+      "condition": "a visible management Code workbench tick asks the server to scan the exact account registry; the client supplies no counters",
+      "lifecycle_position": "visible Code workbench periodic tick after the owner-scoped session list is available",
+      "boundary": null,
+      "occurrences": {
+        "segment": 1,
+        "desktop-event-logging": 1
+      },
+      "occurrence_flows": {
+        "segment": 1,
+        "desktop-event-logging": 1
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "trigger",
+        "sent",
+        "fresh",
+        "probe_dispatched",
+        "no_worker",
+        "recently_checked",
+        "unknown"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 1
+      },
+      "dominant_order_share": {
+        "segment": "1/1",
+        "desktop-event-logging": "1/1"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "trigger": [
+          "string"
+        ],
+        "sent": [
+          "number"
+        ],
+        "fresh": [
+          "number"
+        ],
+        "probe_dispatched": [
+          "number"
+        ],
+        "no_worker": [
+          "number"
+        ],
+        "recently_checked": [
+          "number"
+        ],
+        "unknown": [
+          "number"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "trigger": "tick",
+        "sent": 8,
+        "fresh": 0,
+        "probe_dispatched": 7,
+        "no_worker": 1,
+        "recently_checked": 0,
+        "unknown": 0
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle DesktopVersion without .0",
+        "version": "constant",
+        "trigger": "constant tick",
+        "sent": "number of owner-scoped durable records",
+        "fresh": "measured fresh classification only (zero while no renderer freshness cache exists)",
+        "probe_dispatched": "records with a validated live Host",
+        "no_worker": "records without a live Host",
+        "recently_checked": "measured recent-check classification only (zero while no renderer check cache exists)",
+        "unknown": "records whose live Host identity cannot be validated"
+      },
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.code.sidebar.session_opened",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "UI click on a sidebar session entry (via click, section recents, sidebar unified); single captured occurrence; nobody clicks in the emulated flow; not emitted",
+      "occurrences": {
+        "segment": 1,
+        "desktop-event-logging": 0
+      },
+      "occurrence_flows": {
+        "segment": 1,
+        "desktop-event-logging": 0
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "is_pinned",
+        "section",
+        "session_type",
+        "via",
+        "is_running",
+        "is_unread",
+        "group_by",
+        "sidebar"
+      ],
+      "property_key_order_variants": {
+        "segment": 1,
+        "desktop-event-logging": 0
+      },
+      "dominant_order_share": {
+        "segment": "1/1",
+        "desktop-event-logging": null
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "is_pinned": [
+          "boolean"
+        ],
+        "section": [
+          "string"
+        ],
+        "session_type": [
+          "string"
+        ],
+        "via": [
+          "string"
+        ],
+        "is_running": [
+          "boolean"
+        ],
+        "is_unread": [
+          "boolean"
+        ],
+        "group_by": [
+          "string"
+        ],
+        "sidebar": [
+          "string"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "is_pinned": false,
+        "section": "recents",
+        "session_type": "local",
+        "via": "click",
+        "is_running": false,
+        "is_unread": false,
+        "group_by": "project",
+        "sidebar": "unified"
+      },
+      "value_derivation": null,
+      "dual_fire_suffix_keys": null,
+      "desktop_path": null,
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.code.session.first_text",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "renderer paint/tab measurements (ttfvt_first_text_paint_ms, first_text_receipt_ms, start_to_emit_ms, tab_age_ms, open_local_session_count) vary in every occurrence and are not measurable by the gateway; not emitted",
+      "occurrences": {
+        "segment": 47,
+        "desktop-event-logging": 57
+      },
+      "occurrence_flows": {
+        "segment": 46,
+        "desktop-event-logging": 43
+      },
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_id",
+        "session_type",
+        "is_new_session",
+        "user_message_uuid",
+        "cli_session_id",
+        "first_assistant_message_id",
+        "ttfvt_first_text_paint_ms",
+        "first_text_path",
+        "tool_calls_before_first_text",
+        "requests_before_first_text",
+        "first_text_assistant_message_id",
+        "first_text_wait_end",
+        "first_text_receipt_ms",
+        "user_wait_before_first_text_ms",
+        "user_waits_before_first_text",
+        "time_in_background_ms",
+        "start_to_emit_ms",
+        "send_to_arm_ms",
+        "mid_turn",
+        "navigated_away",
+        "model",
+        "tab_age_ms",
+        "open_local_session_count"
+      ],
+      "property_key_order_variants": {
+        "segment": 2,
+        "desktop-event-logging": 2
+      },
+      "dominant_order_share": {
+        "segment": "26/47",
+        "desktop-event-logging": "32/57"
+      },
+      "outlier_keys": null,
+      "value_types": {
+        "account_uuid": [
+          "string"
+        ],
+        "organization_uuid": [
+          "string"
+        ],
+        "billing_type": [
+          "string"
+        ],
+        "surface": [
+          "string"
+        ],
+        "deployment_mode": [
+          "string"
+        ],
+        "app_version": [
+          "string"
+        ],
+        "version": [
+          "number"
+        ],
+        "session_id": [
+          "string"
+        ],
+        "session_type": [
+          "string"
+        ],
+        "is_new_session": [
+          "boolean"
+        ],
+        "user_message_uuid": [
+          "string"
+        ],
+        "cli_session_id": [
+          "string"
+        ],
+        "first_assistant_message_id": [
+          "string"
+        ],
+        "ttfvt_first_text_paint_ms": [
+          "number"
+        ],
+        "first_text_path": [
+          "string"
+        ],
+        "tool_calls_before_first_text": [
+          "number"
+        ],
+        "requests_before_first_text": [
+          "number"
+        ],
+        "first_text_assistant_message_id": [
+          "string"
+        ],
+        "first_text_wait_end": [
+          "string"
+        ],
+        "first_text_receipt_ms": [
+          "number"
+        ],
+        "user_wait_before_first_text_ms": [
+          "number"
+        ],
+        "user_waits_before_first_text": [
+          "number"
+        ],
+        "time_in_background_ms": [
+          "number"
+        ],
+        "start_to_emit_ms": [
+          "number"
+        ],
+        "send_to_arm_ms": [
+          "number"
+        ],
+        "mid_turn": [
+          "boolean"
+        ],
+        "navigated_away": [
+          "boolean"
+        ],
+        "model": [
+          "string"
+        ],
+        "tab_age_ms": [
+          "number"
+        ],
+        "open_local_session_count": [
+          "number"
+        ]
+      },
+      "constants": {
+        "billing_type": "stripe_subscription",
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "session_type": "local",
+        "first_text_wait_end": "painted",
+        "user_wait_before_first_text_ms": 0,
+        "user_waits_before_first_text": 0,
+        "time_in_background_ms": 0,
+        "send_to_arm_ms": 0,
+        "mid_turn": false,
+        "navigated_away": false
+      },
+      "value_derivation": null,
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "desktop_path": "/epitaxy/$sessionId",
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.code.session.stopped",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "no captured occurrence under either recorder corpus; the key set cannot be pinned; not emitted",
+      "occurrences": {
+        "segment": 0,
+        "desktop-event-logging": 0
+      },
+      "occurrence_flows": {
+        "segment": 0,
+        "desktop-event-logging": 0
+      },
+      "property_keys": null,
+      "property_key_order_variants": null,
+      "dominant_order_share": null,
+      "outlier_keys": null,
+      "value_types": null,
+      "constants": null,
+      "value_derivation": null,
+      "dual_fire_suffix_keys": null,
+      "desktop_path": null,
+      "route_markers": null
+    },
+    {
+      "event_name": "claudeai.epitaxy.transcript.open_settled",
+      "segment_type": "track",
+      "fact": null,
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "condition": null,
+      "lifecycle_position": null,
+      "boundary": "no captured occurrence under either recorder corpus; the key set cannot be pinned; not emitted",
+      "occurrences": {
+        "segment": 0,
+        "desktop-event-logging": 0
+      },
+      "occurrence_flows": {
+        "segment": 0,
+        "desktop-event-logging": 0
+      },
+      "property_keys": null,
+      "property_key_order_variants": null,
+      "dominant_order_share": null,
+      "outlier_keys": null,
+      "value_types": null,
+      "constants": null,
+      "value_derivation": null,
+      "dual_fire_suffix_keys": null,
+      "desktop_path": null,
+      "route_markers": null
+    }
+  ]
+}

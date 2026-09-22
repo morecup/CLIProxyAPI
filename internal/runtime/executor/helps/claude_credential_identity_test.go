@@ -168,6 +168,41 @@ func TestApplyClaudeCredentialMetadataUsesCredentialDeviceAndPreservesExtras(t *
 	}
 }
 
+func TestApplyClaudeDesktopCredentialMetadataDropsCallerIdentityExtensions(t *testing.T) {
+	deviceIDs := []string{
+		"0000000000000000000000000000000000000000000000000000000000000000",
+	}
+	auth := &cliproxyauth.Auth{Metadata: map[string]any{
+		"account_uuid":                        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+		claudeauth.ClaudeDeviceIDsMetadataKey: deviceIDs,
+	}}
+	const sessionID = "11111111-2222-4333-8444-555555555555"
+	body := []byte(`{"messages":[{"role":"user","content":"x"}],"metadata":{"user_id":"{\"device_id\":\"downstream-device\",\"account_uuid\":\"downstream-account\",\"session_id\":\"downstream-session\",\"parent_session_id\":\"parent-1\",\"extra\":true}"}}`)
+
+	updated, selectedDevice, errApply := ApplyClaudeDesktopCredentialMetadata(body, auth, sessionID)
+	if errApply != nil {
+		t.Fatalf("ApplyClaudeDesktopCredentialMetadata() error = %v", errApply)
+	}
+	userID := gjson.GetBytes(updated, "metadata.user_id").String()
+	if got := gjson.Get(userID, "device_id").String(); got != selectedDevice {
+		t.Fatalf("device_id = %q, want selected %q", got, selectedDevice)
+	}
+	if got := gjson.Get(userID, "account_uuid").String(); got != "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" {
+		t.Fatalf("account_uuid = %q", got)
+	}
+	if got := gjson.Get(userID, "session_id").String(); got != sessionID {
+		t.Fatalf("session_id = %q, want %q", got, sessionID)
+	}
+	count := 0
+	gjson.Parse(userID).ForEach(func(_, _ gjson.Result) bool {
+		count++
+		return true
+	})
+	if count != 3 || gjson.Get(userID, "parent_session_id").Exists() || gjson.Get(userID, "extra").Exists() {
+		t.Fatalf("Desktop metadata.user_id retained unprofiled fields: %s", userID)
+	}
+}
+
 func TestApplyClaudeCredentialMetadataRejectsDuplicateIdentityContainers(t *testing.T) {
 	auth := &cliproxyauth.Auth{Metadata: map[string]any{
 		"account_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",

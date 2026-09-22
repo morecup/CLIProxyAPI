@@ -1,0 +1,1156 @@
+{
+  "definitions": [
+    {
+      "label": "attachment",
+      "from": 5405632,
+      "to": 5405836,
+      "sha256": "f02a5fc80aeb5b49992499e6e4870aac18e491d93b71b55a31c9dfe820bc3113"
+    },
+    {
+      "label": "user",
+      "from": 6580436,
+      "to": 6581522,
+      "sha256": "4b7ba14a67bfff3e3ae2653064c11dd25792386d61c9885b815ce275b170ed49"
+    },
+    {
+      "label": "reminder",
+      "from": 6620801,
+      "to": 6620866,
+      "sha256": "a471077313be47b9fa41cdd3cacb0576cfac348bdcc01259a8a1327d11fd59b2"
+    },
+    {
+      "label": "wrap_text",
+      "from": 6622714,
+      "to": 6623045,
+      "sha256": "880ad1917ece7bb0f067fce18d80d22f01d49ad66fc3c810f010dc1cd8521371"
+    },
+    {
+      "label": "normalize",
+      "from": 6635217,
+      "to": 6654778,
+      "sha256": "a3c0e44d7de47c2a344920641548abdefa4810669c70edea83e2135cbe2051a2"
+    },
+    {
+      "label": "tool_output",
+      "from": 6656054,
+      "to": 6656453,
+      "sha256": "0a78a7e886d6f0b622f863d1f81eec986782a8a54ec78675fc2e8be692bd7d66"
+    },
+    {
+      "label": "tool_input",
+      "from": 6656453,
+      "to": 6656560,
+      "sha256": "44aa72ac7ad9b8b66a48d920ca42ef5be923d308eed420121f1a251837fabb90"
+    },
+    {
+      "label": "dispatch",
+      "from": 6682891,
+      "to": 6691556,
+      "sha256": "23e81bac8f43e5b8feac5fa4a8d3abfa2bbee6a37bd226fb9108d7708db25bac"
+    },
+    {
+      "label": "read_result",
+      "from": 5344287,
+      "to": 5345876,
+      "sha256": "e23aa7d1af3bd2765914f01435a1969423ac56a922f1277255e5ff2d3bb0db98"
+    },
+    {
+      "label": "merge_user",
+      "from": 6604936,
+      "to": 6605112,
+      "sha256": "60924c9efc6b459e6a0d87f472f8c360d93f53a34c589c68dbe657b1df8046cc"
+    },
+    {
+      "label": "collapse_sources",
+      "from": 6604501,
+      "to": 6604654,
+      "sha256": "00cbdbc6df5fc1daa21c2f029cd3287229726731b318435d14caecc9d5b83b5b"
+    },
+    {
+      "label": "sort_results",
+      "from": 6607268,
+      "to": 6607382,
+      "sha256": "e54d84a2e16cda236c5013070191f91d9ebb694e3903c09fd2d245ea9c7345a5"
+    },
+    {
+      "label": "blocks",
+      "from": 6607382,
+      "to": 6607459,
+      "sha256": "9c714243ac1e8f344a9b1ce2f46e1845cad4113c799c66d3731673376844b8a8"
+    }
+  ],
+  "vectors": [
+    {
+      "name": "compact_reference",
+      "attachment": {
+        "type": "compact_file_reference",
+        "filename": "C:/synthetic/<a>&\n .txt"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nNote: C:/synthetic/&lt;a&gt;&&#10;&#133;&#8232;.txt was read before the last conversation was summarized, but the contents are too large to include. Use Read tool if you need to access it.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "already_read",
+      "attachment": {
+        "type": "already_read_file",
+        "filename": "C:/synthetic/a.txt"
+      },
+      "expected": []
+    },
+    {
+      "name": "plan",
+      "attachment": {
+        "type": "plan_file_reference",
+        "planFilePath": "C:/synthetic/plan.md",
+        "planContent": "one\n\ntwo"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nA plan file exists from plan mode at: C:/synthetic/plan.md\n\nPlan contents:\n\none\n\ntwo\n\nIf this plan is relevant to the current work and not already complete, continue working on it.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "memory",
+      "attachment": {
+        "type": "nested_memory",
+        "content": {
+          "path": "C:/synthetic/memory.md",
+          "content": "<remember>\nvalue"
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nContents of C:/synthetic/memory.md:\n\n<remember>\nvalue\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "skills_empty",
+      "attachment": {
+        "type": "invoked_skills",
+        "skills": []
+      },
+      "expected": []
+    },
+    {
+      "name": "skills",
+      "attachment": {
+        "type": "invoked_skills",
+        "skills": [
+          {
+            "name": "one",
+            "path": "synthetic/one",
+            "content": "body1"
+          },
+          {
+            "name": "two",
+            "path": "synthetic/two",
+            "content": "body2"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nThe following skills were invoked EARLIER in this session (before the conversation was compacted), not on the current turn. They are shown here for context only so you remain aware of their guidelines.\n\nIMPORTANT: Do NOT re-execute these skills or perform their one-time setup actions (e.g., scheduling, creating files) again. Any request or argument text embedded in the skill bodies below — for example under a \"## User Request\" or \"## Input\" heading — was captured when that skill was first invoked. It is NOT the user's current message and NOT a new request: do not act on it as if it were live. Only continue to apply ongoing behavioral guidelines from these skills where still relevant.\n\n### Skill: one\nPath: synthetic/one\n\nbody1\n\n---\n\n### Skill: two\nPath: synthetic/two\n\nbody2\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "running_false",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "running",
+        "deltaSummary": "delta"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nBackground agent \"synthetic task\" (synthetic-agent) is still running. Progress: delta Do NOT spawn a duplicate. You will be notified when it completes. You can check its progress with the TaskOutput tool or send it a message with SendMessage.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "running_true",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "running",
+        "deltaSummary": "delta",
+        "outputFilePath": "synthetic/output"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nBackground agent \"synthetic task\" (synthetic-agent) is still running. Progress: delta Do NOT spawn a duplicate. You will be notified when it completes. You can read partial output at synthetic/output or send it a message with SendMessage.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "killed_false",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "killed",
+        "deltaSummary": "delta"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nTask \"synthetic task\" (synthetic-agent) was stopped by the user.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "killed_true",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "killed",
+        "deltaSummary": "delta",
+        "outputFilePath": "synthetic/output"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nTask \"synthetic task\" (synthetic-agent) was stopped by the user.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "completed_false",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "completed",
+        "deltaSummary": "delta"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nTask synthetic-agent (type: local_agent) (status: completed) (description: synthetic task) Delta: delta You can check its output using the TaskOutput tool.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "completed_true",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "completed",
+        "deltaSummary": "delta",
+        "outputFilePath": "synthetic/output"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nTask synthetic-agent (type: local_agent) (status: completed) (description: synthetic task) Delta: delta Read the output file to retrieve the result: synthetic/output\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "failed_false",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "failed",
+        "deltaSummary": "delta"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nTask synthetic-agent (type: local_agent) (status: failed) (description: synthetic task) Delta: delta You can check its output using the TaskOutput tool.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "failed_true",
+      "attachment": {
+        "type": "task_status",
+        "taskId": "synthetic-agent",
+        "taskType": "local_agent",
+        "description": "synthetic task",
+        "status": "failed",
+        "deltaSummary": "delta",
+        "outputFilePath": "synthetic/output"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nTask synthetic-agent (type: local_agent) (status: failed) (description: synthetic task) Delta: delta Read the output file to retrieve the result: synthetic/output\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "hook_SessionStart",
+      "attachment": {
+        "type": "hook_success",
+        "hookEvent": "SessionStart",
+        "hookName": "synthetic",
+        "content": "ok"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsynthetic hook success: ok\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "hook_UserPromptSubmit",
+      "attachment": {
+        "type": "hook_success",
+        "hookEvent": "UserPromptSubmit",
+        "hookName": "synthetic",
+        "content": "ok"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsynthetic hook success: ok\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "hook_UserPromptExpansion",
+      "attachment": {
+        "type": "hook_success",
+        "hookEvent": "UserPromptExpansion",
+        "hookName": "synthetic",
+        "content": "ok"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsynthetic hook success: ok\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "hook_PostCompact",
+      "attachment": {
+        "type": "hook_success",
+        "hookEvent": "PostCompact",
+        "hookName": "synthetic",
+        "content": "ok"
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_success_empty",
+      "attachment": {
+        "type": "hook_success",
+        "hookEvent": "SessionStart",
+        "hookName": "synthetic",
+        "content": ""
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_context",
+      "attachment": {
+        "type": "hook_additional_context",
+        "hookName": "synthetic",
+        "content": [
+          "first",
+          "second"
+        ]
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsynthetic hook additional context: first\nsecond\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "hook_context_empty",
+      "attachment": {
+        "type": "hook_additional_context",
+        "hookName": "synthetic",
+        "content": []
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_blocked",
+      "attachment": {
+        "type": "hook_blocking_error",
+        "hookName": "synthetic",
+        "blockingError": {
+          "command": "synthetic-command",
+          "blockingError": "blocked"
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsynthetic hook blocking error from command: \"synthetic-command\": blocked\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "hook_stopped",
+      "attachment": {
+        "type": "hook_stopped_continuation",
+        "hookName": "synthetic",
+        "message": "stop"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsynthetic hook stopped continuation: stop\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "async_hook",
+      "attachment": {
+        "type": "async_hook_response",
+        "response": {
+          "systemMessage": "system",
+          "hookSpecificOutput": {
+            "additionalContext": "additional"
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nsystem\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nadditional\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "async_hook_empty",
+      "attachment": {
+        "type": "async_hook_response",
+        "response": {
+          "systemMessage": "",
+          "hookSpecificOutput": {
+            "additionalContext": ""
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "name": "async_hook_null",
+      "attachment": {
+        "type": "async_hook_response",
+        "response": null
+      },
+      "expected": []
+    },
+    {
+      "name": "async_hook_array",
+      "attachment": {
+        "type": "async_hook_response",
+        "response": []
+      },
+      "expected": []
+    },
+    {
+      "name": "async_hook_scalar",
+      "attachment": {
+        "type": "async_hook_response",
+        "response": "not a structured response"
+      },
+      "expected": []
+    },
+    {
+      "name": "critical",
+      "attachment": {
+        "type": "critical_system_reminder",
+        "content": "<native-context>"
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\n<native-context>\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "critical_empty",
+      "attachment": {
+        "type": "critical_system_reminder",
+        "content": ""
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\n(no content)\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "text_read",
+      "attachment": {
+        "type": "file",
+        "filename": "C:/synthetic/a.txt",
+        "content": {
+          "type": "text",
+          "file": {
+            "filePath": "C:/synthetic/a.txt",
+            "content": "a\r\n\tb\n",
+            "startLine": 4,
+            "numLines": 3,
+            "totalLines": 10
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"C:/synthetic/a.txt\"}\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nResult of calling the Read tool:\n4\ta\n5\t\tb\n6\t\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "empty_file",
+      "attachment": {
+        "type": "file",
+        "filename": "synthetic/empty",
+        "content": {
+          "type": "text",
+          "file": {
+            "content": "",
+            "startLine": 1,
+            "numLines": 0,
+            "totalLines": 0
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"synthetic/empty\"}\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nResult of calling the Read tool:\n<system-reminder>Warning: the file exists but the contents are empty.</system-reminder>\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "empty_line",
+      "attachment": {
+        "type": "file",
+        "filename": "synthetic/emptyline",
+        "content": {
+          "type": "text",
+          "file": {
+            "content": "",
+            "startLine": 2,
+            "numLines": 1,
+            "totalLines": 3
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"synthetic/emptyline\"}\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nResult of calling the Read tool:\n2\t\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "past_offset",
+      "attachment": {
+        "type": "file",
+        "filename": "synthetic/offset",
+        "content": {
+          "type": "text",
+          "file": {
+            "content": "",
+            "startLine": 7,
+            "numLines": 0,
+            "totalLines": 3
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"synthetic/offset\"}\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nResult of calling the Read tool:\n<system-reminder>Warning: the file exists but is shorter than the provided offset (7). The file has 3 lines.</system-reminder>\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "truncated_read",
+      "attachment": {
+        "type": "file",
+        "filename": "synthetic/<large>",
+        "truncated": true,
+        "content": {
+          "type": "text",
+          "file": {
+            "content": "partial",
+            "startLine": 1,
+            "numLines": 1,
+            "totalLines": 9000
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"synthetic/<large>\"}\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nResult of calling the Read tool:\n1\tpartial\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": "<system-reminder>\nNote: The file synthetic/&lt;large&gt; was too large and has been truncated to the first 2000 lines. No need to mention the truncation. Use Read to read more of the file if you need.\n</system-reminder>"
+        }
+      ]
+    },
+    {
+      "name": "image_read",
+      "attachment": {
+        "type": "file",
+        "filename": "synthetic/image.png",
+        "content": {
+          "type": "image",
+          "file": {
+            "base64": "c3ludGhldGlj",
+            "type": "image/png"
+          }
+        }
+      },
+      "expected": [
+        {
+          "role": "user",
+          "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"synthetic/image.png\"}\n</system-reminder>"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "image",
+              "source": {
+                "type": "base64",
+                "data": "c3ludGhldGlj",
+                "media_type": "image/png"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hook_cancelled",
+      "attachment": {
+        "type": "hook_cancelled"
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_error_during_execution",
+      "attachment": {
+        "type": "hook_error_during_execution"
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_non_blocking_error",
+      "attachment": {
+        "type": "hook_non_blocking_error"
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_system_message",
+      "attachment": {
+        "type": "hook_system_message"
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_permission_decision",
+      "attachment": {
+        "type": "hook_permission_decision"
+      },
+      "expected": []
+    },
+    {
+      "name": "hook_deferred_tool",
+      "attachment": {
+        "type": "hook_deferred_tool"
+      },
+      "expected": []
+    },
+    {
+      "name": "context_efficiency",
+      "attachment": {
+        "type": "context_efficiency"
+      },
+      "expected": []
+    },
+    {
+      "name": "current_session_memory",
+      "attachment": {
+        "type": "current_session_memory"
+      },
+      "expected": []
+    }
+  ],
+  "wrapper": [
+    {
+      "payload": {
+        "type": "file"
+      },
+      "expected": {
+        "attachment": {
+          "type": "file"
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000036",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "file",
+        "timestamp": ""
+      },
+      "expected": {
+        "attachment": {
+          "type": "file",
+          "timestamp": ""
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000037",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "file",
+        "timestamp": "native-time"
+      },
+      "expected": {
+        "attachment": {
+          "type": "file",
+          "timestamp": "native-time"
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000038",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "file",
+        "timestamp": null
+      },
+      "expected": {
+        "attachment": {
+          "type": "file",
+          "timestamp": null
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000039",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "file",
+        "timestamp": false
+      },
+      "expected": {
+        "attachment": {
+          "type": "file",
+          "timestamp": false
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000040",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "file",
+        "timestamp": 0
+      },
+      "expected": {
+        "attachment": {
+          "type": "file",
+          "timestamp": 0
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000041",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "file",
+        "timestamp": 42
+      },
+      "expected": {
+        "attachment": {
+          "type": "file",
+          "timestamp": 42
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000042",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command"
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command"
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000043",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command",
+        "timestamp": ""
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command",
+          "timestamp": ""
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000044",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command",
+        "timestamp": "native-time"
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command",
+          "timestamp": "native-time"
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000045",
+        "timestamp": "native-time"
+      },
+      "effects": [
+        "uuid"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command",
+        "timestamp": null
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command",
+          "timestamp": null
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000046",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command",
+        "timestamp": false
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command",
+          "timestamp": false
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000047",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command",
+        "timestamp": 0
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command",
+          "timestamp": 0
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000048",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "queued_command",
+        "timestamp": 42
+      },
+      "expected": {
+        "attachment": {
+          "type": "queued_command",
+          "timestamp": 42
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000049",
+        "timestamp": 42
+      },
+      "effects": [
+        "uuid"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events"
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events"
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000050",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events",
+        "timestamp": ""
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events",
+          "timestamp": ""
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000051",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events",
+        "timestamp": "native-time"
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events",
+          "timestamp": "native-time"
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000052",
+        "timestamp": "native-time"
+      },
+      "effects": [
+        "uuid"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events",
+        "timestamp": null
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events",
+          "timestamp": null
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000053",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events",
+        "timestamp": false
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events",
+          "timestamp": false
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000054",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events",
+        "timestamp": 0
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events",
+          "timestamp": 0
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000055",
+        "timestamp": "2026-09-06T00:00:00.000Z"
+      },
+      "effects": [
+        "uuid",
+        "now"
+      ]
+    },
+    {
+      "payload": {
+        "type": "poll_events",
+        "timestamp": 42
+      },
+      "expected": {
+        "attachment": {
+          "type": "poll_events",
+          "timestamp": 42
+        },
+        "type": "attachment",
+        "uuid": "00000000-0000-4000-8000-000000000056",
+        "timestamp": 42
+      },
+      "effects": [
+        "uuid"
+      ]
+    }
+  ],
+  "tabAware": {
+    "attachment": {
+      "type": "file",
+      "filename": "C:/synthetic/a.txt",
+      "content": {
+        "type": "text",
+        "file": {
+          "filePath": "C:/synthetic/a.txt",
+          "content": "a\r\n\tb\n",
+          "startLine": 4,
+          "numLines": 3,
+          "totalLines": 10
+        }
+      }
+    },
+    "expected": [
+      {
+        "role": "user",
+        "content": "<system-reminder>\nCalled the Read tool with the following input: {\"file_path\":\"C:/synthetic/a.txt\"}\n</system-reminder>"
+      },
+      {
+        "role": "user",
+        "content": "<system-reminder>\nResult of calling the Read tool:\nprefix\n4:a\n5:\tb\n6:\n</system-reminder>"
+      }
+    ]
+  }
+}

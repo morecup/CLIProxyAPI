@@ -4,10 +4,45 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
 )
+
+// Completion is deferred through the actual stream, not just successful
+// response headers. Cancellation releases ownership even if the caller stops
+// reading; late attempt observers then finalize their direct outcome. The
+// outward channel closes only after upstream accounting has settled at EOF.
+func completeAttemptsAfterStream(ctx context.Context, result *cliproxyexecutor.StreamResult, complete func()) *cliproxyexecutor.StreamResult {
+	copyResult := *result
+	out := make(chan cliproxyexecutor.StreamChunk)
+	copyResult.Chunks = out
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	var once sync.Once
+	finish := func() { once.Do(complete) }
+	stopCancellation := context.AfterFunc(ctx, finish)
+	go func() {
+		defer close(out)
+		defer finish()
+		defer stopCancellation()
+		forward := true
+		for chunk := range result.Chunks {
+			if !forward {
+				continue
+			}
+			select {
+			case out <- chunk:
+			case <-ctx.Done():
+				finish()
+				forward = false
+			}
+		}
+	}()
+	return &copyResult
+}
 
 func discardStreamChunks(ch <-chan cliproxyexecutor.StreamChunk) {
 	if ch == nil {
@@ -236,6 +271,7 @@ func (m *Manager) executeStreamWithModelPool(ctx context.Context, executor Provi
 			return nil, errCtx
 		}
 		entry := logEntryWithRequestID(ctx)
+		ctx = beginUpstreamExecutionAttempt(ctx)
 		startStream := time.Now()
 		streamResult, errStream := executor.ExecuteStream(ctx, auth, execReq, execOpts)
 		durationStream := time.Since(startStream)
@@ -258,11 +294,12 @@ func (m *Manager) executeStreamWithModelPool(ctx context.Context, executor Provi
 					errStream = errRefresh
 					warnLogUpstreamFailure(ctx, entry, provider, execModel, auth, durationStream, errStream)
 				} else if okRefresh {
+					recordScheduledRetryTelemetry(ctx, errStream, 1, 0)
 					auth = refreshed
 					m.replaceHomeExecutionLifecycleAuth(execOpts.ExecutionLifecycle, auth)
 					publishSelectedAuthMetadata(execOpts.Metadata, auth)
 					didRefreshOnUnauthorized = true
-					ctx = newUpstreamAttemptContext(ctx)
+					ctx = beginUpstreamExecutionAttempt(ctx)
 					startRetry := time.Now()
 					streamResult, errStream = executor.ExecuteStream(ctx, auth, execReq, execOpts)
 					durationRetry := time.Since(startRetry)
@@ -339,11 +376,12 @@ func (m *Manager) executeStreamWithModelPool(ctx context.Context, executor Provi
 					streamResult = &cliproxyexecutor.StreamResult{}
 				} else if okRefresh {
 					discardStreamChunks(streamResult.Chunks)
+					recordScheduledRetryTelemetry(ctx, bootstrapErr, 1, 0)
 					auth = refreshed
 					m.replaceHomeExecutionLifecycleAuth(execOpts.ExecutionLifecycle, auth)
 					publishSelectedAuthMetadata(execOpts.Metadata, auth)
 					didRefreshOnUnauthorized = true
-					ctx = newUpstreamAttemptContext(ctx)
+					ctx = beginUpstreamExecutionAttempt(ctx)
 					startRetry := time.Now()
 					retryStream, retryErr := executor.ExecuteStream(ctx, auth, execReq, execOpts)
 					retryStream, retryErr = validateStreamResult(retryStream, retryErr)

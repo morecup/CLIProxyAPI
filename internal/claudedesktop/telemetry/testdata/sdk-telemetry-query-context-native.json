@@ -1,0 +1,395 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    }
+  },
+  "definitions": [
+    {
+      "label": "generator_entry",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5373332,
+      "to": 5375342,
+      "bytes": 2010,
+      "sha256": "87dee2fbdc40e58b30cf9af158b0b49d92efdfd66ee744aa0a4645d64e40a0e9"
+    },
+    {
+      "label": "generator_set_head",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5372072,
+      "to": 5372409,
+      "bytes": 337,
+      "sha256": "1d3a17442c71569bc269664a62b151937c9a82743e7a607835600ded348e7fa1"
+    },
+    {
+      "label": "attachment_object",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5384677,
+      "to": 5384868,
+      "bytes": 191,
+      "sha256": "9d8aa09b7bd6cb03fab12d54604afe7f5f642cf47d58a61e42874d7b5bda6583"
+    },
+    {
+      "label": "compute_duration",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5375967,
+      "to": 5376575,
+      "bytes": 608,
+      "sha256": "c0a66dfdf256b76277fa583f6edfdf3597d990d9c020d26618cf6c950b46f712"
+    },
+    {
+      "label": "context_size_fn",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5619314,
+      "to": 5620464,
+      "bytes": 1150,
+      "sha256": "ad95653e916a17765fe1af3e9bde8a166b7c4237876026ed8a6ad6afcd4b061f"
+    },
+    {
+      "label": "heron_brook",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5574854,
+      "to": 5575265,
+      "bytes": 411,
+      "sha256": "ea2ab012a6c5243bb35e24807e6543a61a3ae1bf3c55e97511fc6dd2d9a4d59f"
+    },
+    {
+      "label": "heron_section",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5613248,
+      "to": 5613389,
+      "bytes": 141,
+      "sha256": "5cb919373eac5aa2f5d1f71475023869b015be4f0e88d18186692b5935f60848"
+    },
+    {
+      "label": "reactive_compact_succeeded",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2666805,
+      "to": 2667946,
+      "bytes": 1141,
+      "sha256": "f8c95b2935d757c964b227761a0d1886beb8c0091b67368665d35812b526309a"
+    },
+    {
+      "label": "rotunda_strip",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5670806,
+      "to": 5671463,
+      "bytes": 657,
+      "sha256": "6ee8a158b5def7294faf4e9ae7fc4a1df8a9cf4d183ceaf76ff67c52f37f74b4"
+    },
+    {
+      "label": "gzip_skipped",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1605727,
+      "to": 1605968,
+      "bytes": 241,
+      "sha256": "2f005d9b99e5fa3a283c71fda8b4ef8c547ff57b46d43e88e18ff746d7c9b07e"
+    },
+    {
+      "label": "fork_agent_query",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2712505,
+      "to": 2713209,
+      "bytes": 704,
+      "sha256": "63825fb37bdbe222886250482adffadc4e331cd2de19a6c9b2b34fd9c016aeda"
+    }
+  ],
+  "logger_prefix": [
+    "subscription_type",
+    "cc_prompt_id"
+  ],
+  "contracts": [
+    {
+      "event": "tengu_attachment_compute_duration",
+      "slices": [
+        "generator_entry",
+        "generator_set_head",
+        "attachment_object",
+        "compute_duration"
+      ],
+      "gateway": "executable",
+      "keys": [
+        "label",
+        "duration_ms",
+        "attachment_size_bytes",
+        "attachment_count"
+      ],
+      "failure_keys": [
+        "label",
+        "duration_ms",
+        "error"
+      ],
+      "derivations": {
+        "label": "X(e): the generator label passed to fi(); the deferred-tools reminder generator is fi(\"deferred_tools_delta\",()=>Promise.resolve(qhe(t.options.tools,t.options.mainLoopModel,o,{callSite,querySource},pendingMcp,...)))",
+        "duration_ms": "Date.now()-n around the awaited generator (the gateway measures its DeferredToolsReminder run)",
+        "attachment_size_bytes": "sum of JSON.stringify(attachment).length over non-null results; qhe returns [] or [{type:\"deferred_tools_delta\",...XHr result}] whose key order is type, addedNames, addedLines, removedNames, readdedNames, pendingMcpServers, needsAuthMcpServers, failedMcpServers (tasks golden reminder_cases); without MCP addedLines equal addedNames",
+        "attachment_count": "r.length: 1 when the reminder changed, 0 when qhe returned []",
+        "error": "true when the generator threw (the gateway generator does not throw)"
+      },
+      "condition": "inside y0s for every generator label, per query-loop attachment pass (initial prompt and continuation turns), sampled with Math.random()<0.05 on success and on failure; y0s returns early without fi() when _s(t.agentContext) or CLAUDE_CODE_DISABLE_ATTACHMENTS/CLAUDE_CODE_SIMPLE/bareFork",
+      "position": "inside y0s (awaited by ltr): after tengu_query_before_attachments, before tengu_attachments and tengu_query_after_attachments on continuation turns; standalone on the first turn"
+    },
+    {
+      "event": "tengu_context_size",
+      "slice": "context_size_fn",
+      "gateway": "boundary",
+      "keys": [
+        "git_status_size",
+        "claude_md_size",
+        "has_user_email",
+        "total_context_size",
+        "project_file_count_rounded",
+        "mcp_tools_count",
+        "mcp_servers_count",
+        "mcp_tools_tokens",
+        "non_mcp_tools_count",
+        "non_mcp_tools_tokens"
+      ],
+      "derivations": {
+        "git_status_size": "c.gitStatus?.length??0 where c=await hQ(e): character length of the startup git status text",
+        "claude_md_size": "l.claudeMd?.length??0 where l=await HHe(e,r,o): character length of the loaded CLAUDE.md context",
+        "has_user_email": "Boolean(l.userEmail)",
+        "total_context_size": "p=u+d (git status length plus CLAUDE.md length)",
+        "project_file_count_rounded": "h=await zqr(ze(),AbortSignal.timeout(1000),kJ(vJ(n),cwd)): rounded project file count from a 1s-bounded scan of the cwd",
+        "mcp_tools_count": "i.length: MCP tools returned by prefetchAllMcpResources(mcpClients)",
+        "mcp_servers_count": "distinct second segment of MCP tool names split on \"__\" (mcp__<server>__<tool>)",
+        "mcp_tools_tokens": "sum over MCP tools of Lc(JSON.stringify(inputJSONSchema ?? yre(inputSchema)))",
+        "non_mcp_tools_count": "v.length where v=a.filter(C=>!C.isMcp), a=await xXe(n) (the assembled tool pool)",
+        "non_mcp_tools_tokens": "sum over non-MCP tools of Lc(JSON.stringify(inputJSONSchema ?? yre(inputSchema)))"
+      },
+      "condition": "nvu(): once at startup unless Kne(); after MCP resource prefetch, tool pool, CLAUDE.md/user context and git status resolve (Promise.all) and the 1s file-count scan",
+      "boundary_reason": "git_status_size and project_file_count_rounded need the native startup git status and zqr cwd scan, and the token keys need the Lc estimator over the native tool schemas; the gateway runs neither, so not every key is honestly derivable for the emulated cwd"
+    },
+    {
+      "event": "tengu_heron_brook_applied",
+      "slices": [
+        "heron_brook",
+        "heron_section"
+      ],
+      "gateway": "boundary",
+      "keys": [
+        "len",
+        "fromClientData"
+      ],
+      "derivations": {
+        "len": "trimmed client_data or feature string length, or sqr.length for the built-in section",
+        "fromClientData": "true only for the client_data branch"
+      },
+      "condition": "system prompt assembly xUs(model): client_data tengu_heron_brook non-empty (fromClientData true) else feature tengu_heron_brook non-empty (fromClientData false) else vqt(model) selects the built-in section sqr; otherwise no event",
+      "boundary_reason": "the bundle holds no tengu_heron_brook client_data or feature value and the vqt(model) gate is not pinned, so the gate cannot be evaluated honestly for the emulated prompt"
+    },
+    {
+      "event": "tengu_reactive_compact_succeeded",
+      "slice": "reactive_compact_succeeded",
+      "gateway": "boundary",
+      "keys": [
+        "effort_level",
+        "querySource",
+        "attempts",
+        "groupsPreserved",
+        "totalGroups",
+        "preservedUuidCount",
+        "preservedMessageCount",
+        "forkAssistantMessageCount",
+        "trigger",
+        "thresholdSource",
+        "preCompactTokens",
+        "postCompactTokens",
+        "restoredAttachmentCount",
+        "durationMs",
+        "userWaitMs",
+        "precomputed",
+        "manualPrecomputeReuse",
+        "precomputeBorrowed",
+        "precomputeStatusAtPTL",
+        "precomputeLeadMs",
+        "precomputeTotalMs",
+        "messagesSincePrecompute",
+        "messagesSinceTokens",
+        "compactionInputTokens",
+        "compactionOutputTokens",
+        "compactionCacheReadTokens",
+        "compactionCacheCreationTokens",
+        "compactionTotalTokens",
+        "cacheHitRate"
+      ],
+      "dynamic_tail": "...C = qWe(WWe(preCompactMessages)) spreads additional keys after cacheHitRate",
+      "condition": "NXn() after the reactive compaction summary succeeded, readFileState was cleared, attachments were restored (s1e) and the PostCompact hooks ran (bV); emitted once per successful reactive compaction",
+      "boundary_reason": "the gateway compaction span (SDKReactiveCompactionSpan) only observes trigger/attempt; it does not run the restoration stage (restoredAttachmentCount from s1e attachments+hookResults), the post-compact estimate wp(yV(v)), the boundary marker DAt (preservedUuidCount) or the qWe(WWe(n)) spread, so postCompactTokens, preservedUuidCount, restoredAttachmentCount, forkAssistantMessageCount, userWaitMs and the ...C keys cannot be produced"
+    },
+    {
+      "event": "tengu_rotunda_pennant_strip",
+      "slice": "rotunda_strip",
+      "gateway": "boundary",
+      "datadog_logs_mirror": true,
+      "keys": [
+        "shape",
+        "mode",
+        "non_streaming",
+        "query_source",
+        "sticky_scope"
+      ],
+      "derivations": {
+        "shape": "X(ko): the attributed 400 shape (credit_beta_header, category_beta_header, default_unconfigured, beta_header)",
+        "mode": "X(Fn): current server-fallback mode",
+        "non_streaming": "lt===\"sync\"",
+        "query_source": "Qp(s.querySource)",
+        "sticky_scope": "s.stickyBetas===void 0?\"session\":Ba(querySource)===\"main\"?\"detached_main\":\"subagent\"?\"agent\":\"aux\""
+      },
+      "condition": "mo(et,lt): only when the API error is a 400 whose message names the `fallback-credit-… beta (or the server-side-fallback-/category header); the client strips that beta from the request and returns \"retry:fallback-credit-strip\" / \"retry:server-fallback-category-strip\"",
+      "boundary_reason": "the gateway sends fallback-credit-2026-06-01 in its beta header but implements no 400 beta-strip retry (the executor has no mo() equivalent), so no strip moment exists"
+    },
+    {
+      "event": "tengu_gzip_request_body_skipped",
+      "slice": "gzip_skipped",
+      "gateway": "boundary",
+      "keys": [
+        "rollout",
+        "reason",
+        "requestBodyChars"
+      ],
+      "condition": "wFo(e,t): if(e!==\"ccr_worker\")return; once per skip reason per process (El().gzipRequestBody.ccrWorkerSkipReasonsLogged)",
+      "boundary_reason": "the gateway has no gzip request-body rollout and is never the ccr_worker rollout"
+    },
+    {
+      "event": "tengu_fork_agent_query",
+      "slice": "fork_agent_query",
+      "gateway": "boundary",
+      "keys": [
+        "forkLabel",
+        "querySource",
+        "durationMs",
+        "messageCount",
+        "inputTokens",
+        "outputTokens",
+        "cacheReadInputTokens",
+        "cacheCreationInputTokens",
+        "serviceTier",
+        "cacheCreationEphemeral1hTokens",
+        "cacheCreationEphemeral5mTokens",
+        "cacheHitRate",
+        "queryChainId",
+        "queryDepth"
+      ],
+      "condition": "fJo() after a forked-agent query completes; queryChainId/queryDepth only when queryTracking is set",
+      "boundary_reason": "the owned runtime never runs forked-agent queries"
+    }
+  ],
+  "owned_attachment": {
+    "type": "deferred_tools_delta",
+    "addedNames": [
+      "SendMessage",
+      "TaskOutput",
+      "TaskStop"
+    ],
+    "addedLines": [
+      "SendMessage",
+      "TaskOutput",
+      "TaskStop"
+    ],
+    "removedNames": [],
+    "readdedNames": [],
+    "pendingMcpServers": [],
+    "needsAuthMcpServers": [],
+    "failedMcpServers": []
+  },
+  "owned_attachment_size_bytes": 243,
+  "duration_cases": [
+    {
+      "label": "deferred_tools_delta",
+      "random": 0.049,
+      "returned": [
+        {
+          "type": "deferred_tools_delta",
+          "addedNames": [
+            "SendMessage",
+            "TaskOutput",
+            "TaskStop"
+          ],
+          "addedLines": [
+            "SendMessage",
+            "TaskOutput",
+            "TaskStop"
+          ],
+          "removedNames": [],
+          "readdedNames": [],
+          "pendingMcpServers": [],
+          "needsAuthMcpServers": [],
+          "failedMcpServers": []
+        }
+      ],
+      "events": [
+        {
+          "name": "tengu_attachment_compute_duration",
+          "metadata": {
+            "label": "deferred_tools_delta",
+            "duration_ms": 3,
+            "attachment_size_bytes": 243,
+            "attachment_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "label": "deferred_tools_delta",
+      "random": 0.02,
+      "returned": [],
+      "events": [
+        {
+          "name": "tengu_attachment_compute_duration",
+          "metadata": {
+            "label": "deferred_tools_delta",
+            "duration_ms": 1,
+            "attachment_size_bytes": 0,
+            "attachment_count": 0
+          }
+        }
+      ]
+    },
+    {
+      "label": "deferred_tools_delta",
+      "random": 0.05,
+      "returned": [
+        {
+          "type": "deferred_tools_delta",
+          "addedNames": [
+            "SendMessage",
+            "TaskOutput",
+            "TaskStop"
+          ],
+          "addedLines": [
+            "SendMessage",
+            "TaskOutput",
+            "TaskStop"
+          ],
+          "removedNames": [],
+          "readdedNames": [],
+          "pendingMcpServers": [],
+          "needsAuthMcpServers": [],
+          "failedMcpServers": []
+        }
+      ],
+      "events": []
+    },
+    {
+      "label": "deferred_tools_delta",
+      "random": 0.9,
+      "returned": [],
+      "events": []
+    }
+  ],
+  "failure_events": [
+    {
+      "name": "tengu_attachment_compute_duration",
+      "metadata": {
+        "label": "deferred_tools_delta",
+        "duration_ms": 4,
+        "error": true
+      }
+    }
+  ],
+  "boundary": "fi() executes inside vm with D/X/le/Date/Math stubs; y0s, qhe/XHr, the query loop and the request build do not run. The gateway derives duration_ms by timing its DeferredToolsReminder generator and attachment_size_bytes by rebuilding the pinned attachment object from the names the reminder announced."
+}

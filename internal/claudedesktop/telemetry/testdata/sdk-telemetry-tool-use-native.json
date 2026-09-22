@@ -1,0 +1,785 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "addressing": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    },
+    "features": {
+      "name": "B:/~BUN/root/_823.js",
+      "sha256": "5f9381bcddb7d1d7bf21330d060826004a57c4093d70d141d734003c1e5112da"
+    },
+    "sanitizer": {
+      "name": "B:/~BUN/root/_846.js",
+      "sha256": "13c9adb050f9ad8ba75035999e8a098002f70bb5c16b0d6f7313b9344e1563cb"
+    },
+    "startup": {
+      "name": "B:/~BUN/root/_10.js",
+      "sha256": "78b44909089cb3aad9370ee5316890b62684ff4618620939033bb9da84e6a7ed"
+    },
+    "headless": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    }
+  },
+  "definitions": [
+    {
+      "label": "tool_use_success",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5157100,
+      "to": 5158157,
+      "bytes": 1057,
+      "sha256": "7719eba15f0eb27bf7d627d85c3d6a588c6e069339d08d33c07adb079e6e0d50"
+    },
+    {
+      "label": "tool_use_can_use_tool_allowed",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5151152,
+      "to": 5151435,
+      "bytes": 283,
+      "sha256": "09e0703e7d3cd4bcaed955f614e9c58985be14ff6eb003636b129b46bee2fb45"
+    },
+    {
+      "label": "tool_use_progress",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5137509,
+      "to": 5138047,
+      "bytes": 538,
+      "sha256": "b65a82b3a88ad4b9d7766f497456d4118a309c298766c8f627c7c7f9a50dc567"
+    },
+    {
+      "label": "input_size",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5140064,
+      "to": 5140161,
+      "bytes": 97,
+      "sha256": "770044c70c461dbb40f46d69ba12418b8bc33eccea606115edfa38a109280d7b"
+    },
+    {
+      "label": "validate_input_rejected",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5143597,
+      "to": 5144407,
+      "bytes": 810,
+      "sha256": "74844bcc37308868434ffd80e31144d3571a6a218b4c2d1007fd8e6e41c9a45d"
+    },
+    {
+      "label": "effort_dimension",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5127438,
+      "to": 5127666,
+      "bytes": 228,
+      "sha256": "601c9b6e00373687f9e44b8c6876dffc898fe78d3ab5f0853131087e062c93fb"
+    },
+    {
+      "label": "error_code_name",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5127666,
+      "to": 5127967,
+      "bytes": 301,
+      "sha256": "1bfd024b084d00bf2018afa96984c637d30a5254fedd79011584716fb8966ea6"
+    },
+    {
+      "label": "error_feature_classifier",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5129538,
+      "to": 5130423,
+      "bytes": 885,
+      "sha256": "b40bf3e6580f23ae88fc84061f795d7e7152347acb511fb944c5e1f1a9c18fa3"
+    },
+    {
+      "label": "bg_classify",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2905675,
+      "to": 2906148,
+      "bytes": 473,
+      "sha256": "8e2b5ea3c7441e39303e894d8d8834dede95a2ebb784e91f3334fd354a8a2cc4"
+    },
+    {
+      "label": "auto_mode_outcome",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5819220,
+      "to": 5819407,
+      "bytes": 187,
+      "sha256": "04f996fc2c4f0b5d813381edd52d6f94aa18849b22b7acd0f41fa9e4caeab2f8"
+    },
+    {
+      "label": "auto_mode_decision_allowlist",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1149441,
+      "to": 1149828,
+      "bytes": 387,
+      "sha256": "834caee56a569515e92e6e066ca02386470c805743140dae96c37c672dd614d9"
+    },
+    {
+      "label": "write_tool_not_read_hypothetical",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2200264,
+      "to": 2200477,
+      "bytes": 213,
+      "sha256": "6e83651493ec1560631afd76f7b6b774d98de992e6bbc81db18448666369ddd9"
+    },
+    {
+      "label": "tool_name_loggable",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 273947,
+      "to": 274079,
+      "bytes": 132,
+      "sha256": "0bc6ce04d7370055f9234dd18e819d1a94d6b02a473fd78e273871a688f14381"
+    },
+    {
+      "label": "tool_name_alias_map",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 288853,
+      "to": 288885,
+      "bytes": 32,
+      "sha256": "c04763f732819ec5d7ee91191071dcbac768bbb8279e482919cf237fe05f1c62"
+    },
+    {
+      "label": "id_loggable",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 246341,
+      "to": 246439,
+      "bytes": 98,
+      "sha256": "7b8bf46b9825a6ca9cafb1220c2f386d409d024e05e069d34e087a9d362d4598"
+    },
+    {
+      "label": "mcp_dimensions",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 275130,
+      "to": 275345,
+      "bytes": 215,
+      "sha256": "d241f3d3d5ed3a1ba437e61ae397061a37c991b3a6812b2a71edb5ac49a88c76"
+    },
+    {
+      "label": "attachment_bytes",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 279935,
+      "to": 280173,
+      "bytes": 238,
+      "sha256": "12b2e6a5fb2ba4e77b46697b38c4c3fff22a4e2d571e8fb4e2b6f6a9d63e62f9"
+    },
+    {
+      "label": "datadog_mirror_set",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 395242,
+      "to": 401142,
+      "bytes": 5900,
+      "sha256": "f34af42e4606d43ad911fdd6eed0a354cf2c6dda2f45c42b45e6169b6bdc4ad7"
+    },
+    {
+      "label": "feature_telemetry",
+      "module": "B:/~BUN/root/_823.js",
+      "from": 5917,
+      "to": 6499,
+      "bytes": 582,
+      "sha256": "df615f83ca412c289d7dfab39f1a3a40ecee6d95173c535c9e383f41a01ef101"
+    },
+    {
+      "label": "snake_case",
+      "module": "B:/~BUN/root/_823.js",
+      "from": 5585,
+      "to": 5677,
+      "bytes": 92,
+      "sha256": "b5c7c8c02d2e3db052e605522b76a15138e129b3af8630108439e1b927cf971e"
+    },
+    {
+      "label": "sanitizer",
+      "module": "B:/~BUN/root/_846.js",
+      "from": 681,
+      "to": 774,
+      "bytes": 93,
+      "sha256": "aa73c296423ebb893ef01b4cb764647ac9400b87cc5bb0aa2fcb67f9f07bfe49"
+    },
+    {
+      "label": "timer_plugins_init",
+      "module": "B:/~BUN/root/_10.js",
+      "from": 27135,
+      "to": 27232,
+      "bytes": 97,
+      "sha256": "4bd8240b81ddec963a907b21108140387f17a40076e0627a04962d834a9acfb7"
+    },
+    {
+      "label": "timer_startup_headless",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 168520,
+      "to": 168698,
+      "bytes": 178,
+      "sha256": "fd84ce35ef945afa03016d7522e7fa8bbbea4e4dfab5241cf618e8aa8d1099d8"
+    },
+    {
+      "label": "worker_permission_mode_restore",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 65444,
+      "to": 65871,
+      "bytes": 427,
+      "sha256": "fe5eb7bb905026179c2c28783343039f187f3302aa4b4ae7590bbec11ce490d5"
+    }
+  ],
+  "events": {
+    "tool_use_success": {
+      "event": "tengu_tool_use_success",
+      "slice": "tool_use_success",
+      "members": [
+        "messageID:yt(i)",
+        "toolName:fr(e.name)",
+        "isMcp:e.isMcp??!1",
+        "...z4(r)",
+        "durationMs:oe",
+        "...K!==void 0&&{..._Ur(r.abortController.signal),durationMsAtAbort:K-U}",
+        "rssDeltaBytes:Q.rss-G.rss",
+        "heapUsedDeltaBytes:Q.heapUsed-G.heapUsed",
+        "externalDeltaBytes:Q.external-G.external",
+        "preToolHookDurationMs:L",
+        "permissionDurationMs:N",
+        "toolResultSizeBytes:Xe",
+        "...nt>0&&{toolResultAttachmentBytes:nt}",
+        "toolInputSizeBytes:m",
+        "..._e!==void 0&&{fileExtension:_e}",
+        "...ge!==void 0&&{bashCommandFileExtensions:ge}",
+        "...Ie!==void 0&&{filePathLen:Ie}",
+        "...Be!==void 0&&{bashCommandLen:Be}",
+        "...Oe",
+        "...e.name===Tn&&T&&typeof T===\"object\"&&{readHasLimit:T.limit!==void 0,readHasOffset:T.offset!==void 0}",
+        "queryChainId:yt(r.queryTracking?.chainId)",
+        "queryDepth:r.queryTracking?.depth",
+        "...r.options.messageClientPlatform&&{messageClientPlatform:r.options.messageClientPlatform}",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...e.readOnlyHint!==void 0&&{readOnlyHint:e.readOnlyHint}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ],
+      "keys": [
+        "messageID",
+        "toolName",
+        "isMcp",
+        "...z4(r)",
+        "durationMs",
+        "...K!==void 0&&{..._Ur(r.abortController.signal),durationMsAtAbort:K-U}",
+        "rssDeltaBytes",
+        "heapUsedDeltaBytes",
+        "externalDeltaBytes",
+        "preToolHookDurationMs",
+        "permissionDurationMs",
+        "toolResultSizeBytes",
+        "...nt>0&&{toolResultAttachmentBytes:nt}",
+        "toolInputSizeBytes",
+        "..._e!==void 0&&{fileExtension:_e}",
+        "...ge!==void 0&&{bashCommandFileExtensions:ge}",
+        "...Ie!==void 0&&{filePathLen:Ie}",
+        "...Be!==void 0&&{bashCommandLen:Be}",
+        "...Oe",
+        "...e.name===Tn&&T&&typeof T===\"object\"&&{readHasLimit:T.limit!==void 0,readHasOffset:T.offset!==void 0}",
+        "queryChainId",
+        "queryDepth",
+        "...r.options.messageClientPlatform&&{messageClientPlatform:r.options.messageClientPlatform}",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...e.readOnlyHint!==void 0&&{readOnlyHint:e.readOnlyHint}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ]
+    },
+    "tool_use_can_use_tool_allowed": {
+      "event": "tengu_tool_use_can_use_tool_allowed",
+      "slice": "tool_use_can_use_tool_allowed",
+      "members": [
+        "messageID:yt(i)",
+        "toolName:fr(e.name)",
+        "queryChainId:yt(r.queryTracking?.chainId)",
+        "queryDepth:r.queryTracking?.depth",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ],
+      "keys": [
+        "messageID",
+        "toolName",
+        "queryChainId",
+        "queryDepth",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ]
+    },
+    "tool_use_progress": {
+      "event": "tengu_tool_use_progress",
+      "slice": "tool_use_progress",
+      "members": [
+        "messageID:yt(i)",
+        "toolName:fr(e.name)",
+        "isMcp:e.isMcp??!1",
+        "queryChainId:yt(r.queryTracking?.chainId)",
+        "queryDepth:r.queryTracking?.depth",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ],
+      "keys": [
+        "messageID",
+        "toolName",
+        "isMcp",
+        "queryChainId",
+        "queryDepth",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ]
+    },
+    "tool_use_error_validate_input": {
+      "event": "tengu_tool_use_error",
+      "slice": "validate_input_rejected",
+      "members": [
+        "messageID:yt(i)",
+        "toolName:fr(e.name)",
+        "error:de(\"ValidateInputError\")",
+        "...jI(S.message)",
+        "errorCode:S.errorCode",
+        "isMcp:e.isMcp??!1",
+        "...xH(r.agentContext)",
+        "...z4(r)",
+        "queryChainId:yt(r.queryTracking?.chainId)",
+        "queryDepth:r.queryTracking?.depth",
+        "...r.options.messageClientPlatform&&{messageClientPlatform:r.options.messageClientPlatform}",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ],
+      "keys": [
+        "messageID",
+        "toolName",
+        "error",
+        "...jI(S.message)",
+        "errorCode",
+        "isMcp",
+        "...xH(r.agentContext)",
+        "...z4(r)",
+        "queryChainId",
+        "queryDepth",
+        "...r.options.messageClientPlatform&&{messageClientPlatform:r.options.messageClientPlatform}",
+        "...l&&{mcpServerType:X(l)}",
+        "...c&&{mcpServerBaseUrl:Gy(c)}",
+        "...a&&{requestId:yt(a)}",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ]
+    },
+    "feature_ok": {
+      "event": "tengu_feature_ok",
+      "slice": "feature_telemetry",
+      "members": [
+        "feature_name:a(e)",
+        "...u"
+      ],
+      "keys": [
+        "feature_name",
+        "...u"
+      ]
+    },
+    "feature_sad": {
+      "event": "tengu_feature_sad",
+      "slice": "feature_telemetry",
+      "members": [
+        "...r",
+        "feature_name:a(e)",
+        "error_code:u"
+      ],
+      "keys": [
+        "...r",
+        "feature_name",
+        "error_code"
+      ]
+    },
+    "feature_bad": {
+      "event": "tengu_feature_bad",
+      "slice": "feature_telemetry",
+      "members": [
+        "...r",
+        "feature_name:a(e)",
+        "error_code:u"
+      ],
+      "keys": [
+        "...r",
+        "feature_name",
+        "error_code"
+      ]
+    },
+    "bg_classify": {
+      "event": "tengu_bg_classify",
+      "slice": "bg_classify",
+      "members": [
+        "path:X(d)",
+        "engine:X(i)",
+        "...Zxt(l)",
+        "branch:X(u?.branch??(d===\"heuristic\"?\"heuristic\":\"none\"))",
+        "closingShape:X(e7n(e))",
+        "prevState:n",
+        "newState:m?.state??\"null\"",
+        "stateChanged:m!==null&&m.state!==n",
+        "minsInPrevState:Math.round(s)",
+        "durationMs:Date.now()-c",
+        "tailChars:e.length"
+      ],
+      "keys": [
+        "path",
+        "engine",
+        "...Zxt(l)",
+        "branch",
+        "closingShape",
+        "prevState",
+        "newState",
+        "stateChanged",
+        "minsInPrevState",
+        "durationMs",
+        "tailChars"
+      ]
+    },
+    "auto_mode_outcome": {
+      "event": "tengu_auto_mode_outcome",
+      "slice": "auto_mode_outcome",
+      "members": [
+        "outcome:X(e)",
+        "classifierModel:t",
+        "classifierType:An(r)",
+        "failureKind:An(o)",
+        "stopReason:An(s)",
+        "...i!==void 0&&{errorKind:i}",
+        "...a!==void 0&&{fallbackFrom:mr(a)}",
+        "...l"
+      ],
+      "keys": [
+        "outcome",
+        "classifierModel",
+        "classifierType",
+        "failureKind",
+        "stopReason",
+        "...i!==void 0&&{errorKind:i}",
+        "...a!==void 0&&{fallbackFrom:mr(a)}",
+        "...l"
+      ]
+    },
+    "auto_mode_decision_allowlist": {
+      "event": "tengu_auto_mode_decision",
+      "slice": "auto_mode_decision_allowlist",
+      "members": [
+        "decision:de(\"allowed\")",
+        "toolName:fr(e.name)",
+        "isMcp:e.isMcp??!1",
+        "inProtectedNamespace:ax()",
+        "chromeAutomode:f",
+        "mcpAlwaysAllowOverride:q",
+        "mcpServerAskOverride:P",
+        "agentMsgId:r.message.id",
+        "confidence:de(\"high\")",
+        "fastPath:de(\"allowlist\")",
+        "hookAllowVouch:a.hookAllowVouched===!0",
+        "...MIe(e.name,t)"
+      ],
+      "keys": [
+        "decision",
+        "toolName",
+        "isMcp",
+        "inProtectedNamespace",
+        "chromeAutomode",
+        "mcpAlwaysAllowOverride",
+        "mcpServerAskOverride",
+        "agentMsgId",
+        "confidence",
+        "fastPath",
+        "hookAllowVouch",
+        "...MIe(e.name,t)"
+      ]
+    },
+    "write_tool_not_read_hypothetical": {
+      "event": "tengu_write_tool_not_read_hypothetical",
+      "slice": "write_tool_not_read_hypothetical",
+      "members": [
+        "wouldHaveResult:d&&Math.floor(u)>d.timestamp?de(\"errorCode3\"):de(\"success\")",
+        "isPartialView:d?.isPartialView===!0",
+        "isFilePathAbsolute:DVo(n)",
+        "guardSkipped:g",
+        "modelBucket:m"
+      ],
+      "keys": [
+        "wouldHaveResult",
+        "isPartialView",
+        "isFilePathAbsolute",
+        "guardSkipped",
+        "modelBucket"
+      ]
+    },
+    "timer_plugins_init": {
+      "event": "tengu_timer",
+      "slice": "timer_plugins_init",
+      "members": [
+        "event:Re(\"plugins_init\")",
+        "durationMs:Math.round(performance.now()-o)",
+        "headless:e"
+      ],
+      "keys": [
+        "event",
+        "durationMs",
+        "headless"
+      ]
+    },
+    "timer_startup_headless": {
+      "event": "tengu_timer",
+      "slice": "timer_startup_headless",
+      "members": [
+        "event:rt(\"startup\")",
+        "durationMs:Math.round(process.uptime()*1000)",
+        "mcpNonBlocking:wa()",
+        "mcpClientCount:l.configuredMcpServerCount",
+        "resumed:!!(l.resume||l.continue)"
+      ],
+      "keys": [
+        "event",
+        "durationMs",
+        "mcpNonBlocking",
+        "mcpClientCount",
+        "resumed"
+      ]
+    },
+    "worker_permission_mode_restore": {
+      "event": "tengu_worker_permission_mode_restore",
+      "slice": "worker_permission_mode_restore",
+      "members": [
+        "source:Oe(e.source)",
+        "lane:Oe(t)",
+        "trusted_mode:Ws(e.trustedMode)",
+        "recorded_mode:Oe(e.recordedMode)",
+        "target_mode:Ws(a)",
+        "had_external:s",
+        "had_internal:r",
+        "guard_enabled:Di()",
+        "...e.recordTranscriptState&&{record_transcript_state:Oe(e.recordTranscriptState)}",
+        "...e.transcriptOpen&&{transcript_open:!0}"
+      ],
+      "keys": [
+        "source",
+        "lane",
+        "trusted_mode",
+        "recorded_mode",
+        "target_mode",
+        "had_external",
+        "had_internal",
+        "guard_enabled",
+        "...e.recordTranscriptState&&{record_transcript_state:Oe(e.recordTranscriptState)}",
+        "...e.transcriptOpen&&{transcript_open:!0}"
+      ]
+    }
+  },
+  "emission": {
+    "tool_use_can_use_tool_allowed": "fires once the permission result behavior is allow (the deny/ask branch returned tengu_tool_use_can_use_tool_rejected before it); precedes call; keys messageID/toolName/queryChainId/queryDepth then MCP dimensions, requestId when defined, Aw(name, mcpNameLoggable) (empty for non-MCP tools), plugin telemetry",
+    "tool_use_progress": "pOs: one event per progress item the tool yields whose data.type !== \"tool_heartbeat\", during call, before tengu_tool_use_success; TaskOutput yields exactly one waiting_for_task progress item in block mode before waiting",
+    "tool_use_success": "after call resolved: PUr(name,input,messageID) file-activity, ce(f) => tengu_feature_ok, then D(\"tengu_tool_use_success\") before the OTel tool_result span and before the tool_result message is built; durationMs = Date.now()-U (call wall clock), preToolHookDurationMs/permissionDurationMs = hook and permission phases, rss/heapUsed/external deltas = process.memoryUsage() after minus before, toolResultSizeBytes = content string length or JSON.stringify(content).length of mapToolResultToToolResultBlockParam(data).content, toolResultAttachmentBytes only when newMessages carry image/document blocks, toolInputSizeBytes = JSON.stringify(input).length",
+    "feature_ok": "ce(f) on the success path (same call as tengu_tool_use_success)",
+    "feature_sad": "te(f,\"tool_validate_input_rejected\") on validateInput rejection; te(f,\"tool_input_validation_failed\") on schema/JSON failure; te(f,BUr(err).code) for expected call errors",
+    "feature_bad": "J(f,BUr(err).code) for unexpected call errors (isSad false)",
+    "timer": "startup: headless entry (chunk-zhnz59d4.js runHeadless) {event:\"startup\",durationMs:Math.round(process.uptime()*1000),mcpNonBlocking,mcpClientCount:configuredMcpServerCount,resumed:!!(resume||continue)}; plugins_init: {event:\"plugins_init\",durationMs,headless:deferToCleanup} after the plugin init promise settles",
+    "bg_classify": "background shell-task state classifier (heuristic or llm engine) result; requires a background bash task tail to classify",
+    "auto_mode_decision": "auto permission mode (toolPermissionContext.mode === \"auto\") classifier/fast-path decision per tool use; handoff review variants for subagents in auto mode",
+    "auto_mode_outcome": "auto-mode classifier request outcome (permission_auto_mode_classifier feature) after the classifier call",
+    "worker_permission_mode_restore": "hl(): worker permission-mode restore report at print/sdk_url lane start, keys source/lane/trusted_mode/recorded_mode/target_mode/had_external/had_internal/guard_enabled[,record_transcript_state][,transcript_open]",
+    "write_tool_not_read_hypothetical": "Write tool validateInput when the file was not read (or only partially): keys wouldHaveResult/isPartialView/isFilePathAbsolute/guardSkipped/modelBucket"
+  },
+  "tool_name_cases": [
+    {
+      "name": "Agent",
+      "loggable": "Agent"
+    },
+    {
+      "name": "SendMessage",
+      "loggable": "SendMessage"
+    },
+    {
+      "name": "TaskOutput",
+      "loggable": "TaskOutput"
+    },
+    {
+      "name": "TaskStop",
+      "loggable": "TaskStop"
+    },
+    {
+      "name": "ToolSearch",
+      "loggable": "ToolSearch"
+    },
+    {
+      "name": "Task",
+      "loggable": "Task"
+    },
+    {
+      "name": "mcp__server__tool",
+      "loggable": "mcp_tool"
+    },
+    {
+      "name": "Bash",
+      "loggable": "Bash"
+    },
+    {
+      "name": "PowerShell",
+      "loggable": "Bash"
+    },
+    {
+      "name": "WebFetchLegacy",
+      "loggable": "WebFetch"
+    }
+  ],
+  "id_cases": [
+    {
+      "id": null,
+      "defined": false,
+      "loggable": null
+    },
+    {
+      "id": null,
+      "defined": true,
+      "loggable": null
+    },
+    {
+      "id": "msg_01ABCdef-_",
+      "defined": true,
+      "loggable": "msg_01ABCdef-_"
+    },
+    {
+      "id": "req_011CVGjJHiE6NiHqyMcgEuUx",
+      "defined": true,
+      "loggable": "req_011CVGjJHiE6NiHqyMcgEuUx"
+    },
+    {
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "defined": true,
+      "loggable": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "defined": true,
+      "loggable": "nonconforming"
+    },
+    {
+      "id": "toolu 01",
+      "defined": true,
+      "loggable": "nonconforming"
+    },
+    {
+      "id": "",
+      "defined": true,
+      "loggable": "nonconforming"
+    },
+    {
+      "id": "88888888-8888-4888-8888-888888888888",
+      "defined": true,
+      "loggable": "88888888-8888-4888-8888-888888888888"
+    }
+  ],
+  "feature_name_cases": [
+    {
+      "name": "Agent",
+      "snake": "agent",
+      "feature_name": "tool_agent"
+    },
+    {
+      "name": "SendMessage",
+      "snake": "send_message",
+      "feature_name": "tool_send_message"
+    },
+    {
+      "name": "TaskOutput",
+      "snake": "task_output",
+      "feature_name": "tool_task_output"
+    },
+    {
+      "name": "TaskStop",
+      "snake": "task_stop",
+      "feature_name": "tool_task_stop"
+    },
+    {
+      "name": "ToolSearch",
+      "snake": "tool_search",
+      "feature_name": "tool_tool_search"
+    },
+    {
+      "name": "MCPTool",
+      "snake": "mcp_tool",
+      "feature_name": "tool_mcp_tool"
+    },
+    {
+      "name": "WebFetch",
+      "snake": "web_fetch",
+      "feature_name": "tool_web_fetch"
+    },
+    {
+      "name": "Agent2",
+      "snake": "agent2",
+      "feature_name": "tool_agent2"
+    },
+    {
+      "name": "mcp__server__tool",
+      "snake": "mcp_server_tool",
+      "feature_name": "tool_mcp_server_tool"
+    }
+  ],
+  "input_size_cases": [
+    {
+      "input": {},
+      "json": "{}",
+      "toolInputSizeBytes": 2
+    },
+    {
+      "input": {
+        "query": "select:SendMessage"
+      },
+      "json": "{\"query\":\"select:SendMessage\"}",
+      "toolInputSizeBytes": 30
+    },
+    {
+      "input": {
+        "task_id": "a1b2",
+        "block": false
+      },
+      "json": "{\"task_id\":\"a1b2\",\"block\":false}",
+      "toolInputSizeBytes": 32
+    },
+    {
+      "input": {
+        "prompt": "café 😀"
+      },
+      "json": "{\"prompt\":\"café 😀\"}",
+      "toolInputSizeBytes": 20
+    }
+  ],
+  "feature_dimensions": {
+    "feature_name": "a(f) with f = toolFeature(name) = `tool_${snakeCase(name)}` (_823.js Be); a is the _846.js allowlist marker (identity)",
+    "validate_input_rejected": {
+      "error_code": "tool_validate_input_rejected",
+      "condition": "validateInput returned {result:false}; fires before tengu_tool_use_error and before the permission check, so no tengu_tool_use_can_use_tool_allowed for that call"
+    },
+    "input_validation_failed": {
+      "error_code": "tool_input_validation_failed",
+      "condition": "zod parse failure or unparsable JSON input (gOs), before validateInput"
+    },
+    "call_threw": {
+      "ok": "ce(f) => tengu_feature_ok {feature_name} immediately before tengu_tool_use_success",
+      "sad_or_bad": "BUr(err) => te(f,code) when isSad, else J(f,code) (tengu_feature_bad) after me(...) reporting; BUr tail beyond the pinned expected-error branch is not pinned"
+    }
+  },
+  "boundary": "Executed in vm: lU (loggable tool name with the Bl alias map), Ms (loggable id), F9 (MCP dimensions), K9 (attachment bytes) and the pinned snakeCase reducer over a re-created lodash words split. Recorded only: the event literals with their member order, z4/_Ur, iOs, the pinned head of BUr, the validate-input rejection, the timer/bg/auto-mode/permission-restore/write-guard literals. Not established: BUr tail (_Wt expected-error names and the non-sad fallthrough), Aw for MCP tools, pluginTelemetry, PUr side effects, the OTel tool_result span, live acceptance."
+}

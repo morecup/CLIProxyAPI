@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "kind": "native_title_text_and_content_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "title_query",
+      "module_sha256": "4e09a3cb573b05f2a9ff57f457a43cff0e5ba92c4e4b7ce412c6f6850dc12a8b",
+      "from": 2174,
+      "to": 3040,
+      "sha256": "0c8ff921781400d4f795d9004e9c0739c4592be1b740e8162068e0d7e89e35e1"
+    },
+    {
+      "label": "title_outcome",
+      "module_sha256": "4e09a3cb573b05f2a9ff57f457a43cff0e5ba92c4e4b7ce412c6f6850dc12a8b",
+      "from": 3040,
+      "to": 3385,
+      "sha256": "91502fbd87460959a59681826f67d6972086ff3ce39e20181c2b0793588d42f2"
+    },
+    {
+      "label": "title_schema",
+      "module_sha256": "4e09a3cb573b05f2a9ff57f457a43cff0e5ba92c4e4b7ce412c6f6850dc12a8b",
+      "from": 6575,
+      "to": 6598,
+      "sha256": "67a126667a53bdda2b59f94a0639e270d430318da1687df2f421ec8cb551dddb"
+    },
+    {
+      "label": "response_text_trim",
+      "module_sha256": "b97e31a74cc090c24ae090831d0a85ecc684dd5b5416fd03915857c213c62604",
+      "from": 19143,
+      "to": 19234,
+      "sha256": "fa5406c94875fe9816cb2d5f8f9c85ae156c4a0710b9512762a3defaeceda307"
+    },
+    {
+      "label": "parser_result_contract",
+      "module_sha256": "b97e31a74cc090c24ae090831d0a85ecc684dd5b5416fd03915857c213c62604",
+      "from": 21558,
+      "to": 21693,
+      "sha256": "54129c4ff875e0c6e406d9e77a4edd2e23642406d674441c8678d8fe793eb0ec"
+    },
+    {
+      "label": "response_text_selection",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 6616106,
+      "to": 6616189,
+      "sha256": "1ce2d644e9437e0912ed4dbc3a6cbcb1b905708963b6e83d871a385bf33470bc"
+    },
+    {
+      "label": "json_bom_removal",
+      "module_sha256": "b97e31a74cc090c24ae090831d0a85ecc684dd5b5416fd03915857c213c62604",
+      "from": 892,
+      "to": 949,
+      "sha256": "8323f6937de1bb98d86d3d2a9143902356b6bc1fcaad4c7db36544fa35e10838"
+    },
+    {
+      "label": "safe_json_parse",
+      "module_sha256": "b97e31a74cc090c24ae090831d0a85ecc684dd5b5416fd03915857c213c62604",
+      "from": 18852,
+      "to": 19050,
+      "sha256": "17c0ad2b92a8a39352a31784d6c406dfc3f72b4dcf7252f0b879882d16e146a2"
+    },
+    {
+      "label": "helper_query_result",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 5650527,
+      "to": 5650804,
+      "sha256": "85c17dcb9c180d72aada93bc9a69189bf5dd0fd22cd55ad368399dbab2370b4b"
+    },
+    {
+      "label": "assistant_block_yield",
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "from": 5694739,
+      "to": 5695714,
+      "sha256": "8f85b7dfaafa7b231f2d9c1674e2a10d5c841cba305c43ff2656a59b2fe9862e"
+    }
+  ],
+  "cases": [
+    {
+      "name": "named_title",
+      "json": "{\"title\":\"synthetic title\"}",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "blank_title",
+      "json": "{\"title\":\"  \"}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "missing_title",
+      "json": "{}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "uppercase_is_not_title",
+      "json": "{\"TITLE\":\"synthetic\"}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "uppercase_cannot_override_null_title",
+      "json": "{\"title\":null,\"TITLE\":\"synthetic\"}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "number_title",
+      "json": "{\"title\":42}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "null_title",
+      "json": "{\"title\":null}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "object_title",
+      "json": "{\"title\":{}}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "array_title",
+      "json": "{\"title\":[]}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "non_object_array",
+      "json": "[\"synthetic\"]",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "non_object_string",
+      "json": "\"synthetic\"",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "non_object_null",
+      "json": "null",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "bom_and_nbsp_trimmed",
+      "json": "{\"title\":\"\\ufeff\\u00a0\"}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "next_line_is_not_whitespace",
+      "json": "{\"title\":\"\\u0085\"}",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "all_ecmascript_whitespace",
+      "json": "{\"title\":\"\\t\\n\\u000b\\f\\r                  　﻿\"}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "empty_text",
+      "json": "",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "ordinary_text",
+      "json": "synthetic plain text",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "unclosed_json",
+      "json": "{\"title\":\"synthetic\"",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "trailing_comma_not_repaired",
+      "json": "{\"title\":\"synthetic\",}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "comments_not_repaired",
+      "json": "{/* synthetic */\"title\":\"synthetic\"}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "fenced_json",
+      "json": "```json\n{\"title\":\"synthetic\"}\n```",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "uppercase_fence",
+      "json": "```JSON\n{\"title\":\"synthetic\"}\n```",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "unclosed_fence",
+      "json": "```json\n{\"title\":\"synthetic\"}",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "closing_fence_only",
+      "json": "{\"title\":\"synthetic\"}```",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "no_space_after_fence",
+      "json": "```json{\"title\":\"synthetic\"}```",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "nonletter_fence_name",
+      "json": "```json5\n{\"title\":\"synthetic\"}```",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "unicode_fence_whitespace",
+      "json": "﻿```JSON {\"title\":\"synthetic\"} ```﻿",
+      "success": true,
+      "known": true
+    },
+    {
+      "name": "extra_json_document",
+      "json": "{\"title\":\"synthetic\"}{}",
+      "success": false,
+      "known": true
+    },
+    {
+      "name": "fenced_missing_title",
+      "json": "```json\n{}\n```",
+      "success": false,
+      "known": true
+    }
+  ],
+  "content_cases": [
+    {
+      "name": "split_json",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"title\":"
+        },
+        {
+          "type": "text",
+          "text": "\"synthetic\"}"
+        }
+      ],
+      "success": true,
+      "stream_success": false
+    },
+    {
+      "name": "nontext_between_fragments",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"title\":"
+        },
+        {
+          "type": "thinking",
+          "thinking": "synthetic hidden"
+        },
+        {
+          "type": "text",
+          "text": "\"synthetic\"}"
+        }
+      ],
+      "success": true,
+      "stream_success": false
+    },
+    {
+      "name": "tool_is_not_text",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "synthetic-tool",
+          "name": "synthetic",
+          "input": {
+            "title": "synthetic"
+          }
+        }
+      ],
+      "success": false,
+      "stream_success": false
+    },
+    {
+      "name": "two_json_documents_are_not_one_title",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"title\":\"synthetic\"}"
+        },
+        {
+          "type": "text",
+          "text": "{\"title\":\"synthetic two\"}"
+        }
+      ],
+      "success": false,
+      "stream_success": true
+    },
+    {
+      "name": "empty_content",
+      "content": [],
+      "success": false,
+      "stream_success": false
+    }
+  ],
+  "claim_boundary": "Synthetic vectors through native title generation, text selection, fence cleanup, BOM removal and JSON parsing with a schema adapter. No real title, captured payload or live request."
+}

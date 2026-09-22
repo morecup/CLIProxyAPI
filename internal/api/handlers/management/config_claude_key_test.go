@@ -10,7 +10,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 )
 
-func TestPatchClaudeKeyFingerprintProfile(t *testing.T) {
+func TestPatchClaudeKeyRejectsFingerprintProfile(t *testing.T) {
 	cfg := &config.Config{
 		ClaudeKey: []config.ClaudeKey{
 			{APIKey: "test-claude-key"},
@@ -18,7 +18,6 @@ func TestPatchClaudeKeyFingerprintProfile(t *testing.T) {
 	}
 	h := &Handler{cfg: cfg, configFilePath: writeTestConfigFile(t)}
 
-	// Patch fingerprint-profile to claude-code-cli
 	rec := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
@@ -26,42 +25,14 @@ func TestPatchClaudeKeyFingerprintProfile(t *testing.T) {
 	ctx.Request.Header.Set("Content-Type", "application/json")
 	h.PatchClaudeKey(ctx)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400; body=%s", rec.Code, rec.Body.String())
 	}
-	if got := cfg.ClaudeKey[0].FingerprintProfile; got != "claude-code-cli" {
-		t.Fatalf("FingerprintProfile = %q, want %q", got, "claude-code-cli")
+	if !strings.Contains(rec.Body.String(), "removed Claude Code setting") {
+		t.Fatalf("error body = %s, want migration error", rec.Body.String())
 	}
-
-	// Patch fingerprint-profile back to empty
-	rec = httptest.NewRecorder()
-	ctx, _ = gin.CreateTestContext(rec)
-	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
-		strings.NewReader(`{"index":0,"value":{"fingerprint-profile":""}}`))
-	ctx.Request.Header.Set("Content-Type", "application/json")
-	h.PatchClaudeKey(ctx)
-
-	if rec.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
-	}
-	if got := cfg.ClaudeKey[0].FingerprintProfile; got != "" {
-		t.Fatalf("FingerprintProfile = %q, want empty", got)
-	}
-
-	// A legacy alias is stored in canonical form so the config file and the request
-	// path agree on one spelling.
-	rec = httptest.NewRecorder()
-	ctx, _ = gin.CreateTestContext(rec)
-	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
-		strings.NewReader(`{"index":0,"value":{"fingerprint-profile":"  OAuth-CLI "}}`))
-	ctx.Request.Header.Set("Content-Type", "application/json")
-	h.PatchClaudeKey(ctx)
-
-	if rec.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
-	}
-	if got := cfg.ClaudeKey[0].FingerprintProfile; got != "claude-code-cli" {
-		t.Fatalf("FingerprintProfile = %q, want canonical %q", got, "claude-code-cli")
+	if got := cfg.ClaudeKey[0].APIKey; got != "test-claude-key" {
+		t.Fatalf("APIKey = %q, want rejected patch to leave entry unchanged", got)
 	}
 }
 
@@ -70,7 +41,7 @@ func TestPatchClaudeKeyFingerprintProfile(t *testing.T) {
 func TestPatchClaudeKeyRejectsUnknownFingerprintProfile(t *testing.T) {
 	cfg := &config.Config{
 		ClaudeKey: []config.ClaudeKey{
-			{APIKey: "test-claude-key", FingerprintProfile: "claude-code-cli"},
+			{APIKey: "test-claude-key"},
 		},
 	}
 	h := &Handler{cfg: cfg, configFilePath: writeTestConfigFile(t)}
@@ -88,8 +59,8 @@ func TestPatchClaudeKeyRejectsUnknownFingerprintProfile(t *testing.T) {
 	if !strings.Contains(rec.Body.String(), "fingerprint-profile") {
 		t.Fatalf("error body = %s, want it to name the field", rec.Body.String())
 	}
-	if got := cfg.ClaudeKey[0].FingerprintProfile; got != "claude-code-cli" {
-		t.Fatalf("FingerprintProfile = %q, want the rejected patch to leave it unchanged", got)
+	if got := cfg.ClaudeKey[0].APIKey; got != "test-claude-key" {
+		t.Fatalf("APIKey = %q, want rejected patch to leave entry unchanged", got)
 	}
 }
 

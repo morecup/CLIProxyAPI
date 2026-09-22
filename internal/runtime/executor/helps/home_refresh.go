@@ -1,6 +1,7 @@
 package helps
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -132,13 +133,30 @@ func parseHomeRefreshAuth(raw []byte) (*cliproxyauth.Auth, string, error) {
 		if errUnmarshal := json.Unmarshal(raw, &envelope); errUnmarshal != nil {
 			return nil, "", errUnmarshal
 		}
+		if errDecode := decodeHomeDesktopAuth(rawObject["auth"], &envelope.Auth); errDecode != nil {
+			return nil, "", errDecode
+		}
 		return &envelope.Auth, strings.TrimSpace(envelope.AuthIndex), nil
 	}
 	var updated cliproxyauth.Auth
 	if errUnmarshal := json.Unmarshal(raw, &updated); errUnmarshal != nil {
 		return nil, "", errUnmarshal
 	}
+	if errDecode := decodeHomeDesktopAuth(raw, &updated); errDecode != nil {
+		return nil, "", errDecode
+	}
 	return &updated, "", nil
+}
+
+func decodeHomeDesktopAuth(raw []byte, auth *cliproxyauth.Auth) error {
+	if auth.Provider != "claude" {
+		return nil
+	}
+	// Desktop ownership compares exact noncredential metadata. A float64 round
+	// trip can change an integer binding before that comparison even runs.
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	return decoder.Decode(auth)
 }
 
 func statusFromHomeErrorCode(code string) int {

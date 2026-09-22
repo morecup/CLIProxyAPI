@@ -1,0 +1,2398 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "display": {
+      "name": "B:/~BUN/root/_717.js",
+      "sha256": "faf61387fc1c81ec8c387c4359a673b97f66fdd0a3249cf60f160a121dcc5c9e"
+    },
+    "strings": {
+      "name": "B:/~BUN/root/_845.js",
+      "sha256": "508bf68797427d6c5b6bf34f6c71d1ba19c32c94e464074957745f8dca19bf2b"
+    },
+    "numbers": {
+      "name": "B:/~BUN/root/_837.js",
+      "sha256": "9dbff35abe606147b3ce3527593ff741b57db38ff6d401794794052fadc3f9e0"
+    },
+    "text": {
+      "name": "B:/~BUN/root/_749.js",
+      "sha256": "0e744be662939a64ce01ec1d766d8e18bd4a146718ce800d7ca3fd9c81c35eda"
+    }
+  },
+  "definitions": [
+    {
+      "label": "task_output_tool",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3648416,
+      "to": 3652424,
+      "bytes": 4008,
+      "sha256": "2453be84340c35eb46cd2a8c1f76c9f525bca00fac32bb44a70220631e1cf5ef"
+    },
+    {
+      "label": "task_output_shape",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3645756,
+      "to": 3647749,
+      "bytes": 1993,
+      "sha256": "6f0d401ee8f021cd4a9a206b2a7238afd8b1340b77438dc619b30568ae67b6c4"
+    },
+    {
+      "label": "task_output_wait",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3647749,
+      "to": 3648082,
+      "bytes": 333,
+      "sha256": "d84669d0c8dfa84c3083fcb10716e489fbe3312197d4ade677fa3a1fc4f42bf3"
+    },
+    {
+      "label": "task_output_literals",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3648082,
+      "to": 3648288,
+      "bytes": 206,
+      "sha256": "e65c6babf3b63d196c9473e7d831792afa9d00de155f68542a292c2a5b5374ca"
+    },
+    {
+      "label": "task_output_truncation",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3645172,
+      "to": 3645723,
+      "bytes": 551,
+      "sha256": "9555125a67dd392672634ec056dd6a16a893edb47b1ff1300c8303811618d94c"
+    },
+    {
+      "label": "env_number_clamp",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 67830,
+      "to": 68191,
+      "bytes": 361,
+      "sha256": "626b19da13fefa5512b89cf07468479dcc940ee3a8ee727c5a483a6a336935a6"
+    },
+    {
+      "label": "report_sections",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1269384,
+      "to": 1269717,
+      "bytes": 333,
+      "sha256": "64e61fba3f70c6c634715b8daec0ff6a7038ead9b65c25fcd8f805c028a0d023"
+    },
+    {
+      "label": "text_join",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 6616106,
+      "to": 6616189,
+      "bytes": 83,
+      "sha256": "1ce2d644e9437e0912ed4dbc3a6cbcb1b905708963b6e83d871a385bf33470bc"
+    },
+    {
+      "label": "stop_task_error",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3563990,
+      "to": 3564173,
+      "bytes": 183,
+      "sha256": "0818560fc4d2f7acda62038cdb5bb38767585803ca601ee3c31dfe72b50ce0b2"
+    },
+    {
+      "label": "task_stop_tool",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3564259,
+      "to": 3566305,
+      "bytes": 2046,
+      "sha256": "248c2439c517efd25ea0131af26a617a5ff452dd8e6339576d9f0c6f3c6e2133"
+    },
+    {
+      "label": "task_stop_core",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3560132,
+      "to": 3562738,
+      "bytes": 2606,
+      "sha256": "4b437a380710e1c7088e471bf7a6706cbfb88bad0b2527b6e24157cb999f9cf3"
+    },
+    {
+      "label": "task_stop_lookup",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3556696,
+      "to": 3558791,
+      "bytes": 2095,
+      "sha256": "51773c3ab0e7d311930e4dfccb616d1de8aba0d25186dc504bc3a5f33092e742"
+    },
+    {
+      "label": "task_stop_not_found",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3558840,
+      "to": 3560132,
+      "bytes": 1292,
+      "sha256": "2e0750ee6690fb392676f16b135e79afa5137d9e79750393d66acd80fae9341c"
+    },
+    {
+      "label": "teammate_lookup",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3470910,
+      "to": 3471592,
+      "bytes": 682,
+      "sha256": "1297165588aa01d6846865f57f3fb02bbe8ab3211595da207556acb93a15e77f"
+    },
+    {
+      "label": "fuzzy_suggestion",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3221863,
+      "to": 3222681,
+      "bytes": 818,
+      "sha256": "9147877fe915417f973f19be64048e3e40153fcbcc8d9745d92bb595a5eeda72"
+    },
+    {
+      "label": "local_agent_task_type",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3551132,
+      "to": 3551209,
+      "bytes": 77,
+      "sha256": "5e0cdecd94facc2895c13a25393e86315c455cedeaa0af541f3dbc3d6d869a62"
+    },
+    {
+      "label": "keepalive_predicate",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2324416,
+      "to": 2324571,
+      "bytes": 155,
+      "sha256": "8e5ca33b63b34e0da8409880cfca9f2b8282b44a9a03abcce83d92d4f74a9778"
+    },
+    {
+      "label": "observer_and_descendants",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2313974,
+      "to": 2314455,
+      "bytes": 481,
+      "sha256": "c2d5852eadd3b90193fc8a2f50f476c7a20bda1a858fd25a139ccaf7e158de91"
+    },
+    {
+      "label": "bash_predicate",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2323724,
+      "to": 2323811,
+      "bytes": 87,
+      "sha256": "6b2fcb073b448da1ba333ee3a674e4179c2a207e05f44065c7ea63fd269308db"
+    },
+    {
+      "label": "terminal_status",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 57494,
+      "to": 57560,
+      "bytes": 66,
+      "sha256": "88a5042712fa13a696e76b08518feb0051f1e172b6b1ba01b977094d3d9ce08f"
+    },
+    {
+      "label": "owner_check",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3069051,
+      "to": 3069232,
+      "bytes": 181,
+      "sha256": "aa33945625c573403e994c5e04e22c997d50af8b0679d228a23cb5a9493479fb"
+    },
+    {
+      "label": "validate_input_rejected",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5143597,
+      "to": 5144407,
+      "bytes": 810,
+      "sha256": "74844bcc37308868434ffd80e31144d3571a6a218b4c2d1007fd8e6e41c9a45d"
+    },
+    {
+      "label": "display_sanitizer",
+      "module": "B:/~BUN/root/_717.js",
+      "from": 771,
+      "to": 1042,
+      "bytes": 271,
+      "sha256": "643b367958a75eda2d7b23ba17302a86c9a6a984c91a6b92119858023dcc9dfb"
+    },
+    {
+      "label": "string_truncation",
+      "module": "B:/~BUN/root/_845.js",
+      "from": 993,
+      "to": 1499,
+      "bytes": 506,
+      "sha256": "00478eb10901df9ad89089487aad044f07ae23075d71e6ed34746f5e5195e1ae"
+    },
+    {
+      "label": "control_char_collapse",
+      "module": "B:/~BUN/root/_749.js",
+      "from": 1809,
+      "to": 1877,
+      "bytes": 68,
+      "sha256": "75b755952883dd7ade7611c3635f00fc41f02efb1555cd1c65b2632c016f8cf6"
+    },
+    {
+      "label": "env_integer_parse",
+      "module": "B:/~BUN/root/_837.js",
+      "from": 916,
+      "to": 1131,
+      "bytes": 215,
+      "sha256": "7a9ab0d725ffc9f40d7d42590defa861c5c1f7a1fe853ad344ad7e200211026d"
+    },
+    {
+      "label": "env_integer_patterns",
+      "module": "B:/~BUN/root/_837.js",
+      "from": 1300,
+      "to": 1420,
+      "bytes": 120,
+      "sha256": "c8944171b2f1904de66b86018868a1168b7f7d7f1d729fc06744c9c1367dcd3e"
+    }
+  ],
+  "constants": {
+    "task_stop": "TaskStop",
+    "task_output": "TaskOutput",
+    "not_found_prefix": "No task found with ID: ",
+    "background_agents_prefix": ". Running background agents: ",
+    "named_agents_prefix": ". Running named agents: ",
+    "teammates_prefix": ". Running teammates: ",
+    "did_you_mean": ". Did you mean: <suggestion>?",
+    "list_separator": ", ",
+    "description_display": "<id> (<Y1(description)>)",
+    "display_limit": 160,
+    "ellipsis": "…",
+    "missing_task_id": "Missing required parameter: task_id",
+    "task_id_required": "Task ID is required",
+    "not_running": "Task <input> is not running (status: <status>)",
+    "not_owner": "Task <display> is owned by <Zy(Oye(owner))>; agent <Zy(String(caller))> cannot stop it.",
+    "unsupported_type": "Unsupported task type: <type>",
+    "main_session": "main session",
+    "success_message": "Successfully stopped task: <taskId> (<command>)",
+    "stop_result_keys": [
+      "message",
+      "task_id",
+      "task_type",
+      "command"
+    ],
+    "killed_by_tool": "parent",
+    "killed_by_user_default": "user",
+    "stop_task_error_name": "StopTaskError",
+    "stop_task_telemetry_message": "StopTask: <code>",
+    "stop_task_error_codes": [
+      "not_running",
+      "ambiguous",
+      "not_found",
+      "not_owner",
+      "unsupported_type"
+    ],
+    "validate_input_error_codes": {
+      "task_output_missing_id": 1,
+      "task_output_not_found": 2,
+      "task_stop_missing_or_not_found_or_ambiguous": 1,
+      "task_stop_not_running": 3
+    },
+    "tool_use_error_template": "<tool_use_error>${S.message}</tool_use_error>",
+    "tool_use_result_template": "Error: ${S.message}",
+    "output_default_limit": 32000,
+    "output_limit_cap": 160000,
+    "output_limit_env": "TASK_MAX_OUTPUT_LENGTH",
+    "poll_ms": 100,
+    "default_timeout_ms": 30000,
+    "max_timeout_ms": 600000,
+    "truncated_full_output": "[Truncated. Full output: <ji(taskId)>]\n\n",
+    "truncated_omit_path": "[Truncated to the last <n> characters; the earlier part of the report is not retrievable.]\n\n",
+    "no_report_text": "[The agent produced no report text.]",
+    "no_report_yet_webfetch": "[The agent has no report yet — it is still running, or it stopped before reporting. Its transcript is raw fetched page content and is not returned.]",
+    "killed_note_prefix": "NOTE: this agent stopped at its ",
+    "progress_event_type": "waiting_for_task",
+    "progress_tool_use_id": "task-output-waiting-<Date.now()>",
+    "output_shape_keys": [
+      "task_id",
+      "task_type",
+      "status",
+      "description",
+      "prompt",
+      "result",
+      "output",
+      "isRawTranscript",
+      "error",
+      "[harnessHead]",
+      "[webFetchSavedFiles, webFetchReportCutNote]",
+      "[omitOutputPath]"
+    ]
+  },
+  "display_cases": [
+    {
+      "input": "plain",
+      "zy": "plain",
+      "y1": "plain",
+      "zy_length": 5
+    },
+    {
+      "input": "  padded  ",
+      "zy": "padded",
+      "y1": "padded",
+      "zy_length": 6
+    },
+    {
+      "input": "tab\tand\nnewline",
+      "zy": "tab and newline",
+      "y1": "tab and newline",
+      "zy_length": 15
+    },
+    {
+      "input": "a\u0007b\u0000c",
+      "zy": "abc",
+      "y1": "a b c",
+      "zy_length": 3
+    },
+    {
+      "input": "zero​width‍",
+      "zy": "zerowidth",
+      "y1": "zero width",
+      "zy_length": 9
+    },
+    {
+      "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "zy": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "y1": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "zy_length": 159
+    },
+    {
+      "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "zy": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "y1": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "zy_length": 160
+    },
+    {
+      "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "zy": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…",
+      "y1": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…",
+      "zy_length": 161
+    },
+    {
+      "input": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+      "zy": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…",
+      "y1": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…",
+      "zy_length": 161
+    },
+    {
+      "input": "sp zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "zy": "sp zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz…",
+      "y1": "sp zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz…",
+      "zy_length": 161
+    },
+    {
+      "input": " line sep",
+      "zy": "line sep",
+      "y1": "line sep",
+      "zy_length": 8
+    },
+    {
+      "input": "emoji 😀 ok",
+      "zy": "emoji 😀 ok",
+      "y1": "emoji 😀 ok",
+      "zy_length": 11
+    },
+    {
+      "input": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee😀",
+      "zy": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee…",
+      "y1": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee…",
+      "zy_length": 160
+    },
+    {
+      "input": "",
+      "zy": "",
+      "y1": "",
+      "zy_length": 0
+    }
+  ],
+  "truncation_cases": [
+    {
+      "env": null,
+      "effective": 32000,
+      "clamp": {
+        "effective": 32000,
+        "status": "valid"
+      },
+      "logs": []
+    },
+    {
+      "env": "1000",
+      "effective": 1000,
+      "clamp": {
+        "effective": 1000,
+        "status": "valid"
+      },
+      "logs": []
+    },
+    {
+      "env": "200000",
+      "effective": 160000,
+      "clamp": {
+        "effective": 160000,
+        "status": "capped",
+        "message": "Capped from 200000 to 160000"
+      },
+      "logs": [
+        "TASK_MAX_OUTPUT_LENGTH Capped from 200000 to 160000"
+      ]
+    },
+    {
+      "env": "160000",
+      "effective": 160000,
+      "clamp": {
+        "effective": 160000,
+        "status": "valid"
+      },
+      "logs": []
+    },
+    {
+      "env": "160001",
+      "effective": 160000,
+      "clamp": {
+        "effective": 160000,
+        "status": "capped",
+        "message": "Capped from 160001 to 160000"
+      },
+      "logs": [
+        "TASK_MAX_OUTPUT_LENGTH Capped from 160001 to 160000"
+      ]
+    },
+    {
+      "env": "abc",
+      "effective": 32000,
+      "clamp": {
+        "effective": 32000,
+        "status": "invalid",
+        "message": "Invalid value \"abc\" (using default: 32000)"
+      },
+      "logs": [
+        "TASK_MAX_OUTPUT_LENGTH Invalid value \"abc\" (using default: 32000)"
+      ]
+    },
+    {
+      "env": "0",
+      "effective": 32000,
+      "clamp": {
+        "effective": 32000,
+        "status": "invalid",
+        "message": "Invalid value \"0\" (using default: 32000)"
+      },
+      "logs": [
+        "TASK_MAX_OUTPUT_LENGTH Invalid value \"0\" (using default: 32000)"
+      ]
+    },
+    {
+      "env": "-5",
+      "effective": 32000,
+      "clamp": {
+        "effective": 32000,
+        "status": "invalid",
+        "message": "Invalid value \"-5\" (using default: 32000)"
+      },
+      "logs": [
+        "TASK_MAX_OUTPUT_LENGTH Invalid value \"-5\" (using default: 32000)"
+      ]
+    },
+    {
+      "env": "1e3",
+      "effective": 1000,
+      "clamp": {
+        "effective": 1000,
+        "status": "valid"
+      },
+      "logs": []
+    },
+    {
+      "env": "1,000",
+      "effective": 1000,
+      "clamp": {
+        "effective": 1000,
+        "status": "valid"
+      },
+      "logs": []
+    },
+    {
+      "env": " 2000 ",
+      "effective": 2000,
+      "clamp": {
+        "effective": 2000,
+        "status": "valid"
+      },
+      "logs": []
+    },
+    {
+      "env": "12.5",
+      "effective": 12,
+      "clamp": {
+        "effective": 12,
+        "status": "valid"
+      },
+      "logs": []
+    }
+  ],
+  "vfr_cases": [
+    {
+      "limit": 100,
+      "length": 100,
+      "omit_path": false,
+      "content": "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",
+      "content_length": 100,
+      "was_truncated": false
+    },
+    {
+      "limit": 100,
+      "length": 101,
+      "omit_path": false,
+      "content": "[Truncated. Full output: /tmp/tasks/a0123456789abcdef.output]\n\n4567890123456789012345678901234567890",
+      "content_length": 100,
+      "was_truncated": true
+    },
+    {
+      "limit": 100,
+      "length": 250,
+      "omit_path": false,
+      "content": "[Truncated. Full output: /tmp/tasks/a0123456789abcdef.output]\n\n3456789012345678901234567890123456789",
+      "content_length": 100,
+      "was_truncated": true
+    },
+    {
+      "limit": 100,
+      "length": 250,
+      "omit_path": true,
+      "content": "[Truncated to the last 8 characters; the earlier part of the report is not retrievable.]\n\n23456789",
+      "content_length": 98,
+      "was_truncated": true
+    },
+    {
+      "limit": 50,
+      "length": 60,
+      "omit_path": true,
+      "content": "[Truncated to the last 0 characters; the earlier part of the report is not retrievable.]\n\n",
+      "content_length": 90,
+      "was_truncated": true
+    },
+    {
+      "limit": 100,
+      "length": 250,
+      "omit_path": false,
+      "content": "[Truncated. Full output: /tmp/tasks/a0123456789abcdef.output]\n\n3456789012345678901234567890123456789",
+      "content_length": 100,
+      "was_truncated": true
+    }
+  ],
+  "not_found_cases": [
+    {
+      "label": "no_tasks",
+      "input": "a0000000000000000",
+      "caller": null,
+      "names": {},
+      "tasks": [],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": "",
+      "stop_not_found": "No task found with ID: a0000000000000000",
+      "output_not_found": "No task found with ID: a0000000000000000",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: a0000000000000000",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: a0000000000000000",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "running_background_agents",
+      "input": "missing",
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Long description Long description Long description Long description Long description Long description Long description Long description Long description Long description Long description Long description",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a3333333333333333",
+          "type": "local_agent",
+          "status": "running",
+          "description": "tab\tsep\u0007bell​zero\n\nnewline  double  space ",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": ". Running background agents: a1111111111111111 (Inspect the repo), a2222222222222222 (Long description Long description Long description Long description Long description Long description Long description Long description Long description Long de…), a3333333333333333 (tab sep bell zero newline double space)",
+      "stop_not_found": "No task found with ID: missing. Running background agents: a1111111111111111 (Inspect the repo), a2222222222222222 (Long description Long description Long description Long description Long description Long description Long description Long description Long description Long de…), a3333333333333333 (tab sep bell zero newline double space)",
+      "output_not_found": "No task found with ID: missing. Running background agents: a1111111111111111 (Inspect the repo), a2222222222222222 (Long description Long description Long description Long description Long description Long description Long description Long description Long description Long de…), a3333333333333333 (tab sep bell zero newline double space)",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a1111111111111111 (Inspect the repo), a2222222222222222 (Long description Long description Long description Long description Long description Long description Long description Long description Long description Long de…), a3333333333333333 (tab sep bell zero newline double space)",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a1111111111111111 (Inspect the repo), a2222222222222222 (Long description Long description Long description Long description Long description Long description Long description Long description Long description Long de…), a3333333333333333 (tab sep bell zero newline double space)",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "caller_excluded",
+      "input": "missing",
+      "caller": "a1111111111111111",
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Other",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": ". Running background agents: a2222222222222222 (Other)",
+      "stop_not_found": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+      "output_not_found": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "named_agent_listed_separately",
+      "input": "missing",
+      "caller": null,
+      "names": {
+        "worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Other",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": ". Running background agents: a2222222222222222 (Other)",
+      "stop_not_found": "No task found with ID: missing. Running named agents: worker. Running background agents: a2222222222222222 (Other)",
+      "output_not_found": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running named agents: worker. Running background agents: a2222222222222222 (Other)",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "main_session_excluded",
+      "input": "missing",
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Main",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "main-session",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Other",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": ". Running background agents: a2222222222222222 (Other)",
+      "stop_not_found": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+      "output_not_found": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a2222222222222222 (Other)",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "foreground_observer_terminal_excluded",
+      "input": "missing",
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Foreground",
+          "isBackgrounded": false,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Observer",
+          "isBackgrounded": true,
+          "isObserver": true,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a3333333333333333",
+          "type": "local_agent",
+          "status": "completed",
+          "description": "Done",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a4444444444444444",
+          "type": "local_agent",
+          "status": "failed",
+          "description": "Failed",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": "",
+      "stop_not_found": "No task found with ID: missing",
+      "output_not_found": "No task found with ID: missing",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "keepalive_included",
+      "input": "missing",
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "completed",
+          "description": "Parked",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": [
+            "agent:a2222222222222222"
+          ]
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "completed",
+          "description": "Empty keepalive",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": []
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": ". Running background agents: a1111111111111111 (Parked)",
+      "stop_not_found": "No task found with ID: missing. Running background agents: a1111111111111111 (Parked)",
+      "output_not_found": "No task found with ID: missing. Running background agents: a1111111111111111 (Parked)",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a1111111111111111 (Parked)",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a1111111111111111 (Parked)",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "no_description",
+      "input": "missing",
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": null,
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a5555555555555555",
+          "type": "local_bash",
+          "status": "running",
+          "description": "sleep",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": ". Running background agents: a1111111111111111",
+      "stop_not_found": "No task found with ID: missing. Running background agents: a1111111111111111",
+      "output_not_found": "No task found with ID: missing. Running background agents: a1111111111111111",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a1111111111111111",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: missing. Running background agents: a1111111111111111",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "input_sanitized",
+      "input": "bad\u0007id\twith\nspaces qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+      "caller": null,
+      "names": {},
+      "tasks": [],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": "",
+      "stop_not_found": "No task found with ID: badid with spaces qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq…",
+      "output_not_found": "No task found with ID: bad\u0007id\twith\nspaces qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: badid with spaces qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq…",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: bad\u0007id\twith\nspaces qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "fuzzy_suggestion",
+      "input": "workr",
+      "caller": null,
+      "names": {
+        "worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found",
+        "suggestion": "worker"
+      },
+      "suffix": "",
+      "stop_not_found": "No task found with ID: workr. Did you mean: worker?. Running named agents: worker",
+      "output_not_found": "No task found with ID: workr",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: workr. Did you mean: worker?. Running named agents: worker",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: workr",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "fuzzy_suggestion_stopped_agent_ignored",
+      "input": "workr",
+      "caller": null,
+      "names": {
+        "worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "killed",
+          "description": "Inspect the repo",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "not_found"
+      },
+      "suffix": "",
+      "stop_not_found": "No task found with ID: workr",
+      "output_not_found": "No task found with ID: workr",
+      "stop_validate_input": {
+        "result": false,
+        "message": "No task found with ID: workr",
+        "errorCode": 1
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: workr",
+        "errorCode": 2
+      }
+    },
+    {
+      "label": "name_case_insensitive_found",
+      "input": "worker",
+      "caller": null,
+      "names": {
+        "Worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "isBackgrounded": true,
+          "isObserver": null,
+          "agentType": "general-purpose",
+          "keepalive_reasons": null
+        }
+      ],
+      "lookup": {
+        "status": "found",
+        "task": {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "isBackgrounded": true,
+          "agentType": "general-purpose",
+          "description": "Inspect the repo"
+        }
+      },
+      "suffix": "",
+      "stop_not_found": "No task found with ID: worker. Running named agents: Worker",
+      "output_not_found": "No task found with ID: worker",
+      "stop_validate_input": {
+        "result": true
+      },
+      "output_validate_input": {
+        "result": false,
+        "message": "No task found with ID: worker",
+        "errorCode": 2
+      }
+    }
+  ],
+  "stop_cases": [
+    {
+      "label": "missing_task_id",
+      "input": {},
+      "caller": null,
+      "names": {},
+      "tasks": [],
+      "validate_input": {
+        "result": false,
+        "message": "Missing required parameter: task_id",
+        "errorCode": 1
+      },
+      "core": null,
+      "core_error": null,
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "Error",
+        "message": "Missing required parameter: task_id"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [],
+      "tool_use_error_content": "<tool_use_error>Missing required parameter: task_id</tool_use_error>"
+    },
+    {
+      "label": "shell_id_fallback",
+      "input": {
+        "shell_id": "a1111111111111111"
+      },
+      "caller": "acaller00000000000",
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": {
+        "taskId": "a1111111111111111",
+        "taskType": "local_agent",
+        "command": "Inspect the repo"
+      },
+      "core_error": null,
+      "core_calls": [
+        {
+          "name": "uL",
+          "args": [
+            "a1111111111111111",
+            "parent"
+          ]
+        }
+      ],
+      "call_result": {
+        "data": {
+          "message": "Successfully stopped task: a1111111111111111 (Inspect the repo)",
+          "task_id": "a1111111111111111",
+          "task_type": "local_agent",
+          "command": "Inspect the repo"
+        }
+      },
+      "call_error": null,
+      "result_block": {
+        "tool_use_id": "toolu_stop",
+        "type": "tool_result",
+        "content": "{\"message\":\"Successfully stopped task: a1111111111111111 (Inspect the repo)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Inspect the repo\"}"
+      },
+      "result_json": "{\"message\":\"Successfully stopped task: a1111111111111111 (Inspect the repo)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Inspect the repo\"}",
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "success_by_id",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": "acaller00000000000",
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "desc <b>&\"quotes\"</b>   line  sep é",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": {
+        "taskId": "a1111111111111111",
+        "taskType": "local_agent",
+        "command": "desc <b>&\"quotes\"</b>   line  sep é"
+      },
+      "core_error": null,
+      "core_calls": [
+        {
+          "name": "uL",
+          "args": [
+            "a1111111111111111",
+            "parent"
+          ]
+        }
+      ],
+      "call_result": {
+        "data": {
+          "message": "Successfully stopped task: a1111111111111111 (desc <b>&\"quotes\"</b>   line  sep é)",
+          "task_id": "a1111111111111111",
+          "task_type": "local_agent",
+          "command": "desc <b>&\"quotes\"</b>   line  sep é"
+        }
+      },
+      "call_error": null,
+      "result_block": {
+        "tool_use_id": "toolu_stop",
+        "type": "tool_result",
+        "content": "{\"message\":\"Successfully stopped task: a1111111111111111 (desc <b>&\\\"quotes\\\"</b>   line  sep é)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"desc <b>&\\\"quotes\\\"</b>   line  sep é\"}"
+      },
+      "result_json": "{\"message\":\"Successfully stopped task: a1111111111111111 (desc <b>&\\\"quotes\\\"</b>   line  sep é)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"desc <b>&\\\"quotes\\\"</b>   line  sep é\"}",
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "success_by_name",
+      "input": {
+        "task_id": "worker"
+      },
+      "caller": "acaller00000000000",
+      "names": {
+        "worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": {
+        "taskId": "a1111111111111111",
+        "taskType": "local_agent",
+        "command": "Inspect the repo"
+      },
+      "core_error": null,
+      "core_calls": [
+        {
+          "name": "uL",
+          "args": [
+            "a1111111111111111",
+            "parent"
+          ]
+        }
+      ],
+      "call_result": {
+        "data": {
+          "message": "Successfully stopped task: a1111111111111111 (Inspect the repo)",
+          "task_id": "a1111111111111111",
+          "task_type": "local_agent",
+          "command": "Inspect the repo"
+        }
+      },
+      "call_error": null,
+      "result_block": {
+        "tool_use_id": "toolu_stop",
+        "type": "tool_result",
+        "content": "{\"message\":\"Successfully stopped task: a1111111111111111 (Inspect the repo)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Inspect the repo\"}"
+      },
+      "result_json": "{\"message\":\"Successfully stopped task: a1111111111111111 (Inspect the repo)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Inspect the repo\"}",
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "success_main_caller",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "agentId": "aother000000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": {
+        "taskId": "a1111111111111111",
+        "taskType": "local_agent",
+        "command": "Inspect the repo"
+      },
+      "core_error": null,
+      "core_calls": [
+        {
+          "name": "uL",
+          "args": [
+            "a1111111111111111",
+            "parent"
+          ]
+        }
+      ],
+      "call_result": {
+        "data": {
+          "message": "Successfully stopped task: a1111111111111111 (Inspect the repo)",
+          "task_id": "a1111111111111111",
+          "task_type": "local_agent",
+          "command": "Inspect the repo"
+        }
+      },
+      "call_error": null,
+      "result_block": {
+        "tool_use_id": "toolu_stop",
+        "type": "tool_result",
+        "content": "{\"message\":\"Successfully stopped task: a1111111111111111 (Inspect the repo)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Inspect the repo\"}"
+      },
+      "result_json": "{\"message\":\"Successfully stopped task: a1111111111111111 (Inspect the repo)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Inspect the repo\"}",
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "not_running_by_id",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": "acaller00000000000",
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "completed",
+          "description": "Done",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": false,
+        "message": "Task a1111111111111111 is not running (status: completed)",
+        "errorCode": 3
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Task a1111111111111111 is not running (status: completed)",
+        "code": "not_running",
+        "taskStatus": "completed",
+        "telemetryMessage": "StopTask: not_running"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Task a1111111111111111 is not running (status: completed)",
+        "code": "not_running",
+        "taskStatus": "completed",
+        "telemetryMessage": "StopTask: not_running"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "completed",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": "<tool_use_error>Task a1111111111111111 is not running (status: completed)</tool_use_error>"
+    },
+    {
+      "label": "not_running_by_name",
+      "input": {
+        "task_id": "worker"
+      },
+      "caller": "acaller00000000000",
+      "names": {
+        "worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "killed",
+          "description": "Done",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": false,
+        "message": "Task worker is not running (status: killed)",
+        "errorCode": 3
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Task worker (a1111111111111111) is not running (status: killed)",
+        "code": "not_running",
+        "taskStatus": "killed",
+        "telemetryMessage": "StopTask: not_running"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Task worker (a1111111111111111) is not running (status: killed)",
+        "code": "not_running",
+        "taskStatus": "killed",
+        "telemetryMessage": "StopTask: not_running"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": "<tool_use_error>Task worker is not running (status: killed)</tool_use_error>"
+    },
+    {
+      "label": "not_running_by_name_sanitized",
+      "input": {
+        "task_id": "wor\u0007 ker"
+      },
+      "caller": "acaller00000000000",
+      "names": {
+        "wor ker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "failed",
+          "description": "Done",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": false,
+        "message": "Task wor\u0007 ker is not running (status: failed)",
+        "errorCode": 3
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Task wor ker (a1111111111111111) is not running (status: failed)",
+        "code": "not_running",
+        "taskStatus": "failed",
+        "telemetryMessage": "StopTask: not_running"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Task wor ker (a1111111111111111) is not running (status: failed)",
+        "code": "not_running",
+        "taskStatus": "failed",
+        "telemetryMessage": "StopTask: not_running"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "failed",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": "<tool_use_error>Task wor\u0007 ker is not running (status: failed)</tool_use_error>"
+    },
+    {
+      "label": "not_owner_by_id",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": "acaller00000000000",
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "agentId": "aowner000000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Task a1111111111111111 is owned by aowner000000000000; agent acaller00000000000 cannot stop it.",
+        "code": "not_owner",
+        "telemetryMessage": "StopTask: not_owner"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Task a1111111111111111 is owned by aowner000000000000; agent acaller00000000000 cannot stop it.",
+        "code": "not_owner",
+        "telemetryMessage": "StopTask: not_owner"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "running",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "not_owner_by_name",
+      "input": {
+        "task_id": "worker"
+      },
+      "caller": "acaller00000000000",
+      "names": {
+        "worker": "a1111111111111111"
+      },
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "agentId": "aowner000000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Task worker (a1111111111111111) is owned by aowner000000000000; agent acaller00000000000 cannot stop it.",
+        "code": "not_owner",
+        "telemetryMessage": "StopTask: not_owner"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Task worker (a1111111111111111) is owned by aowner000000000000; agent acaller00000000000 cannot stop it.",
+        "code": "not_owner",
+        "telemetryMessage": "StopTask: not_owner"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "running",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "not_owner_main_owned",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": "acaller00000000000",
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Inspect the repo",
+          "agentId": null,
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Task a1111111111111111 is owned by main session; agent acaller00000000000 cannot stop it.",
+        "code": "not_owner",
+        "telemetryMessage": "StopTask: not_owner"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Task a1111111111111111 is owned by main session; agent acaller00000000000 cannot stop it.",
+        "code": "not_owner",
+        "telemetryMessage": "StopTask: not_owner"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "running",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "unsupported_type",
+      "input": {
+        "task_id": "m1"
+      },
+      "caller": "acaller00000000000",
+      "names": {},
+      "tasks": [
+        {
+          "id": "m1",
+          "type": "monitor_ws",
+          "status": "running",
+          "description": "watch",
+          "agentId": "acaller00000000000",
+          "parentAgentId": null,
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": null,
+      "core_error": {
+        "name": "StopTaskError",
+        "message": "Unsupported task type: monitor_ws",
+        "code": "unsupported_type",
+        "telemetryMessage": "StopTask: unsupported_type"
+      },
+      "core_calls": [],
+      "call_result": null,
+      "call_error": {
+        "name": "StopTaskError",
+        "message": "Unsupported task type: monitor_ws",
+        "code": "unsupported_type",
+        "telemetryMessage": "StopTask: unsupported_type"
+      },
+      "result_block": null,
+      "result_json": null,
+      "registry_after_call": [
+        {
+          "id": "m1",
+          "status": "running",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "keepalive_cascade",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "completed",
+          "description": "Parent",
+          "agentId": "a1111111111111111",
+          "parentAgentId": "acaller00000000000",
+          "keepalive_reasons": [
+            "agent:a2222222222222222"
+          ]
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Child",
+          "agentId": "a2222222222222222",
+          "parentAgentId": "a1111111111111111",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a3333333333333333",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Grandchild",
+          "agentId": "a3333333333333333",
+          "parentAgentId": "a2222222222222222",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a4444444444444444",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Unrelated",
+          "agentId": "a4444444444444444",
+          "parentAgentId": "acaller00000000000",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a5555555555555555",
+          "type": "local_agent",
+          "status": "completed",
+          "description": "Finished child",
+          "agentId": "a5555555555555555",
+          "parentAgentId": "a1111111111111111",
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": {
+        "taskId": "a1111111111111111",
+        "taskType": "local_agent",
+        "command": "Parent"
+      },
+      "core_error": null,
+      "core_calls": [
+        {
+          "name": "uL",
+          "args": [
+            "a1111111111111111",
+            "parent"
+          ]
+        },
+        {
+          "name": "q2",
+          "args": [
+            "a2222222222222222"
+          ]
+        },
+        {
+          "name": "pa",
+          "args": [
+            "a2222222222222222",
+            "stopped",
+            {
+              "toolUseId": "toolu_child",
+              "summary": "Child"
+            }
+          ]
+        },
+        {
+          "name": "uL",
+          "args": [
+            "a2222222222222222",
+            "parent"
+          ]
+        },
+        {
+          "name": "q2",
+          "args": [
+            "a3333333333333333"
+          ]
+        },
+        {
+          "name": "pa",
+          "args": [
+            "a3333333333333333",
+            "stopped",
+            {
+              "toolUseId": "toolu_grandchild",
+              "summary": "Grandchild"
+            }
+          ]
+        },
+        {
+          "name": "uL",
+          "args": [
+            "a3333333333333333",
+            "parent"
+          ]
+        }
+      ],
+      "call_result": {
+        "data": {
+          "message": "Successfully stopped task: a1111111111111111 (Parent)",
+          "task_id": "a1111111111111111",
+          "task_type": "local_agent",
+          "command": "Parent"
+        }
+      },
+      "call_error": null,
+      "result_block": {
+        "tool_use_id": "toolu_stop",
+        "type": "tool_result",
+        "content": "{\"message\":\"Successfully stopped task: a1111111111111111 (Parent)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Parent\"}"
+      },
+      "result_json": "{\"message\":\"Successfully stopped task: a1111111111111111 (Parent)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Parent\"}",
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": null
+        },
+        {
+          "id": "a2222222222222222",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": true
+        },
+        {
+          "id": "a3333333333333333",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": true
+        },
+        {
+          "id": "a4444444444444444",
+          "status": "running",
+          "killedBy": null,
+          "notified": null
+        },
+        {
+          "id": "a5555555555555555",
+          "status": "completed",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    },
+    {
+      "label": "running_parent_no_cascade",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "caller": null,
+      "names": {},
+      "tasks": [
+        {
+          "id": "a1111111111111111",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Parent",
+          "agentId": "a1111111111111111",
+          "parentAgentId": "acaller00000000000",
+          "keepalive_reasons": null
+        },
+        {
+          "id": "a2222222222222222",
+          "type": "local_agent",
+          "status": "running",
+          "description": "Child",
+          "agentId": "a2222222222222222",
+          "parentAgentId": "a1111111111111111",
+          "keepalive_reasons": null
+        }
+      ],
+      "validate_input": {
+        "result": true
+      },
+      "core": {
+        "taskId": "a1111111111111111",
+        "taskType": "local_agent",
+        "command": "Parent"
+      },
+      "core_error": null,
+      "core_calls": [
+        {
+          "name": "uL",
+          "args": [
+            "a1111111111111111",
+            "parent"
+          ]
+        }
+      ],
+      "call_result": {
+        "data": {
+          "message": "Successfully stopped task: a1111111111111111 (Parent)",
+          "task_id": "a1111111111111111",
+          "task_type": "local_agent",
+          "command": "Parent"
+        }
+      },
+      "call_error": null,
+      "result_block": {
+        "tool_use_id": "toolu_stop",
+        "type": "tool_result",
+        "content": "{\"message\":\"Successfully stopped task: a1111111111111111 (Parent)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Parent\"}"
+      },
+      "result_json": "{\"message\":\"Successfully stopped task: a1111111111111111 (Parent)\",\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"command\":\"Parent\"}",
+      "registry_after_call": [
+        {
+          "id": "a1111111111111111",
+          "status": "killed",
+          "killedBy": "parent",
+          "notified": null
+        },
+        {
+          "id": "a2222222222222222",
+          "status": "running",
+          "killedBy": null,
+          "notified": null
+        }
+      ],
+      "tool_use_error_content": null
+    }
+  ],
+  "shape_cases": [
+    {
+      "label": "running_raw_transcript",
+      "status": "running",
+      "raw_output": "raw transcript tail",
+      "data": {
+        "task_id": "a1111111111111111",
+        "task_type": "local_agent",
+        "status": "running",
+        "description": "Inspect",
+        "prompt": "inspect actual state",
+        "result": "raw transcript tail",
+        "output": "raw transcript tail",
+        "isRawTranscript": true
+      },
+      "keys": [
+        "task_id",
+        "task_type",
+        "status",
+        "description",
+        "prompt",
+        "result",
+        "output",
+        "isRawTranscript",
+        "error"
+      ],
+      "json": "{\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"status\":\"running\",\"description\":\"Inspect\",\"prompt\":\"inspect actual state\",\"result\":\"raw transcript tail\",\"output\":\"raw transcript tail\",\"isRawTranscript\":true}",
+      "result_block_success": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>running</status>\n\n<output>\nraw transcript tail\n</output>",
+      "result_block_timeout": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>running</status>\n\n<output>\nraw transcript tail\n</output>"
+    },
+    {
+      "label": "running_no_output_file",
+      "status": "running",
+      "raw_output": null,
+      "data": {
+        "task_id": "a1111111111111111",
+        "task_type": "local_agent",
+        "status": "running",
+        "description": "Inspect",
+        "prompt": "inspect actual state",
+        "result": "",
+        "output": "",
+        "isRawTranscript": true
+      },
+      "keys": [
+        "task_id",
+        "task_type",
+        "status",
+        "description",
+        "prompt",
+        "result",
+        "output",
+        "isRawTranscript",
+        "error"
+      ],
+      "json": "{\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"status\":\"running\",\"description\":\"Inspect\",\"prompt\":\"inspect actual state\",\"result\":\"\",\"output\":\"\",\"isRawTranscript\":true}",
+      "result_block_success": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>running</status>",
+      "result_block_timeout": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>running</status>"
+    },
+    {
+      "label": "completed_with_report",
+      "status": "completed",
+      "raw_output": "raw",
+      "data": {
+        "task_id": "a1111111111111111",
+        "task_type": "local_agent",
+        "status": "completed",
+        "description": "Inspect",
+        "prompt": "p",
+        "result": "Final report",
+        "output": "Final report",
+        "isRawTranscript": false
+      },
+      "keys": [
+        "task_id",
+        "task_type",
+        "status",
+        "description",
+        "prompt",
+        "result",
+        "output",
+        "isRawTranscript",
+        "error"
+      ],
+      "json": "{\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"status\":\"completed\",\"description\":\"Inspect\",\"prompt\":\"p\",\"result\":\"Final report\",\"output\":\"Final report\",\"isRawTranscript\":false}",
+      "result_block_success": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>completed</status>\n\n<output>\nFinal report\n</output>",
+      "result_block_timeout": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>completed</status>\n\n<output>\nFinal report\n</output>"
+    },
+    {
+      "label": "completed_empty_report_falls_back_to_transcript",
+      "status": "completed",
+      "raw_output": "raw",
+      "data": {
+        "task_id": "a1111111111111111",
+        "task_type": "local_agent",
+        "status": "completed",
+        "description": "Inspect",
+        "prompt": "p",
+        "result": "raw",
+        "output": "raw",
+        "isRawTranscript": true
+      },
+      "keys": [
+        "task_id",
+        "task_type",
+        "status",
+        "description",
+        "prompt",
+        "result",
+        "output",
+        "isRawTranscript",
+        "error"
+      ],
+      "json": "{\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"status\":\"completed\",\"description\":\"Inspect\",\"prompt\":\"p\",\"result\":\"raw\",\"output\":\"raw\",\"isRawTranscript\":true}",
+      "result_block_success": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>completed</status>\n\n<output>\nraw\n</output>",
+      "result_block_timeout": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>completed</status>\n\n<output>\nraw\n</output>"
+    },
+    {
+      "label": "failed_with_error",
+      "status": "failed",
+      "raw_output": "",
+      "data": {
+        "task_id": "a1111111111111111",
+        "task_type": "local_agent",
+        "status": "failed",
+        "description": "Inspect",
+        "prompt": "p",
+        "result": "",
+        "output": "",
+        "isRawTranscript": true,
+        "error": "boom <x>"
+      },
+      "keys": [
+        "task_id",
+        "task_type",
+        "status",
+        "description",
+        "prompt",
+        "result",
+        "output",
+        "isRawTranscript",
+        "error"
+      ],
+      "json": "{\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"status\":\"failed\",\"description\":\"Inspect\",\"prompt\":\"p\",\"result\":\"\",\"output\":\"\",\"isRawTranscript\":true,\"error\":\"boom <x>\"}",
+      "result_block_success": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>failed</status>\n\n<error>boom <x></error>",
+      "result_block_timeout": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>failed</status>\n\n<error>boom <x></error>"
+    },
+    {
+      "label": "killed_with_report",
+      "status": "killed",
+      "raw_output": "raw",
+      "data": {
+        "task_id": "a1111111111111111",
+        "task_type": "local_agent",
+        "status": "killed",
+        "description": "Inspect",
+        "prompt": "p",
+        "result": "Final report",
+        "output": "Final report",
+        "isRawTranscript": false
+      },
+      "keys": [
+        "task_id",
+        "task_type",
+        "status",
+        "description",
+        "prompt",
+        "result",
+        "output",
+        "isRawTranscript",
+        "error"
+      ],
+      "json": "{\"task_id\":\"a1111111111111111\",\"task_type\":\"local_agent\",\"status\":\"killed\",\"description\":\"Inspect\",\"prompt\":\"p\",\"result\":\"Final report\",\"output\":\"Final report\",\"isRawTranscript\":false}",
+      "result_block_success": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>killed</status>\n\n<output>\nFinal report\n</output>",
+      "result_block_timeout": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>killed</status>\n\n<output>\nFinal report\n</output>"
+    }
+  ],
+  "wait_cases": [
+    {
+      "label": "aps_timeout_0_running",
+      "result": "running"
+    },
+    {
+      "label": "aps_timeout_0_completed",
+      "result": "completed"
+    },
+    {
+      "label": "aps_evicted_returns_null",
+      "result": null
+    },
+    {
+      "label": "aps_aborted_throws_AbortError",
+      "result": {
+        "name": "AbortError",
+        "message": "aborted"
+      }
+    },
+    {
+      "label": "aps_timeout_0_ignores_abort",
+      "result": "running"
+    }
+  ],
+  "output_call_cases": [
+    {
+      "label": "missing_task_id",
+      "input": {},
+      "validate_input": {
+        "result": false,
+        "message": "Task ID is required",
+        "errorCode": 1
+      },
+      "result": null,
+      "error": {
+        "name": "Error",
+        "message": "No task found with ID: undefined. Running background agents: a1111111111111111 (Inspect)"
+      },
+      "progress": [],
+      "result_block": null,
+      "notified_after": null,
+      "tool_use_error_content": "<tool_use_error>Task ID is required</tool_use_error>"
+    },
+    {
+      "label": "not_found_with_background_suffix",
+      "input": {
+        "task_id": "nope"
+      },
+      "validate_input": {
+        "result": false,
+        "message": "No task found with ID: nope. Running background agents: a1111111111111111 (Inspect)",
+        "errorCode": 2
+      },
+      "result": null,
+      "error": {
+        "name": "Error",
+        "message": "No task found with ID: nope. Running background agents: a1111111111111111 (Inspect)"
+      },
+      "progress": [],
+      "result_block": null,
+      "notified_after": null,
+      "tool_use_error_content": "<tool_use_error>No task found with ID: nope. Running background agents: a1111111111111111 (Inspect)</tool_use_error>"
+    },
+    {
+      "label": "not_found_caller_excluded",
+      "input": {
+        "task_id": "nope"
+      },
+      "validate_input": {
+        "result": false,
+        "message": "No task found with ID: nope",
+        "errorCode": 2
+      },
+      "result": null,
+      "error": {
+        "name": "Error",
+        "message": "No task found with ID: nope"
+      },
+      "progress": [],
+      "result_block": null,
+      "notified_after": null,
+      "tool_use_error_content": "<tool_use_error>No task found with ID: nope</tool_use_error>"
+    },
+    {
+      "label": "block_false_running",
+      "input": {
+        "task_id": "a1111111111111111",
+        "block": false
+      },
+      "validate_input": {
+        "result": true
+      },
+      "result": {
+        "data": {
+          "retrieval_status": "not_ready",
+          "task": {
+            "task_id": "a1111111111111111",
+            "task_type": "local_agent",
+            "status": "running",
+            "description": "Inspect",
+            "prompt": "p",
+            "result": "raw tail",
+            "output": "raw tail",
+            "isRawTranscript": true
+          }
+        }
+      },
+      "error": null,
+      "progress": [],
+      "result_block": "<retrieval_status>not_ready</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>running</status>\n\n<output>\nraw tail\n</output>",
+      "notified_after": null,
+      "tool_use_error_content": null
+    },
+    {
+      "label": "block_false_completed",
+      "input": {
+        "task_id": "a1111111111111111",
+        "block": false
+      },
+      "validate_input": {
+        "result": true
+      },
+      "result": {
+        "data": {
+          "retrieval_status": "success",
+          "task": {
+            "task_id": "a1111111111111111",
+            "task_type": "local_agent",
+            "status": "completed",
+            "description": "Inspect",
+            "prompt": "p",
+            "result": "Final report",
+            "output": "Final report",
+            "isRawTranscript": false
+          }
+        }
+      },
+      "error": null,
+      "progress": [],
+      "result_block": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>completed</status>\n\n<output>\nFinal report\n</output>",
+      "notified_after": true,
+      "tool_use_error_content": null
+    },
+    {
+      "label": "block_true_timeout_0_running",
+      "input": {
+        "task_id": "a1111111111111111",
+        "timeout": 0
+      },
+      "validate_input": {
+        "result": true
+      },
+      "result": {
+        "data": {
+          "retrieval_status": "timeout",
+          "task": {
+            "task_id": "a1111111111111111",
+            "task_type": "local_agent",
+            "status": "running",
+            "description": "Inspect",
+            "prompt": "p",
+            "result": "raw tail",
+            "output": "raw tail",
+            "isRawTranscript": true
+          }
+        }
+      },
+      "error": null,
+      "progress": [
+        {
+          "type": "progress",
+          "toolUseID": "task-output-waiting-<ms>",
+          "data": {
+            "type": "waiting_for_task",
+            "taskDescription": "Inspect",
+            "taskType": "local_agent"
+          }
+        }
+      ],
+      "result_block": "<retrieval_status>timeout</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>running</status>\n\n<output>\nraw tail\n</output>",
+      "notified_after": null,
+      "tool_use_error_content": null
+    },
+    {
+      "label": "block_true_completed",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "validate_input": {
+        "result": true
+      },
+      "result": {
+        "data": {
+          "retrieval_status": "success",
+          "task": {
+            "task_id": "a1111111111111111",
+            "task_type": "local_agent",
+            "status": "completed",
+            "description": "Inspect",
+            "prompt": "p",
+            "result": "Final report",
+            "output": "Final report",
+            "isRawTranscript": false
+          }
+        }
+      },
+      "error": null,
+      "progress": [
+        {
+          "type": "progress",
+          "toolUseID": "task-output-waiting-<ms>",
+          "data": {
+            "type": "waiting_for_task",
+            "taskDescription": "Inspect",
+            "taskType": "local_agent"
+          }
+        }
+      ],
+      "result_block": "<retrieval_status>success</retrieval_status>\n\n<task_id>a1111111111111111</task_id>\n\n<task_type>local_agent</task_type>\n\n<status>completed</status>\n\n<output>\nFinal report\n</output>",
+      "notified_after": true,
+      "tool_use_error_content": null
+    },
+    {
+      "label": "block_true_evicted_during_wait",
+      "input": {
+        "task_id": "a1111111111111111"
+      },
+      "validate_input": {
+        "result": true
+      },
+      "result": {
+        "data": {
+          "retrieval_status": "timeout",
+          "task": null
+        }
+      },
+      "error": null,
+      "progress": [
+        {
+          "type": "progress",
+          "toolUseID": "task-output-waiting-<ms>",
+          "data": {
+            "type": "waiting_for_task",
+            "taskDescription": "Inspect",
+            "taskType": "local_agent"
+          }
+        }
+      ],
+      "result_block": "<retrieval_status>timeout</retrieval_status>",
+      "notified_after": null,
+      "tool_use_error_content": null
+    }
+  ],
+  "literals": {
+    "validate_input_rejected": "if(S?.result===!1)return _(`${e.name} tool validation error: ${S.message?.slice(0,200)}`),te(f,\"tool_validate_input_rejected\"),D(\"tengu_tool_use_error\",{messageID:yt(i),toolName:fr(e.name),error:de(\"ValidateInputError\"),...jI(S.message),errorCode:S.errorCode,isMcp:e.isMcp??!1,...xH(r.agentContext),...z4(r),queryChainId:yt(r.queryTracking?.chainId),queryDepth:r.queryTracking?.depth,...r.options.messageClientPlatform&&{messageClientPlatform:r.options.messageClientPlatform},...l&&{mcpServerType:X(l)},...c&&{mcpServerBaseUrl:Gy(c)},...a&&{requestId:yt(a)},...Aw(e.name,u),...e.mcpInfo?.pluginTelemetry}),[{message:pt({content:[{type:\"tool_result\",content:`<tool_use_error>${S.message}</tool_use_error>`,is_error:!0,tool_use_id:t}],toolUseResult:`Error: ${S.message}`,sourceToolAssistantUUID:s.uuid,now:d})}];",
+    "stop_task_error_class": "iM=class iM extends Error{code;taskStatus;telemetryMessage;constructor(e,t,n){super(e);this.code=t;this.taskStatus=n;this.name=\"StopTaskError\",this.telemetryMessage=`StopTask: ${t}`}}",
+    "local_agent_task_type": "Gdr={name:\"LocalAgentTask\",type:\"local_agent\",async kill(e,t,n,r){uL(e,t,r)}}",
+    "task_output_literals": "var Efr=\"[The agent produced no report text.]\",sps=\"[The agent has no report yet \\u2014 it is still running, or it stopped before reporting. Its transcript is raw fetched page content and is not returned.]\"",
+    "teammate_ambiguity": {
+      "ipr": "Multiple teammates match \"${Zy(e)}\": ${t.map((n)=>Zy(n)).join(\", \")}. Use the full agent ID (name@team).",
+      "apr": "\"${Zy(e)}\" matches both teammate ${t.map((r)=>Zy(r)).join(\", \")} and background agent ${Zy(n)}. Use the full agent ID (name@team) for the teammate or the task ID for the background agent."
+    },
+    "observer_self_stop": "Observer ${d} cannot stop itself; use the task UI or a main-session TaskStop."
+  },
+  "boundary": "Executed natively inside vm: GVe/VVe/cpr/upr/Aus/c$t (not-found suffixes), Cfr, qVe/R_e/ipr/apr/Cus/Rus/lpr with yur/_ur/v_e (teams absent: kK undefined, Oh false) and _2e/nir/rir (fuzzy suggestion), u$t and Pfc (only u$t exercised), the StopTaskError class, the TaskStop tool object (validateInput/call/mapToolResultToToolResultBlockParam with le = JSON.stringify), the TaskOutput tool object (validateInput/call/mapToolResultToToolResultBlockParam), bKe, aps, Cfr, ops/vfr/kfr, yN with the _837.js integer parser, Yue (counts 0 only; the hash path cU is unreached), is, Gk/jy/Pze/Dh/Xa/VL/lMt/Oye, Gdr.kill, _717.js l/d/C with the _749.js control collapse and the _845.js head/tail truncation. Synthetic: the task registry (get/all/update over a plain map), getAppState ({tasks, agentNameRegistry}), uL (recorded; additionally marks status killed/killedBy so cascades observe terminal children; the native uL keepalive/notification/eviction side effects are not modelled), q2 (recorded; sets notified), pa/l$t/DUe/Fnr/cascadeSpared/telemetry recorders, WVe (local_agent -> Gdr only), So (no cascade exemptions), ji (/tmp/tasks/<id>.output), zoe (in-memory raw tail), PE (identity; the sanitizer is pinned elsewhere), Dr (mirrors _675.js Gt), the _845.js lone-surrogate strip (isWellFormed guard), TA undefined (no ambient agent context), Bt no-op sleep. Not established: the generic tool wrapper around validateInput (recorded as the literal validate_input_rejected slice only), VD/lOs formatting of errors thrown inside call, killed-agent note filtering with non-zero harness counts (cU), webFetch branches (Z_n/sU), local_bash/mcp_task/remote_agent shapes, user-path stop markers and eviction timers, the spawn-time meaning of task.agentId versus parentAgentId (the ownership check compares the caller with task.agentId and the keepalive cascade walks parentAgentId links up to task.agentId; the cascade cases therefore run as a main-session caller), zod schemas (inputSchema getters never touched here; pinned by the tool-definitions audit), live native acceptance."
+}

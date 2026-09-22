@@ -282,6 +282,34 @@ func ApplyClaudeCredentialMetadata(payload []byte, auth *cliproxyauth.Auth, sess
 	return updated, deviceID, nil
 }
 
+// ApplyClaudeDesktopCredentialMetadata renders the fixed Desktop identity
+// contract. Caller-owned metadata.user_id extensions are intentionally not
+// inherited because the first-party Desktop request contains exactly these
+// three ordered identity fields.
+func ApplyClaudeDesktopCredentialMetadata(payload []byte, auth *cliproxyauth.Auth, sessionID string) ([]byte, string, error) {
+	validated, deviceID, errValidate := ApplyClaudeCredentialMetadata(payload, auth, sessionID)
+	if errValidate != nil {
+		return nil, "", errValidate
+	}
+	accountUUID := ClaudeCredentialAccountUUID(auth)
+	if accountUUID == "" {
+		return nil, "", fmt.Errorf("apply Claude Desktop credential metadata: account UUID is empty")
+	}
+	var identity bytes.Buffer
+	identity.WriteString(`{"device_id":`)
+	writeClaudeJSONQuoted(&identity, deviceID)
+	identity.WriteString(`,"account_uuid":`)
+	writeClaudeJSONQuoted(&identity, accountUUID)
+	identity.WriteString(`,"session_id":`)
+	writeClaudeJSONQuoted(&identity, sessionID)
+	identity.WriteByte('}')
+	updated, errSet := sjson.SetBytes(validated, "metadata.user_id", identity.String())
+	if errSet != nil {
+		return nil, "", fmt.Errorf("set Claude Desktop credential metadata: %w", errSet)
+	}
+	return updated, deviceID, nil
+}
+
 type claudeJSONMember struct {
 	key   string
 	value json.RawMessage

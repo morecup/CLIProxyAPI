@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "headless": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    },
+    "addressing": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    }
+  },
+  "definitions": [
+    {
+      "label": "claudemd_initial_load",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1489866,
+      "to": 1490147,
+      "bytes": 281,
+      "sha256": "fbed8389d11a457a046960396fe642402892d58a77d8762811927509c0ff8ddf"
+    },
+    {
+      "label": "claudemd_type_counts",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1489815,
+      "to": 1489866,
+      "bytes": 51,
+      "sha256": "407b7e9786492741866173460d3897f78b3ba69366a2409d797e8d60219e6f53"
+    },
+    {
+      "label": "skills_dir_loaded",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1910421,
+      "to": 1910614,
+      "bytes": 193,
+      "sha256": "8c1f4912e8790095071ead746f509a22b14cc3b1c261adeedb9a3b5595ad432f"
+    },
+    {
+      "label": "headless_install_init",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 144171,
+      "to": 144216,
+      "bytes": 45,
+      "sha256": "ac722f3101497c8036e705c1ca983ddab5e12cf17d716788aac1e96f0b8e4edf"
+    },
+    {
+      "label": "headless_no_marketplaces",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 144225,
+      "to": 144290,
+      "bytes": 65,
+      "sha256": "0c0c2c3021ae79194e8e0345e68b55900b241c92ab214326de584b92adad2226"
+    },
+    {
+      "label": "headless_delisted",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 145177,
+      "to": 145235,
+      "bytes": 58,
+      "sha256": "f2eae9a89133353c972259e39cb3e98d74457d1fc3d14a9793e4ccc6b5a86eb8"
+    },
+    {
+      "label": "headless_install_emit",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 145562,
+      "to": 145608,
+      "bytes": 46,
+      "sha256": "b7095d2210b50d31aa0ba44b91bd6909a5e3c55fbdbc933f5a0fc7931d7e20bc"
+    },
+    {
+      "label": "handshake_after_prewait",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 324439,
+      "to": 324529,
+      "bytes": 90,
+      "sha256": "a193517dd38651467cda721491eb821dcf8e8104dd680547deb141cad30d35a3"
+    },
+    {
+      "label": "known_event_names",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 396390,
+      "to": 396432,
+      "bytes": 42,
+      "sha256": "23c5460ed6ed8ad1ea6c7c0cd5e1ed89a6d013b8e901ce7d497b96b683591099"
+    }
+  ],
+  "logger_prefix": [
+    "subscription_type"
+  ],
+  "startup_order": {
+    "tengu_started": 100,
+    "tengu_plugin_skills_dir_loaded": 150,
+    "tengu_init": 200,
+    "tengu_headless_plugin_install": 210,
+    "tengu_sdk_init_handshake": 300,
+    "tengu_claudemd__initial_load": 400
+  },
+  "events": [
+    {
+      "fact": "plugin_skills_dir_loaded",
+      "event_name": "tengu_plugin_skills_dir_loaded",
+      "module": "B:/~BUN/root/_448.js",
+      "slices": [
+        "skills_dir_loaded"
+      ],
+      "order": 150,
+      "position": "plugin loader (skills-as-plugins scan) during setup, before tengu_init",
+      "condition": "unconditional: emitted once per plugin scan (captured in 55/55 scenarios)",
+      "keys": [
+        "count",
+        "user_count",
+        "project_count",
+        "project_suppressed_count",
+        "error_count"
+      ],
+      "metadata": {
+        "count": 0,
+        "user_count": 0,
+        "project_count": 0,
+        "project_suppressed_count": 0,
+        "error_count": 0
+      },
+      "metadata_json": "{\"count\":0,\"user_count\":0,\"project_count\":0,\"project_suppressed_count\":0,\"error_count\":0}",
+      "derivations": {
+        "count": "u.length (loaded skills-as-plugins)",
+        "user_count": "Qt(u, scope===\"user\")",
+        "project_count": "Qt(u, scope===\"project\")",
+        "project_suppressed_count": "d.length (untrusted workspace suppressions)",
+        "error_count": "a.length"
+      },
+      "emulated": "no ~/.claude/skills or ./.claude/skills => all counters 0"
+    },
+    {
+      "fact": "headless_plugin_install",
+      "event_name": "tengu_headless_plugin_install",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "slices": [
+        "headless_install_init",
+        "headless_no_marketplaces",
+        "headless_delisted",
+        "headless_install_emit"
+      ],
+      "order": 210,
+      "position": "print flow installPluginsForHeadless finally block, after tengu_init and before the MCP prewait / tengu_sdk_init_handshake",
+      "condition": "unconditional in headless (-p / stream-json) mode: finally block (captured in 55/55 scenarios)",
+      "keys": [
+        "marketplaces_installed",
+        "delisted_count"
+      ],
+      "metadata": {
+        "marketplaces_installed": 0,
+        "delisted_count": 0
+      },
+      "metadata_json": "{\"marketplaces_installed\":0,\"delisted_count\":0}",
+      "derivations": {
+        "marketplaces_installed": "installed.length+updated.length of the marketplace reconcile; stays 0 when Object.keys(Kb()).length===0 (no marketplaces declared)",
+        "delisted_count": "Qb(t).length (delisted plugins removed); 0 without installed plugins"
+      },
+      "emulated": "no marketplaces declared, no installed plugins => {marketplaces_installed:0,delisted_count:0}"
+    },
+    {
+      "fact": "claudemd_initial_load",
+      "event_name": "tengu_claudemd__initial_load",
+      "module": "B:/~BUN/root/_448.js",
+      "slices": [
+        "claudemd_type_counts",
+        "claudemd_initial_load"
+      ],
+      "order": 400,
+      "position": "first memory-file load (hasLoggedInitialLoad latch), after tengu_sdk_init_handshake",
+      "condition": "once per session at the first memory load regardless of file count (captured in 55/55 scenarios)",
+      "keys": [
+        "file_count",
+        "total_content_length",
+        "user_count",
+        "project_count",
+        "local_count",
+        "managed_count",
+        "automem_count",
+        "duration_ms"
+      ],
+      "metadata": {
+        "file_count": 0,
+        "total_content_length": 0,
+        "user_count": 0,
+        "project_count": 0,
+        "local_count": 0,
+        "managed_count": 0,
+        "automem_count": 0,
+        "duration_ms": 0
+      },
+      "metadata_json": "{\"file_count\":0,\"total_content_length\":0,\"user_count\":0,\"project_count\":0,\"local_count\":0,\"managed_count\":0,\"automem_count\":0,\"duration_ms\":0}",
+      "derivations": {
+        "file_count": "a.length",
+        "total_content_length": "sum of content.length",
+        "user_count": "k.User??0",
+        "project_count": "k.Project??0",
+        "local_count": "k.Local??0",
+        "managed_count": "k.Managed??0",
+        "automem_count": "k.AutoMem??0",
+        "duration_ms": "Date.now()-i"
+      },
+      "emulated": "no CLAUDE.md / memory files => all counters 0; empty load completes within the same millisecond => duration_ms 0"
+    }
+  ],
+  "controls": {
+    "claudemd_non_empty": {
+      "file_count": 3,
+      "total_content_length": 3,
+      "user_count": 1,
+      "project_count": 1,
+      "local_count": 0,
+      "managed_count": 0,
+      "automem_count": 1,
+      "duration_ms": 7
+    },
+    "skills_non_empty": {
+      "count": 3,
+      "user_count": 1,
+      "project_count": 2,
+      "project_suppressed_count": 1,
+      "error_count": 2
+    }
+  },
+  "boundary": "Pinned the three metadata object literals and executed them in vm over the zero-inventory environment; the headless initializer/no-marketplace/delisted statements and the finally emit are pinned as text. Synthetic: Qt (count-by-predicate) and Date.now. Positions are call-site readings (skills scan inside the plugin loader before tengu_init; installPluginsForHeadless in the print flow ahead of the tengu_sdk_init_handshake emit; memory load at the first system-prompt build), not captured timestamps. Not established: tengu_headless_mcp_prewait values (deadlineMs/localOnly/willDeferMcp depend on --mcp-config, sdkUrl and tool-search gates), tengu_claudeai_mcp_eligibility state, org-memory decision cause, per-skill tengu_skill_loaded inventory."
+}

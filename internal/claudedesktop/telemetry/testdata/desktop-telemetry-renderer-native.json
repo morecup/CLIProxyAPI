@@ -1,0 +1,472 @@
+{
+  "schema_version": 1,
+  "lane": "D2 renderer-analytics",
+  "desktop_version": "1.40609.0.0",
+  "origin": "claude.ai web renderer hosted in the Desktop webview; event names are absent from the local Electron .vite chunks, so contracts are pinned on captured schema field names (values are never copied)",
+  "renderer_origin_check": {
+    "vite_build_chunks_scanned": 150,
+    "chunks_containing_claudeai_code_literal": 0
+  },
+  "captured_sources": [
+    {
+      "id": "desktop-message-submitted",
+      "endpoint_role": "desktop-event-logging",
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-multi-turn-r01-20260904-1846/flow-000197/request-body.txt",
+      "sha256": "482b9d36b6c861997bbcb907af2a3fea64cef6ed3c9ed71ddc7fd00718dc3b3d"
+    },
+    {
+      "id": "desktop-ttft",
+      "endpoint_role": "desktop-event-logging",
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-main-query-r01-20260904-1840/flow-000139/request-body.txt",
+      "sha256": "5e657a255fcab957c650040abea7bbee55bea439dd0deb5334d3f876205a876c"
+    },
+    {
+      "id": "segment-message-submitted",
+      "endpoint_role": "segment",
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-multi-turn-r01-20260904-1846/flow-000176/request-body.txt",
+      "sha256": "ef58f86803c4c394cb6f19c76a1f7164df8fa0594147f72f9ee1225386ab6e8a"
+    },
+    {
+      "id": "segment-first-text-ttft",
+      "endpoint_role": "segment",
+      "path": "recorder/runtime/h9-v140609-20260904-r03-corpus-staging/h9-v140609-multi-turn-r01-20260904-1846/flow-000198/request-body.txt",
+      "sha256": "7a2b8504a7f6c48e58c0b29c1e42d5c9caf90486746bd0a21ac5d23484517f1e"
+    },
+    {
+      "id": "desktop-identify",
+      "endpoint_role": "desktop-event-logging",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000022/request-body.txt",
+      "sha256": "7e0f87474b41c6c141153a463d0f69f4c40b511412f13143be664c43846b0855"
+    },
+    {
+      "id": "segment-identify",
+      "endpoint_role": "segment",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000145/request-body.txt",
+      "sha256": "97b5214c69da8a32dfc3a106b530de8e89936e5ffec4c642fb04c511db3669d7"
+    },
+    {
+      "id": "segment-permission-mode",
+      "endpoint_role": "segment",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-plan/flow-002791/request-body.txt",
+      "sha256": "6b8c2d06612c000cb322ba77049c42270b15d0f2633b18f0a57277389638a379"
+    },
+    {
+      "id": "desktop-permission-mode",
+      "endpoint_role": "desktop-event-logging",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-message-opus-mode-plan/flow-002889/request-body.txt",
+      "sha256": "fba84d7d389701413274b05239df28741eb80570b9234424010f60dcb1c32a98"
+    }
+  ],
+  "events": [
+    {
+      "event_name": "claudeai.code.message.submitted",
+      "segment_event_name": "claudeai.code.message.submitted",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "request_started",
+      "dual_fire_fact": "renderer_message_submitted",
+      "condition": "main-role prompt start (StartsPrompt) for a local Desktop session",
+      "lifecycle_position": "renderer send; before desktop_ccd_message_cycle_start and before the first API request",
+      "boundary": null,
+      "segment_type": "track",
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "segment_trait_keys": null,
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_id",
+        "message_length",
+        "image_count",
+        "is_local",
+        "post_band_switch",
+        "transcript_mode",
+        "session_origin",
+        "is_agent_owned",
+        "project_enabled",
+        "renderer_surface",
+        "is_mobile_web"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy/$sessionId",
+        "anonymous_id_prefix": "claudeai.v1.<uuid>"
+      },
+      "captured_sources": [
+        "desktop-message-submitted",
+        "desktop-ttft",
+        "segment-message-submitted",
+        "segment-first-text-ttft",
+        "desktop-identify",
+        "segment-identify",
+        "segment-permission-mode",
+        "desktop-permission-mode"
+      ]
+    },
+    {
+      "event_name": "claudeai.code.session.ttft",
+      "segment_event_name": "claudeai.code.session.ttft",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "first_byte",
+      "dual_fire_fact": "renderer_session_ttft",
+      "condition": "first byte of the first API response of a prompt",
+      "lifecycle_position": "after the first streamed frame; emitted after claudeai.code.session.first_text in the same batch",
+      "boundary": null,
+      "segment_type": "track",
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "segment_trait_keys": null,
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_id",
+        "ttft_ms",
+        "is_new_session",
+        "time_in_background_ms",
+        "client_send_epoch_ms",
+        "time_to_request_ms",
+        "send_to_arm_ms",
+        "session_type",
+        "pre_fetch_ms",
+        "tab_age_ms",
+        "open_local_session_count",
+        "dispatch_first",
+        "response_open_ms",
+        "fetch_to_first_byte_ms",
+        "requesting_to_first_byte_ms",
+        "user_message_uuid",
+        "mid_turn",
+        "ttft_first_frame_ms",
+        "ttft_first_paint_ms",
+        "first_paint_wait_end",
+        "first_paint_kind",
+        "gate_ccr_thinking_token_count",
+        "first_frame_kind",
+        "first_content_type",
+        "navigated_away",
+        "completed_after_remount",
+        "cli_session_id",
+        "first_assistant_message_id",
+        "first_request_id"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy/$sessionId",
+        "anonymous_id_prefix": "claudeai.v1.<uuid>"
+      },
+      "captured_sources": [
+        "desktop-message-submitted",
+        "desktop-ttft",
+        "segment-message-submitted",
+        "segment-first-text-ttft",
+        "desktop-identify",
+        "segment-identify",
+        "segment-permission-mode",
+        "desktop-permission-mode"
+      ]
+    },
+    {
+      "event_name": "claudeai.code.session.first_text",
+      "segment_event_name": "claudeai.code.session.first_text",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "dual_fire_fact": null,
+      "condition": "first text_delta painted; requires first_assistant_message_id (msg_) which the gateway span does not retain at that moment",
+      "lifecycle_position": "first painted text delta of the prompt; precedes claudeai.code.session.ttft",
+      "boundary": "renderer paint/tab measurements (ttfvt_first_text_paint_ms, first_text_wait_end, first_text_receipt_ms, time_in_background_ms, tab_age_ms, open_local_session_count) are always present in the capture and cannot be measured by the gateway; not emitted",
+      "segment_type": "track",
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "segment_trait_keys": null,
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "session_id",
+        "session_type",
+        "is_new_session",
+        "user_message_uuid",
+        "cli_session_id",
+        "first_assistant_message_id",
+        "ttfvt_first_text_paint_ms",
+        "first_text_path",
+        "tool_calls_before_first_text",
+        "requests_before_first_text",
+        "first_text_assistant_message_id",
+        "first_text_wait_end",
+        "first_text_receipt_ms",
+        "user_wait_before_first_text_ms",
+        "user_waits_before_first_text",
+        "time_in_background_ms",
+        "start_to_emit_ms",
+        "send_to_arm_ms",
+        "mid_turn",
+        "navigated_away",
+        "model",
+        "tab_age_ms",
+        "open_local_session_count"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy/$sessionId",
+        "anonymous_id_prefix": "claudeai.v1.<uuid>"
+      },
+      "captured_sources": [
+        "desktop-message-submitted",
+        "desktop-ttft",
+        "segment-message-submitted",
+        "segment-first-text-ttft",
+        "desktop-identify",
+        "segment-identify",
+        "segment-permission-mode",
+        "desktop-permission-mode"
+      ]
+    },
+    {
+      "event_name": "$identify",
+      "segment_event_name": "identify",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": "runtime_started",
+      "dual_fire_fact": "renderer_identify",
+      "condition": "once per application activation, immediately after the Segment identify was persisted",
+      "lifecycle_position": "epitaxy shell load; same activation moment as the Segment identify, before any claudeai.code.* event",
+      "boundary": null,
+      "segment_type": "identify",
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "type",
+        "userId",
+        "traits",
+        "context",
+        "messageId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "segment_trait_keys": [
+        "deployment_mode",
+        "app_version",
+        "country",
+        "email",
+        "is_personal_email",
+        "account_created_at",
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "org_type",
+        "subscription_level",
+        "subscription_plan",
+        "plan"
+      ],
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "property_keys": [
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_suffix_keys": null,
+      "dual_fire_markers": {
+        "service_name": "claude_ai",
+        "path": "/epitaxy",
+        "anonymous_id_prefix": "claudeai.v1.<uuid>"
+      },
+      "captured_sources": [
+        "desktop-message-submitted",
+        "desktop-ttft",
+        "segment-message-submitted",
+        "segment-first-text-ttft",
+        "desktop-identify",
+        "segment-identify",
+        "segment-permission-mode",
+        "desktop-permission-mode"
+      ]
+    },
+    {
+      "event_name": "claudeai.code.permission_mode.changed",
+      "segment_event_name": "claudeai.code.permission_mode.changed",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "gateway_moment": null,
+      "dual_fire_fact": null,
+      "condition": "user changes the permission mode in the renderer; change_method names the UI control used",
+      "lifecycle_position": "between two prompts of a session, before the next claudeai.code.message.submitted",
+      "boundary": "the gateway only sees the resulting PermissionMode of the next request; the pinned change_method value (mode_dropdown) names a UI control the gateway cannot distinguish from other controls; not emitted",
+      "segment_type": "track",
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "segment_trait_keys": null,
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "previous_mode",
+        "current_mode",
+        "change_method",
+        "renderer_surface"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy",
+        "anonymous_id_prefix": "claudeai.v1.<uuid>"
+      },
+      "captured_sources": [
+        "desktop-message-submitted",
+        "desktop-ttft",
+        "segment-message-submitted",
+        "segment-first-text-ttft",
+        "desktop-identify",
+        "segment-identify",
+        "segment-permission-mode",
+        "desktop-permission-mode"
+      ]
+    }
+  ]
+}

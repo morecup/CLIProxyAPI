@@ -1,0 +1,276 @@
+{
+  "kind": "synthetic-native-input-scalars",
+  "sdk_version": "2.1.247",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "cases": [
+    {
+      "input": "continue",
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 8
+    },
+    {
+      "input": "CONTINUE",
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 8
+    },
+    {
+      "input": "continue now",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 12
+    },
+    {
+      "input": "please keep going!",
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 18
+    },
+    {
+      "input": "go on",
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 5
+    },
+    {
+      "input": "go onward",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 9
+    },
+    {
+      "input": "WHAT THE HELL",
+      "negative": true,
+      "keep": false,
+      "wake": false,
+      "length": 13
+    },
+    {
+      "input": "this is wrong",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 13
+    },
+    {
+      "input": "horrible",
+      "negative": true,
+      "keep": false,
+      "wake": false,
+      "length": 8
+    },
+    {
+      "input": "shitake",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 7
+    },
+    {
+      "input": "hello",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 5
+    },
+    {
+      "input": "hİ",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 2
+    },
+    {
+      "input": "Hİ",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 2
+    },
+    {
+      "input": "hi",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 2
+    },
+    {
+      "input": "hiİ",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 3
+    },
+    {
+      "input": "﻿continue﻿",
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 10
+    },
+    {
+      "input": "continue",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 10
+    },
+    {
+      "input": "¿在吗？！",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 5
+    },
+    {
+      "input": "...",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 3
+    },
+    {
+      "input": ".",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 1
+    },
+    {
+      "input": "!",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 1
+    },
+    {
+      "input": "???",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 3
+    },
+    {
+      "input": "……",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 2
+    },
+    {
+      "input": "Hola!",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 5
+    },
+    {
+      "input": "ты тут?",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 7
+    },
+    {
+      "input": "salut",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 5
+    },
+    {
+      "input": "hey hey",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 7
+    },
+    {
+      "input": "are you still working",
+      "negative": false,
+      "keep": false,
+      "wake": true,
+      "length": 21
+    },
+    {
+      "input": "hello xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 47
+    },
+    {
+      "input": "🙂中文",
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 4
+    },
+    {
+      "input": [
+        {
+          "type": "text",
+          "text": "continue"
+        },
+        {
+          "type": "text",
+          "text": "🙂中文"
+        }
+      ],
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 4
+    },
+    {
+      "input": [
+        {
+          "type": "text",
+          "text": "ordinary"
+        },
+        {
+          "type": "text",
+          "text": "continue"
+        }
+      ],
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 8
+    },
+    {
+      "input": [
+        {
+          "type": "text",
+          "text": "continue"
+        },
+        {
+          "type": "text",
+          "text": ""
+        }
+      ],
+      "negative": false,
+      "keep": true,
+      "wake": false,
+      "length": 0
+    },
+    {
+      "input": [
+        {
+          "type": "image"
+        }
+      ],
+      "negative": false,
+      "keep": false,
+      "wake": false,
+      "length": 0
+    }
+  ]
+}

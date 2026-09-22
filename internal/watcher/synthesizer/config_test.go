@@ -224,12 +224,10 @@ func TestConfigSynthesizer_ClaudeKeys(t *testing.T) {
 		Config: &config.Config{
 			ClaudeKey: []config.ClaudeKey{
 				{
-					APIKey:                  "sk-ant-api-xxx",
-					Prefix:                  "main",
-					BaseURL:                 "https://api.anthropic.com",
-					DisableCooling:          boolPointer(true),
-					RebuildMidSystemMessage: true,
-					FingerprintProfile:      "claude-code-cli",
+					APIKey:         "sk-ant-api-xxx",
+					Prefix:         "main",
+					BaseURL:        "https://api.anthropic.com",
+					DisableCooling: boolPointer(true),
 					Models: []config.ClaudeModel{
 						{Name: "claude-3-opus"},
 						{Name: "claude-3-sonnet"},
@@ -249,11 +247,11 @@ func TestConfigSynthesizer_ClaudeKeys(t *testing.T) {
 		t.Fatalf("expected 1 auth, got %d", len(auths))
 	}
 
-	if auths[0].Provider != "claude" {
-		t.Errorf("expected provider claude, got %s", auths[0].Provider)
+	if auths[0].Provider != "anthropic-compatible" {
+		t.Errorf("expected provider anthropic-compatible, got %s", auths[0].Provider)
 	}
-	if auths[0].Label != "claude-apikey" {
-		t.Errorf("expected label claude-apikey, got %s", auths[0].Label)
+	if auths[0].Label != "anthropic-compatible-apikey" {
+		t.Errorf("expected label anthropic-compatible-apikey, got %s", auths[0].Label)
 	}
 	if auths[0].Prefix != "main" {
 		t.Errorf("expected prefix main, got %s", auths[0].Prefix)
@@ -267,11 +265,8 @@ func TestConfigSynthesizer_ClaudeKeys(t *testing.T) {
 	if _, ok := auths[0].Attributes["models_hash"]; !ok {
 		t.Error("expected models_hash in attributes")
 	}
-	if got := auths[0].Attributes["rebuild_mid_system_message"]; got != "true" {
-		t.Errorf("expected rebuild_mid_system_message=true, got %s", got)
-	}
-	if got := auths[0].Attributes["fingerprint_profile"]; got != "claude-code-cli" {
-		t.Errorf("expected fingerprint_profile=claude-code-cli, got %s", got)
+	if got := auths[0].Attributes["fingerprint_profile"]; got != "" {
+		t.Errorf("fingerprint_profile = %q, want omitted", got)
 	}
 	if v, ok := auths[0].Metadata["disable_cooling"].(bool); !ok || !v {
 		t.Errorf("expected disable_cooling=true, got %v", auths[0].Metadata["disable_cooling"])
@@ -1115,7 +1110,7 @@ func TestConfigSynthesizer_AllProviders(t *testing.T) {
 		providers[a.Provider] = true
 	}
 
-	expected := []string{"gemini", "claude", "codex", "xai", "openai-compatible-compat", "vertex"}
+	expected := []string{"gemini", "anthropic-compatible", "codex", "xai", "openai-compatible-compat", "vertex"}
 	for _, p := range expected {
 		if !providers[p] {
 			t.Errorf("expected provider %s not found", p)

@@ -176,13 +176,6 @@ save-cooldown-status: false
 # Set to 0 to keep the legacy 60-second cooldown; set to -1 to disable transient error cooldowns.
 transient-error-cooldown-seconds: 0
 
-# When true, globally disable Claude request cloaking (the Claude Code CLI disguise and
-# system prompt replacement), so the original system prompt is passed through to Claude as-is.
-# Individual credentials can still override this: a claude-api-key entry via its "cloak.mode",
-# or a Claude OAuth/token file via a "cloak_mode" value. Default false keeps the per-client
-# "auto" behavior (cloak only non-Claude-Code clients).
-disable-claude-cloak-mode: false
-
 # Claude Code compatibility settings.
 claude-code:
   # When true, return original model IDs in Anthropic model list responses instead of cloaked IDs.
@@ -497,107 +490,47 @@ nonstream-keepalive-interval: 0
 #       - "claude-3-*"               # wildcard matching prefix (e.g. claude-3-7-sonnet-20250219)
 #       - "*-thinking"               # wildcard matching suffix (e.g. claude-opus-4-5-thinking)
 #       - "*haiku*"                  # wildcard matching substring (e.g. claude-3-5-haiku-20241022)
-#     rebuild-mid-system-message: false # optional: default is false; when true, move messages with role "system" into the top-level Claude system field
-#     cloak:                         # optional: explicitly enable request cloaking for non-Claude-Code clients
-#       mode: "auto"                 # "auto" (default inside this block): cloak only when client is not Claude Code
-#                                    # "always": cloak every unconfirmed client; confirmed native Claude Code still passes through
-#                                    # "never": never apply cloaking
-#       # This "cloak" block applies to this claude-api-key entry only. For Claude OAuth
-#       # credentials, set the same options in the auth/token JSON file via "cloak_mode" /
-#       # "cloak_strict_mode" / "cloak_sensitive_words" / "cloak_cache_user_id". The top-level
-#       # "disable-claude-cloak-mode: true" disables cloaking for all Claude credentials at once.
-#       strict-mode: false           # false (default): legacy-model whitelist uses a user system-reminder;
-#                                    # all other and future models use messages[].role=system
-#                                    # true: strip caller prompts and keep only Claude Code billing and identity blocks
-#       sensitive-words:             # optional: words to obfuscate with zero-width characters
-#         - "API"
-#         - "proxy"
-#       cache-user-id: true          # optional: default is false; set true to reuse cached user_id per API key instead of generating a random one each request
-#       # Every custom tool on a cloaked OAuth request automatically uses a caller-stable opaque mcp__<server>__<tool> alias.
+# The `claude` provider is reserved for first-party Claude OAuth credentials and
+# always renders the pinned Claude Desktop profile. API keys and custom gateways
+# use the separate `anthropic-compatible` provider and never receive Desktop
+# headers, system artifacts, CCH billing, diagnostics, or session identity.
 #
-#     # fingerprint-profile (optional, top-level on this claude-api-key entry; not a cloak sub-field):
-#     # OAuth and API-key fingerprints are different contracts.
-#     #   - Real Claude OAuth stays on the strict Claude Code CLI wire fingerprint.
-#     #   - API keys (official Anthropic, custom gateways, Kimi) stay loose and
-#     #     caller-owned unless this field is set.
-#     #
-#     # Default (omit / empty): keep the caller request fingerprint and headers.
-#     # Official api.anthropic.com API keys do not add extra CLI betas/identity unless
-#     # this field is set. Custom gateways and delegated providers are the same.
-#     #
-#     # Controls request fingerprint only on /v1/messages (and related Claude executor paths).
-#     # Auth scheme stays API key (x-api-key on api.anthropic.com; Bearer on custom base-url).
-#     # Does NOT enable OAuth refresh, profile fetch, or OAuth-cancellation semantics.
-#     #
-#     # Values:
-#     #   omit / empty        = caller-owned API-key fingerprint (respects caller)
-#     #   "claude-code-cli"   = same Messages fingerprint as Claude Code OAuth CLI,
-#     #                         including official Anthropic API keys: OAuth Anthropic-Beta
-#     #                         set, CCH signing on api.anthropic.com, stable CLI
-#     #                         metadata.user_id / session_id / device identity.
-#     #                         API keys seed identity from the key;
-#     #                         delegated OAuth providers use stable auth ID instead of
-#     #                         rotating access tokens. "oauth-cli" is a legacy alias.
-#     #
-#     # count_tokens keeps the native model/messages/tools shape for every origin, including
-#     # Kimi opt-in. It does not send billing/CCH, currentDate, metadata, or diagnostics.
-#     #
-#     # CCH: the billing block may carry a per-request cch hash. CPA emits it exactly where
-#     # Claude Code does, which is api.anthropic.com (first-party) and Vertex only. An opt-in
-#     # on any other gateway (including Kimi) still sends the billing block, but without cch,
-#     # so a per-request hash cannot bust that gateway's prompt cache. api.anthropic.com
-#     # strips the block itself (0 tokens, no cache impact). Kimi drops the whole block by
-#     # default and keeps it, unsigned, after an explicit fingerprint opt-in.
-#     # A real Claude OAuth credential always signs, on every upstream: a downstream Claude
-#     # Code pointed at CPA cannot produce that value itself.
-#     #
-#     # Example (official Anthropic or a custom Messages gateway):
-#     #   - api-key: "your-key"
-#     #     # base-url: "https://gateway.example"   # omit for api.anthropic.com
-#     #     fingerprint-profile: "claude-code-cli"
-#     #     cloak:
-#     #       mode: "always"   # recommended when upstream rejects non-CLI clients
-#     #
-#     # Delegated Anthropic Messages OAuth files (Kimi, etc.) use "fingerprint_profile"
-#     # in the auth JSON. Refresh keeps it. Example:
-#     #   {
-#     #     "type": "kimi",
-#     #     "access_token": "...",
-#     #     "refresh_token": "...",
-#     #     "fingerprint_profile": "claude-code-cli"
-#     #   }
-#     #   Legacy "fingerprint-profile" credentials remain supported and are normalized at load time.
-#     # fingerprint-profile: "claude-code-cli" # optional claude-api-key provider field; default is empty (caller-owned); uncomment to opt in
-#     experimental-cch-signing: false # deprecated compatibility field; CCH is generated automatically
-#                                     # for real Claude OAuth on any upstream, and for claude-code-cli profiles
-#                                     # only on api.anthropic.com; Vertex keeps provider-native signing
-
-# Anthropic-Beta is assembled per request rather than sent as a fixed list, matching
-# Claude Code 2.1.220: context-1m sits right after claude-code, mid-conversation-system
-# is added only for models that accept a role=system turn, advanced-tool-use only when
-# the request declares tools, and server-side-fallback / fallback-credit /
-# structured-outputs trail effort. On direct api.anthropic.com a caller may only ask for
-# betas real Claude Code also sends, and they are placed at their observed positions;
-# anything else is dropped so the outgoing set stays one a real client could produce.
-# Other Anthropic-compatible upstreams still forward caller betas verbatim.
+# claude-desktop:
+#   bundle-path: ""             # empty uses the built-in validated profile
+#   state-path: ""              # empty uses <auth-dir>/claude-desktop-state; queue payloads are current-user encrypted
+#   rollout-auth-ids: []         # optional allow-list of Claude OAuth auth IDs
+#   emergency-stop: false        # stops new Desktop requests immediately
+#   machine-profiles: []         # optional measured host profiles; empty uses one local-host profile
+#   machine-profile-bindings: {} # optional auth ID -> profile ID overrides; automatic assignments persist per account
+#   # machine-profiles:
+#   #   - id: "desktop-host-a"
+#   #     total-memory-bytes: 34359738368
+#   #     available-memory-bytes: 17179869184
+#   #     cpu-model: "Measured CPU model"
+#   #     os-build: "Measured Windows build lab"
+#   #     os-release: "10.0.26100"
+#   #     os-version: "10.0.26100"
+#   #     sdk-process:
+#   #       uptime-seconds: 123.5             # measured start baseline; advances independently for each account runtime
+#   #       rss-bytes: 314572800
+#   #       heap-total-bytes: 134217728
+#   #       heap-used-bytes: 100663296
+#   #       external-bytes: 8388608
+#   #       array-buffers-bytes: 1048576
+#   #       constrained-memory-bytes: 8589369344
+#   #       cpu-user-microseconds: 120000
+#   #       cpu-system-microseconds: 30000
 #
-# Default headers for Claude API requests. Update only after measuring a new Claude Code release.
-# Unconfirmed clients use this CLI baseline. Verified native Claude Code CLI, sdk-cli,
-# and VSCode requests preserve their measured entrypoint and software shape only when the
-# Claude Code version, package version, and runtime version exactly match this configured
-# baseline; unmeasured versions fall back to it. In legacy mode, timeout is a fallback and
-# verified native OS/arch values remain client-supplied. When stabilize-device-profile is
-# enabled, OS/arch are pinned to the values below and cached profiles remain constrained to
-# the same exact software baseline rather than learning newer client versions.
-# claude-header-defaults:
-#   user-agent: "claude-cli/2.1.220 (external, cli)"
-#   package-version: "0.94.0"
-#   runtime-version: "v26.3.0"
-#   os: "MacOS"
-#   arch: "arm64"
-#   timeout: "600"
-#   timezone: "Asia/Singapore"  # fallback IANA timezone for cloaked currentDate; a credential JSON "timezone" takes priority
-#   stabilize-device-profile: false  # optional, default false; set true to enable per-auth/API-key fingerprint pinning
+# The current Desktop profile delivers the captured renderer and embedded-SDK
+# event-logging contracts. Segment and Datadog payloads are captured but remain
+# non-delivering until enrollment supplies their account-bound runtime material.
+# Sentry is captured at wire level only. Three Intercom metrics requests are
+# explicitly excluded from the Claude telemetry role set. None of these
+# auxiliary states blocks a model request.
+# Operators can inspect delivery health or trigger recovery through:
+#   GET  /v0/management/claude-desktop/telemetry
+#   POST /v0/management/claude-desktop/telemetry/flush
+#   POST /v0/management/claude-desktop/telemetry/retry-dead
 
 # Default headers for Codex OAuth model requests.
 # These are used only for file-backed/OAuth Codex requests when the client

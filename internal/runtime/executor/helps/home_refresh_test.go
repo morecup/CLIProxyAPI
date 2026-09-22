@@ -176,3 +176,20 @@ func TestRefreshAuthViaHomeAcceptsAuthEnvelope(t *testing.T) {
 		t.Fatalf("updated auth_index = %q, want home-index-1", updated.Index)
 	}
 }
+
+func TestParseHomeRefreshClaudePreservesExactMetadataNumbers(t *testing.T) {
+	for _, envelope := range []bool{false, true} {
+		raw := `{"id":"synthetic-desktop","provider":"claude","metadata":{"binding_number":18446744073709551615,"nested":{"sequence":9007199254740993}}}`
+		if envelope {
+			raw = `{"auth":` + raw + `,"auth_index":"synthetic-index"}`
+		}
+		parsed, _, err := parseHomeRefreshAuth([]byte(raw))
+		if err != nil {
+			t.Fatal(err)
+		}
+		encoded, err := json.Marshal(parsed.Metadata)
+		if err != nil || !strings.Contains(string(encoded), "18446744073709551615") || !strings.Contains(string(encoded), "9007199254740993") {
+			t.Fatal("Home deserialization changed exact Desktop metadata", err)
+		}
+	}
+}

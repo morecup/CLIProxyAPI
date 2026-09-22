@@ -1,0 +1,633 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "query_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+  "definitions": [
+    {
+      "label": "chain",
+      "from": 6749810,
+      "to": 6751471,
+      "sha256": "021cc7afbefba77c9d5ea4f2717cc1604a4a26454de102daf7a846347d8f066c"
+    },
+    {
+      "label": "append",
+      "from": 6752213,
+      "to": 6753595,
+      "sha256": "886d4a7ec1da70ced218eeb3d3daed9d2701813975191dda4e3dbe9a2c7d1b11"
+    }
+  ],
+  "reviewed": [
+    {
+      "name": "sidechain_entry",
+      "from": 6759253,
+      "to": 6759362,
+      "sha256": "c45662ceead5bda6c60d426e0fbc051552af92d184f26d220629bf4c8cf0e879"
+    },
+    {
+      "name": "windows_output_binding",
+      "from": 64897,
+      "to": 65824,
+      "sha256": "593882221335c473228a1e10122bfbc7f4d141993a4f847d726a63c0adf02ef4"
+    }
+  ],
+  "identity": {
+    "session": "synthetic-session",
+    "agent": "a12345678",
+    "prompt": "10000000-0000-4000-8000-000000000001",
+    "version": "2.1.247",
+    "entrypoint": "claude-desktop",
+    "cwd": "C:/synthetic/owned-workspace"
+  },
+  "vectors": [
+    {
+      "name": "one-turn",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000001",
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_INITIAL"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-09-07T00:00:02.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "text",
+                "text": "line one\nline two 😀 <>&  "
+              }
+            ]
+          },
+          "requestId": "req_native"
+        }
+      ],
+      "expected": [
+        {
+          "parentUuid": null,
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000001",
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_INITIAL"
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000001",
+          "isSidechain": true,
+          "agentId": "a12345678",
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-09-07T00:00:02.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "text",
+                "text": "line one\nline two 😀 <>&  "
+              }
+            ]
+          },
+          "requestId": "req_native",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        }
+      ]
+    },
+    {
+      "name": "parallel-tools",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000001",
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_INITIAL"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000003",
+          "timestamp": "2026-09-07T00:00:03.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "tool_one",
+                "name": "TaskOutput",
+                "input": {
+                  "task_id": "a11111111"
+                }
+              }
+            ]
+          },
+          "requestId": "req_tools"
+        },
+        {
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000004",
+          "timestamp": "2026-09-07T00:00:04.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "tool_two",
+                "name": "SendMessage",
+                "input": {
+                  "to": "peer",
+                  "message": "PRIVATE"
+                }
+              }
+            ]
+          },
+          "requestId": "req_tools"
+        },
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000005",
+          "timestamp": "2026-09-07T00:00:05.000Z",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "tool_one",
+                "content": "PRIVATE_RESULT_ONE"
+              }
+            ]
+          },
+          "sourceToolAssistantUUID": "20000000-0000-4000-8000-000000000003"
+        },
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000006",
+          "timestamp": "2026-09-07T00:00:06.000Z",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "tool_two",
+                "content": "PRIVATE_RESULT_TWO"
+              }
+            ]
+          },
+          "sourceToolAssistantUUID": "20000000-0000-4000-8000-000000000004"
+        },
+        {
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-09-07T00:00:02.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "text",
+                "text": "line one\nline two 😀 <>&  "
+              }
+            ]
+          },
+          "requestId": "req_native"
+        }
+      ],
+      "expected": [
+        {
+          "parentUuid": null,
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000001",
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_INITIAL"
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000001",
+          "isSidechain": true,
+          "agentId": "a12345678",
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000003",
+          "timestamp": "2026-09-07T00:00:03.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "tool_one",
+                "name": "TaskOutput",
+                "input": {
+                  "task_id": "a11111111"
+                }
+              }
+            ]
+          },
+          "requestId": "req_tools",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000003",
+          "isSidechain": true,
+          "agentId": "a12345678",
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000004",
+          "timestamp": "2026-09-07T00:00:04.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "tool_two",
+                "name": "SendMessage",
+                "input": {
+                  "to": "peer",
+                  "message": "PRIVATE"
+                }
+              }
+            ]
+          },
+          "requestId": "req_tools",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000003",
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000005",
+          "timestamp": "2026-09-07T00:00:05.000Z",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "tool_one",
+                "content": "PRIVATE_RESULT_ONE"
+              }
+            ]
+          },
+          "sourceToolAssistantUUID": "20000000-0000-4000-8000-000000000003",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000004",
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000006",
+          "timestamp": "2026-09-07T00:00:06.000Z",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "tool_two",
+                "content": "PRIVATE_RESULT_TWO"
+              }
+            ]
+          },
+          "sourceToolAssistantUUID": "20000000-0000-4000-8000-000000000004",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000006",
+          "isSidechain": true,
+          "agentId": "a12345678",
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-09-07T00:00:02.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "text",
+                "text": "line one\nline two 😀 <>&  "
+              }
+            ]
+          },
+          "requestId": "req_native",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        }
+      ]
+    },
+    {
+      "name": "queued-input",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000001",
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_INITIAL"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-09-07T00:00:02.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "text",
+                "text": "line one\nline two 😀 <>&  "
+              }
+            ]
+          },
+          "requestId": "req_native"
+        },
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000007",
+          "timestamp": "2026-09-07T00:00:07.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_QUEUED"
+          }
+        }
+      ],
+      "expected": [
+        {
+          "parentUuid": null,
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000001",
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_INITIAL"
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000001",
+          "isSidechain": true,
+          "agentId": "a12345678",
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000002",
+          "timestamp": "2026-09-07T00:00:02.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "text",
+                "text": "line one\nline two 😀 <>&  "
+              }
+            ]
+          },
+          "requestId": "req_native",
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000002",
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000007",
+          "timestamp": "2026-09-07T00:00:07.000Z",
+          "message": {
+            "role": "user",
+            "content": "PRIVATE_QUEUED"
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        }
+      ]
+    },
+    {
+      "name": "empty-user",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000008",
+          "timestamp": "2026-09-07T00:00:08.000Z",
+          "message": {
+            "role": "user",
+            "content": ""
+          }
+        }
+      ],
+      "expected": [
+        {
+          "parentUuid": null,
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000008",
+          "timestamp": "2026-09-07T00:00:08.000Z",
+          "message": {
+            "role": "user",
+            "content": ""
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        }
+      ]
+    },
+    {
+      "name": "media-and-thinking",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000009",
+          "timestamp": "2026-09-07T00:00:09.000Z",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "image",
+                "source": {
+                  "type": "base64",
+                  "media_type": "image/png",
+                  "data": "SYNTHETIC"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000010",
+          "timestamp": "2026-09-07T00:00:10.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "PRIVATE_THINKING",
+                "signature": "PRIVATE_SIGNATURE"
+              }
+            ]
+          }
+        }
+      ],
+      "expected": [
+        {
+          "parentUuid": null,
+          "isSidechain": true,
+          "promptId": "10000000-0000-4000-8000-000000000001",
+          "agentId": "a12345678",
+          "type": "user",
+          "uuid": "20000000-0000-4000-8000-000000000009",
+          "timestamp": "2026-09-07T00:00:09.000Z",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "image",
+                "source": {
+                  "type": "base64",
+                  "media_type": "image/png",
+                  "data": "SYNTHETIC"
+                }
+              }
+            ]
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        },
+        {
+          "parentUuid": "20000000-0000-4000-8000-000000000009",
+          "isSidechain": true,
+          "agentId": "a12345678",
+          "type": "assistant",
+          "uuid": "20000000-0000-4000-8000-000000000010",
+          "timestamp": "2026-09-07T00:00:10.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_native",
+            "type": "message",
+            "model": "sonnet",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "PRIVATE_THINKING",
+                "signature": "PRIVATE_SIGNATURE"
+              }
+            ]
+          },
+          "userType": "external",
+          "entrypoint": "claude-desktop",
+          "cwd": "C:/synthetic/owned-workspace",
+          "sessionId": "synthetic-session",
+          "version": "2.1.247"
+        }
+      ]
+    }
+  ],
+  "primitive_checks": {
+    "native_sidechain_ignores_main_uuid_dedup": true,
+    "native_queue_serializes_live_object_at_drain": true,
+    "native_queue_does_not_rewrite_prior_disk_rows": true
+  },
+  "boundaries": [
+    "Only chain/append and queue primitives execute; metadata/classification/I/O seams are synthetic.",
+    "Windows BY hardlink/copy registration and actual initial/per-yield mA sites are reviewed, not executed.",
+    "The product uses an ACL-restricted plaintext projection of its encrypted journal, not native physical hardlinks, paths or storage backends.",
+    "No native application, account operation, new capture, production endpoint, full tool/SDK accounting or live A/B acceptance."
+  ]
+}

@@ -27,6 +27,21 @@ func newUpstreamAttemptContext(ctx context.Context) context.Context {
 	return logging.WithFreshResponseHeadersHolder(ctx)
 }
 
+func beginUpstreamExecutionAttempt(ctx context.Context) context.Context {
+	return cliproxyexecutor.WithNextUpstreamAttempt(newUpstreamAttemptContext(ctx), time.Now())
+}
+
+type scheduledRetryTelemetry interface {
+	RecordScheduledRetry(context.Context, int, time.Duration)
+}
+
+func recordScheduledRetryTelemetry(ctx context.Context, err error, attempt int, delay time.Duration) {
+	var observer scheduledRetryTelemetry
+	if err != nil && errors.As(err, &observer) && observer != nil {
+		observer.RecordScheduledRetry(ctx, attempt, delay)
+	}
+}
+
 func claudeOAuthRequestCancellation(ctx context.Context, auth *Auth, err error) error {
 	if auth == nil || !strings.EqualFold(strings.TrimSpace(auth.Provider), "claude") || !strings.EqualFold(strings.TrimSpace(auth.Attributes["auth_kind"]), "oauth") {
 		return nil
@@ -44,6 +59,9 @@ func claudeOAuthRequestCancellation(ctx context.Context, auth *Auth, err error) 
 // It supports multiple providers for the same model and round-robins the starting provider per model.
 func (m *Manager) Execute(ctx context.Context, providers []string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
 	req, opts = cliproxysession.Enrich(req, opts)
+	ctx = cliproxyexecutor.WithUpstreamAttemptChain(ctx, time.Now())
+	releaseCompletion := cliproxyexecutor.BeginUpstreamCompletionScope(ctx)
+	defer releaseCompletion()
 	normalized := m.normalizeProviders(providers)
 	if len(normalized) == 0 {
 		return cliproxyexecutor.Response{}, &Error{Code: "provider_not_found", Message: "no provider supplied"}
@@ -70,6 +88,7 @@ func (m *Manager) Execute(ctx context.Context, providers []string, req cliproxye
 		if !shouldRetry {
 			break
 		}
+		recordScheduledRetryTelemetry(ctx, errExec, attempt+1, wait)
 		if errWait := waitForCooldown(ctx, wait, maxWait); errWait != nil {
 			return cliproxyexecutor.Response{}, errWait
 		}
@@ -91,6 +110,9 @@ func (m *Manager) Execute(ctx context.Context, providers []string, req cliproxye
 // It supports multiple providers for the same model and round-robins the starting provider per model.
 func (m *Manager) ExecuteCount(ctx context.Context, providers []string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
 	req, opts = cliproxysession.Enrich(req, opts)
+	ctx = cliproxyexecutor.WithUpstreamAttemptChain(ctx, time.Now())
+	releaseCompletion := cliproxyexecutor.BeginUpstreamCompletionScope(ctx)
+	defer releaseCompletion()
 	normalized := m.normalizeProviders(providers)
 	if len(normalized) == 0 {
 		return cliproxyexecutor.Response{}, &Error{Code: "provider_not_found", Message: "no provider supplied"}
@@ -117,6 +139,7 @@ func (m *Manager) ExecuteCount(ctx context.Context, providers []string, req clip
 		if !shouldRetry {
 			break
 		}
+		recordScheduledRetryTelemetry(ctx, errExec, attempt+1, wait)
 		if errWait := waitForCooldown(ctx, wait, maxWait); errWait != nil {
 			return cliproxyexecutor.Response{}, errWait
 		}
@@ -129,8 +152,17 @@ func (m *Manager) ExecuteCount(ctx context.Context, providers []string, req clip
 
 // ExecuteStream performs a streaming execution using the configured selector and executor.
 // It supports multiple providers for the same model and round-robins the starting provider per model.
-func (m *Manager) ExecuteStream(ctx context.Context, providers []string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (m *Manager) ExecuteStream(ctx context.Context, providers []string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (streamResult *cliproxyexecutor.StreamResult, streamErr error) {
 	req, opts = cliproxysession.Enrich(req, opts)
+	ctx = cliproxyexecutor.WithUpstreamAttemptChain(ctx, time.Now())
+	releaseCompletion := cliproxyexecutor.BeginUpstreamCompletionScope(ctx)
+	defer func() {
+		if streamErr != nil || streamResult == nil || streamResult.Chunks == nil {
+			releaseCompletion()
+			return
+		}
+		streamResult = completeAttemptsAfterStream(ctx, streamResult, releaseCompletion)
+	}()
 	if m.HomeEnabled() {
 		if unlockSession := m.lockHomeWebsocketSession(ctx, opts); unlockSession != nil {
 			defer unlockSession()
@@ -176,6 +208,7 @@ func (m *Manager) ExecuteStream(ctx context.Context, providers []string, req cli
 		if !shouldRetry {
 			break
 		}
+		recordScheduledRetryTelemetry(ctx, errStream, attempt+1, wait)
 		if errWait := waitForCooldown(ctx, wait, maxWait); errWait != nil {
 			return nil, errWait
 		}
@@ -260,7 +293,7 @@ func requestToFormat(provider string, executor ProviderExecutor, req cliproxyexe
 		return sdktranslator.FormatCodex
 	case "xai":
 		return sdktranslator.FormatCodex
-	case "claude":
+	case "claude", "anthropic-compatible":
 		return sdktranslator.FormatClaude
 	case "gemini", "vertex", "aistudio":
 		return sdktranslator.FormatGemini
@@ -390,6 +423,7 @@ func (m *Manager) executeMixedOnce(ctx context.Context, providers []string, req 
 			if !restoreExecutionModel {
 				execReq = attachResolvedAPIKeyModelInfo(routing, execReq, auth, routeModel, upstreamModel)
 			}
+			execCtx = beginUpstreamExecutionAttempt(execCtx)
 			startExec := time.Now()
 			resp, errExec := executor.Execute(execCtx, auth, execReq, execOpts)
 			durationExec := time.Since(startExec)
@@ -399,9 +433,10 @@ func (m *Manager) executeMixedOnce(ctx context.Context, providers []string, req 
 				}
 				refreshCtx := newUpstreamAttemptContext(execCtx)
 				if refreshed, okRefresh := m.tryRefreshAfterUnauthorized(refreshCtx, auth, errExec, didRefreshOnUnauthorized); okRefresh {
+					recordScheduledRetryTelemetry(execCtx, errExec, 1, 0)
 					auth = refreshed
 					didRefreshOnUnauthorized = true
-					execCtx = newUpstreamAttemptContext(execCtx)
+					execCtx = beginUpstreamExecutionAttempt(execCtx)
 					startRetry := time.Now()
 					resp, errExec = executor.Execute(execCtx, auth, execReq, execOpts)
 					durationRetry := time.Since(startRetry)
@@ -568,6 +603,7 @@ func (m *Manager) executeCountMixedOnce(ctx context.Context, providers []string,
 			if !restoreExecutionModel {
 				execReq = attachResolvedAPIKeyModelInfo(routing, execReq, auth, routeModel, upstreamModel)
 			}
+			execCtx = beginUpstreamExecutionAttempt(execCtx)
 			startExec := time.Now()
 			resp, errExec := executor.CountTokens(execCtx, auth, execReq, execOpts)
 			durationExec := time.Since(startExec)
@@ -579,7 +615,7 @@ func (m *Manager) executeCountMixedOnce(ctx context.Context, providers []string,
 				if refreshed, okRefresh := m.tryRefreshAfterUnauthorized(refreshCtx, auth, errExec, didRefreshOnUnauthorized); okRefresh {
 					auth = refreshed
 					didRefreshOnUnauthorized = true
-					execCtx = newUpstreamAttemptContext(execCtx)
+					execCtx = beginUpstreamExecutionAttempt(execCtx)
 					startRetry := time.Now()
 					resp, errExec = executor.CountTokens(execCtx, auth, execReq, execOpts)
 					durationRetry := time.Since(startRetry)

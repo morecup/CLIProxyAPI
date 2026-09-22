@@ -16,6 +16,10 @@ const (
 	// Claude represents the Anthropic Claude provider identifier.
 	Claude = "claude"
 
+	// AnthropicCompatible represents generic Anthropic Messages API credentials.
+	// It is deliberately separate from the Desktop-only Claude provider.
+	AnthropicCompatible = "anthropic-compatible"
+
 	// OpenAI represents the OpenAI provider identifier.
 	OpenAI = "openai"
 

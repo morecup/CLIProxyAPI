@@ -16,7 +16,7 @@ const (
 // passive credential-level quota snapshot understood by collectQuotaSignals.
 func ProviderSupportsQuotaObservation(provider string) bool {
 	switch strings.ToLower(strings.TrimSpace(provider)) {
-	case "claude", "codex":
+	case "claude", "anthropic-compatible", "codex":
 		return true
 	default:
 		return false
@@ -171,10 +171,10 @@ func isQuotaSignalHeaderForProvider(provider, name string) bool {
 	provider = strings.ToLower(strings.TrimSpace(provider))
 	name = strings.ToLower(strings.TrimSpace(name))
 	if name == "retry-after" {
-		return provider == "claude" || provider == "codex"
+		return provider == "claude" || provider == "anthropic-compatible" || provider == "codex"
 	}
 	if strings.HasPrefix(name, "anthropic-ratelimit-unified-") {
-		return provider == "claude"
+		return provider == "claude" || provider == "anthropic-compatible"
 	}
 	if strings.HasPrefix(name, "x-ratelimit-") {
 		// Observed Codex responses do not carry x-ratelimit-* headers; the only

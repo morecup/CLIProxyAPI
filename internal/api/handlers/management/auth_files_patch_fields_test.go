@@ -528,7 +528,7 @@ func TestAuthFileRequestRetryFromJSON(t *testing.T) {
 	}
 }
 
-func TestNormalizeAuthFilePatchFieldsCanonicalizesLegacyRoots(t *testing.T) {
+func TestNormalizeAuthFilePatchFieldsCanonicalizesSupportedLegacyRoots(t *testing.T) {
 	fields := map[string]json.RawMessage{
 		"request-retry":             json.RawMessage(`2`),
 		" disable-cooling ":         json.RawMessage(`true`),
@@ -540,7 +540,7 @@ func TestNormalizeAuthFilePatchFieldsCanonicalizesLegacyRoots(t *testing.T) {
 	if errNormalize != nil {
 		t.Fatalf("normalizeAuthFilePatchFields() error = %v", errNormalize)
 	}
-	for _, key := range []string{"request_retry", "disable_cooling", "fingerprint_profile.value", "provider-specific"} {
+	for _, key := range []string{"request_retry", "disable_cooling", "fingerprint-profile.value", "provider-specific"} {
 		if _, exists := normalized[key]; !exists {
 			t.Fatalf("normalized fields missing %q: %#v", key, normalized)
 		}

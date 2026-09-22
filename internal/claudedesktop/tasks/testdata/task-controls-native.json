@@ -1,0 +1,347 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "query_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+  "definitions": [
+    {
+      "label": "output",
+      "from": 3645756,
+      "to": 3648082,
+      "sha256": "0263a7a93e71b3c0eb4f5eef48b6ae2e5e53b2aa0cf3e798eea3923c1dc21aef"
+    },
+    {
+      "label": "output_call",
+      "from": 3650494,
+      "to": 3651313,
+      "sha256": "b279e8901780c34fa8dc479afd4760d87c30e68bf8f94675d203f61e43fd58fe"
+    },
+    {
+      "label": "stop",
+      "from": 3560132,
+      "to": 3562226,
+      "sha256": "0982d795e2209e272f1b46aac776714952d0492dcb00829dc602d5675643f7d5"
+    },
+    {
+      "label": "kill",
+      "from": 2331436,
+      "to": 2332744,
+      "sha256": "fad9f99c6545903b5e39c05f4be511e3156a4f3730105f69d773cb3497656489"
+    },
+    {
+      "label": "stop_call",
+      "from": 3565875,
+      "to": 3566302,
+      "sha256": "b6bd892eeccd0e6b13d153665395360da5818a5f9414f31a0af6beb9656f9672"
+    },
+    {
+      "label": "owner",
+      "from": 3069137,
+      "to": 3069232,
+      "sha256": "4ad50a7a9fa85e5b145d454c2a1027a023352741f6664670bd45fdf54a4e43f3"
+    },
+    {
+      "label": "boolean",
+      "from": 2172737,
+      "to": 2172791,
+      "sha256": "84581e800419b13f0ae3b84ee7cc737a397a0427c27d1d85068fe0b3afaf4f0e"
+    }
+  ],
+  "cases": [
+    {
+      "name": "running_snapshot",
+      "status": "running",
+      "block": false,
+      "timeout": 30000,
+      "report": null,
+      "error": "",
+      "expected": {
+        "retrieval_status": "not_ready",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "running",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "",
+          "output": "",
+          "isRawTranscript": true
+        }
+      },
+      "elapsed_ms": 0,
+      "notified": false
+    },
+    {
+      "name": "running_zero_wait",
+      "status": "running",
+      "block": true,
+      "timeout": 0,
+      "report": null,
+      "error": "",
+      "expected": {
+        "retrieval_status": "timeout",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "running",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "",
+          "output": "",
+          "isRawTranscript": true
+        }
+      },
+      "elapsed_ms": 0,
+      "notified": false
+    },
+    {
+      "name": "running_timeout",
+      "status": "running",
+      "block": true,
+      "timeout": 150,
+      "report": null,
+      "error": "",
+      "expected": {
+        "retrieval_status": "timeout",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "running",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "",
+          "output": "",
+          "isRawTranscript": true
+        }
+      },
+      "elapsed_ms": 200,
+      "notified": false
+    },
+    {
+      "name": "completed_report",
+      "status": "completed",
+      "block": true,
+      "timeout": 30000,
+      "report": "actual report",
+      "error": "",
+      "expected": {
+        "retrieval_status": "success",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "completed",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "actual report",
+          "output": "actual report",
+          "isRawTranscript": false
+        }
+      },
+      "elapsed_ms": 0,
+      "notified": true
+    },
+    {
+      "name": "completed_empty",
+      "status": "completed",
+      "block": false,
+      "timeout": 30000,
+      "report": "",
+      "error": "",
+      "expected": {
+        "retrieval_status": "success",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "completed",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "",
+          "output": "",
+          "isRawTranscript": true
+        }
+      },
+      "elapsed_ms": 0,
+      "notified": true
+    },
+    {
+      "name": "failed",
+      "status": "failed",
+      "block": false,
+      "timeout": 30000,
+      "report": null,
+      "error": "upstream failure",
+      "expected": {
+        "retrieval_status": "success",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "failed",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "",
+          "output": "",
+          "isRawTranscript": true,
+          "error": "upstream failure"
+        }
+      },
+      "elapsed_ms": 0,
+      "notified": true
+    },
+    {
+      "name": "killed",
+      "status": "killed",
+      "block": true,
+      "timeout": 30000,
+      "report": null,
+      "error": "",
+      "expected": {
+        "retrieval_status": "success",
+        "task": {
+          "task_id": "a01234567",
+          "task_type": "local_agent",
+          "status": "killed",
+          "description": "Inspect",
+          "prompt": "inspect actual state",
+          "result": "",
+          "output": "",
+          "isRawTranscript": true
+        }
+      },
+      "elapsed_ms": 0,
+      "notified": true
+    }
+  ],
+  "stop_cases": [
+    {
+      "name": "main_id",
+      "id": "a01234567",
+      "caller": "",
+      "status": "running",
+      "expected": {
+        "message": "Successfully stopped task: a01234567 (Inspect)",
+        "task_id": "a01234567",
+        "task_type": "local_agent",
+        "command": "Inspect"
+      },
+      "error": null,
+      "kills": [
+        {
+          "id": "a01234567",
+          "by": "parent"
+        }
+      ]
+    },
+    {
+      "name": "main_name",
+      "id": "worker",
+      "caller": "",
+      "status": "running",
+      "expected": {
+        "message": "Successfully stopped task: a01234567 (Inspect)",
+        "task_id": "a01234567",
+        "task_type": "local_agent",
+        "command": "Inspect"
+      },
+      "error": null,
+      "kills": [
+        {
+          "id": "a01234567",
+          "by": "parent"
+        }
+      ]
+    },
+    {
+      "name": "self",
+      "id": "a01234567",
+      "caller": "a01234567",
+      "status": "running",
+      "expected": {
+        "message": "Successfully stopped task: a01234567 (Inspect)",
+        "task_id": "a01234567",
+        "task_type": "local_agent",
+        "command": "Inspect"
+      },
+      "error": null,
+      "kills": [
+        {
+          "id": "a01234567",
+          "by": "parent"
+        }
+      ]
+    },
+    {
+      "name": "foreign_child",
+      "id": "a01234567",
+      "caller": "a76543210",
+      "status": "running",
+      "expected": null,
+      "error": {
+        "message": "Task a01234567 is owned by a01234567; agent a76543210 cannot stop it.",
+        "code": "not_owner"
+      },
+      "kills": []
+    },
+    {
+      "name": "completed",
+      "id": "a01234567",
+      "caller": "",
+      "status": "completed",
+      "expected": null,
+      "error": {
+        "message": "Task a01234567 is not running (status: completed)",
+        "code": "not_running"
+      },
+      "kills": []
+    },
+    {
+      "name": "unknown",
+      "id": "missing",
+      "caller": "",
+      "status": "running",
+      "expected": null,
+      "error": {
+        "message": "No task found with ID: missing. Running named agents: worker",
+        "code": "not_found"
+      },
+      "kills": []
+    }
+  ],
+  "transitions": [
+    "blocking_polls_current_registry_until_terminal",
+    "removed_while_waiting_returns_null_timeout",
+    "abort_throws_instead_of_returning_success",
+    "live_generation_not_old_done_promise",
+    "deprecated_shell_id_uses_same_owned_stop",
+    "model_stop_is_not_a_native_task_error"
+  ],
+  "boolean_cases": [
+    {
+      "input": true,
+      "output": true
+    },
+    {
+      "input": false,
+      "output": false
+    },
+    {
+      "input": "true",
+      "output": true
+    },
+    {
+      "input": "false",
+      "output": false
+    },
+    {
+      "input": "TRUE",
+      "output": "TRUE"
+    },
+    {
+      "input": null,
+      "output": null
+    },
+    {
+      "input": 0,
+      "output": 0
+    }
+  ],
+  "boundary": "Pinned bKe/aps/output call/u$t/uL/stop call/lMt/_je run with synthetic clocks, absent output files, ordinary report sections and a local-agent-only registry. The uL transition guard, retention timer and settlement hooks are synthetic. Schemas, native name resolution, keepalive/cascade/observer/team lanes, raw transcript projection, result sanitization/rendering and live A/B are not established."
+}

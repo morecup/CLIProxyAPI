@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claudedesktop"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/credentialweight"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/watcher/synthesizer"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
@@ -106,7 +107,10 @@ func (h *Handler) PatchAuthFileStatus(c *gin.Context) {
 		return
 	}
 
-	applyAuthDisabledState(targetAuth, *req.Disabled)
+	if errState := applyAuthDisabledState(targetAuth, *req.Disabled); errState != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": errState.Error()})
+		return
+	}
 	if _, err := h.authManager.Update(ctx, targetAuth); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to update auth: %v", err)})
 		return
@@ -143,7 +147,9 @@ func (h *Handler) patchPluginVirtualSourceStatus(ctx context.Context, targetAuth
 			!sameAuthFilePath(authAttribute(auth, coreauth.AttributeVirtualSource), sourcePath) {
 			continue
 		}
-		applyAuthDisabledState(auth, disabled)
+		if errState := applyAuthDisabledState(auth, disabled); errState != nil {
+			return fmt.Errorf("failed to update auth %s: %w", auth.ID, errState)
+		}
 		auth.UpdatedAt = now
 		if _, errUpdate := h.authManager.Update(ctx, auth); errUpdate != nil {
 			return fmt.Errorf("failed to update auth %s: %w", auth.ID, errUpdate)
@@ -182,9 +188,14 @@ func setSourceAuthFileDisabled(path string, disabled bool) error {
 	return nil
 }
 
-func applyAuthDisabledState(auth *coreauth.Auth, disabled bool) {
+func applyAuthDisabledState(auth *coreauth.Auth, disabled bool) error {
 	if auth == nil {
-		return
+		return nil
+	}
+	if isClaudeDesktopAuth(auth) {
+		if errTransition := transitionClaudeDesktopDisabledState(auth, disabled, time.Now()); errTransition != nil {
+			return errTransition
+		}
 	}
 	auth.Disabled = disabled
 	if disabled {
@@ -199,6 +210,59 @@ func applyAuthDisabledState(auth *coreauth.Auth, disabled bool) {
 		auth.Metadata = make(map[string]any)
 	}
 	auth.Metadata["disabled"] = disabled
+	return nil
+}
+
+func isClaudeDesktopAuth(auth *coreauth.Auth) bool {
+	if auth == nil || auth.Metadata == nil {
+		return false
+	}
+	flow, _ := auth.Metadata[claudedesktop.MetadataAuthFlowKey].(string)
+	_, hasEnrollment := auth.Metadata[claudedesktop.MetadataEnrollmentKey]
+	return strings.EqualFold(strings.TrimSpace(flow), claudedesktop.AuthFlowDesktop) || hasEnrollment
+}
+
+func transitionClaudeDesktopDisabledState(auth *coreauth.Auth, disabled bool, now time.Time) error {
+	enrollment, errEnrollment := claudedesktop.ValidateEnrollmentBinding(auth.ID, auth.Metadata)
+	if errEnrollment != nil {
+		return fmt.Errorf("Claude Desktop lifecycle is invalid: %w", errEnrollment)
+	}
+	if disabled {
+		switch enrollment.State {
+		case claudedesktop.EnrollmentActive, claudedesktop.EnrollmentReady:
+			_, errEnrollment = claudedesktop.TransitionMetadataEnrollment(auth.Metadata, auth.ID, claudedesktop.EnrollmentDisabled, "disabled via management API", now)
+		case claudedesktop.EnrollmentDisabled:
+			return nil
+		default:
+			return fmt.Errorf("Claude Desktop enrollment state %q cannot be disabled", enrollment.State)
+		}
+		if errEnrollment != nil {
+			return fmt.Errorf("disable Claude Desktop enrollment: %w", errEnrollment)
+		}
+		return nil
+	}
+
+	switch enrollment.State {
+	case claudedesktop.EnrollmentActive:
+		return nil
+	case claudedesktop.EnrollmentReady:
+		_, errEnrollment = claudedesktop.TransitionMetadataEnrollment(auth.Metadata, auth.ID, claudedesktop.EnrollmentActive, "", now)
+	case claudedesktop.EnrollmentDisabled:
+		if _, errReady := claudedesktop.TransitionMetadataEnrollment(auth.Metadata, auth.ID, claudedesktop.EnrollmentReady, "", now); errReady != nil {
+			return fmt.Errorf("prepare Claude Desktop enrollment for enable: %w", errReady)
+		}
+		_, errEnrollment = claudedesktop.TransitionMetadataEnrollment(auth.Metadata, auth.ID, claudedesktop.EnrollmentActive, "", now)
+	case claudedesktop.EnrollmentQuarantined:
+		return fmt.Errorf("Claude Desktop enrollment is quarantined; re-enroll or explicitly promote its runtime binding")
+	case claudedesktop.EnrollmentRetired:
+		return fmt.Errorf("Claude Desktop enrollment is retired; re-enrollment is required")
+	default:
+		return fmt.Errorf("Claude Desktop enrollment state %q cannot be enabled", enrollment.State)
+	}
+	if errEnrollment != nil {
+		return fmt.Errorf("enable Claude Desktop enrollment: %w", errEnrollment)
+	}
+	return nil
 }
 
 // PatchAuthFileFields updates arbitrary metadata fields of an auth file.
@@ -333,7 +397,10 @@ func (h *Handler) PatchAuthFileFields(c *gin.Context) {
 		changed = true
 	}
 	if changed {
-		syncAuthFileMetadataFields(targetAuth, touchedRoots)
+		if errSync := syncAuthFileMetadataFields(targetAuth, touchedRoots); errSync != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": errSync.Error()})
+			return
+		}
 	}
 
 	if !changed {
@@ -536,9 +603,9 @@ func authFileHeadersStringMap(value any) (map[string]string, bool) {
 	}
 }
 
-func syncAuthFileMetadataFields(auth *coreauth.Auth, touchedRoots map[string]struct{}) {
+func syncAuthFileMetadataFields(auth *coreauth.Auth, touchedRoots map[string]struct{}) error {
 	if auth == nil || len(touchedRoots) == 0 {
-		return
+		return nil
 	}
 	if _, ok := touchedRoots["prefix"]; ok {
 		if prefix, okString := auth.Metadata["prefix"].(string); okString {
@@ -566,8 +633,11 @@ func syncAuthFileMetadataFields(auth *coreauth.Auth, touchedRoots map[string]str
 		syncAuthFileWebsocketsAttribute(auth)
 	}
 	if _, ok := touchedRoots["disabled"]; ok {
-		syncAuthFileDisabledState(auth)
+		if errState := syncAuthFileDisabledState(auth); errState != nil {
+			return errState
+		}
 	}
+	return nil
 }
 
 func syncAuthFileHeaderAttributes(auth *coreauth.Auth) {
@@ -689,24 +759,15 @@ func authFileBoolValue(value any) (bool, bool) {
 	return false, false
 }
 
-func syncAuthFileDisabledState(auth *coreauth.Auth) {
+func syncAuthFileDisabledState(auth *coreauth.Auth) error {
 	if auth == nil {
-		return
+		return nil
 	}
 	disabled, ok := authFileBoolValue(auth.Metadata["disabled"])
 	if !ok {
-		return
+		return nil
 	}
-	auth.Disabled = disabled
-	if disabled {
-		auth.Status = coreauth.StatusDisabled
-		if strings.TrimSpace(auth.StatusMessage) == "" {
-			auth.StatusMessage = "disabled via management API"
-		}
-		return
-	}
-	auth.Status = coreauth.StatusActive
-	auth.StatusMessage = ""
+	return applyAuthDisabledState(auth, disabled)
 }
 
 func (h *Handler) removeAuth(ctx context.Context, id string) {

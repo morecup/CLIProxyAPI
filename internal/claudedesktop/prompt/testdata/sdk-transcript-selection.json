@@ -1,0 +1,1607 @@
+{
+  "schema_version": 1,
+  "source": {
+    "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+    "query_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+    "definitions": [
+      {
+        "name": "leaf",
+        "from": 6784204,
+        "to": 6784322,
+        "sha256": "b132e18104fdac77c13015ec1623b7a0bfa321a995e61dbd6a40f20e51e1d8f1"
+      },
+      {
+        "name": "chain",
+        "from": 6784322,
+        "to": 6784742,
+        "sha256": "d15adf79e9dad333bde436cedc91c3cc78b2c16e4df24308ef6f8ca4f6b73b1b"
+      },
+      {
+        "name": "children",
+        "from": 6785669,
+        "to": 6785858,
+        "sha256": "c749e186250e8be2bc93ac9579e13c8a941b827ba6c704da75a3a9c8054843ea"
+      },
+      {
+        "name": "append_children",
+        "from": 6785858,
+        "to": 6786124,
+        "sha256": "b86fe78e56fc2d482de004834b5a8f4dbe794c53093e8df9bd0ef13bbef190e2"
+      },
+      {
+        "name": "fallback",
+        "from": 6786124,
+        "to": 6786427,
+        "sha256": "412db91e12abd05f63c8ffcff8631b416fca18008072c9452f5f9a1f30adcd87"
+      },
+      {
+        "name": "siblings",
+        "from": 6786427,
+        "to": 6787574,
+        "sha256": "2925d1eebd0f1e0d6d8a4a1877d6ac32098c94bbfeac8cd28c7d76d98551a066"
+      },
+      {
+        "name": "parser",
+        "from": 6823882,
+        "to": 6830286,
+        "sha256": "1a3be5fda02550e43934bcef5eb02cc0cec39cd43611cb4bb718a1d529b9d23f"
+      }
+    ],
+    "timestamp_fallback_ms": 5000,
+    "boundaries": [
+      "k$/ati/lti/Qio/sti/LY execute pinned native source; no storage, network or application launch.",
+      "The ordinary-file parser probe uses synthetic schema/migration guards and rejects compaction or unrelated metadata. It does not prove rti relinking, GT backends, metadata consumers, forks or task dispatch.",
+      "Go owned admission accepts canonical ISO timestamps; arbitrary JavaScript Date parsing and non-ISO locale sorting are not claimed.",
+      "Captured D calls are source facts, not newly implemented network emitter mappings."
+    ]
+  },
+  "vectors": [
+    {
+      "name": "default-last-foreground",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "sibling",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_sibling",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "sibling",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_sibling",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "explicit-previous-branch",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "sibling",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_sibling",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a",
+          "explicit": true
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "passive-previous-sibling",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "sibling",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_sibling",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a"
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "passive-ancestor-advances",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a"
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "next",
+            "parentUuid": "a",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_next",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "explicit-ancestor-does-not-advance",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a",
+          "explicit": true
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "explicit-retained-by-same-passive-marker",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a",
+          "explicit": true
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a"
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "changed-passive-marker-retires-explicit",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "u",
+          "explicit": true
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a"
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "next",
+            "parentUuid": "a",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_next",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "missing-marker-falls-back",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "missing",
+          "explicit": true
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null,
+          "explicit": true
+        }
+      ],
+      "expected": {
+        "rows": [],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "nonexplicit-null-does-not-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "string-true-does-not-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null,
+          "explicit": "true"
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "undefined-leaf-does-not-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "explicit": true
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "empty-leaf-does-not-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "",
+          "explicit": true
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "null-noop-retains-explicit-anchor",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a",
+          "explicit": true
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "new-content-retires-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null,
+          "explicit": true
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "next",
+            "parentUuid": "a",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_next",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "sidechain-does-not-retire-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null,
+          "explicit": true
+        },
+        {
+          "type": "assistant",
+          "uuid": "side",
+          "parentUuid": "a",
+          "isSidechain": true,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        }
+      ],
+      "expected": {
+        "rows": [],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "later-anchor-retires-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null,
+          "explicit": true
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a"
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "new-descendant-after-explicit-anchor",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": "a",
+          "explicit": true
+        },
+        {
+          "type": "assistant",
+          "uuid": "next",
+          "parentUuid": "a",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_next",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        }
+      ],
+      "expected": {
+        "rows": [
+          {
+            "type": "user",
+            "uuid": "u",
+            "parentUuid": null,
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:00.000Z",
+            "message": {
+              "role": "user",
+              "content": "u"
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "a",
+            "parentUuid": "u",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_a",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          },
+          {
+            "type": "assistant",
+            "uuid": "next",
+            "parentUuid": "a",
+            "isSidechain": false,
+            "timestamp": "2026-09-07T00:00:01.000Z",
+            "message": {
+              "role": "assistant",
+              "id": "msg_next",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "a"
+                }
+              ]
+            }
+          }
+        ],
+        "events": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "unrelated-metadata-does-not-retire-clear",
+      "rows": [
+        {
+          "type": "user",
+          "uuid": "u",
+          "parentUuid": null,
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:00.000Z",
+          "message": {
+            "role": "user",
+            "content": "u"
+          }
+        },
+        {
+          "type": "assistant",
+          "uuid": "a",
+          "parentUuid": "u",
+          "isSidechain": false,
+          "timestamp": "2026-09-07T00:00:01.000Z",
+          "message": {
+            "role": "assistant",
+            "id": "msg_a",
+            "content": [
+              {
+                "type": "text",
+                "text": "a"
+              }
+            ]
+          }
+        },
+        {
+          "type": "last-prompt",
+          "leafUuid": null,
+          "explicit": true
+        },
+        {
+          "type": "last-prompt",
+          "lastPrompt": "display-only"
+        }
+      ],
+      "expected": {
+        "rows": [],
+        "events": [],
+        "diagnostics": []
+      }
+    }
+  ]
+}

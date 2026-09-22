@@ -131,7 +131,7 @@ func extractRequestScopedErrorRules(auth *Auth, cfg *internalconfig.Config) []in
 	}
 
 	switch provider {
-	case "claude":
+	case "claude", "anthropic-compatible":
 		if index >= 0 && index < len(cfg.ClaudeKey) {
 			return cfg.ClaudeKey[index].RequestScopedErrors
 		}

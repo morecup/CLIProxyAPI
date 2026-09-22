@@ -6,9 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
+	claudeprofile "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/profile"
 	"github.com/tidwall/gjson"
 )
 
@@ -96,31 +94,23 @@ func TestClaudeThinkingSignaturesSurviveUpstreamPreparation(t *testing.T) {
 		t.Fatalf("fixture built %d signatures, want %d", len(got), len(signatures))
 	}
 
-	cfg := &config.Config{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{"cloak_mode": "always"}}
-
-	cloaked, didCloak, errCloaking := applyCloaking(
-		context.Background(),
-		cfg,
-		auth,
-		payload,
-		"sk-ant-oat-test",
-		false,
-		true,
-	)
-	if errCloaking != nil {
-		t.Fatalf("applyCloaking() error = %v", errCloaking)
+	executor := newClaudeDesktopTestExecutor(t)
+	plan, errPlan := executor.planClaudeDesktopRequestWithHints(payload, claudeprofile.RoleMain, "claude-opus-5", nil)
+	if errPlan != nil {
+		t.Fatal(errPlan)
 	}
-	if !didCloak {
-		t.Fatal("applyCloaking() cloaked = false, want true")
+	facts := executor.newClaudeDesktopRuntimeFacts(nil, "session", "claude-opus-5", "22222222-2222-4222-8222-222222222222", "33333333-3333-4333-8333-333333333333", "", map[string]any{"working_dir": `C:\code`})
+	profiled, _, errProfile := executor.applyClaudeDesktopMessageProfile(context.Background(), nil, payload, true, plan, facts)
+	if errProfile != nil {
+		t.Fatal(errProfile)
 	}
 
-	prepared, reverseMap := prepareClaudeOAuthToolNamesForUpstream(cloaked, claudeMCPAliasOptions{secret: "signature-fixture-caller"})
+	prepared, reverseMap := prepareClaudeDesktopToolNamesForUpstream(profiled, claudeMCPAliasOptions{secret: "signature-fixture-caller"})
 	if len(reverseMap) == 0 {
 		t.Fatal("expected the MCP alias pass to rewrite the declared tool")
 	}
 
-	for stage, body := range map[string][]byte{"cloaked": cloaked, "prepared": prepared} {
+	for stage, body := range map[string][]byte{"profiled": profiled, "prepared": prepared} {
 		got := collectThinkingSignatures(t, body)
 		if len(got) != len(signatures) {
 			t.Fatalf("%s stage produced %d signatures, want %d", stage, len(got), len(signatures))
@@ -136,52 +126,3 @@ func TestClaudeThinkingSignaturesSurviveUpstreamPreparation(t *testing.T) {
 // TestClaudeThinkingSignaturesSurviveSensitiveWordObfuscation guards the case
 // where cloaking rewrites message text: obfuscation must never reach into an
 // opaque thinking signature, even when the signature contains the trigger word.
-func TestClaudeThinkingSignaturesSurviveSensitiveWordObfuscation(t *testing.T) {
-	const sensitive = "proxy"
-	signature := "ErUBCkYIBRgC" + sensitive + "KkDq+9zN=="
-	// The visible user text carries the same trigger word, so the assertions below
-	// prove obfuscation ran and still left the signature untouched.
-	payload := buildThinkingHistoryPayload(t, []string{signature}, "please use the "+sensitive+" now")
-
-	cfg := &config.Config{
-		ClaudeKey: []config.ClaudeKey{{
-			APIKey: "key-123",
-			Cloak:  &config.CloakConfig{SensitiveWords: []string{sensitive}},
-		}},
-	}
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "key-123"}}
-
-	out, didCloak, errCloaking := applyCloaking(context.Background(), cfg, auth, payload, "key-123", false, true)
-	if errCloaking != nil {
-		t.Fatalf("applyCloaking() error = %v", errCloaking)
-	}
-	if !didCloak {
-		t.Fatal("applyCloaking() cloaked = false, want true")
-	}
-
-	var obfuscatedUserText bool
-	gjson.GetBytes(out, "messages").ForEach(func(_, message gjson.Result) bool {
-		message.Get("content").ForEach(func(_, contentBlock gjson.Result) bool {
-			if contentBlock.Get("type").String() != "text" {
-				return true
-			}
-			if text := contentBlock.Get("text").String(); strings.Contains(text, "\u200B") {
-				obfuscatedUserText = true
-				return false
-			}
-			return true
-		})
-		return !obfuscatedUserText
-	})
-	if !obfuscatedUserText {
-		t.Fatal("sensitive word obfuscation never ran, so the signature assertion would be vacuous")
-	}
-
-	got := collectThinkingSignatures(t, out)
-	if len(got) != 1 {
-		t.Fatalf("collected %d signatures, want 1", len(got))
-	}
-	if got[0] != signature {
-		t.Fatalf("signature mutated by obfuscation:\n got  %q\n want %q", got[0], signature)
-	}
-}

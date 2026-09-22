@@ -105,7 +105,6 @@ func sampleCloneRuntimeConfig() *Config {
 	cacheStrict := true
 	bypassStrict := false
 	pluginEnabled := false
-	cacheUserID := true
 
 	return &Config{
 		SDKConfig: SDKConfig{
@@ -159,10 +158,6 @@ func sampleCloneRuntimeConfig() *Config {
 			Models:         []ClaudeModel{{Name: "claude-upstream", Alias: "claude-client"}},
 			Headers:        map[string]string{"X-Claude": "one"},
 			ExcludedModels: []string{"claude-hidden"},
-			Cloak: &CloakConfig{
-				SensitiveWords: []string{"secret"},
-				CacheUserID:    &cacheUserID,
-			},
 		}},
 		OpenAICompatibility: []OpenAICompatibility{{
 			Name:          "compat",

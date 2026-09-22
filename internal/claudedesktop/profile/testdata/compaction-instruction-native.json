@@ -1,0 +1,49 @@
+{
+  "cases": [
+    {
+      "custom": "",
+      "bytes": 6369,
+      "sha256": "63e2bfb4ded280d5057a66d8a034ef352a73960d97d955b990e78f04f0db1fb0"
+    },
+    {
+      "custom": "  ",
+      "bytes": 6369,
+      "sha256": "63e2bfb4ded280d5057a66d8a034ef352a73960d97d955b990e78f04f0db1fb0"
+    },
+    {
+      "custom": "﻿ \t\r\n",
+      "bytes": 6369,
+      "sha256": "63e2bfb4ded280d5057a66d8a034ef352a73960d97d955b990e78f04f0db1fb0"
+    },
+    {
+      "custom": "synthetic",
+      "bytes": 6405,
+      "sha256": "b659549ce0044a6f85ef73946f156788def1d67abccc2e14115abf0b2204ce04"
+    },
+    {
+      "custom": "  synthetic  ",
+      "bytes": 6409,
+      "sha256": "c01875188dced1c3ffd878fb841c407dbe99e7187fae72901851c939fd5cc2a6"
+    },
+    {
+      "custom": "﻿synthetic﻿",
+      "bytes": 6411,
+      "sha256": "3a61a9aab26a099f502354ee063ee7b7bc90a793baba45f20e01f7b3187cc6ef"
+    },
+    {
+      "custom": "",
+      "bytes": 6398,
+      "sha256": "14d032c195f7f190df063d36f59b5da5cabb823d95d782aae253b4990340fb0e"
+    },
+    {
+      "custom": "😀\nsynthetic",
+      "bytes": 6410,
+      "sha256": "3cb4f519724475505f4e5e65815f1f17fb884aa84e9ec41961a0ab85d68c18f8"
+    },
+    {
+      "custom": "$&$1$`",
+      "bytes": 6402,
+      "sha256": "2711272ec400c8c374b0e931878d50efcd835e03f446811d8edfb84946799887"
+    }
+  ]
+}

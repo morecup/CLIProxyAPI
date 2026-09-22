@@ -1,0 +1,1689 @@
+{
+  "schema_version": 1,
+  "lane": "W7 renderer-inventory",
+  "desktop_version": "1.40609.0.0",
+  "origin": "claude.ai web renderer hosted in the Desktop webview; event names are absent from the local Electron .vite chunks, so contracts are pinned on captured schema field names, key order and constant markers of non-identifying keys (identifying values are never copied)",
+  "captured_sources": [
+    {
+      "id": "segment-shell-load",
+      "endpoint_role": "segment",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000145/request-body.txt",
+      "sha256": "97b5214c69da8a32dfc3a106b530de8e89936e5ffec4c642fb04c511db3669d7"
+    },
+    {
+      "id": "desktop-shell-load",
+      "endpoint_role": "desktop-event-logging",
+      "path": "recorder/runtime/v140609-corpus-staging/h7-v140609-core-cont-r05-startup-bootstrap-after-normal-quit-3m/flow-000022/request-body.txt",
+      "sha256": "7e0f87474b41c6c141153a463d0f69f4c40b511412f13143be664c43846b0855"
+    }
+  ],
+  "scanned_corpora": [
+    "recorder/runtime/h9-v140609-20260904-r03-corpus-staging",
+    "recorder/runtime/v140609-corpus-staging"
+  ],
+  "events": [
+    {
+      "event_name": "claudeai.desktop.sidebar.state_set",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "executable": true,
+      "dual_fire_fact": "renderer_desktop_sidebar_state_set",
+      "gateway_moment": "first_session_of_account_per_activation",
+      "condition": "renderer shell load reports the desktop sidebar initial state (source initial_load); every captured occurrence carries the same values",
+      "lifecycle_position": "shell load: after identify / claudeai.sidebar.state_set / claudeai.settings.chat_font.active, before mcp.servers.listed and before any code session event",
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "is_expanded",
+        "source",
+        "other_tab_activity"
+      ],
+      "constants": {
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "is_expanded": true,
+        "source": "initial_load",
+        "other_tab_activity": "none"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle.DesktopVersion without trailing .0",
+        "version": "constant",
+        "is_expanded": "constant",
+        "source": "constant",
+        "other_tab_activity": "constant"
+      },
+      "occurrences_checked": {
+        "segment": 19,
+        "desktop-event-logging": 6
+      },
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy"
+      },
+      "captured_sources": [
+        "segment-shell-load",
+        "desktop-shell-load"
+      ]
+    },
+    {
+      "event_name": "claudeai.settings.chat_font.active",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "executable": true,
+      "dual_fire_fact": "renderer_settings_chat_font_active",
+      "gateway_moment": "first_session_of_account_per_activation",
+      "condition": "renderer shell load reports the active chat font setting; every captured occurrence carries the same values",
+      "lifecycle_position": "shell load: after claudeai.sidebar.state_set, before claudeai.desktop.sidebar.state_set",
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "font"
+      ],
+      "constants": {
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 2,
+        "font": "default"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle.DesktopVersion without trailing .0",
+        "version": "constant",
+        "font": "constant"
+      },
+      "occurrences_checked": {
+        "segment": 19,
+        "desktop-event-logging": 6
+      },
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy"
+      },
+      "captured_sources": [
+        "segment-shell-load",
+        "desktop-shell-load"
+      ]
+    },
+    {
+      "event_name": "claudeai.epitaxy.side_pane.layout_changed",
+      "roles": [
+        "segment",
+        "desktop-event-logging"
+      ],
+      "executable": true,
+      "dual_fire_fact": "renderer_side_pane_layout_changed",
+      "gateway_moment": "first_session_of_account_per_activation",
+      "condition": "renderer side pane layout initialises with zero open tiles; every captured occurrence carries the same values",
+      "lifecycle_position": "shell load: after mcp.servers.listed / claudeai.epitaxy.page.viewed, before the code session events",
+      "property_keys": [
+        "account_uuid",
+        "organization_uuid",
+        "billing_type",
+        "surface",
+        "deployment_mode",
+        "app_version",
+        "version",
+        "open_tile_count",
+        "renderer_surface"
+      ],
+      "constants": {
+        "surface": "claude-ai",
+        "deployment_mode": "1p",
+        "app_version": "1.40609.0",
+        "version": 1,
+        "open_tile_count": 0,
+        "renderer_surface": "epitaxy"
+      },
+      "value_derivation": {
+        "account_uuid": "binding.AccountUUID",
+        "organization_uuid": "binding.OrganizationUUID",
+        "billing_type": "subscriptionType(auth)",
+        "surface": "constant",
+        "deployment_mode": "constant",
+        "app_version": "bundle.DesktopVersion without trailing .0",
+        "version": "constant",
+        "open_tile_count": "constant",
+        "renderer_surface": "constant"
+      },
+      "occurrences_checked": {
+        "segment": 20,
+        "desktop-event-logging": 17
+      },
+      "segment_top_level_keys": [
+        "timestamp",
+        "integrations",
+        "event",
+        "type",
+        "properties",
+        "context",
+        "messageId",
+        "userId",
+        "anonymousId",
+        "writeKey",
+        "_metadata"
+      ],
+      "desktop_event_type": "ProductAnalyticsEvent",
+      "desktop_event_data_keys": [
+        "event_name",
+        "event_id",
+        "event_timestamp",
+        "account_uuid",
+        "organization_uuid",
+        "properties"
+      ],
+      "dual_fire_suffix_keys": [
+        "_dual_fire",
+        "anonymous_id",
+        "service_name",
+        "path"
+      ],
+      "dual_fire_markers": {
+        "_dual_fire": true,
+        "service_name": "claude_ai",
+        "path": "/epitaxy"
+      },
+      "captured_sources": [
+        "segment-shell-load",
+        "desktop-shell-load"
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "event_name": "mcp.servers.listed",
+      "executable": false,
+      "blocking_fields": [
+        "server_count"
+      ],
+      "native_condition": "renderer lists the configured MCP servers at shell load; every captured occurrence reports the same non-zero server_count of the capture host and no capture shows an empty inventory, so a zero inventory would be an invented emission condition",
+      "captured": {
+        "segment": {
+          "occurrences": 25,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "server_count"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 14,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "server_count"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "mcp.servers.connected",
+      "executable": false,
+      "blocking_fields": [
+        "result"
+      ],
+      "native_condition": "one event per MCP server connection (follows mcp.servers.listed, precedes mcp.prompts.listed); no server exists in the emulated environment",
+      "captured": {
+        "segment": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "result"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "result"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "mcp.tools.listed",
+      "executable": false,
+      "blocking_fields": [
+        "tool_count_on_server"
+      ],
+      "native_condition": "per connected MCP server after mcp.resources.listed; tool_count_on_server varies per server",
+      "captured": {
+        "segment": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "tool_count_on_server"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "tool_count_on_server"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "tool_count_on_server"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "tool_count_on_server"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "mcp.prompts.listed",
+      "executable": false,
+      "blocking_fields": [
+        "prompt_count_on_server"
+      ],
+      "native_condition": "per connected MCP server after mcp.servers.connected",
+      "captured": {
+        "segment": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "prompt_count_on_server"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "prompt_count_on_server"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "mcp.resources.listed",
+      "executable": false,
+      "blocking_fields": [
+        "resource_count_on_server"
+      ],
+      "native_condition": "per connected MCP server after mcp.prompts.listed",
+      "captured": {
+        "segment": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "resource_count_on_server"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 31,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "resource_count_on_server"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.mcp.bootstrap_stream.completed",
+      "executable": false,
+      "blocking_fields": [
+        "duration_ms",
+        "ttfb_ms",
+        "connected_count",
+        "auth_not_required_count",
+        "auth_authenticated_count",
+        "trigger"
+      ],
+      "native_condition": "renderer MCP bootstrap stream completes (trigger initial or stale_rebootstrap); timings and per-connector auth counts vary with the account connectors",
+      "captured": {
+        "segment": {
+          "occurrences": 22,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "duration_ms",
+            "ttfb_ms",
+            "outcome",
+            "error_retries",
+            "server_count",
+            "connected_count",
+            "disconnected_count",
+            "auth_not_required_count",
+            "auth_authenticated_count",
+            "auth_auth_required_count",
+            "auth_token_invalid_count",
+            "auth_refresh_failed_count",
+            "auth_error_detail",
+            "trigger"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "duration_ms",
+            "ttfb_ms",
+            "connected_count",
+            "auth_not_required_count",
+            "auth_authenticated_count",
+            "trigger"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 21,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "duration_ms",
+            "ttfb_ms",
+            "outcome",
+            "error_retries",
+            "server_count",
+            "connected_count",
+            "disconnected_count",
+            "auth_not_required_count",
+            "auth_authenticated_count",
+            "auth_auth_required_count",
+            "auth_token_invalid_count",
+            "auth_refresh_failed_count",
+            "auth_error_detail",
+            "trigger"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "duration_ms",
+            "ttfb_ms",
+            "connected_count",
+            "auth_not_required_count",
+            "auth_authenticated_count",
+            "trigger"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.sidebar.state_set",
+      "executable": false,
+      "blocking_fields": [
+        "is_expanded"
+      ],
+      "native_condition": "shell load reports the persisted chat sidebar state (source initial_load); is_expanded varies across captures with no gateway source",
+      "captured": {
+        "segment": {
+          "occurrences": 20,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "is_expanded",
+            "source"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "is_expanded"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 6,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "is_expanded",
+            "source"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "is_expanded"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.sidebar.pin_census",
+      "executable": false,
+      "blocking_fields": [
+        "code_session_count"
+      ],
+      "native_condition": "shell load census of the sidebar session list; code_session_count is the renderer session list size",
+      "captured": {
+        "segment": {
+          "occurrences": 19,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "kind",
+            "pinned_count",
+            "pinned_local_count",
+            "pinned_remote_count",
+            "pinned_archived_count",
+            "pinned_orphan_count",
+            "code_session_count",
+            "status_filter",
+            "pinned_section_collapsed",
+            "group_by"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "code_session_count"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 19,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "kind",
+            "pinned_count",
+            "pinned_local_count",
+            "pinned_remote_count",
+            "pinned_archived_count",
+            "pinned_orphan_count",
+            "code_session_count",
+            "status_filter",
+            "pinned_section_collapsed",
+            "group_by"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "code_session_count"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.feature_ok",
+      "executable": false,
+      "blocking_fields": [
+        "feature_name"
+      ],
+      "native_condition": "follows a sidebar click (claudeai.desktop.sidebar.nav_item_clicked / profile_menu_opened / more_flyout_opened); feature_name names the clicked control",
+      "captured": {
+        "segment": {
+          "occurrences": 27,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "feature_name"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "feature_name"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 44,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "feature_name"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "feature_name"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.perf.interaction_histogram",
+      "executable": false,
+      "blocking_fields": [
+        "key_non_nav",
+        "pointer_non_nav",
+        "total_interactions",
+        "build_id"
+      ],
+      "native_condition": "renderer input-latency histogram of real key/pointer interactions",
+      "captured": {
+        "segment": {
+          "occurrences": 166,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "bucket_bounds_ms",
+            "key_nav",
+            "key_non_nav",
+            "key_send_non_nav",
+            "key_paste_non_nav",
+            "pointer_nav",
+            "pointer_non_nav",
+            "total_interactions",
+            "hidden_excluded",
+            "build_id"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "key_non_nav",
+            "key_send_non_nav",
+            "key_paste_non_nav",
+            "pointer_nav",
+            "pointer_non_nav",
+            "total_interactions",
+            "build_id"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 187,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "bucket_bounds_ms",
+            "key_nav",
+            "key_non_nav",
+            "key_send_non_nav",
+            "key_paste_non_nav",
+            "pointer_nav",
+            "pointer_non_nav",
+            "total_interactions",
+            "hidden_excluded",
+            "build_id"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "key_non_nav",
+            "key_send_non_nav",
+            "key_paste_non_nav",
+            "pointer_nav",
+            "pointer_non_nav",
+            "total_interactions",
+            "build_id"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.user_facing_error.shown",
+      "executable": false,
+      "blocking_fields": [
+        "error_message",
+        "toast_id",
+        "error_endpoint",
+        "error_stack_trace"
+      ],
+      "native_condition": "renderer toast for a failed renderer GET (captured only while the proxy upstream was offline); carries the renderer JS stack trace and toast counter",
+      "captured": {
+        "segment": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "error_message",
+            "toast_id",
+            "error_type",
+            "error_source",
+            "error_endpoint",
+            "error_method",
+            "has_original_error",
+            "original_error_message",
+            "error_stack_trace",
+            "error_status_code",
+            "is_instanceof_api_error",
+            "is_caller_api_error",
+            "offline_status"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "toast_id"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 26,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "error_message",
+            "toast_id",
+            "error_type",
+            "error_source",
+            "error_endpoint",
+            "error_method",
+            "has_original_error",
+            "original_error_message",
+            "error_stack_trace",
+            "error_status_code",
+            "is_instanceof_api_error",
+            "is_caller_api_error",
+            "offline_status"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "toast_id"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.television.sessions_watch.retry_loop",
+      "executable": true,
+      "dual_fire_fact": "renderer_sessions_watch_retry_loop",
+      "gateway_moment": "v140609 startup sessions/watch response status 502",
+      "blocking_fields": [],
+      "native_condition": "renderer sessions/watch stream retry after an upstream 502",
+      "value_derivation": {
+        "http_status": "actual startup response status 502",
+        "detail": "contract-owned sessions/watch 502 marker",
+        "watch_tags": "fixed captured watcher set sidebar+cowork-remote+idle-notifications"
+      },
+      "captured": {
+        "segment": {
+          "occurrences": 41,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "http_status",
+            "detail",
+            "watch_tags"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 76,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "http_status",
+            "detail",
+            "watch_tags"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.television.sessions_watch.demand_suppressed",
+      "executable": true,
+      "dual_fire_fact": "local_sessions_watch_demand_suppressed",
+      "gateway_moment": "accepted management Code view visibility transition to hidden",
+      "blocking_fields": [],
+      "native_condition": "window blur/tray/minimize suppresses the sessions/watch demand",
+      "value_derivation": {
+        "watch_tags": "fixed captured Code watcher set (cowork-remote, sidebar, idle-notifications)",
+        "platform": "constant desktop",
+        "host_suspended": "omitted without an independently measured host suspend signal"
+      },
+      "captured": {
+        "segment": {
+          "occurrences": 33,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "watch_tags",
+            "platform",
+            "host_suspended"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "watch_tags"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 33,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "watch_tags",
+            "platform",
+            "host_suspended"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "watch_tags"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.television.sessions_watch.demand_restored",
+      "executable": true,
+      "dual_fire_fact": "local_sessions_watch_demand_restored",
+      "gateway_moment": "accepted visible transition after the same account/view/session/generation was suppressed",
+      "blocking_fields": [],
+      "native_condition": "window focus restores the sessions/watch demand",
+      "value_derivation": {
+        "watch_tags": "same fixed captured Code watcher set as suppression",
+        "platform": "constant desktop",
+        "suppressed_duration_ms": "server clock delta from accepted suppression",
+        "trigger": "constant focus",
+        "host_slept_in_gap": "omitted without an independently measured host sleep signal"
+      },
+      "captured": {
+        "segment": {
+          "occurrences": 24,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "watch_tags",
+            "platform",
+            "suppressed_duration_ms",
+            "trigger",
+            "host_slept_in_gap"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "watch_tags",
+            "suppressed_duration_ms"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 36,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "watch_tags",
+            "platform",
+            "suppressed_duration_ms",
+            "trigger",
+            "host_slept_in_gap"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "watch_tags",
+            "suppressed_duration_ms"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.desktop.sidebar.nav_item_clicked",
+      "executable": false,
+      "blocking_fields": [
+        "item_id",
+        "location",
+        "sidebar_state"
+      ],
+      "native_condition": "user clicks a sidebar navigation item",
+      "captured": {
+        "segment": {
+          "occurrences": 24,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "item_id",
+            "location",
+            "sidebar_state"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 41,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "item_id",
+            "location",
+            "sidebar_state"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.desktop.sidebar.profile_menu_opened",
+      "executable": false,
+      "blocking_fields": [
+        "sidebar_state"
+      ],
+      "native_condition": "user opens the sidebar profile menu",
+      "captured": {
+        "segment": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "sidebar_state"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "sidebar_state"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.desktop.sidebar.more_flyout_opened",
+      "executable": false,
+      "blocking_fields": [
+        "sidebar_state"
+      ],
+      "native_condition": "user opens the sidebar more flyout",
+      "captured": {
+        "segment": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "sidebar_state"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "sidebar_state"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.user_menu.item_clicked",
+      "executable": false,
+      "blocking_fields": [
+        "item"
+      ],
+      "native_condition": "user clicks a user-menu item",
+      "captured": {
+        "segment": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "item"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "item"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.pricing.max_plan_toggled",
+      "executable": false,
+      "blocking_fields": [
+        "new_plan_type"
+      ],
+      "native_condition": "user toggles the Max plan tier on the upgrade page",
+      "captured": {
+        "segment": {
+          "occurrences": 3,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "new_plan_type"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "new_plan_type"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 3,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "new_plan_type"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "new_plan_type"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.upgrade.plans_page_viewed",
+      "executable": false,
+      "blocking_fields": [
+        "entry_from",
+        "initial_plan_tab"
+      ],
+      "native_condition": "user navigates to /upgrade",
+      "captured": {
+        "segment": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "data_team_tag",
+            "initial_plan_tab",
+            "org_type",
+            "entry_from",
+            "entry_url_source",
+            "entry_feature"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 2,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "data_team_tag",
+            "initial_plan_tab",
+            "org_type",
+            "entry_from",
+            "entry_url_source",
+            "entry_feature"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.epitaxy.clipboard",
+      "executable": false,
+      "blocking_fields": [
+        "len_bucket",
+        "path"
+      ],
+      "native_condition": "user pastes into the composer",
+      "captured": {
+        "segment": {
+          "occurrences": 17,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "op",
+            "path",
+            "len_bucket",
+            "has_html",
+            "html_dropped",
+            "had_list_or_indent",
+            "has_pre",
+            "has_table",
+            "is_vscode",
+            "bash_mode",
+            "outcome",
+            "renderer_surface"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "len_bucket"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 17,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "op",
+            "path",
+            "len_bucket",
+            "has_html",
+            "html_dropped",
+            "had_list_or_indent",
+            "has_pre",
+            "has_table",
+            "is_vscode",
+            "bash_mode",
+            "outcome",
+            "renderer_surface"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "path",
+            "len_bucket"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.desktop.code.landing.model_selected",
+      "executable": false,
+      "blocking_fields": [
+        "model",
+        "previous_model"
+      ],
+      "native_condition": "user changes the landing model picker",
+      "captured": {
+        "segment": {
+          "occurrences": 8,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "model",
+            "previous_model",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "model",
+            "previous_model"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 6,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "model",
+            "previous_model",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "model",
+            "previous_model"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.desktop.code.landing.image_added",
+      "executable": false,
+      "blocking_fields": [
+        "image_count",
+        "source"
+      ],
+      "native_condition": "user adds an image on the landing composer",
+      "captured": {
+        "desktop-event-logging": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "image_count",
+            "source",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.desktop.code.prompt_suggestion.shown",
+      "executable": false,
+      "blocking_fields": [
+        "suggestion_length"
+      ],
+      "native_condition": "renderer shows a prompt suggestion after first text; length of the suggestion text",
+      "captured": {
+        "segment": {
+          "occurrences": 12,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "session_type",
+            "suggestion_length",
+            "renderer_surface"
+          ],
+          "key_order_variants": 2,
+          "varying_fields": [
+            "account_uuid",
+            "organization_uuid",
+            "suggestion_length"
+          ]
+        },
+        "desktop-event-logging": {
+          "occurrences": 18,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "session_type",
+            "suggestion_length",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": [
+            "suggestion_length"
+          ]
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.code.auto_mode_notice.printed",
+      "executable": false,
+      "blocking_fields": [
+        "variant"
+      ],
+      "native_condition": "auto permission mode notice printed in the transcript",
+      "captured": {
+        "segment": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "variant",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        },
+        "desktop-event-logging": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "variant",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.code.try_auto_coach.shown",
+      "executable": false,
+      "blocking_fields": [],
+      "native_condition": "coach mark shown after a permission mode change by the user",
+      "captured": {
+        "desktop-event-logging": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "claudeai.code.try_auto_coach.dismissed",
+      "executable": false,
+      "blocking_fields": [
+        "reason"
+      ],
+      "native_condition": "user dismisses the coach mark",
+      "captured": {
+        "desktop-event-logging": {
+          "occurrences": 1,
+          "key_order": [
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "version",
+            "reason",
+            "renderer_surface"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "/login",
+      "executable": false,
+      "blocking_fields": [
+        "referrer"
+      ],
+      "native_condition": "segment page call after logout navigation",
+      "captured": {
+        "segment-page": {
+          "occurrences": 2,
+          "key_order": [
+            "path",
+            "referrer",
+            "search",
+            "url",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "name",
+            "canonical_path",
+            "canonical_url",
+            "canonical_referrer"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "/upgrade",
+      "executable": false,
+      "blocking_fields": [],
+      "native_condition": "segment page call when the user opens the upgrade page",
+      "captured": {
+        "segment-page": {
+          "occurrences": 2,
+          "key_order": [
+            "path",
+            "referrer",
+            "search",
+            "url",
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "name",
+            "canonical_path",
+            "canonical_url"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    },
+    {
+      "event_name": "/upgrade/max/from-existing",
+      "executable": false,
+      "blocking_fields": [],
+      "native_condition": "segment page call when the user opens the Max upgrade page",
+      "captured": {
+        "segment-page": {
+          "occurrences": 1,
+          "key_order": [
+            "path",
+            "referrer",
+            "search",
+            "url",
+            "account_uuid",
+            "organization_uuid",
+            "billing_type",
+            "surface",
+            "deployment_mode",
+            "app_version",
+            "name",
+            "canonical_path",
+            "canonical_url"
+          ],
+          "key_order_variants": 1,
+          "varying_fields": []
+        }
+      }
+    }
+  ],
+  "not_captured_in_scanned_corpora": [
+    "claudeai.yukon_gold.enabled",
+    "claudeai.yukon_gold.activation_checklist_v2_in_viewport",
+    "claudeai.yukon_gold.activation_checklist_v2_shown",
+    "claudeai.page.new_chat_input_ready",
+    "claudeai.cumulative_error_count",
+    "claudeai.epitaxy.sidebar.group_new_session_clicked",
+    "claudeai.desktop.sidebar.design_entry_shown",
+    "claudeai.desktop.sidebar.mode_pill_selected",
+    "claudeai.model_selector.model_selected",
+    "claudeai.model_selector.opened",
+    "claudeai.cowork_model_update_banner.displayed",
+    "claudeai.cowork_model_update_composer_warning.displayed",
+    "chorus.ideas.suggestions_shown"
+  ]
+}

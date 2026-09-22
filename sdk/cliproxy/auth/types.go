@@ -45,6 +45,9 @@ func GetRequestInfo(ctx context.Context) *RequestInfo {
 
 // Auth encapsulates the runtime state and metadata associated with a single credential.
 type Auth struct {
+	// credentialGeneration prevents cleanup from borrowing a removed and
+	// re-registered credential, even if its public ID and metadata are equal.
+	credentialGeneration uint64
 	// ID uniquely identifies the auth record across restarts.
 	ID string `json:"id"`
 	// Index is a stable runtime identifier derived from auth metadata (not persisted).
@@ -385,7 +388,7 @@ func (a *Auth) indexSeed() string {
 			apiPrefix = "codex-api-key"
 		case strings.EqualFold(provider, "xai"):
 			apiPrefix = "xai-api-key"
-		case strings.EqualFold(provider, "claude"):
+		case strings.EqualFold(provider, "claude"), strings.EqualFold(provider, "anthropic-compatible"):
 			apiPrefix = "claude-api-key"
 		}
 	}

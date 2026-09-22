@@ -107,20 +107,47 @@ func defaultPluginInstanceConfigNode() *yaml.Node {
 	}
 }
 
-// ClaudeHeaderDefaults configures the measured Claude Code software baseline.
-// Verified native requests preserve their entrypoint and software shape only when their
-// Claude Code, package, and runtime versions exactly match this baseline; unmeasured
-// versions use the configured values. Timeout remains a fallback. Stabilized profiles
-// also pin OS and Arch and never learn newer software versions automatically.
-type ClaudeHeaderDefaults struct {
-	UserAgent              string `yaml:"user-agent" json:"user-agent"`
-	PackageVersion         string `yaml:"package-version" json:"package-version"`
-	RuntimeVersion         string `yaml:"runtime-version" json:"runtime-version"`
-	OS                     string `yaml:"os" json:"os"`
-	Arch                   string `yaml:"arch" json:"arch"`
-	Timeout                string `yaml:"timeout" json:"timeout"`
-	Timezone               string `yaml:"timezone" json:"timezone"`
-	StabilizeDeviceProfile *bool  `yaml:"stabilize-device-profile,omitempty" json:"stabilize-device-profile,omitempty"`
+// ClaudeDesktopConfig selects the immutable Desktop profile and the directory
+// reserved for account-scoped runtime state. The profile is shared read-only;
+// mutable identity and session state must never be stored inside it.
+type ClaudeDesktopConfig struct {
+	BundlePath             string                        `yaml:"bundle-path,omitempty" json:"bundle-path,omitempty"`
+	StatePath              string                        `yaml:"state-path,omitempty" json:"state-path,omitempty"`
+	RolloutAuthIDs         []string                      `yaml:"rollout-auth-ids,omitempty" json:"rollout-auth-ids,omitempty"`
+	EmergencyStop          bool                          `yaml:"emergency-stop,omitempty" json:"emergency-stop,omitempty"`
+	MachineProfiles        []ClaudeDesktopMachineProfile `yaml:"machine-profiles,omitempty" json:"machine-profiles,omitempty"`
+	MachineProfileBindings map[string]string             `yaml:"machine-profile-bindings,omitempty" json:"machine-profile-bindings,omitempty"`
+}
+
+// ClaudeDesktopMachineProfile describes a measured host assigned to one or
+// more account runtimes. Zero-valued fields inherit the local host snapshot.
+type ClaudeDesktopMachineProfile struct {
+	ID                   string                         `yaml:"id" json:"id"`
+	TotalMemoryBytes     uint64                         `yaml:"total-memory-bytes,omitempty" json:"total-memory-bytes,omitempty"`
+	AvailableMemoryBytes uint64                         `yaml:"available-memory-bytes,omitempty" json:"available-memory-bytes,omitempty"`
+	CPUModel             string                         `yaml:"cpu-model,omitempty" json:"cpu-model,omitempty"`
+	OSBuild              string                         `yaml:"os-build,omitempty" json:"os-build,omitempty"`
+	OSRelease            string                         `yaml:"os-release,omitempty" json:"os-release,omitempty"`
+	OSVersion            string                         `yaml:"os-version,omitempty" json:"os-version,omitempty"`
+	SDKProcess           ClaudeDesktopSDKProcessProfile `yaml:"sdk-process,omitempty" json:"sdk-process,omitempty"`
+}
+
+// ClaudeDesktopSDKProcessProfile contains an optional measured embedded-Node
+// process snapshot. Values must come from the Desktop runtime, not Go MemStats.
+type ClaudeDesktopSDKProcessProfile struct {
+	UptimeSeconds         float64 `yaml:"uptime-seconds,omitempty" json:"uptime-seconds,omitempty"`
+	RSS                   uint64  `yaml:"rss-bytes,omitempty" json:"rss-bytes,omitempty"`
+	FootprintBytes        uint64  `yaml:"footprint-bytes,omitempty" json:"footprint-bytes,omitempty"`
+	CommitBytes           uint64  `yaml:"commit-bytes,omitempty" json:"commit-bytes,omitempty"`
+	PeakFootprintBytes    uint64  `yaml:"peak-footprint-bytes,omitempty" json:"peak-footprint-bytes,omitempty"`
+	MemorySampleAgeMS     int64   `yaml:"memory-sample-age-ms,omitempty" json:"memory-sample-age-ms,omitempty"`
+	HeapTotal             uint64  `yaml:"heap-total-bytes,omitempty" json:"heap-total-bytes,omitempty"`
+	HeapUsed              uint64  `yaml:"heap-used-bytes,omitempty" json:"heap-used-bytes,omitempty"`
+	External              uint64  `yaml:"external-bytes,omitempty" json:"external-bytes,omitempty"`
+	ArrayBuffers          uint64  `yaml:"array-buffers-bytes,omitempty" json:"array-buffers-bytes,omitempty"`
+	ConstrainedMemory     uint64  `yaml:"constrained-memory-bytes,omitempty" json:"constrained-memory-bytes,omitempty"`
+	CPUUserMicroseconds   int64   `yaml:"cpu-user-microseconds,omitempty" json:"cpu-user-microseconds,omitempty"`
+	CPUSystemMicroseconds int64   `yaml:"cpu-system-microseconds,omitempty" json:"cpu-system-microseconds,omitempty"`
 }
 
 // CodexHeaderDefaults configures fallback header values injected into Codex
@@ -313,30 +340,6 @@ type PayloadModelRule struct {
 	NotExist []string `yaml:"not-exist" json:"not-exist"`
 }
 
-// CloakConfig configures request cloaking for non-Claude-Code clients.
-// Cloaking disguises API requests to appear as originating from the official Claude Code CLI.
-type CloakConfig struct {
-	// Mode controls cloaking behavior: "auto" (default), "always", or "never".
-	// Supplying this CloakConfig explicitly enables cloaking for an unprofiled API key.
-	// - "auto": cloak unless strong request signals identify a verified native entrypoint
-	// - "always": cloak every unconfirmed client; confirmed native Claude Code remains passthrough
-	// - "never": never apply cloaking
-	Mode string `yaml:"mode,omitempty" json:"mode,omitempty"`
-
-	// StrictMode controls how caller system prompts are handled when cloaking.
-	// - false (default): legacy-model whitelist uses a user reminder; all other models use a mid-conversation system message
-	// - true: strip caller system prompts and keep only the Claude Code billing and identity blocks
-	StrictMode bool `yaml:"strict-mode,omitempty" json:"strict-mode,omitempty"`
-
-	// SensitiveWords is a list of words to obfuscate with zero-width characters.
-	// This can help bypass certain content filters.
-	SensitiveWords []string `yaml:"sensitive-words,omitempty" json:"sensitive-words,omitempty"`
-
-	// CacheUserID controls whether Claude user_id values are cached per API key.
-	// When false, a fresh random user_id is generated for every request.
-	CacheUserID *bool `yaml:"cache-user-id,omitempty" json:"cache-user-id,omitempty"`
-}
-
 // ClaudeKey represents the configuration for a Claude API key,
 // including the API key itself and an optional base URL for the API endpoint.
 type ClaudeKey struct {
@@ -370,9 +373,6 @@ type ClaudeKey struct {
 	// ExcludedModels lists model IDs that should be excluded for this provider.
 	ExcludedModels []string `yaml:"excluded-models,omitempty" json:"excluded-models,omitempty"`
 
-	// RebuildMidSystemMessage moves Claude messages with role "system" into the top-level system field.
-	RebuildMidSystemMessage bool `yaml:"rebuild-mid-system-message,omitempty" json:"rebuild-mid-system-message,omitempty"`
-
 	// DisableCooling overrides the global cooling policy for this credential when set.
 	// True disables auth/model cooldowns; false explicitly enables them.
 	DisableCooling *bool `yaml:"disable-cooling,omitempty" json:"disable-cooling,omitempty"`
@@ -383,28 +383,6 @@ type ClaudeKey struct {
 
 	// RequestScopedErrors configures custom classification rules for upstream errors.
 	RequestScopedErrors []RequestScopedErrorRule `yaml:"request-scoped-errors,omitempty" json:"request-scoped-errors,omitempty"`
-
-	// Cloak configures request cloaking for non-Claude-Code clients.
-	Cloak *CloakConfig `yaml:"cloak,omitempty" json:"cloak,omitempty"`
-
-	// FingerprintProfile selects the Claude Code request fingerprint for this
-	// credential on Anthropic Messages. Empty/default keeps the caller request
-	// fingerprint and headers, including first-party api.anthropic.com API keys.
-	// "claude-code-cli" opts official Anthropic API keys, custom gateways, and
-	// delegated providers such as Kimi into the Claude Code OAuth CLI Messages
-	// shape (OAuth betas, CCH signing, stable CLI identity) without treating the
-	// credential as a real OAuth token for refresh/profile/runtime semantics.
-	// CCH is a per-request hash and follows the native gate: it is emitted only on
-	// api.anthropic.com and Vertex, so an opt-in on any other gateway sends the
-	// billing block unsigned and cannot bust that gateway's prompt cache. Kimi
-	// strips the attribution entirely by default and keeps it, unsigned, after an
-	// explicit opt-in. count_tokens keeps the native model/messages/tools shape.
-	// Recognized values are defined by NormalizeClaudeFingerprintProfile.
-	FingerprintProfile string `yaml:"fingerprint-profile,omitempty" json:"fingerprint-profile,omitempty"`
-
-	// ExperimentalCCHSigning is retained for configuration compatibility.
-	// CCH signing is automatic for Claude OAuth and supported direct upstreams.
-	ExperimentalCCHSigning bool `yaml:"experimental-cch-signing,omitempty" json:"experimental-cch-signing,omitempty"`
 }
 
 func (k ClaudeKey) GetAPIKey() string { return k.APIKey }

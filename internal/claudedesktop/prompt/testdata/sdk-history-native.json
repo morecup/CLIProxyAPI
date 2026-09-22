@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "kind": "native_sdk_history_grouping_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "group_messages",
+      "from": 2713533,
+      "to": 2713867,
+      "sha256": "c46b0005c76c0fa7e48568e89164605230f988a2901c441b95a64799d0ff42d2"
+    },
+    {
+      "label": "group_active_history",
+      "from": 2713867,
+      "to": 2713941,
+      "sha256": "de72089d2f37f2054f95757884de736a96321d8f39a33d620a07a0f6797817e6"
+    },
+    {
+      "label": "is_boundary",
+      "from": 6659249,
+      "to": 6659322,
+      "sha256": "7b5bb222268db9cdce3fc2dbdcb2b76e58264e51e1f09d648bd6f1e52f7a3960"
+    },
+    {
+      "label": "last_boundary",
+      "from": 6659393,
+      "to": 6659481,
+      "sha256": "c22a19e1404966b0f68a99506f56531194425ff350d062ebc86c74ba542e1b23"
+    },
+    {
+      "label": "active_history",
+      "from": 6659481,
+      "to": 6659538,
+      "sha256": "89116b2907d1f785d62e7afc695d603ca480a582393caeb61b271a6ad41f5096"
+    }
+  ],
+  "cases": [
+    {
+      "name": "user_only",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0"
+        ]
+      ]
+    },
+    {
+      "name": "three_blocks_one_response",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-2"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-3"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0"
+        ],
+        [
+          "synthetic-1",
+          "synthetic-2",
+          "synthetic-3"
+        ]
+      ]
+    },
+    {
+      "name": "new_response_new_group",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-2"
+        },
+        {
+          "type": "assistant",
+          "message_id": "two",
+          "uuid": "synthetic-3"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0"
+        ],
+        [
+          "synthetic-1",
+          "synthetic-2"
+        ],
+        [
+          "synthetic-3"
+        ]
+      ]
+    },
+    {
+      "name": "virtual_does_not_update_previous_id",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "assistant",
+          "message_id": "virtual",
+          "is_virtual": true,
+          "uuid": "synthetic-2"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-3"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0"
+        ],
+        [
+          "synthetic-1",
+          "synthetic-2",
+          "synthetic-3"
+        ]
+      ]
+    },
+    {
+      "name": "virtual_first_assistant",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "virtual",
+          "is_virtual": true,
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-2"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0",
+          "synthetic-1"
+        ],
+        [
+          "synthetic-2"
+        ]
+      ]
+    },
+    {
+      "name": "resumed_updates_previous_id_without_splitting",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "assistant",
+          "message_id": "two",
+          "resumed_from_incomplete_thinking": true,
+          "uuid": "synthetic-2"
+        },
+        {
+          "type": "assistant",
+          "message_id": "two",
+          "uuid": "synthetic-3"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0"
+        ],
+        [
+          "synthetic-1",
+          "synthetic-2",
+          "synthetic-3"
+        ]
+      ]
+    },
+    {
+      "name": "progress_removed",
+      "messages": [
+        {
+          "type": "progress",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "progress",
+          "uuid": "synthetic-2"
+        },
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-3"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-1"
+        ],
+        [
+          "synthetic-3"
+        ]
+      ]
+    },
+    {
+      "name": "last_compact_boundary_retained",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "old",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "system",
+          "subtype": "compact_boundary",
+          "uuid": "synthetic-2"
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-3"
+        },
+        {
+          "type": "system",
+          "subtype": "compact_boundary",
+          "uuid": "synthetic-4"
+        },
+        {
+          "type": "progress",
+          "uuid": "synthetic-5"
+        },
+        {
+          "type": "user",
+          "uuid": "synthetic-6"
+        },
+        {
+          "type": "assistant",
+          "message_id": "new",
+          "uuid": "synthetic-7"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-4",
+          "synthetic-6"
+        ],
+        [
+          "synthetic-7"
+        ]
+      ]
+    },
+    {
+      "name": "missing_message_id_is_not_a_new_id",
+      "messages": [
+        {
+          "type": "user",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-1"
+        },
+        {
+          "type": "assistant",
+          "uuid": "synthetic-2"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0",
+          "synthetic-1",
+          "synthetic-2"
+        ]
+      ]
+    },
+    {
+      "name": "first_assistant_without_user",
+      "messages": [
+        {
+          "type": "assistant",
+          "message_id": "one",
+          "uuid": "synthetic-0"
+        },
+        {
+          "type": "assistant",
+          "message_id": "two",
+          "uuid": "synthetic-1"
+        }
+      ],
+      "groups": [
+        [
+          "synthetic-0"
+        ],
+        [
+          "synthetic-1"
+        ]
+      ]
+    }
+  ],
+  "claim_boundary": "Synthetic structural messages through five hash-pinned native grouping/boundary functions. No transcript text, token estimator, capture content or live query. Proxy-owned history is not an inverse reconstruction of hidden caller SDK objects."
+}

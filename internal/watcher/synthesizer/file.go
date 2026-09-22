@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claudedesktop"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/codex"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
@@ -82,6 +83,13 @@ func synthesizeFileAuths(ctx *SynthesisContext, fullPath string, data []byte) ([
 		return nil, nil
 	}
 	coreauth.NormalizeCredentialMetadata(metadata)
+	if errHydrate := claudedesktop.HydrateMetadata(fullPath, metadata); errHydrate != nil {
+		log.WithError(errHydrate).WithField("path", fullPath).Warn("failed to load Claude Desktop credential")
+		return nil, nil
+	}
+	if profile := fingerprintProfileFromMetadata(metadata); profile != "" {
+		return nil, fmt.Errorf("legacy Claude fingerprint profile %q in %s is no longer supported; remove it and use a provider-specific credential", profile, filepath.Base(fullPath))
+	}
 	if errWeight := coreauth.ValidateAuthWeight(&coreauth.Auth{Metadata: metadata}); errWeight != nil {
 		return nil, fmt.Errorf("invalid weight in %s: %w", filepath.Base(fullPath), errWeight)
 	}
@@ -135,7 +143,6 @@ func synthesizeFileAuths(ctx *SynthesisContext, fullPath string, data []byte) ([
 				coreauth.SetOAuthModelAliasesAttribute(auth, perAccountModelAliases)
 				ApplyAuthExcludedModelsMeta(auth, cfg, perAccountExcluded, "oauth")
 				coreauth.ApplyCustomHeadersFromMetadata(auth)
-				applyFingerprintProfileAttribute(auth, metadata)
 			}
 			return auths, nil
 		}
@@ -225,7 +232,6 @@ func synthesizeFileAuths(ctx *SynthesisContext, fullPath string, data []byte) ([
 	coreauth.ApplyCustomHeadersFromMetadata(a)
 	coreauth.SetOAuthModelAliasesAttribute(a, perAccountModelAliases)
 	ApplyAuthExcludedModelsMeta(a, cfg, perAccountExcluded, "oauth")
-	applyFingerprintProfileAttribute(a, metadata)
 	// For codex auth files, extract plan_type from the JWT id_token.
 	if provider == "codex" {
 		if idTokenRaw, ok := metadata["id_token"].(string); ok && strings.TrimSpace(idTokenRaw) != "" {

@@ -1,0 +1,438 @@
+{
+  "schema_version": 1,
+  "kind": "native_sdk_summary_dependency_vectors",
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "definitions": [
+    {
+      "label": "zero",
+      "file": "_667.js",
+      "from": 1749,
+      "to": 2087,
+      "sha256": "3444acb7d09377d80b6996f867f7cb3731d0ebbe0ea63e2b07dd3b1ce8dd3bcf"
+    },
+    {
+      "label": "merge_usage",
+      "file": "_448.js",
+      "from": 5722009,
+      "to": 5723308,
+      "sha256": "a63c16fb390ee62213e2aa95870ba13a8800077dfc92ce03b9009cb78bd80833"
+    },
+    {
+      "label": "add_usage",
+      "file": "_448.js",
+      "from": 5723969,
+      "to": 5724912,
+      "sha256": "f67729c9d71bcfd14bafaf8b9cac1f0e6cf610a88fae5de4e2823c7efc8f306b"
+    },
+    {
+      "label": "fork_delta",
+      "file": "_448.js",
+      "from": 2711378,
+      "to": 2711497,
+      "sha256": "90ee3fb3ca4a91eebc5933d2ee30bcc0a3c56b6bf5181476f0e24df46276b679"
+    },
+    {
+      "label": "api_user_merge",
+      "file": "_448.js",
+      "from": 6604936,
+      "to": 6605112,
+      "sha256": "60924c9efc6b459e6a0d87f472f8c360d93f53a34c589c68dbe657b1df8046cc"
+    },
+    {
+      "label": "content_to_blocks",
+      "file": "_448.js",
+      "from": 6607382,
+      "to": 6607459,
+      "sha256": "9c714243ac1e8f344a9b1ce2f46e1845cad4113c799c66d3731673376844b8a8"
+    },
+    {
+      "label": "tool_result_order",
+      "file": "_448.js",
+      "from": 6607268,
+      "to": 6607382,
+      "sha256": "e54d84a2e16cda236c5013070191f91d9ebb694e3903c09fd2d245ea9c7345a5"
+    },
+    {
+      "label": "api_content_merge",
+      "file": "_448.js",
+      "from": 6608279,
+      "to": 6608802,
+      "sha256": "14c289e57accd4530dba128ec30c8627f18df137ef0a2b93b8e5c7a689ebea09"
+    },
+    {
+      "label": "preserved_usage_reset",
+      "file": "_448.js",
+      "from": 2668186,
+      "to": 2668385,
+      "sha256": "28123114f1c1592a740a40360e90a783e847c06ca3aa78ad303d62e4c8d7398b"
+    },
+    {
+      "label": "compacted_history",
+      "file": "_448.js",
+      "from": 2763978,
+      "to": 2764093,
+      "sha256": "156adada7a97448fcfeec6251a314f760181abd93c43051e597b92eedc01cc45"
+    }
+  ],
+  "cases": [
+    {
+      "name": "zero",
+      "events": [],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0
+      }
+    },
+    {
+      "name": "start_ignored",
+      "events": [
+        {
+          "type": "message_start",
+          "message": {
+            "usage": {
+              "input_tokens": 999,
+              "output_tokens": 999
+            }
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0
+      }
+    },
+    {
+      "name": "sum_not_last",
+      "events": [
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": 10,
+            "output_tokens": 3
+          }
+        },
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": 2,
+            "output_tokens": 5
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 8
+      }
+    },
+    {
+      "name": "zero_is_fresh",
+      "events": [
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": 10,
+            "output_tokens": 3
+          }
+        },
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 10,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 3
+      }
+    },
+    {
+      "name": "cache_breakdown",
+      "events": [
+        {
+          "type": "message_delta",
+          "usage": {
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 7,
+              "ephemeral_5m_input_tokens": 9
+            }
+          }
+        },
+        {
+          "type": "message_delta",
+          "usage": {
+            "cache_read_input_tokens": 12
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 16,
+        "cache_read_input_tokens": 12,
+        "output_tokens": 0
+      }
+    },
+    {
+      "name": "explicit_cache_wins",
+      "events": [
+        {
+          "type": "message_delta",
+          "usage": {
+            "cache_creation_input_tokens": 3,
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 9
+            }
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 0,
+        "cache_creation_input_tokens": 3,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0
+      }
+    },
+    {
+      "name": "null_values",
+      "events": [
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": 1,
+            "output_tokens": 2
+          }
+        },
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "cache_read_input_tokens": null
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 1,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 2
+      }
+    },
+    {
+      "name": "metadata_ignored",
+      "events": [
+        {
+          "type": "ping",
+          "usage": {
+            "input_tokens": 999
+          }
+        },
+        {
+          "type": "message_delta",
+          "usage": {
+            "input_tokens": 1
+          }
+        }
+      ],
+      "expected": {
+        "input_tokens": 1,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 0
+      }
+    }
+  ],
+  "merges": [
+    {
+      "name": "string",
+      "left": "first",
+      "right": "instruction",
+      "expected": [
+        {
+          "type": "text",
+          "text": "first"
+        },
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ]
+    },
+    {
+      "name": "blocks",
+      "left": [
+        {
+          "type": "text",
+          "text": "a"
+        },
+        {
+          "type": "text",
+          "text": "b"
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ],
+      "expected": [
+        {
+          "type": "text",
+          "text": "a"
+        },
+        {
+          "type": "text",
+          "text": "b"
+        },
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ]
+    },
+    {
+      "name": "empty_string",
+      "left": "",
+      "right": [
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ],
+      "expected": [
+        {
+          "type": "text",
+          "text": ""
+        },
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ]
+    },
+    {
+      "name": "empty_blocks",
+      "left": [],
+      "right": [
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ],
+      "expected": [
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ]
+    },
+    {
+      "name": "cache",
+      "left": [
+        {
+          "type": "text",
+          "text": "first",
+          "cache_control": {
+            "type": "ephemeral"
+          }
+        }
+      ],
+      "right": [
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ],
+      "expected": [
+        {
+          "type": "text",
+          "text": "first",
+          "cache_control": {
+            "type": "ephemeral"
+          }
+        },
+        {
+          "type": "text",
+          "text": "instruction"
+        }
+      ]
+    }
+  ],
+  "application": {
+    "preserved": [
+      {
+        "type": "assistant",
+        "uuid": "synthetic-kept-assistant",
+        "message": {
+          "id": "synthetic-response",
+          "usage": {
+            "input_tokens": 30,
+            "output_tokens": 5,
+            "cache_creation_input_tokens": 2,
+            "cache_read_input_tokens": 20
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "kept"
+            }
+          ]
+        }
+      },
+      {
+        "type": "user",
+        "uuid": "synthetic-kept-user",
+        "message": {
+          "content": "next"
+        }
+      }
+    ],
+    "expected": [
+      {
+        "type": "system",
+        "subtype": "compact_boundary"
+      },
+      {
+        "type": "user",
+        "uuid": "synthetic-summary"
+      },
+      {
+        "type": "assistant",
+        "uuid": "synthetic-kept-assistant",
+        "message": {
+          "id": "synthetic-response",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "kept"
+            }
+          ]
+        }
+      },
+      {
+        "type": "user",
+        "uuid": "synthetic-kept-user",
+        "message": {
+          "content": "next"
+        }
+      }
+    ]
+  },
+  "claim_boundary": "Four fork counters used by compaction and ordinary text API merge only. No tool-result merge, extra usage metadata, network, hooks or transcript execution."
+}

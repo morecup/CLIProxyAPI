@@ -181,6 +181,7 @@ func (m *Manager) executeHomeOnce(ctx context.Context, providers []string, req c
 				selection.End("attempt_canceled")
 				return cliproxyexecutor.Response{}, errCtx
 			}
+			execCtx = beginUpstreamExecutionAttempt(execCtx)
 			var response cliproxyexecutor.Response
 			var errExecute error
 			var effectiveAuthMu sync.RWMutex
@@ -234,7 +235,7 @@ func (m *Manager) executeHomeOnce(ctx context.Context, providers []string, req c
 					didRefreshOnUnauthorized = true
 					publishSelectedAuthMetadata(opts.Metadata, preparedAuth)
 					setEffectiveAuth(preparedAuth)
-					execCtx = newUpstreamAttemptContext(execCtx)
+					execCtx = beginUpstreamExecutionAttempt(execCtx)
 					executorCtx = execCtx
 					if countTokens {
 						executorCtx = withAccessTokenFingerprintObserver(execCtx, setEffectiveAuth)

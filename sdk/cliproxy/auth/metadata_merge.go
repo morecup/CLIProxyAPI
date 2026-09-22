@@ -8,7 +8,7 @@ import (
 // that should not overwrite newly acquired OAuth credentials during metadata merge.
 func IsAuthTokenPayloadKey(key string) bool {
 	switch strings.ToLower(strings.TrimSpace(key)) {
-	case "access_token", "refresh_token", "id_token", "session_id",
+	case "access_token", "refresh_token", "id_token", "session_id", "claude_desktop_session_key",
 		"expired", "last_refresh", "expires_in", "timestamp",
 		"token_type", "user_code", "verification_uri", "verification_uri_complete":
 		return true

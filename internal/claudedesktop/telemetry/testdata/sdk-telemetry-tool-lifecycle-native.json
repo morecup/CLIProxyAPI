@@ -1,0 +1,613 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "logger": {
+      "name": "B:/~BUN/root/_675.js",
+      "sha256": "d7fc39bb3928fc4890c5b0f1615568cc99c3f489020874190f4404c7f2040c14"
+    },
+    "features": {
+      "name": "B:/~BUN/root/_823.js",
+      "sha256": "5f9381bcddb7d1d7bf21330d060826004a57c4093d70d141d734003c1e5112da"
+    },
+    "print_resume": {
+      "name": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "sha256": "9f696abe4b5006f1eb38491956c1c6cf4899c4b957ecf252aa8ead15308f88f7"
+    }
+  },
+  "definitions": [
+    {
+      "label": "tool_use_progress",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5137509,
+      "to": 5138047,
+      "bytes": 538,
+      "sha256": "b65a82b3a88ad4b9d7766f497456d4118a309c298766c8f627c7c7f9a50dc567"
+    },
+    {
+      "label": "run_tool_use_ids",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5134563,
+      "to": 5134669,
+      "bytes": 106,
+      "sha256": "ace3dc81f946518a3c611d322af1726367477b9a385d42931e367f7b5a5bba88"
+    },
+    {
+      "label": "run_tool_use_call",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5136905,
+      "to": 5137508,
+      "bytes": 603,
+      "sha256": "718ab0ec1dc65d8f6cfaa7c5426dabb1e44e404360ccee6a0eeb0ceb6f59602b"
+    },
+    {
+      "label": "task_output_call",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3650494,
+      "to": 3651313,
+      "bytes": 819,
+      "sha256": "b279e8901780c34fa8dc479afd4760d87c30e68bf8f94675d203f61e43fd58fe"
+    },
+    {
+      "label": "call_error_classifier",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5129538,
+      "to": 5130663,
+      "bytes": 1125,
+      "sha256": "12a7423f6611c1a12b1866947d024ad70d579a8352594360da0a792db6ac3252"
+    },
+    {
+      "label": "expected_error_names",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5166918,
+      "to": 5168088,
+      "bytes": 1170,
+      "sha256": "fad93e61e6e5abee788a2cbfc36945e10fede667a153c5eb7690f6334d3d15b7"
+    },
+    {
+      "label": "transport_error_codes",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3031814,
+      "to": 3031907,
+      "bytes": 93,
+      "sha256": "9c1274a5c1771e9f4d7a0d57cde3eb337f297eef2855b9682168a4a3a3d23134"
+    },
+    {
+      "label": "abort_error",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5129239,
+      "to": 5129360,
+      "bytes": 121,
+      "sha256": "26618d08c10c34a56636e426f1204e225cff43eec9b8b5a598b31b9e22f3e6f2"
+    },
+    {
+      "label": "tool_call_catch_head",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5163485,
+      "to": 5163806,
+      "bytes": 321,
+      "sha256": "57c3b74e5fa16c669d8c02e078d60128fdbf0afb44a6eb492d2abb0b1f27f0af"
+    },
+    {
+      "label": "tool_call_catch_route",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5164553,
+      "to": 5164756,
+      "bytes": 203,
+      "sha256": "2791c2934eedb419ae96bb6ee2762f467ccddcbac59ae7c40c1ffc694c10a865"
+    },
+    {
+      "label": "feature_telemetry",
+      "module": "B:/~BUN/root/_823.js",
+      "from": 5917,
+      "to": 6499,
+      "bytes": 582,
+      "sha256": "df615f83ca412c289d7dfab39f1a3a40ecee6d95173c535c9e383f41a01ef101"
+    },
+    {
+      "label": "agent_finalize",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3139319,
+      "to": 3140765,
+      "bytes": 1446,
+      "sha256": "29351da9e8942610e5c1e7460194afed755419db6c031cfb6de368018208bf46"
+    },
+    {
+      "label": "last_assistant",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 6577734,
+      "to": 6577794,
+      "bytes": 60,
+      "sha256": "cbbc2ab2ebe60a99351109e368a1285f3e25281e2f51ae587a38eaaa50f75f6d"
+    },
+    {
+      "label": "cache_eviction_session_end",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 6872170,
+      "to": 6872263,
+      "bytes": 93,
+      "sha256": "df678fef0641f9983172d291e9d5acef1dccf31ba2fb3a2445878e6a8b45fa43"
+    },
+    {
+      "label": "id_loggable",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 246341,
+      "to": 246439,
+      "bytes": 98,
+      "sha256": "7b8bf46b9825a6ca9cafb1220c2f386d409d024e05e069d34e087a9d362d4598"
+    },
+    {
+      "label": "tool_name_loggable",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 273947,
+      "to": 274079,
+      "bytes": 132,
+      "sha256": "0bc6ce04d7370055f9234dd18e819d1a94d6b02a473fd78e273871a688f14381"
+    },
+    {
+      "label": "tool_name_alias_map",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 288853,
+      "to": 288885,
+      "bytes": 32,
+      "sha256": "c04763f732819ec5d7ee91191071dcbac768bbb8279e482919cf237fe05f1c62"
+    },
+    {
+      "label": "datadog_mirror_set",
+      "module": "B:/~BUN/root/_675.js",
+      "from": 395242,
+      "to": 401142,
+      "bytes": 5900,
+      "sha256": "f34af42e4606d43ad911fdd6eed0a354cf2c6dda2f45c42b45e6169b6bdc4ad7"
+    },
+    {
+      "label": "resume_lane",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "from": 332862,
+      "to": 338610,
+      "bytes": 5748,
+      "sha256": "31614e4e93107a61cc09824141c31a899eab15e42e4b763d303c00747d55ee10"
+    }
+  ],
+  "logger_prefix": [
+    "subscription_type",
+    "cc_prompt_id"
+  ],
+  "events": {
+    "tool_use_progress": {
+      "event": "tengu_tool_use_progress",
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "tool_use_progress",
+      "keys": [
+        "messageID",
+        "toolName",
+        "isMcp",
+        "queryChainId",
+        "queryDepth",
+        "mcpServerType",
+        "mcpServerBaseUrl",
+        "requestId",
+        "...Aw(e.name,u)",
+        "...e.mcpInfo?.pluginTelemetry"
+      ],
+      "members": [
+        {
+          "key": "messageID",
+          "derivation": "yt(i)",
+          "conditional": false
+        },
+        {
+          "key": "toolName",
+          "derivation": "fr(e.name)",
+          "conditional": false
+        },
+        {
+          "key": "isMcp",
+          "derivation": "e.isMcp??!1",
+          "conditional": false
+        },
+        {
+          "key": "queryChainId",
+          "derivation": "yt(r.queryTracking?.chainId)",
+          "conditional": false
+        },
+        {
+          "key": "queryDepth",
+          "derivation": "r.queryTracking?.depth",
+          "conditional": false
+        },
+        {
+          "key": "mcpServerType",
+          "derivation": "X(l)",
+          "conditional": true,
+          "condition": "l"
+        },
+        {
+          "key": "mcpServerBaseUrl",
+          "derivation": "Gy(c)",
+          "conditional": true,
+          "condition": "c"
+        },
+        {
+          "key": "requestId",
+          "derivation": "yt(a)",
+          "conditional": true,
+          "condition": "a"
+        },
+        {
+          "spread": "Aw(e.name,u)",
+          "conditional": true
+        },
+        {
+          "spread": "e.mcpInfo?.pluginTelemetry",
+          "conditional": true
+        }
+      ]
+    },
+    "cache_eviction_hint_subagent_end": {
+      "event": "tengu_cache_eviction_hint",
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "agent_finalize",
+      "keys": [
+        "scope",
+        "last_request_id"
+      ],
+      "members": [
+        {
+          "key": "scope",
+          "derivation": "de(\"subagent_end\")",
+          "conditional": false
+        },
+        {
+          "key": "last_request_id",
+          "derivation": "yt(z)",
+          "conditional": false
+        }
+      ]
+    },
+    "cache_eviction_hint_session_end": {
+      "event": "tengu_cache_eviction_hint",
+      "module": "B:/~BUN/root/_448.js",
+      "slice": "cache_eviction_session_end",
+      "keys": [
+        "scope",
+        "last_request_id"
+      ],
+      "members": [
+        {
+          "key": "scope",
+          "derivation": "de(\"session_end\")",
+          "conditional": false
+        },
+        {
+          "key": "last_request_id",
+          "derivation": "yt(a)",
+          "conditional": false
+        }
+      ]
+    },
+    "feature_bad": {
+      "event": "tengu_feature_bad",
+      "module": "B:/~BUN/root/_823.js",
+      "slice": "feature_telemetry",
+      "keys": [
+        "...r",
+        "feature_name",
+        "error_code"
+      ],
+      "members": [
+        {
+          "spread": "r",
+          "conditional": true
+        },
+        {
+          "key": "feature_name",
+          "derivation": "a(e)",
+          "conditional": false
+        },
+        {
+          "key": "error_code",
+          "derivation": "u",
+          "conditional": false
+        }
+      ]
+    },
+    "resume_print": {
+      "event": "tengu_resume_print",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "slice": "resume_lane",
+      "keys": [],
+      "members": []
+    },
+    "session_resumed_print_success": {
+      "event": "tengu_session_resumed",
+      "module": "B:/~BUN/root/chunk-zhnz59d4.js",
+      "slice": "resume_lane",
+      "keys": [
+        "entrypoint",
+        "success",
+        "interruption_kind",
+        "resume_duration_ms"
+      ],
+      "members": [
+        {
+          "key": "entrypoint",
+          "derivation": "rt(\"print\")",
+          "conditional": false
+        },
+        {
+          "key": "success",
+          "derivation": "!0",
+          "conditional": false
+        },
+        {
+          "key": "interruption_kind",
+          "derivation": "Oe(D.turnInterruptionState?.kind??\"none\")",
+          "conditional": false
+        },
+        {
+          "key": "resume_duration_ms",
+          "derivation": "Math.round(performance.now()-m)",
+          "conditional": false
+        }
+      ]
+    }
+  },
+  "emission": {
+    "tool_use_progress": "pOs f(b): for every item the tool yields with b.type===\"progress\" and b.data.type!==\"tool_heartbeat\", during call, before tengu_tool_use_success/error of the same call; messageID = yt(assistantMessage.message.id) (runToolUse Ux: a=t.message.id), toolName = fr(tool.name), isMcp = tool.isMcp ?? false, queryChainId/queryDepth = toolUseContext.queryTracking, mcpServerType/mcpServerBaseUrl only for connected MCP servers, requestId = yt(assistantMessage.requestId) when defined (Ux: l=t.requestId), Aw(name, mcpNameLoggable) and mcpInfo.pluginTelemetry spreads (empty for the owned non-MCP tools)",
+    "task_output_waiting_for_task": "TaskOutput call: block mode only, after the task lookup (validateInput already rejected unknown ids) and before await aps(...), whether or not the task is already terminal: one {type:\"progress\", toolUseID:`task-output-waiting-${Date.now()}`, data:{type:\"waiting_for_task\", taskDescription, taskType}} item; non-block calls yield none",
+    "cache_eviction_hint_subagent_end": "DMt(messages, agentId, ctx, {suppressTelemetry}) agent finalize when !suppressTelemetry: after D(\"tengu_agent_tool_completed\") and xl(\"subagent_completed\"), z = vb(messages).requestId (last assistant message); emitted only when z is defined: {scope:\"subagent_end\", last_request_id: yt(z)}",
+    "cache_eviction_hint_other_scopes": "scope \"session_end\" (shutdown, WKe() last request id) and \"conversation_clear\" (/clear, _403.js) are process-level moments the gateway does not own",
+    "feature_bad": "gOs call catch: oe=FXe(re) (abort error), Se=Tz(abortSignal); when !Se&&!oe: {code,isSad}=BUr(re); isSad => te(f,code) (tengu_feature_sad); else me(...) then J(f,code) => tengu_feature_bad {feature_name:f, error_code:code} immediately before D(\"tengu_tool_use_error\"); f = FUr(tool.name, mcpInfo) = toolFeature(name). BUr tail: plain Error/TypeError (name not in _Wt, no transport code) => {code:\"tool_call_threw\", isSad:false}. The outer runToolUse catch (permission/hook phase) uses the constant \"tool_unexpected_error\" instead",
+    "resume_print": "print / sdk_url lane: first statement inside the `if(r.resume){... try{` block, before the session lookup (Fm/BP), before clearSessionCaches and hydration; empty native object (logger prefix only); tengu_session_resumed(print, success) is emitted later in the same try block after Hp() hydration, so tengu_resume_print always precedes it under the same r.resume condition"
+  },
+  "progress_cases": [
+    {
+      "label": "task_output_main",
+      "messageID": "msg_01ABCdef",
+      "requestId": "req_011CVGjJHiE6NiHqyMcgEuUx",
+      "event": {
+        "name": "tengu_tool_use_progress",
+        "metadata": {
+          "messageID": "msg_01ABCdef",
+          "toolName": "TaskOutput",
+          "isMcp": false,
+          "queryChainId": "88888888-8888-4888-8888-888888888888",
+          "queryDepth": 0,
+          "requestId": "req_011CVGjJHiE6NiHqyMcgEuUx"
+        }
+      }
+    },
+    {
+      "label": "task_output_no_request_id",
+      "messageID": "msg_01ABCdef",
+      "requestId": null,
+      "event": {
+        "name": "tengu_tool_use_progress",
+        "metadata": {
+          "messageID": "msg_01ABCdef",
+          "toolName": "TaskOutput",
+          "isMcp": false,
+          "queryChainId": "88888888-8888-4888-8888-888888888888",
+          "queryDepth": 0
+        }
+      }
+    },
+    {
+      "label": "task_output_child_without_lineage",
+      "messageID": "msg_02",
+      "requestId": null,
+      "event": {
+        "name": "tengu_tool_use_progress",
+        "metadata": {
+          "messageID": "msg_02",
+          "toolName": "TaskOutput",
+          "isMcp": false
+        }
+      }
+    },
+    {
+      "label": "mcp_tool",
+      "messageID": "msg_03",
+      "requestId": "req_02",
+      "event": {
+        "name": "tengu_tool_use_progress",
+        "metadata": {
+          "messageID": "msg_03",
+          "toolName": "mcp_tool",
+          "isMcp": true,
+          "queryChainId": "88888888-8888-4888-8888-888888888888",
+          "queryDepth": 1,
+          "requestId": "req_02"
+        }
+      }
+    }
+  ],
+  "task_output_cases": [
+    {
+      "label": "block_terminal",
+      "input": {
+        "task_id": "a1",
+        "block": true,
+        "timeout": 1000
+      },
+      "progress_items": [
+        {
+          "type": "progress",
+          "toolUseID_prefix": "task-output-waiting-<Date.now()>",
+          "data": {
+            "type": "waiting_for_task",
+            "taskDescription": "summarize logs",
+            "taskType": "local_agent"
+          }
+        }
+      ],
+      "retrieval_status": "success"
+    },
+    {
+      "label": "block_running",
+      "input": {
+        "task_id": "a2",
+        "block": true,
+        "timeout": 0
+      },
+      "progress_items": [
+        {
+          "type": "progress",
+          "toolUseID_prefix": "task-output-waiting-<Date.now()>",
+          "data": {
+            "type": "waiting_for_task",
+            "taskDescription": "still running",
+            "taskType": "local_agent"
+          }
+        }
+      ],
+      "retrieval_status": "success"
+    },
+    {
+      "label": "non_block",
+      "input": {
+        "task_id": "a2",
+        "block": false
+      },
+      "progress_items": [],
+      "retrieval_status": "not_ready"
+    }
+  ],
+  "call_error_classifier": {
+    "expected_error_names": [
+      "AgentPreconditionError",
+      "AgentTypeError",
+      "ArtifactInputError",
+      "ClaudeAiProxyBearerRejectedError",
+      "ConnectorRegistryUnavailableError",
+      "PluginSkillSearchUnavailableError",
+      "CtxAgentValidationError",
+      "DesignSyncPreconditionError",
+      "DomainBlockedError",
+      "DomainCheckFailedError",
+      "EgressBlockedError",
+      "RipgrepTimeoutError",
+      "RipgrepUsageError",
+      "FileStateError",
+      "FileTooLargeError",
+      "ImageResizeError",
+      "McpError",
+      "ProtocolError",
+      "SdkError",
+      "SdkHttpError",
+      "McpResponseSchemaError",
+      "MonitorMcpPreconditionError",
+      "MonitorWsPreconditionError",
+      "NotebookReadError",
+      "PlanPreconditionError",
+      "ProjectsPreconditionError",
+      "RemoteAgentPreconditionError",
+      "SandboxBridgeUnavailableError",
+      "SandboxCommandTooLongError",
+      "SandboxInitFailedError",
+      "SandboxPolicyRefusalError",
+      "SandboxUnavailableForShellError",
+      "ScheduleWakeupInputError",
+      "SelectedRangeTooLargeError",
+      "SelfHostedRunnerApiError",
+      "SendMessagePreconditionError",
+      "StagingDirTamperedError",
+      "StreamableHTTPError",
+      "StopTaskError",
+      "SwarmPaneError",
+      "SymlinkWriteRefusedError",
+      "TooManyRedirectsError",
+      "WebFetchTransportError",
+      "WorkflowInputError",
+      "WorkflowRemotePreconditionError",
+      "WorktreeGitTransientError",
+      "WorktreeIsolationError"
+    ],
+    "transport_error_codes": [
+      "500",
+      "502",
+      "503",
+      "504",
+      "23",
+      "CLI_OWNED_BEARER_REJECTED",
+      "CONNECT_TIMEOUT"
+    ],
+    "cases": [
+      {
+        "label": "plain_error",
+        "code": "tool_call_threw",
+        "isSad": false
+      },
+      {
+        "label": "type_error",
+        "code": "tool_call_threw",
+        "isSad": false
+      },
+      {
+        "label": "expected_named_error",
+        "code": "tool_expected_error",
+        "isSad": true
+      },
+      {
+        "label": "expected_reason_code",
+        "code": "agent_missing_prompt",
+        "isSad": true
+      },
+      {
+        "label": "transport_code",
+        "code": "tool_mcp_transport_error",
+        "isSad": true
+      },
+      {
+        "label": "string_thrown",
+        "code": "tool_call_threw",
+        "isSad": false
+      }
+    ]
+  },
+  "feature_bad_case": {
+    "name": "tengu_feature_bad",
+    "metadata": {
+      "feature_name": "tool_task_stop",
+      "error_code": "tool_call_threw"
+    }
+  },
+  "cache_eviction_cases": [
+    {
+      "label": "last_assistant_with_request_id",
+      "event": {
+        "name": "tengu_cache_eviction_hint",
+        "metadata": {
+          "scope": "subagent_end",
+          "last_request_id": "req_011CVGjJHiE6NiHqyMcgEuUx"
+        }
+      }
+    },
+    {
+      "label": "last_assistant_without_request_id",
+      "event": null
+    },
+    {
+      "label": "nonconforming_request_id",
+      "event": {
+        "name": "tengu_cache_eviction_hint",
+        "metadata": {
+          "scope": "subagent_end",
+          "last_request_id": "nonconforming"
+        }
+      }
+    }
+  ],
+  "datadog_mirror": {
+    "tengu_feature_bad": true,
+    "tengu_tool_use_progress": false,
+    "tengu_cache_eviction_hint": false,
+    "tengu_resume_print": false
+  },
+  "boundary": "Executed in vm: the pOs progress literal with lU/Ms from _675.js, the TaskOutput call body with a synthetic registry, BUr with the pinned _Wt/NIt sets and stubbed opaque error classes (zL/hk/HL/MH/ye/IH never match plain Errors; zx/AT stubbed false: the owned tools throw no fs errors), the _823.js Q literal and the DMt hint tail with vb. Recorded statically: the resume lane order, the gOs catch routing, the runToolUse ids. Not established: Aw(name, mcpNameLoggable) for MCP tools (stubbed empty per the owned non-MCP family), Tz (abort signal check) body, the session_end/conversation_clear scopes as gateway moments, live acceptance."
+}

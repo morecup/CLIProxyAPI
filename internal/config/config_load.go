@@ -50,6 +50,9 @@ func LoadConfigOptional(configFile string, optional bool) (*Config, error) {
 		cfg.NormalizePluginsConfig()
 		return cfg, nil
 	}
+	if errMigration := ValidateClaudeDesktopMigrationYAML(data); errMigration != nil {
+		return nil, errMigration
+	}
 
 	if errValidate := validateCredentialWeightYAML(data); errValidate != nil {
 		if optional {
@@ -165,8 +168,7 @@ func LoadConfigOptional(configFile string, optional bool) (*Config, error) {
 	// Sanitize Codex header defaults.
 	cfg.SanitizeCodexHeaderDefaults()
 
-	// Sanitize Claude header defaults.
-	cfg.SanitizeClaudeHeaderDefaults()
+	cfg.SanitizeClaudeDesktop()
 
 	// Sanitize Claude key headers
 	cfg.SanitizeClaudeKeys()

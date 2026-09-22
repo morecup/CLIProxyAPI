@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "kind": "native_compaction_assistant_selection_vectors",
+  "definitions": [
+    {
+      "label": "normalize_summary",
+      "source_code_unit_from": 2715351,
+      "source_code_unit_to": 2715603,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 252,
+      "sha256": "212438945c56881727fbd69b70368589fc526a4456408bd8d98a976414976cf3"
+    },
+    {
+      "label": "select_summary",
+      "source_code_unit_from": 2714244,
+      "source_code_unit_to": 2714337,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 93,
+      "sha256": "741319a583dbfb315de7dee6afdb8ae9f78befe7319781293d3d498b27354d0e"
+    },
+    {
+      "label": "select_summary_assistant",
+      "source_code_unit_from": 2714008,
+      "source_code_unit_to": 2714244,
+      "module_sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c",
+      "bytes": 236,
+      "sha256": "8715480ea81ef841562851654c447b261f43aea0ac73af66a42ccc3bef1aca08"
+    }
+  ],
+  "cases": [
+    {
+      "name": "one_text",
+      "content": [
+        {
+          "type": "text",
+          "text": "plain summary"
+        }
+      ],
+      "buffered": "plain summary",
+      "streamed": "plain summary"
+    },
+    {
+      "name": "analysis_then_summary",
+      "content": [
+        {
+          "type": "text",
+          "text": "<analysis>discard</analysis>"
+        },
+        {
+          "type": "text",
+          "text": "<summary>keep</summary>"
+        }
+      ],
+      "buffered": "",
+      "streamed": "Summary:\nkeep"
+    },
+    {
+      "name": "two_plain_texts",
+      "content": [
+        {
+          "type": "text",
+          "text": "first"
+        },
+        {
+          "type": "text",
+          "text": "last"
+        }
+      ],
+      "buffered": "first",
+      "streamed": "last"
+    },
+    {
+      "name": "tagged_then_plain",
+      "content": [
+        {
+          "type": "text",
+          "text": "<summary>keep</summary>"
+        },
+        {
+          "type": "text",
+          "text": "trailing text"
+        }
+      ],
+      "buffered": "Summary:\nkeep",
+      "streamed": "Summary:\nkeep"
+    },
+    {
+      "name": "last_tagged_wins",
+      "content": [
+        {
+          "type": "text",
+          "text": "<summary>old</summary>"
+        },
+        {
+          "type": "text",
+          "text": "<summary>new</summary>"
+        },
+        {
+          "type": "text",
+          "text": "tail"
+        }
+      ],
+      "buffered": "Summary:\nold",
+      "streamed": "Summary:\nnew"
+    },
+    {
+      "name": "uppercase_tag_is_plain",
+      "content": [
+        {
+          "type": "text",
+          "text": "<summary>keep</summary>"
+        },
+        {
+          "type": "text",
+          "text": "<SUMMARY>plain</SUMMARY>"
+        }
+      ],
+      "buffered": "Summary:\nkeep",
+      "streamed": "Summary:\nkeep"
+    },
+    {
+      "name": "thinking_after_summary",
+      "content": [
+        {
+          "type": "text",
+          "text": "<summary>keep</summary>"
+        },
+        {
+          "type": "thinking",
+          "thinking": "not summary"
+        }
+      ],
+      "buffered": "Summary:\nkeep",
+      "streamed": "Summary:\nkeep"
+    },
+    {
+      "name": "empty_last_plain",
+      "content": [
+        {
+          "type": "text",
+          "text": "first"
+        },
+        {
+          "type": "text",
+          "text": ""
+        }
+      ],
+      "buffered": "first",
+      "streamed": null
+    },
+    {
+      "name": "blank_last_plain",
+      "content": [
+        {
+          "type": "text",
+          "text": "first"
+        },
+        {
+          "type": "text",
+          "text": "  "
+        }
+      ],
+      "buffered": "first",
+      "streamed": null
+    },
+    {
+      "name": "bom_trim",
+      "content": [
+        {
+          "type": "text",
+          "text": "﻿summary "
+        }
+      ],
+      "buffered": "summary",
+      "streamed": "summary"
+    },
+    {
+      "name": "no_text",
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "not summary"
+        }
+      ],
+      "buffered": null,
+      "streamed": null
+    },
+    {
+      "name": "tagged_text_then_tool",
+      "content": [
+        {
+          "type": "text",
+          "text": "<summary>keep</summary>"
+        },
+        {
+          "type": "tool_use",
+          "name": "synthetic",
+          "id": "synthetic",
+          "input": {}
+        }
+      ],
+      "buffered": "Summary:\nkeep",
+      "streamed": "Summary:\nkeep"
+    }
+  ],
+  "native_error_and_nonassistant_skipped": true,
+  "claim_boundary": "Three pinned native selection/normalization functions. Buffered content is one assistant; ordinary streaming closed blocks become separate assistants. Synthetic inputs only. No full fork query, API error classification, stream normalization, capture contents or live application."
+}

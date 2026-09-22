@@ -1,0 +1,623 @@
+{
+  "schema_version": 1,
+  "sdk_sha256": "00e5be0a8b69893cad9259a1e8b80d59be8f3eb367d4a16c19f91bcd279423b7",
+  "modules": {
+    "query": {
+      "name": "B:/~BUN/root/_448.js",
+      "sha256": "c8bc281d58b08f6cc76a339adb2f3e7187a51d5fd86d8590ef176f3afaac679c"
+    },
+    "bootstrap": {
+      "name": "B:/~BUN/root/_395.js",
+      "sha256": "2c1363e74f44adffdebd1ab4d9218a77b00946c8023637ea6b94ceab54667052"
+    }
+  },
+  "definitions": [
+    {
+      "label": "before_attachments",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2998542,
+      "to": 2998710,
+      "bytes": 168,
+      "sha256": "d7d70f4a1be620e57f27349313f06763152a80edc76007e07c940e5d6f11f0ab"
+    },
+    {
+      "label": "attachments_generator",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5403150,
+      "to": 5403330,
+      "bytes": 180,
+      "sha256": "5bd3fe5e3a2f9155193fa8e679318bdd8948df206e60b97ef89d5b73a83e6d6a"
+    },
+    {
+      "label": "compute_duration",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5375967,
+      "to": 5376575,
+      "bytes": 608,
+      "sha256": "c0a66dfdf256b76277fa583f6edfdf3597d990d9c020d26618cf6c950b46f712"
+    },
+    {
+      "label": "after_attachments",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3002831,
+      "to": 3003048,
+      "bytes": 217,
+      "sha256": "eba0822b533b8ce09f53c789b5a212677e288768642505e4a214ee8d7ed3f829"
+    },
+    {
+      "label": "next_turn_messages",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3003209,
+      "to": 3003500,
+      "bytes": 291,
+      "sha256": "7fe37398519aff27a45e23b30a4bc6a138613a563a994c5a857bbc248bf28aac"
+    },
+    {
+      "label": "before_normalize",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5660873,
+      "to": 5660978,
+      "bytes": 105,
+      "sha256": "e08fb3ce3748900aeeaf3d1fb87ca8eb08c667883ff06258070e7193c337e102"
+    },
+    {
+      "label": "mode_decision_call",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5659825,
+      "to": 5660873,
+      "bytes": 1048,
+      "sha256": "52e4e90c8951d954a9a83472fc0a4b81868fc77cce8bfa4148b9df097f4b26ce"
+    },
+    {
+      "label": "context_size",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5620215,
+      "to": 5620462,
+      "bytes": 247,
+      "sha256": "44b9e788c8745cfd7aee5f6b40056e70a61b8cfdc71f6fd023d81c3e5bf1019e"
+    },
+    {
+      "label": "client_data_cache_key",
+      "module": "B:/~BUN/root/_395.js",
+      "from": 7570,
+      "to": 7688,
+      "bytes": 118,
+      "sha256": "33e3df722a31e33d31f145c96fd5dca1396081ac2eb1b36003254ab6f08fd712"
+    },
+    {
+      "label": "gzip_skipped",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 1605727,
+      "to": 1605968,
+      "bytes": 241,
+      "sha256": "2f005d9b99e5fa3a283c71fda8b4ef8c547ff57b46d43e88e18ff746d7c9b07e"
+    },
+    {
+      "label": "cache_eviction_subagent",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 3140662,
+      "to": 3140764,
+      "bytes": 102,
+      "sha256": "88a82dd8f3e0355d38f9f1e7fea100ff74c7b3ea1a08162803f405aa4a74f3a6"
+    },
+    {
+      "label": "cache_eviction_session_end",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 6872170,
+      "to": 6872264,
+      "bytes": 94,
+      "sha256": "3c3c96e40190a51601c299dbf2ff9aabbd57fbaca530d14064fd60c6c5e31f6b"
+    },
+    {
+      "label": "heron_brook",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 5574854,
+      "to": 5575265,
+      "bytes": 411,
+      "sha256": "ea2ab012a6c5243bb35e24807e6543a61a3ae1bf3c55e97511fc6dd2d9a4d59f"
+    },
+    {
+      "label": "fork_agent_query",
+      "module": "B:/~BUN/root/_448.js",
+      "from": 2712505,
+      "to": 2713209,
+      "bytes": 704,
+      "sha256": "63825fb37bdbe222886250482adffadc4e331cd2de19a6c9b2b34fd9c016aeda"
+    }
+  ],
+  "logger_prefix": [
+    "subscription_type",
+    "cc_prompt_id"
+  ],
+  "order": {
+    "query_loop_range": [
+      2947047,
+      3003534
+    ],
+    "before_attachments": 2998542,
+    "after_attachments": 3002831,
+    "next_turn_messages": 3003209,
+    "mode_decision_call": 5659825,
+    "before_normalize": 5660873,
+    "api_query_literal": 2628754
+  },
+  "contracts": [
+    {
+      "event": "tengu_query_before_attachments",
+      "slice": "before_attachments",
+      "gateway": "executable",
+      "keys": [
+        "messagesForQueryCount",
+        "assistantMessagesCount",
+        "toolResultsCount",
+        "queryChainId",
+        "queryDepth"
+      ],
+      "derivations": {
+        "messagesForQueryCount": "Fe.length: internal message rows before the assistant turn that produced the tool calls",
+        "assistantMessagesCount": "We.length: internal assistant rows of that turn (one per streamed content block)",
+        "toolResultsCount": "jt.length before attachments: one internal user row per tool_result",
+        "queryChainId": "queryChainIdForAnalytics of the query",
+        "queryDepth": "queryTracking.depth (0 main, +1 per subagent level)"
+      },
+      "condition": "every loop iteration whose assistant turn ended with tool_use blocks, after the tools ran and before attachment generation; skipped for the loop/wakeup early return",
+      "position": "query loop, after tool execution; precedes tengu_attachments, tengu_query_after_attachments, the next request build (tengu_tool_search_mode_decision, tengu_api_before_normalize) and tengu_api_query"
+    },
+    {
+      "event": "tengu_attachments",
+      "slice": "attachments_generator",
+      "gateway": "executable",
+      "keys": [
+        "attachment_types"
+      ],
+      "derivations": {
+        "attachment_types": "l.map(c=>c.type): types of the attachments y0s produced for this iteration, in production order (not deduplicated)"
+      },
+      "condition": "ltr(): only when y0s returned at least one attachment (l.length>0)",
+      "position": "between tengu_query_before_attachments and tengu_query_after_attachments; tengu_deferred_tools_pool_change (XHr, inside y0s) precedes it when the deferred_tools_delta attachment is produced"
+    },
+    {
+      "event": "tengu_attachment_compute_duration",
+      "slice": "compute_duration",
+      "gateway": "boundary",
+      "keys": [
+        "label",
+        "duration_ms",
+        "attachment_size_bytes",
+        "attachment_count"
+      ],
+      "failure_keys": [
+        "label",
+        "duration_ms",
+        "error"
+      ],
+      "derivations": {
+        "label": "X(generator label passed to fi())",
+        "duration_ms": "Date.now() delta around the generator",
+        "attachment_size_bytes": "sum of JSON.stringify(attachment).length over non-null results",
+        "attachment_count": "r.length (including null slots)",
+        "error": "true on the generator throwing"
+      },
+      "condition": "per generator label inside y0s, sampled with Math.random()<0.05 on both success and failure",
+      "position": "inside y0s, before tengu_attachments",
+      "boundary_reason": "random 5% sampling over the native generator label set (ide_selection, diagnostics, token_usage, ...) that the gateway does not run; the gateway only produces deferred_tools_delta and does not time a native generator"
+    },
+    {
+      "event": "tengu_query_after_attachments",
+      "slice": "after_attachments",
+      "gateway": "executable",
+      "keys": [
+        "totalToolResultsCount",
+        "fileChangeAttachmentCount",
+        "queryChainId",
+        "queryDepth"
+      ],
+      "derivations": {
+        "totalToolResultsCount": "jt.length after attachments: tool_result rows plus attachment rows appended this iteration",
+        "fileChangeAttachmentCount": "Qt(jt, row.type===\"attachment\"&&row.attachment.type===\"edited_text_file\")",
+        "queryChainId": "same as before_attachments",
+        "queryDepth": "same as before_attachments"
+      },
+      "condition": "every loop iteration that emitted tengu_query_before_attachments (unconditional after attachments)",
+      "position": "after tengu_attachments; before max_turns check and the recursive next-turn request build"
+    },
+    {
+      "event": "tengu_api_before_normalize",
+      "slice": "before_normalize",
+      "gateway": "executable",
+      "keys": [
+        "preNormalizedMessageCount"
+      ],
+      "derivations": {
+        "preNormalizedMessageCount": "e.length: internal message rows handed to the request build ([...Fe,...We,...jt] on continuation turns) before normalization merges them into API messages"
+      },
+      "condition": "every API request build (first turn and continuation turns), after the tool schema build",
+      "position": "request assembly: after the tool-search decision (j1e: tengu_tool_search_mode_decision) and tool schema build, before message normalization and tengu_api_query"
+    },
+    {
+      "event": "tengu_context_size",
+      "slice": "context_size",
+      "gateway": "boundary",
+      "keys": [
+        "git_status_size",
+        "claude_md_size",
+        "has_user_email",
+        "total_context_size",
+        "project_file_count_rounded",
+        "mcp_tools_count",
+        "mcp_servers_count",
+        "mcp_tools_tokens",
+        "non_mcp_tools_count",
+        "non_mcp_tools_tokens"
+      ],
+      "condition": "startup context measurement after MCP tools, tool pool, CLAUDE.md/user context and git status resolve (Promise.all), with a 1s project file count scan",
+      "boundary_reason": "requires the native startup scan (git status length, CLAUDE.md length, project file count via zqr with AbortSignal.timeout(1000), tokenizer estimates Lc over tool schemas) that the gateway does not perform"
+    },
+    {
+      "event": "tengu_client_data_cache_key",
+      "slice": "client_data_cache_key",
+      "gateway": "boundary",
+      "keys": [
+        "slot_hit",
+        "slot_changed",
+        "legacy_fallback",
+        "slot_stale"
+      ],
+      "condition": "bootstrap cache persistence (module _395.js): fired while deciding whether the client_data cache slot for the account/org/entrypoint/model key changed before writing the config cache",
+      "boundary_reason": "the gateway keeps no bootstrap client_data disk cache slots (clientDataCacheSlots), so slot_hit/slot_changed/slot_stale have no owned state"
+    },
+    {
+      "event": "tengu_gzip_request_body_skipped",
+      "slice": "gzip_skipped",
+      "gateway": "boundary",
+      "keys": [
+        "rollout",
+        "reason",
+        "requestBodyChars"
+      ],
+      "condition": "wFo(e,t): if(e!==\"ccr_worker\")return; once per skip reason per process (ccrWorkerSkipReasonsLogged)",
+      "boundary_reason": "the gateway has no gzip request-body path; the native skip reasons come from the gzip rollout state machine (El().gzipRequestBody) it does not run"
+    },
+    {
+      "event": "tengu_cache_eviction_hint",
+      "slices": [
+        "cache_eviction_subagent",
+        "cache_eviction_session_end"
+      ],
+      "gateway": "boundary",
+      "keys": [
+        "scope",
+        "last_request_id"
+      ],
+      "condition": "subagent_end: after tengu_agent_tool_completed when the subagent's last requestId exists (let z=h.requestId;if(z)...); session_end: at process shutdown when WKe() returns a last request id; conversation_clear (module _403.js) on /clear",
+      "boundary_reason": "no eviction moment is owned here: the gateway's subagent completion is the S2 tool-use lane's ToolExecuted hook (would need the child's last request id), and the gateway has no process session_end or /clear"
+    },
+    {
+      "event": "tengu_heron_brook_applied",
+      "slice": "heron_brook",
+      "gateway": "boundary",
+      "keys": [
+        "len",
+        "fromClientData"
+      ],
+      "condition": "system prompt assembly xUs(model): client_data tengu_heron_brook non-empty (fromClientData true) else feature tengu_heron_brook non-empty else vqt(model) selects the built-in section sqr (fromClientData false); otherwise no event",
+      "boundary_reason": "whether the emulated Desktop system prompt includes the sqr section (vqt model gate, feature and client_data values) is not established for the owned prompt"
+    },
+    {
+      "event": "tengu_fork_agent_query",
+      "slice": "fork_agent_query",
+      "gateway": "boundary",
+      "keys": [
+        "forkLabel",
+        "querySource",
+        "durationMs",
+        "messageCount",
+        "inputTokens",
+        "outputTokens",
+        "cacheReadInputTokens",
+        "cacheCreationInputTokens",
+        "serviceTier",
+        "cacheCreationEphemeral1hTokens",
+        "cacheCreationEphemeral5mTokens",
+        "cacheHitRate",
+        "queryChainId",
+        "queryDepth"
+      ],
+      "condition": "fJo() after a forked-agent query completes; queryChainId/queryDepth only when queryTracking is set",
+      "boundary_reason": "the owned runtime never runs forked-agent queries"
+    }
+  ],
+  "loop_cases": [
+    {
+      "label": "single_tool_result_no_attachments",
+      "events": [
+        {
+          "name": "tengu_query_before_attachments",
+          "metadata": {
+            "messagesForQueryCount": 1,
+            "assistantMessagesCount": 1,
+            "toolResultsCount": 1,
+            "queryChainId": "chain-1",
+            "queryDepth": 0
+          }
+        },
+        {
+          "name": "tengu_query_after_attachments",
+          "metadata": {
+            "totalToolResultsCount": 1,
+            "fileChangeAttachmentCount": 0,
+            "queryChainId": "chain-1",
+            "queryDepth": 0
+          }
+        },
+        {
+          "name": "tengu_api_before_normalize",
+          "metadata": {
+            "preNormalizedMessageCount": 3
+          }
+        }
+      ]
+    },
+    {
+      "label": "two_tool_results_with_reminder",
+      "events": [
+        {
+          "name": "tengu_query_before_attachments",
+          "metadata": {
+            "messagesForQueryCount": 2,
+            "assistantMessagesCount": 2,
+            "toolResultsCount": 2,
+            "queryChainId": "chain-1",
+            "queryDepth": 0
+          }
+        },
+        {
+          "name": "tengu_attachments",
+          "metadata": {
+            "attachment_types": [
+              "deferred_tools_delta"
+            ]
+          }
+        },
+        {
+          "name": "tengu_query_after_attachments",
+          "metadata": {
+            "totalToolResultsCount": 3,
+            "fileChangeAttachmentCount": 0,
+            "queryChainId": "chain-1",
+            "queryDepth": 0
+          }
+        },
+        {
+          "name": "tengu_api_before_normalize",
+          "metadata": {
+            "preNormalizedMessageCount": 7
+          }
+        }
+      ]
+    },
+    {
+      "label": "subagent_depth_one_edited_file",
+      "events": [
+        {
+          "name": "tengu_query_before_attachments",
+          "metadata": {
+            "messagesForQueryCount": 1,
+            "assistantMessagesCount": 1,
+            "toolResultsCount": 1,
+            "queryChainId": "chain-2",
+            "queryDepth": 1
+          }
+        },
+        {
+          "name": "tengu_attachments",
+          "metadata": {
+            "attachment_types": [
+              "edited_text_file",
+              "deferred_tools_delta"
+            ]
+          }
+        },
+        {
+          "name": "tengu_query_after_attachments",
+          "metadata": {
+            "totalToolResultsCount": 3,
+            "fileChangeAttachmentCount": 1,
+            "queryChainId": "chain-2",
+            "queryDepth": 1
+          }
+        },
+        {
+          "name": "tengu_api_before_normalize",
+          "metadata": {
+            "preNormalizedMessageCount": 5
+          }
+        }
+      ]
+    }
+  ],
+  "duration_cases": [
+    {
+      "label": "deferred_tools_delta",
+      "random": 0,
+      "failed": false,
+      "returned": [
+        {
+          "type": "deferred_tools_delta"
+        },
+        null
+      ],
+      "events": [
+        {
+          "name": "tengu_attachment_compute_duration",
+          "metadata": {
+            "label": "deferred_tools_delta",
+            "duration_ms": 7,
+            "attachment_size_bytes": 31,
+            "attachment_count": 2
+          }
+        }
+      ]
+    },
+    {
+      "label": "deferred_tools_delta",
+      "random": 0.5,
+      "failed": false,
+      "returned": [
+        {
+          "type": "deferred_tools_delta"
+        },
+        null
+      ],
+      "events": []
+    },
+    {
+      "label": "token_usage",
+      "random": 0.049,
+      "failed": true,
+      "returned": [],
+      "events": [
+        {
+          "name": "tengu_attachment_compute_duration",
+          "metadata": {
+            "label": "token_usage",
+            "duration_ms": 7,
+            "error": true
+          }
+        }
+      ]
+    }
+  ],
+  "gzip_events": [
+    {
+      "name": "tengu_gzip_request_body_skipped",
+      "metadata": {
+        "rollout": "ccr_worker",
+        "reason": "synthetic_reason",
+        "requestBodyChars": 1234
+      }
+    }
+  ],
+  "eviction_events": [
+    {
+      "name": "tengu_cache_eviction_hint",
+      "metadata": {
+        "scope": "subagent_end",
+        "last_request_id": "req_synthetic"
+      }
+    }
+  ],
+  "heron_cases": [
+    {
+      "label": "client_data",
+      "returned": "from client",
+      "events": [
+        {
+          "name": "tengu_heron_brook_applied",
+          "metadata": {
+            "len": 11,
+            "fromClientData": true
+          }
+        }
+      ]
+    },
+    {
+      "label": "feature",
+      "returned": "from feature",
+      "events": [
+        {
+          "name": "tengu_heron_brook_applied",
+          "metadata": {
+            "len": 12,
+            "fromClientData": false
+          }
+        }
+      ]
+    },
+    {
+      "label": "model_gate",
+      "returned": "synthetic default section",
+      "events": [
+        {
+          "name": "tengu_heron_brook_applied",
+          "metadata": {
+            "len": 25,
+            "fromClientData": false
+          }
+        }
+      ]
+    },
+    {
+      "label": "none",
+      "returned": null,
+      "events": []
+    }
+  ],
+  "fork_events": [
+    {
+      "name": "tengu_fork_agent_query",
+      "metadata": {
+        "forkLabel": "synthetic",
+        "querySource": "sdk",
+        "durationMs": 42,
+        "messageCount": 3,
+        "inputTokens": 10,
+        "outputTokens": 5,
+        "cacheReadInputTokens": 30,
+        "cacheCreationInputTokens": 60,
+        "serviceTier": "standard",
+        "cacheCreationEphemeral1hTokens": 0,
+        "cacheCreationEphemeral5mTokens": 60,
+        "cacheHitRate": 0.3,
+        "queryChainId": "chain-1",
+        "queryDepth": 1
+      }
+    },
+    {
+      "name": "tengu_fork_agent_query",
+      "metadata": {
+        "forkLabel": "synthetic",
+        "querySource": "sdk",
+        "durationMs": 42,
+        "messageCount": 3,
+        "inputTokens": 10,
+        "outputTokens": 5,
+        "cacheReadInputTokens": 30,
+        "cacheCreationInputTokens": 60,
+        "serviceTier": "standard",
+        "cacheCreationEphemeral1hTokens": 0,
+        "cacheCreationEphemeral5mTokens": 60,
+        "cacheHitRate": 0.3
+      }
+    }
+  ],
+  "context_size_events": [
+    {
+      "name": "tengu_context_size",
+      "metadata": {
+        "git_status_size": 0,
+        "claude_md_size": 0,
+        "has_user_email": false,
+        "total_context_size": 0,
+        "project_file_count_rounded": 0,
+        "mcp_tools_count": 0,
+        "mcp_servers_count": 0,
+        "mcp_tools_tokens": 0,
+        "non_mcp_tools_count": 4,
+        "non_mcp_tools_tokens": 1200
+      }
+    }
+  ],
+  "client_data_cache_key_events": [
+    {
+      "name": "tengu_client_data_cache_key",
+      "metadata": {
+        "slot_hit": false,
+        "slot_changed": true,
+        "legacy_fallback": true,
+        "slot_stale": false
+      }
+    }
+  ],
+  "boundary": "The emitter statements execute inside vm with D/X/yt/de/le/Qt/Qn/Date/Math stubs and synthetic rows; y0s (the attachment generator set), the tool execution loop, the request normalizer and tengu_api_query itself do not run. Internal-row counts (Fe/We/jt) are synthetic here; the gateway derives them from the wire request it builds."
+}

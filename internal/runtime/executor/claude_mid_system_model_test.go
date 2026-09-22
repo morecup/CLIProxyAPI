@@ -2,7 +2,6 @@ package executor
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -89,37 +88,24 @@ func httptest_NewRequest() *http.Request {
 
 func midSystemAuth() *cliproxyauth.Auth {
 	// No base_url, so the executor keeps Anthropic's first-party origin.
-	return &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "key-123", "cloak_mode": "always"}}
+	return &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "key-123"}}
 }
 
 func midSystemConfig() *config.Config {
 	return &config.Config{ClaudeKey: []config.ClaudeKey{{APIKey: "key-123"}}}
 }
 
-func assertMidSystemRejected(t *testing.T, err error, upstream *midSystemUpstream) {
+func assertMidSystemForwarded(t *testing.T, err error, upstream *midSystemUpstream) {
 	t.Helper()
-	if err == nil {
-		t.Fatal("error = nil, want the legacy pairing rejected")
+	if err != nil {
+		t.Fatalf("request error = %v, want the upstream to decide", err)
 	}
-	if upstream.called {
-		t.Fatalf("upstream must not be called for a guaranteed rejection; got %s", upstream.body)
-	}
-	var statusCoder interface{ StatusCode() int }
-	if !errors.As(err, &statusCoder) || statusCoder.StatusCode() != http.StatusBadRequest {
-		t.Fatalf("error = %v, want a 400 status error", err)
-	}
-	var scoped interface{ IsRequestScoped() bool }
-	if !errors.As(err, &scoped) || !scoped.IsRequestScoped() {
-		t.Fatalf("error = %v, want a request-scoped error so no credential is retried", err)
-	}
-	if !strings.Contains(err.Error(), "role 'system' is not supported on this model") {
-		t.Fatalf("error = %v, want Anthropic's wording preserved", err)
+	if !upstream.called {
+		t.Fatal("expected the request to reach the upstream")
 	}
 }
 
-// Every executor path that can send the pairing to Anthropic must answer it
-// locally instead of spending an upstream call on a guaranteed 400.
-func TestClaudeExecutor_LegacyMidSystemMessageRejectedOnEveryUpstreamPath(t *testing.T) {
+func TestAnthropicCompatibleExecutor_LegacyMidSystemMessageUsesUpstreamPolicy(t *testing.T) {
 	for _, test := range []struct {
 		name  string
 		model string
@@ -132,9 +118,9 @@ func TestClaudeExecutor_LegacyMidSystemMessageRejectedOnEveryUpstreamPath(t *tes
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			upstream := &midSystemUpstream{}
-			ex := NewClaudeExecutor(midSystemConfig())
+			ex := newAnthropicCompatibleTestExecutor(midSystemConfig())
 			err := test.send(t, ex, upstream.context(t, nil), test.model)
-			assertMidSystemRejected(t, err, upstream)
+			assertMidSystemForwarded(t, err, upstream)
 		})
 	}
 }
@@ -171,36 +157,31 @@ func sendMidSystemCountTokens(t *testing.T, ex *ClaudeExecutor, ctx context.Cont
 	return err
 }
 
-// Payload rules run long after translation and can rewrite model and messages,
-// so the guard has to read the finished body rather than an intermediate one.
-func TestClaudeExecutor_PayloadOverrideCannotSmuggleLegacyMidSystemMessage(t *testing.T) {
+func TestAnthropicCompatibleExecutor_PayloadOverrideLeavesMidSystemPolicyToUpstream(t *testing.T) {
 	upstream := &midSystemUpstream{}
 	cfg := midSystemConfig()
 	cfg.Payload.Override = []config.PayloadRule{{
 		Models: []config.PayloadModelRule{{Name: "*"}},
 		Params: map[string]any{"model": "claude-haiku-4-5-20251001"},
 	}}
-	ex := NewClaudeExecutor(cfg)
+	ex := newAnthropicCompatibleTestExecutor(cfg)
 
 	// The caller addresses a model that accepts the turn; only the payload rule
 	// turns it into the rejected pairing.
 	_, err := ex.Execute(upstream.context(t, nil), midSystemAuth(), cliproxyexecutor.Request{
 		Model: "claude-sonnet-5", Payload: midSystemLegacyPayload("claude-sonnet-5"),
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
-	assertMidSystemRejected(t, err, upstream)
+	assertMidSystemForwarded(t, err, upstream)
 }
 
-// A caller may already have the exact role=system turn that cloaking would
-// otherwise insert. The message-count proof must keep that turn caller-owned,
-// so a later legacy model rewrite is rejected instead of silently consuming it.
-func TestClaudeExecutor_PayloadOverrideDoesNotClaimMatchingCallerTurn(t *testing.T) {
+func TestAnthropicCompatibleExecutor_PayloadOverridePreservesCallerMidSystemTurn(t *testing.T) {
 	upstream := &midSystemUpstream{}
 	cfg := midSystemConfig()
 	cfg.Payload.Override = []config.PayloadRule{{
 		Models: []config.PayloadModelRule{{Name: "*"}},
 		Params: map[string]any{"model": "claude-haiku-4-5-20251001"},
 	}}
-	ex := NewClaudeExecutor(cfg)
+	ex := newAnthropicCompatibleTestExecutor(cfg)
 	payload := []byte(`{"model":"claude-sonnet-5","max_tokens":32,` +
 		`"system":[{"type":"text","text":"Same rule"}],` +
 		`"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]},` +
@@ -209,93 +190,7 @@ func TestClaudeExecutor_PayloadOverrideDoesNotClaimMatchingCallerTurn(t *testing
 	_, err := ex.Execute(upstream.context(t, nil), midSystemAuth(), cliproxyexecutor.Request{
 		Model: "claude-sonnet-5", Payload: payload,
 	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
-	assertMidSystemRejected(t, err, upstream)
-}
-
-// Cloaking relocates a caller's system prompt into a role=system turn for models
-// that accept one. A payload rule can then rewrite the model to one that does
-// not. Because the caller never wrote that turn, CPA must reconcile its own
-// placement through the legacy reminder path instead of returning 400.
-func TestClaudeExecutor_PayloadOverrideReconcilesRelocatedSystemPrompt(t *testing.T) {
-	for _, test := range []struct {
-		name string
-		send func(t *testing.T, ex *ClaudeExecutor, ctx context.Context, payload []byte) error
-	}{
-		{name: "execute", send: func(t *testing.T, ex *ClaudeExecutor, ctx context.Context, payload []byte) error {
-			_, err := ex.Execute(ctx, midSystemAuth(), cliproxyexecutor.Request{
-				Model: "claude-sonnet-5", Payload: payload,
-			}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
-			return err
-		}},
-		{name: "execute stream", send: func(t *testing.T, ex *ClaudeExecutor, ctx context.Context, payload []byte) error {
-			result, err := ex.ExecuteStream(ctx, midSystemAuth(), cliproxyexecutor.Request{
-				Model: "claude-sonnet-5", Payload: payload,
-			}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude})
-			if err != nil {
-				return err
-			}
-			for chunk := range result.Chunks {
-				if chunk.Err != nil {
-					return chunk.Err
-				}
-			}
-			return nil
-		}},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			upstream := &midSystemUpstream{}
-			cfg := midSystemConfig()
-			cfg.Payload.Override = []config.PayloadRule{{
-				Models: []config.PayloadModelRule{{Name: "*"}},
-				Params: map[string]any{"model": "claude-haiku-4-5-20251001"},
-			}}
-			ex := NewClaudeExecutor(cfg)
-
-			// Only a top-level system prompt: the caller never writes a
-			// role=system turn.
-			payload := []byte(`{"model":"claude-sonnet-5","max_tokens":32,` +
-				`"system":[{"type":"text","text":"Caller top"}],` +
-				`"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}`)
-
-			if err := test.send(t, ex, upstream.context(t, nil), payload); err != nil {
-				t.Fatalf("request error = %v, want CPA's inserted turn reconciled", err)
-			}
-			if !upstream.called {
-				t.Fatal("expected reconciled request to reach upstream")
-			}
-			if got := gjson.GetBytes(upstream.body, "model").String(); got != "claude-haiku-4-5-20251001" {
-				t.Fatalf("upstream model = %q, want payload override preserved", got)
-			}
-			if gjson.GetBytes(upstream.body, `messages.#(role=="system")`).Exists() {
-				t.Fatalf("reconciled body still carries role=system; body=%s", upstream.body)
-			}
-			if !strings.Contains(gjson.GetBytes(upstream.body, "messages.0.content").Raw, "<system-reminder>") ||
-				!strings.Contains(gjson.GetBytes(upstream.body, "messages.0.content").Raw, "Caller top") {
-				t.Fatalf("caller system prompt was not replayed as a legacy reminder; body=%s", upstream.body)
-			}
-		})
-	}
-}
-
-// A confirmed native caller owns its wire. It gates the turn on the model
-// itself, so CPA forwards the body untouched and lets the upstream answer.
-func TestClaudeExecutor_ConfirmedNativeLegacyMidSystemMessageForwarded(t *testing.T) {
-	upstream := &midSystemUpstream{}
-	ex := NewClaudeExecutor(midSystemConfig())
-	headers := claudeNativeHelperHeaders("claude-code-20250219,"+claudeNativeHelperCoreBetas, "gzip", false)
-
-	if _, err := ex.Execute(upstream.context(t, headers), midSystemAuth(), cliproxyexecutor.Request{
-		Model:   "claude-haiku-4-5-20251001",
-		Payload: midSystemLegacyPayload("claude-haiku-4-5-20251001"),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude, Headers: headers}); err != nil {
-		t.Fatalf("Execute() error = %v, want the native body forwarded", err)
-	}
-	if !upstream.called {
-		t.Fatal("expected the native request to reach the upstream")
-	}
-	if !gjson.GetBytes(upstream.body, `messages.#(role=="system")`).Exists() {
-		t.Fatalf("confirmed native caller lost its role=system turn; body=%s", upstream.body)
-	}
+	assertMidSystemForwarded(t, err, upstream)
 }
 
 // The rejection was measured against api.anthropic.com. A third-party gateway
@@ -303,7 +198,7 @@ func TestClaudeExecutor_ConfirmedNativeLegacyMidSystemMessageForwarded(t *testin
 // locally would also stop failover to another credential or base URL.
 func TestClaudeExecutor_LegacyMidSystemMessageForwardedToThirdPartyGateway(t *testing.T) {
 	upstream := &midSystemUpstream{}
-	ex := NewClaudeExecutor(&config.Config{ClaudeKey: []config.ClaudeKey{{
+	ex := newAnthropicCompatibleTestExecutor(&config.Config{ClaudeKey: []config.ClaudeKey{{
 		APIKey: "key-123", BaseURL: "https://gateway.example",
 	}}})
 	auth := &cliproxyauth.Auth{Attributes: map[string]string{
@@ -327,7 +222,7 @@ func TestClaudeExecutor_SupportedModelMidSystemMessageForwarded(t *testing.T) {
 	for _, model := range []string{"claude-sonnet-5", "claude-sonnet-9"} {
 		t.Run(model, func(t *testing.T) {
 			upstream := &midSystemUpstream{}
-			ex := NewClaudeExecutor(midSystemConfig())
+			ex := newAnthropicCompatibleTestExecutor(midSystemConfig())
 			if _, err := ex.Execute(upstream.context(t, nil), midSystemAuth(), cliproxyexecutor.Request{
 				Model: model, Payload: midSystemLegacyPayload(model),
 			}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude}); err != nil {
@@ -337,28 +232,6 @@ func TestClaudeExecutor_SupportedModelMidSystemMessageForwarded(t *testing.T) {
 				t.Fatal("expected the request to reach the upstream")
 			}
 		})
-	}
-}
-
-// The opt-in rescues the pairing by folding the turn into the system slot, so
-// the guard must run after it rather than rejecting the request outright.
-func TestClaudeExecutor_LegacyMidSystemMessageOptInStillRebuilds(t *testing.T) {
-	upstream := &midSystemUpstream{}
-	ex := NewClaudeExecutor(midSystemConfig())
-	auth := midSystemAuth()
-	auth.Attributes["rebuild_mid_system_message"] = "true"
-
-	if _, err := ex.Execute(upstream.context(t, nil), auth, cliproxyexecutor.Request{
-		Model:   "claude-haiku-4-5-20251001",
-		Payload: midSystemLegacyPayload("claude-haiku-4-5-20251001"),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude}); err != nil {
-		t.Fatalf("Execute() error = %v, want the opt-in rebuild to rescue the request", err)
-	}
-	if !upstream.called {
-		t.Fatal("expected the rebuilt request to reach the upstream")
-	}
-	if gjson.GetBytes(upstream.body, `messages.#(role=="system")`).Exists() {
-		t.Fatalf("opt-in rebuild left a role=system turn; body=%s", upstream.body)
 	}
 }
 
@@ -387,7 +260,7 @@ func TestTranslatedRequestNeverPairsLegacyModelWithMidSystemMessage(t *testing.T
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			upstream := &midSystemUpstream{}
-			ex := NewClaudeExecutor(midSystemConfig())
+			ex := newAnthropicCompatibleTestExecutor(midSystemConfig())
 
 			if _, err := ex.Execute(upstream.context(t, nil), midSystemAuth(), cliproxyexecutor.Request{
 				Model: legacyModel, Payload: []byte(test.payload),
@@ -447,11 +320,9 @@ func TestClaudePayloadHasMidSystemMessage(t *testing.T) {
 func TestValidateClaudeMidSystemMessageModel(t *testing.T) {
 	const turn = `,"messages":[{"role":"user","content":"a"},{"role":"system","content":"s"}]}`
 	for _, test := range []struct {
-		name       string
-		payload    string
-		confirmed  bool
-		thirdParty bool
-		wantError  bool
+		name      string
+		payload   string
+		wantError bool
 	}{
 		{name: "legacy model is rejected", wantError: true,
 			payload: `{"model":"claude-haiku-4-5-20251001"` + turn},
@@ -459,10 +330,6 @@ func TestValidateClaudeMidSystemMessageModel(t *testing.T) {
 			payload: `{"model":"anthropic/claude-sonnet-4-6"` + turn},
 		{name: "model casing is ignored", wantError: true,
 			payload: `{"model":"Claude-Haiku-4-5-20251001"` + turn},
-		{name: "confirmed native keeps the passthrough", confirmed: true,
-			payload: `{"model":"claude-haiku-4-5-20251001"` + turn},
-		{name: "third party gateway decides for itself", thirdParty: true,
-			payload: `{"model":"claude-haiku-4-5-20251001"` + turn},
 		{name: "supported model is forwarded",
 			payload: `{"model":"claude-sonnet-5"` + turn},
 		{name: "unknown model stays optimistic",
@@ -471,9 +338,9 @@ func TestValidateClaudeMidSystemMessageModel(t *testing.T) {
 			payload: `{"model":"claude-haiku-4-5-20251001","messages":[{"role":"user","content":"a"}]}`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			err := validateClaudeMidSystemMessageModel([]byte(test.payload), test.confirmed, !test.thirdParty)
+			err := validateClaudeDesktopMidSystemMessageModel([]byte(test.payload))
 			if test.wantError != (err != nil) {
-				t.Fatalf("validateClaudeMidSystemMessageModel error = %v, want error %v", err, test.wantError)
+				t.Fatalf("validateClaudeDesktopMidSystemMessageModel error = %v, want error %v", err, test.wantError)
 			}
 			if err == nil {
 				return

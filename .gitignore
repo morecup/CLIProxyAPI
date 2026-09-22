@@ -5,9 +5,11 @@ cli-proxy-api
 # Configuration
 config.yaml
 .env
+.codex-claude-desktop-login.yaml
 
 # Generated content
 bin/*
+.agent-validation/
 /logs
 conv/*
 temp/*
@@ -30,6 +32,7 @@ auths/*
 
 # Documentation
 docs/*
+!docs/claude-desktop-alignment-plan.md
 AGENTS.md
 CLAUDE.md
 GEMINI.md

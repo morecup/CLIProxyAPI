@@ -1,0 +1,338 @@
+{
+  "schema_version": 1,
+  "lane": "W5 desktop-process2",
+  "desktop_version": "1.40609.0.0",
+  "claim_boundary": [
+    "Exact installed Desktop 1.40609 main-process source, sliced by unique markers and executed in isolation with synthetic inputs.",
+    "The @ant/claude-native addon binary is not part of the reviewed tree; its getWindowsElevationType() string enum is pinned from the two JS consumers (default | limited | full; anything else is treated as unknown by getSystemInfo).",
+    "Not a capture value proof: the captured schema holds field names only; native source decides key order and values.",
+    "The gateway emits only the events listed under executable_events; every other lane event stays a boundary with its native condition."
+  ],
+  "chunks": {
+    "main": {
+      "path": "build/index.chunk-C5__TEgr.js",
+      "sha256": "447185cd1821209151f80f368108fef086c2cba98ee464355faac957c3c45947",
+      "bytes": 5774579
+    }
+  },
+  "slices": [
+    {
+      "symbol": "appReadyWindowsElevation",
+      "chunk": "main",
+      "begin": "oAr();try{let{maybeGetClaudeNative:e}=await Promise.resolve().then((()=>Ple)),t=e()?.getWindowsElevationType()",
+      "end": "let s=!1,c=()=>{!s&&Rc().shouldEnableChromeExtensionBridge()",
+      "from": 5632002,
+      "to": 5632301,
+      "sha256": "d3f1df890de6bbea4f43ae6b61bf6bdf694d833bdc972079cdb0ea2df749db9b"
+    },
+    {
+      "symbol": "getSystemInfoElevation",
+      "chunk": "main",
+      "begin": "getSystemInfo(){let e=gi()?.getWindowsElevationType()??null;",
+      "end": "is_msix:Br(),installer_variant:jce()}}",
+      "from": 5600692,
+      "to": 5600990,
+      "sha256": "df6e1e78df60f2adf026b91646d2daf6d30af03c5f4083ac17e1013b382b2be6"
+    },
+    {
+      "symbol": "oauthResultLogger",
+      "chunk": "main",
+      "begin": "function gPt(e,t,n){let r=n.scope===",
+      "end": "async function ck(){",
+      "from": 2482315,
+      "to": 2482585,
+      "sha256": "9d4873ad8264c129c83ee51486ae8d5c0e8a2ed68360d418d8c4ea5f093c9379"
+    },
+    {
+      "symbol": "oauthRefreshFlow",
+      "chunk": "main",
+      "begin": "async function gk(e,t){let n=await FPt(e,t);return gPt(`refresh`,n,e),n}",
+      "end": "async function IPt(){",
+      "from": 2489929,
+      "to": 2490755,
+      "sha256": "11aada90a4c36361032050889ff067f7380aa74cfd68a28766ae003e410f268a"
+    },
+    {
+      "symbol": "oauthSuccessPredicate",
+      "chunk": "main",
+      "begin": "function lk(e){return`token`in e}",
+      "end": "async function uk(e){",
+      "from": 2483872,
+      "to": 2483905,
+      "sha256": "0c39869cce173e944116f7996e0a8d7fe207acf439dfc81546ac6b6cede6cc72"
+    },
+    {
+      "symbol": "growthbookFeatureExposure",
+      "chunk": "main",
+      "begin": "function KS(e,t){if(OS()&&t!==void 0)",
+      "end": "let n=t?.experimentResult;if(!n||n.inExperiment!==!0)return;",
+      "from": 1979229,
+      "to": 1979516,
+      "sha256": "2ec51fc93b4dc1c1db3c6fd2a5ff84507fabf06f420b1f81652f2db38e076fa2"
+    }
+  ],
+  "executable_events": [
+    {
+      "event_name": "desktop_windows_elevation_detected",
+      "gateway_fact": "desktop_windows_elevation_detected",
+      "endpoint_role": "desktop-event-logging",
+      "logger": "Y(...) main-process logEvent (chunk main)",
+      "chunk": "main",
+      "slice": "appReadyWindowsElevation",
+      "payload_keys": [
+        "elevation_type",
+        "can_elevate"
+      ],
+      "derivations": {
+        "elevation_type": "maybeGetClaudeNative()?.getWindowsElevationType() ?? `default`; addon enum default | limited | full mirrors TOKEN_ELEVATION_TYPE (TokenElevationTypeDefault=1, TokenElevationTypeFull=2, TokenElevationTypeLimited=3) of the process token",
+        "can_elevate": "elevation_type === `limited` || elevation_type === `full`"
+      },
+      "condition": "app-ready handler of the main process, once per application launch, unconditionally (no platform gate); a throw inside the try suppresses the event (P.error `Failed to detect Windows elevation type`)",
+      "lifecycle_position": "application activation: after the account-details listener (oAr()) and before fcn()/Chrome extension bridge enablement; independent of any session, therefore before the first session event of that launch and before the autoUpdater checking-for-update event (desktop_update_check_started) which is only triggered later by the updater",
+      "emulated_state": "the gateway emulates one Desktop main process per enrolled account on Windows and reads the real process token (OpenProcessToken + GetTokenInformation(TokenElevationType)) once per account activation",
+      "builder": "{elevation_type:t,can_elevate:t===`limited`||t===`full`}",
+      "fallback_expression": "t=e()?.getWindowsElevationType()??`default`;",
+      "literals": [
+        "default",
+        "full",
+        "limited"
+      ],
+      "probes": [
+        {
+          "addon": "addon_default",
+          "addon_value": "default",
+          "emitted": true,
+          "metadata": {
+            "elevation_type": "default",
+            "can_elevate": false
+          }
+        },
+        {
+          "addon": "addon_limited",
+          "addon_value": "limited",
+          "emitted": true,
+          "metadata": {
+            "elevation_type": "limited",
+            "can_elevate": true
+          }
+        },
+        {
+          "addon": "addon_full",
+          "addon_value": "full",
+          "emitted": true,
+          "metadata": {
+            "elevation_type": "full",
+            "can_elevate": true
+          }
+        },
+        {
+          "addon": "addon_null_result",
+          "addon_value": null,
+          "emitted": true,
+          "metadata": {
+            "elevation_type": "default",
+            "can_elevate": false
+          }
+        },
+        {
+          "addon": "addon_missing",
+          "addon_value": "<undefined>",
+          "emitted": true,
+          "metadata": {
+            "elevation_type": "default",
+            "can_elevate": false
+          }
+        }
+      ]
+    },
+    {
+      "event_name": "desktop_oauth_failed",
+      "gateway_fact": "desktop_oauth_failed",
+      "endpoint_role": "desktop-event-logging",
+      "logger": "sk(logEvent) deferred main-process logEvent (chunk main)",
+      "chunk": "main",
+      "slice": "oauthResultLogger",
+      "payload_keys": [
+        "oauth_type",
+        "failure_reason",
+        "status?",
+        "client?"
+      ],
+      "derivations": {
+        "oauth_type": "gPt call-site literal: `refresh` (gk -> FPt token refresh) or `initial` (_k -> LPt cookie/authorize exchange); the gateway only refreshes",
+        "failure_reason": "result.type of the flow; refresh flow (FPt): network_error (token POST threw), server_error (status >= 500), auth_error (status !== 200 and < 500)",
+        "status": "present only when `status` in result: the HTTP status of the non-200 token response (server_error / auth_error); absent for network_error",
+        "client": "`cowork_3p_hybrid` only when config.scope === `user:profile org:desktop_config`; the gateway refresh scope is user:inference, so never present"
+      },
+      "condition": "gPt(e,t,n) with !lk(t) i.e. the result has no `token` key; the refresh flow returns a typed failure instead of throwing for transport errors and non-200 responses (a response-body parse failure in KO throws and logs nothing)",
+      "lifecycle_position": "application-level, no session; on every failed token refresh",
+      "emulated_state": "the gateway refreshes the Desktop OAuth token via POST /v1/oauth/token (grant_type refresh_token, scope user:inference); transport failure => network_error, non-2xx => server_error/auth_error with status; other errors are not reported",
+      "builder": "{oauth_type:e,failure_reason:t.type,...`status`in t&&{status:t.status},...r}",
+      "oauth_type_literals": [
+        "refresh",
+        "initial"
+      ],
+      "refresh_failure_types": [
+        {
+          "type": "network_error",
+          "has_status": false
+        },
+        {
+          "type": "server_error",
+          "has_status": true
+        },
+        {
+          "type": "auth_error",
+          "has_status": true
+        }
+      ],
+      "probes": [
+        {
+          "probe": "refresh_network_error",
+          "metadata": {
+            "oauth_type": "refresh",
+            "failure_reason": "network_error"
+          }
+        },
+        {
+          "probe": "refresh_auth_error_401",
+          "metadata": {
+            "oauth_type": "refresh",
+            "failure_reason": "auth_error",
+            "status": 401
+          }
+        },
+        {
+          "probe": "refresh_server_error_503",
+          "metadata": {
+            "oauth_type": "refresh",
+            "failure_reason": "server_error",
+            "status": 503
+          }
+        },
+        {
+          "probe": "refresh_cowork_hybrid_client",
+          "metadata": {
+            "oauth_type": "refresh",
+            "failure_reason": "auth_error",
+            "status": 400,
+            "client": "cowork_3p_hybrid"
+          }
+        }
+      ]
+    }
+  ],
+  "pinned_boundaries": [
+    {
+      "event_name": "desktop_feature_exposure",
+      "chunk": "main",
+      "slice": "growthbookFeatureExposure",
+      "payload_keys": [
+        "feature_hash",
+        "on",
+        "feature_source",
+        "in_experiment"
+      ],
+      "condition": "KS(e,t): OS() && t !== undefined, deduped per `${feature_hash}:${on}:${source}` for the process lifetime; t is the GrowthBook FeatureResult of a subscribed/evaluated feature",
+      "reason": "the OS() gate and the GrowthBook FeatureResult.source of the Desktop main-process feature evaluation are not modelled by claudefeatures (its Lookup returns values without a GrowthBook source); stays a boundary",
+      "builder": "{feature_hash:e,on:t.on,feature_source:t.source,in_experiment:t.experimentResult?.inExperiment===!0}",
+      "probes": [
+        {
+          "probe": "default_value_no_experiment",
+          "metadata": {
+            "feature_hash": "2795002549",
+            "on": true,
+            "feature_source": "defaultValue",
+            "in_experiment": false
+          }
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "event_name": "desktop_ccd_session_list_loaded",
+      "reason": "renderer-reported (index2 chunk qt(e,n)): {attempt_id, list_source:`local`, entry_point, attempt_index, duration_ms, session_count, skipped_count (only when store status loaded), cached:!1, store_state:n.status} from the UI session-list store outcome; the gateway has no renderer session-list load"
+    },
+    {
+      "event_name": "desktop_ccd_session_start_timing",
+      "reason": "index2 chunk: {session_id, preflight_ms, worktree_ms, mcp_ms, query_ms, enqueue_ms, init_ms, init_awake_ms, first_assistant_ms, ...} are performance marks of the real CLI spawn phases (n.sleepAtMark enqueue/init); the gateway spawns no CLI"
+    },
+    {
+      "event_name": "desktop_ccd_session_idle_timeout_cancelled / desktop_ccd_session_idle_pause_declined / desktop_ccd_session_pause_blocked_by_rc",
+      "reason": "warm-lifecycle idle timer outcomes (hasActiveQuery, remoteControlEnabled) of the CCD session manager; the gateway only models idle_timeout_started at app quit"
+    },
+    {
+      "event_name": "desktop_ccd_session_idle_warm_start / desktop_ccd_session_idle_warm_complete",
+      "reason": "index2 chunk: emitted when a warm (re)spawn starts after cliGovernor.acquireSlot(`warm`) ({session_id, is_ssh, backend_kind}) and completes; the gateway has no warm re-spawn"
+    },
+    {
+      "event_name": "desktop_ccd_remote_managed_settings_fetch",
+      "reason": "main chunk e_r(): {outcome, duration_ms, key_count, organization_id} after the remote managed-settings RPC race with a timeout, suppressed for outcome `no_org`; the gateway performs no managed-settings fetch"
+    },
+    {
+      "event_name": "desktop_ccd_trust_check_miss",
+      "reason": "index2 chunk checkWorkspaceTrustUncached(e,n): {trust_check_cause:n, trust_total_ms:Math.round(performance.now()-r)} measures a real workspace trust lookup with dangerous-feature scan; no workspace trust check exists in the gateway"
+    },
+    {
+      "event_name": "desktop_ccd_config_reparse",
+      "reason": "main chunk qrn(e): {...e, config_read_ms, config_parse_ms|null, config_rpc_ms|null} rounded measurements of a real config file re-read (cause self_write | external | initial); the gateway re-reads no Desktop config file"
+    },
+    {
+      "event_name": "desktop_ccd_transcript_lease_pass",
+      "reason": "index2 chunk transcriptLease onPassResult: {candidates, renewed, fresh, missing, errors, skipped?, retention_days?, retention_source?} counts of a lease pass over the on-disk Desktop transcript store the gateway does not hold"
+    },
+    {
+      "event_name": "desktop_ccd_governor_would_evict / desktop_ccd_governor_soft_cap_exceeded / desktop_ccd_governor_*",
+      "reason": "index2 chunk CliGovernor.acquire(): fires only when effective CLI process count >= cap ({reason, cap, ...inflight, victim_idle_seconds, total_mem_gb, evicted}); the gateway runs no CLI processes"
+    },
+    {
+      "event_name": "desktop_ccd_session_switch_initiated / desktop_ccd_session_switch_abandoned",
+      "reason": "index2 chunk vn(e,n)/yn(e): renderer-reported switch telemetry ({session_id clamped, switch_id, session_type, is_new_session, entry_point, renderer_surface, backend_kind, renderer_build_id} / {..., reason, elapsed_ms, nav_temp, was_hidden}); nobody switches sessions in the gateway UI"
+    },
+    {
+      "event_name": "desktop_ccd_resume_bring_home_timing",
+      "reason": "index2 chunk: {session_id, cli_session_id, outcome, timed_out_phase, resolve_ms, scan_ms, stat_ms, copy_ms, total_ms} of the resume transcript relocation before spawn; not performed by the gateway"
+    },
+    {
+      "event_name": "desktop_ccd_remote_control_auto_enable",
+      "reason": "route/verdict/outcome come from the remote-control auto-enable policy and its RPC result; remote control is not modelled"
+    },
+    {
+      "event_name": "chrome_bridge_transport_selected",
+      "reason": "main chunk Qun(): {transport: e.bridgeConfig?`bridge`:`socket`, bridge_url_present, is_nest_build:!1, platform} once when the Chrome extension bridge transport is first created (shouldEnableChromeExtensionBridge()); the gateway hosts no extension bridge"
+    },
+    {
+      "event_name": "desktop_hardware_buddy_status",
+      "reason": "emitted by initBuddy() of the lazily loaded hardware-buddy chunk (index.chunk-C45MTFpl.js) for a real HID device; none exists in the gateway"
+    },
+    {
+      "event_name": "device_registry_no_tpm_probe_code",
+      "reason": "main chunk vJn(e,t): {no_tpm_probe_code: NTE_*/0x code token ?? `no-code-token`} only when the device-registry TPM probe threw; the gateway performs no TPM key probe"
+    },
+    {
+      "event_name": "desktop_app_input_ready / desktop_app_sidebar_painted / desktop_app_startup_perf / desktop_main_view_paint_probe / desktop_main_event_loop_stall / desktop_process_memory_sample / desktop_ccd_stream_render / desktop_ccd_composer_inp",
+      "reason": "real UI paint/INP/event-loop/process-memory metrics of the Electron processes (e.g. desktop_process_memory_sample G$n(): interval sample every O$n ticks over process.getProcessMemoryInfo samples sorted by rss); no Electron process exists"
+    },
+    {
+      "event_name": "desktop_ccd_terminal_spawned",
+      "reason": "emitted after a PTY shell spawn succeeds ({sessionId, shell, spawn_reason}); the gateway spawns no PTY"
+    },
+    {
+      "event_name": "desktop_notification_displayed / desktop_notification_reachability / desktop_notification_shown / desktop_notification_suppressed",
+      "reason": "require NotificationService state (initialized, viewing session, banner level) and real OS notifications"
+    },
+    {
+      "event_name": "lam_* (8)",
+      "reason": "secure-VM (LAM) feature support evaluation, MCP server setup and VM lifecycle of the local agent machine; the gateway hosts no VM"
+    },
+    {
+      "event_name": "cowork_* (2)",
+      "reason": "Cowork watch/record lifecycle (cowork_watch_record scheduled at app ready via n5t) of the Cowork surface; not modelled"
+    },
+    {
+      "event_name": "marketplace_plugin_account_sync_result",
+      "reason": "result of the plugin marketplace account sync (primePluginsSyncAtAppReady in the lazily loaded plugins chunk index.chunk-C7vBSyQ2.js); the gateway syncs no marketplace plugins"
+    }
+  ]
+}

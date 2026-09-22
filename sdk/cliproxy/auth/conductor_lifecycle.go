@@ -40,10 +40,23 @@ func (m *Manager) RegisterExecutor(executor ProviderExecutor) {
 	}
 
 	var replaced ProviderExecutor
+	var lifecycleAuths []*Auth
 	m.mu.Lock()
 	replaced = m.executors[provider]
 	m.executors[provider] = executor
+	if _, ok := executor.(AuthLifecycleSynchronizer); ok {
+		for _, auth := range m.auths {
+			if auth != nil && executorKeyFromAuth(auth) == provider {
+				lifecycleAuths = append(lifecycleAuths, auth.Clone())
+			}
+		}
+	}
 	m.mu.Unlock()
+	if synchronizer, ok := executor.(AuthLifecycleSynchronizer); ok {
+		for _, auth := range lifecycleAuths {
+			synchronizer.SyncAuth(auth)
+		}
+	}
 
 	if replaced == nil || replaced == executor {
 		return
@@ -82,8 +95,12 @@ func (m *Manager) Register(ctx context.Context, auth *Auth) (*Auth, error) {
 		cooldownStateChanged = clearCooldownStateForAuth(auth, now) || cooldownStateChanged
 	}
 	auth.EnsureIndex()
-	authClone := auth.Clone()
+	auth.credentialGeneration = nextCredentialGeneration.Add(1)
 	m.mu.Lock()
+	// Keep publication and persistence ordered with credential-only refresh.
+	// A late registration write must not overwrite a newer rotated token.
+	_ = m.persist(ctx, auth)
+	authClone := auth.Clone()
 	m.auths[auth.ID] = authClone
 	m.mu.Unlock()
 	if !shouldDeferAPIKeyModelAliasRebuild(ctx) {
@@ -92,8 +109,8 @@ func (m *Manager) Register(ctx context.Context, auth *Auth) (*Auth, error) {
 	if m.scheduler != nil {
 		m.scheduler.upsertAuth(authClone)
 	}
+	m.syncAuthLifecycle(authClone)
 	m.queueRefreshReschedule(auth.ID)
-	_ = m.persist(ctx, auth)
 	m.hook.OnAuthRegistered(ctx, auth.Clone())
 	if cooldownStateChanged {
 		m.persistCooldownStates(ctx)
@@ -121,6 +138,7 @@ func (m *Manager) Update(ctx context.Context, auth *Auth) (*Auth, error) {
 		auth.indexAssigned = existing.indexAssigned
 	}
 	auth.Success = existing.Success
+	auth.credentialGeneration = existing.credentialGeneration
 	auth.Failed = existing.Failed
 	auth.recentRequests = existing.recentRequests
 	if !existing.Disabled && existing.Status != StatusDisabled && !auth.Disabled && auth.Status != StatusDisabled {
@@ -142,6 +160,7 @@ func (m *Manager) Update(ctx context.Context, auth *Auth) (*Auth, error) {
 		cooldownStateChanged = clearCooldownStateForAuth(auth, now) || cooldownStateChanged
 	}
 	auth.EnsureIndex()
+	_ = m.persist(ctx, auth)
 	authClone := auth.Clone()
 	m.auths[auth.ID] = authClone
 	m.mu.Unlock()
@@ -151,13 +170,25 @@ func (m *Manager) Update(ctx context.Context, auth *Auth) (*Auth, error) {
 	if m.scheduler != nil {
 		m.scheduler.upsertAuth(authClone)
 	}
+	m.syncAuthLifecycle(authClone)
 	m.queueRefreshReschedule(auth.ID)
-	_ = m.persist(ctx, auth)
 	m.hook.OnAuthUpdated(ctx, auth.Clone())
 	if cooldownStateChanged {
 		m.persistCooldownStates(ctx)
 	}
 	return auth.Clone(), nil
+}
+
+func (m *Manager) syncAuthLifecycle(auth *Auth) {
+	if m == nil || auth == nil {
+		return
+	}
+	m.mu.RLock()
+	executor := m.executors[executorKeyFromAuth(auth)]
+	m.mu.RUnlock()
+	if synchronizer, ok := executor.(AuthLifecycleSynchronizer); ok && synchronizer != nil {
+		synchronizer.SyncAuth(auth.Clone())
+	}
 }
 
 // Remove deletes an auth from runtime state without persisting.
@@ -205,7 +236,9 @@ func (m *Manager) Remove(ctx context.Context, id string) {
 
 	if provider != "" {
 		if exec, ok := m.Executor(provider); ok && exec != nil {
-			if closer, okCloser := exec.(ExecutionSessionCloser); okCloser {
+			if closer, okCloser := exec.(AuthResourceCloser); okCloser {
+				closer.CloseAuth(id)
+			} else if closer, okCloser := exec.(ExecutionSessionCloser); okCloser {
 				closer.CloseExecutionSession(CloseAllExecutionSessionsID)
 			}
 		}
@@ -244,6 +277,7 @@ func (m *Manager) Load(ctx context.Context) error {
 			continue
 		}
 		auth.EnsureIndex()
+		auth.credentialGeneration = nextCredentialGeneration.Add(1)
 		m.auths[auth.ID] = auth.Clone()
 	}
 	cfg, _ := m.runtimeConfig.Load().(*internalconfig.Config)

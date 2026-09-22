@@ -1,219 +1,140 @@
 package executor
 
 import (
-	"bufio"
-	"bytes"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"sort"
 	"strings"
 	"testing"
 
+	claudeprofile "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/profile"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 )
 
-// claudeCode2_1_220WireHeaderOrder is the header name sequence captured from a
-// real Claude Code 2.1.220 OAuth POST /v1/messages over HTTP/1.1, minus the four
-// names the Node HTTP layer appends after the sorted block (Connection, Host,
-// Accept-Encoding, Content-Length) and minus User-Agent. Go hardcodes Host,
-// User-Agent and Content-Length ahead of the sorted block, so those four
-// positions cannot be matched without replacing the request serialiser; the real
-// client carries User-Agent inside the sorted block at index 3.
-var claudeCode2_1_220WireHeaderOrder = []string{
-	"Accept",
-	"Authorization",
-	"Content-Type",
-	"X-Claude-Code-Session-Id",
-	"X-Stainless-Arch",
-	"X-Stainless-Lang",
-	"X-Stainless-OS",
-	"X-Stainless-Package-Version",
-	"X-Stainless-Retry-Count",
-	"X-Stainless-Runtime",
-	"X-Stainless-Runtime-Version",
-	"X-Stainless-Timeout",
-	"anthropic-beta",
-	"anthropic-dangerous-direct-browser-access",
-	"anthropic-version",
-	"x-app",
-	"x-client-request-id",
-}
-
-func newClaudeWireProbeRequest(t *testing.T, rawURL string) *http.Request {
+func newClaudeDesktopWireProbeRequest(t *testing.T) (*ClaudeExecutor, *http.Request) {
 	t.Helper()
-	auth := &cliproxyauth.Auth{ID: "wire", Metadata: map[string]any{"access_token": "sk-ant-oat01-wire"}}
-	req := httptest.NewRequest(http.MethodPost, rawURL, strings.NewReader("{}"))
-	req.Header = http.Header{}
+	executor := NewClaudeExecutor(&config.Config{})
 	body := []byte(`{"model":"claude-opus-5","messages":[{"role":"user","content":"hi"}]}`)
-	if err := applyClaudeHeaders(req, auth, "sk-ant-oat01-wire", false, nil, body, nil, nil, false); err != nil {
-		t.Fatalf("applyClaudeHeaders: %v", err)
+	plan, errPlan := executor.planClaudeDesktopRequest(body, claudeprofile.RoleMain)
+	if errPlan != nil {
+		t.Fatalf("plan Claude Desktop request: %v", errPlan)
 	}
-	// Mirror the production sequence: the casing pass runs at the send boundary,
-	// not inside applyClaudeHeaders, so Header.Get keeps working everywhere else.
-	applyClaudeWireHeaderCasing(req)
-	return req
+	plan.PromptID = "11111111-2222-4333-8444-555555555555"
+	plan.ClientRequestID = "66666666-7777-4888-8999-aaaaaaaaaaaa"
+	req := httptest.NewRequest(http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", strings.NewReader("{}"))
+	req.Header = make(http.Header)
+	if errHeaders := executor.applyClaudeHeadersWithProfile(
+		req,
+		&cliproxyauth.Auth{Metadata: map[string]any{"access_token": "sk-ant-oat01-wire"}},
+		"sk-ant-oat01-wire",
+		false,
+		nil,
+		body,
+		plan,
+		nil,
+		"bbbbbbbb-cccc-4ddd-8eee-ffffffffffff",
+	); errHeaders != nil {
+		t.Fatalf("apply Claude Desktop headers: %v", errHeaders)
+	}
+	return executor, req
 }
 
-// The casing pass must stay at the send boundary. Running it inside
-// applyClaudeHeaders would make these headers invisible to Header.Get for the
-// rest of the pipeline, which is how the first attempt broke ten other tests.
-func TestApplyClaudeHeaders_LeavesHeadersCanonicalForThePipeline(t *testing.T) {
-	auth := &cliproxyauth.Auth{ID: "wire", Metadata: map[string]any{"access_token": "sk-ant-oat01-wire"}}
-	req := httptest.NewRequest(http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", strings.NewReader("{}"))
-	req.Header = http.Header{}
-	body := []byte(`{"model":"claude-opus-5","messages":[{"role":"user","content":"hi"}]}`)
-	if err := applyClaudeHeaders(req, auth, "sk-ant-oat01-wire", false, nil, body, nil, nil, false); err != nil {
-		t.Fatalf("applyClaudeHeaders: %v", err)
-	}
+func TestClaudeDesktopHeadersRemainCanonicalUntilSend(t *testing.T) {
+	_, req := newClaudeDesktopWireProbeRequest(t)
 	for canonical := range claudeWireHeaderCasing {
 		if req.Header.Get(canonical) == "" {
-			t.Fatalf("%s is unreadable through Header.Get right after applyClaudeHeaders", canonical)
+			t.Fatalf("%s is unreadable through Header.Get before send", canonical)
 		}
 	}
 }
 
-// serializedHeaderNames reads the names off the actual serialized request, which
-// is the only representation the server ever sees.
-func serializedHeaderNames(t *testing.T, req *http.Request) []string {
-	t.Helper()
-	var buf bytes.Buffer
-	if err := req.Write(&buf); err != nil {
-		t.Fatalf("write request: %v", err)
+func TestClaudeDesktopWireCasingPreservesProfileValues(t *testing.T) {
+	_, req := newClaudeDesktopWireProbeRequest(t)
+	wantValues := make(map[string]string, len(claudeWireHeaderCasing))
+	for canonical := range claudeWireHeaderCasing {
+		wantValues[canonical] = req.Header.Get(canonical)
 	}
-	var names []string
-	scanner := bufio.NewScanner(&buf)
-	scanner.Scan() // request line
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			break
-		}
-		name, _, found := strings.Cut(line, ":")
-		if !found {
-			t.Fatalf("malformed header line %q", line)
-		}
-		names = append(names, name)
-	}
-	return names
-}
-
-// The wire casing is a fingerprint in its own right: CPA negotiates ALPN
-// http/1.1, so names are not lowercased by HPACK and reach Anthropic verbatim.
-func TestApplyClaudeHeaders_WireCasingMatchesRealClient(t *testing.T) {
-	req := newClaudeWireProbeRequest(t, "https://api.anthropic.com/v1/messages?beta=true")
-	got := serializedHeaderNames(t, req)
-
-	transportOwned := map[string]bool{
-		"Host": true, "Content-Length": true, "Connection": true, "Accept-Encoding": true,
-		// Go writes User-Agent before the sorted block; the real client keeps it
-		// inside it. Tracked separately below.
-		"User-Agent": true,
-	}
-	var sdkNames []string
-	for _, name := range got {
-		if !transportOwned[name] {
-			sdkNames = append(sdkNames, name)
-		}
-	}
-
-	want := claudeCode2_1_220WireHeaderOrder
-	if len(sdkNames) != len(want) {
-		t.Fatalf("header count = %d, want %d\n got %v", len(sdkNames), len(want), sdkNames)
-	}
-	for i := range want {
-		if sdkNames[i] != want[i] {
-			t.Fatalf("wire header %d = %q, want %q\n got  %v\n want %v", i, sdkNames[i], want[i], sdkNames, want)
-		}
-	}
-}
-
-// Documents the one ordering gap the casing fix cannot close. If Go ever stops
-// hoisting User-Agent, or the serialiser is replaced, this test fails and the
-// name can move back into claudeCode2_1_220WireHeaderOrder.
-func TestApplyClaudeHeaders_UserAgentStillHoistedByGo(t *testing.T) {
-	req := newClaudeWireProbeRequest(t, "https://api.anthropic.com/v1/messages?beta=true")
-	names := serializedHeaderNames(t, req)
-	uaIndex, acceptIndex := -1, -1
-	for i, name := range names {
-		switch name {
-		case "User-Agent":
-			uaIndex = i
-		case "Accept":
-			acceptIndex = i
-		}
-	}
-	if uaIndex == -1 || acceptIndex == -1 {
-		t.Fatalf("missing User-Agent or Accept: %v", names)
-	}
-	if uaIndex > acceptIndex {
-		t.Fatal("User-Agent now sorts with the block: fold it back into the expected wire order")
-	}
-	if got := req.Header.Get("User-Agent"); !strings.HasPrefix(got, "claude-cli/") {
-		t.Fatalf("User-Agent = %q, want the Claude Code identity", got)
-	}
-}
-
-// Guards the property that makes the casing fix sufficient: the real client's
-// order is a plain bytewise sort, which is also what Go emits.
-func TestClaudeWireHeaderOrderIsBytewiseSorted(t *testing.T) {
-	sorted := append([]string(nil), claudeCode2_1_220WireHeaderOrder...)
-	sort.Strings(sorted)
-	for i := range sorted {
-		if sorted[i] != claudeCode2_1_220WireHeaderOrder[i] {
-			t.Fatalf("captured order is not a bytewise sort at %d: %q vs %q", i, claudeCode2_1_220WireHeaderOrder[i], sorted[i])
-		}
-	}
-}
-
-// Every fingerprint rule is keyed on the upstream host, never on the caller.
-func TestApplyClaudeHeaders_WireCasingIsAnthropicOnly(t *testing.T) {
-	req := newClaudeWireProbeRequest(t, "https://api.moonshot.cn/v1/messages")
-	for _, name := range serializedHeaderNames(t, req) {
-		if name == "anthropic-beta" || name == "x-app" || name == "X-Stainless-OS" {
-			t.Fatalf("Anthropic wire casing leaked to a third-party gateway: %q", name)
-		}
-	}
-	if req.Header.Get("Anthropic-Version") == "" {
-		t.Fatal("third-party gateway lost its canonical headers")
-	}
-}
-
-// The rewritten keys are unreachable through Header.Get, so the pass has to run
-// after every other mutation. This pins that the values survived the rewrite.
-func TestApplyClaudeHeaders_WireCasingPreservesValues(t *testing.T) {
-	req := newClaudeWireProbeRequest(t, "https://api.anthropic.com/v1/messages?beta=true")
+	applyClaudeWireHeaderCasing(req)
 	for canonical, wire := range claudeWireHeaderCasing {
 		if _, stillCanonical := req.Header[canonical]; stillCanonical {
 			t.Fatalf("%s was not rewritten to %s", canonical, wire)
 		}
-		if len(req.Header[wire]) == 0 || req.Header[wire][0] == "" {
-			t.Fatalf("%s lost its value during the rewrite", wire)
+		if got := strings.Join(req.Header[wire], ","); got != wantValues[canonical] {
+			t.Fatalf("%s = %q, want %q", wire, got, wantValues[canonical])
 		}
 	}
 }
 
-// The three Claude request paths must all leave through doClaudeUpstreamRequest.
-// A direct client.Do would skip the wire-casing pass silently, and no behavioural
-// test can catch that for a path it does not exercise, so the invariant is
-// checked structurally.
-func TestClaudeExecutorHasSingleUpstreamSendBoundary(t *testing.T) {
-	paths := []string{
-		"claude_executor_execute.go",
-		"claude_executor_stream.go",
-		"claude_executor_tokens.go",
+func TestAnthropicCompatibleSendDoesNotApplyDesktopWireCasing(t *testing.T) {
+	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
+	req, errNewRequest := http.NewRequest(http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", nil)
+	if errNewRequest != nil {
+		t.Fatalf("new request: %v", errNewRequest)
 	}
-	for _, name := range paths {
-		src, err := os.ReadFile(name)
-		if err != nil {
-			t.Fatalf("read %s: %v", name, err)
+	req.Header.Set("Anthropic-Beta", "caller-beta")
+	var seen http.Header
+	client := &http.Client{Transport: roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+		seen = req.Header.Clone()
+		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader("{}")), Request: req}, nil
+	})}
+	resp, errRequest := executor.doClaudeUpstreamRequest(client, req)
+	if errRequest != nil {
+		t.Fatalf("anthropic-compatible send: %v", errRequest)
+	}
+	_ = resp.Body.Close()
+	if _, ok := seen["Anthropic-Beta"]; !ok {
+		t.Fatalf("canonical caller header missing: %v", seen)
+	}
+	if _, ok := seen["anthropic-beta"]; ok {
+		t.Fatalf("Desktop wire casing leaked into anthropic-compatible: %v", seen)
+	}
+}
+
+func TestClaudeExecutorHasSingleUpstreamSendBoundary(t *testing.T) {
+	for name, want := range map[string]struct {
+		method string
+		calls  int
+	}{
+		"claude_executor_execute.go":                 {"doClaudeDesktopRecoverableRequest", 1},
+		"claude_executor_stream.go":                  {"doClaudeDesktopRecoverableRequest", 1},
+		"claude_desktop_http_request.go":             {"doClaudeDesktopRecoverableRequest", 1},
+		"claude_executor_tokens.go":                  {"doClaudeUpstreamRequest", 1},
+		"claude_desktop_count_tokens_calibration.go": {"doClaudeUpstreamRequest", 1},
+		"claude_desktop_recovery_executor.go":        {"doClaudeUpstreamRequest", 3},
+	} {
+		source, errRead := os.ReadFile(name)
+		if errRead != nil {
+			t.Fatalf("read %s: %v", name, errRead)
 		}
-		text := string(src)
-		if strings.Contains(text, "httpClient.Do(") {
-			t.Errorf("%s bypasses the send boundary with a direct httpClient.Do", name)
+		file, errParse := parser.ParseFile(token.NewFileSet(), name, source, 0)
+		if errParse != nil {
+			t.Fatal(errParse)
 		}
-		if !strings.Contains(text, "doClaudeUpstreamRequest(") {
-			t.Errorf("%s does not route through doClaudeUpstreamRequest", name)
+		calls := 0
+		ast.Inspect(file, func(node ast.Node) bool {
+			call, ok := node.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			selector, ok := call.Fun.(*ast.SelectorExpr)
+			if !ok {
+				return true
+			}
+			if selector.Sel.Name == "Do" || selector.Sel.Name == "RoundTrip" {
+				t.Errorf("%s bypasses the executor send boundary", name)
+			}
+			if selector.Sel.Name == want.method {
+				calls++
+			}
+			return true
+		})
+		if calls != want.calls {
+			t.Errorf("%s has %d calls to %s; want %d", name, calls, want.method, want.calls)
 		}
 	}
 }

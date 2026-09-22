@@ -10,9 +10,10 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claude"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claudedesktop"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/codex"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
@@ -21,7 +22,6 @@ import (
 
 func TestSaveTokenRecord_PostPersistHookReceivesCanonicalClaudeOAuth(t *testing.T) {
 	authDir := t.TempDir()
-	fileName := "claude-user@example.com.json"
 	accessToken := "sk-ant-oat01-hot-reload"
 
 	h := NewHandler(&config.Config{AuthDir: authDir}, "", nil)
@@ -31,19 +31,45 @@ func TestSaveTokenRecord_PostPersistHookReceivesCanonicalClaudeOAuth(t *testing.
 		return nil
 	})
 
-	tokenStorage := &claude.ClaudeTokenStorage{
-		AccessToken:  accessToken,
-		RefreshToken: "refresh-token",
-		LastRefresh:  "2026-03-09T00:00:00Z",
-		Email:        "user@example.com",
-		Expire:       "2026-12-31T23:59:59Z",
+	identity := claudedesktop.AccountIdentity{
+		AccountUUID:      "11111111-1111-4111-8111-111111111111",
+		Email:            "user@example.com",
+		OrganizationUUID: "22222222-2222-4222-8222-222222222222",
+	}
+	device := claudedesktop.TrustedDevice{
+		DeviceID:    "33333333-3333-4333-8333-333333333333",
+		DeviceToken: "trusted-device-token",
+		DisplayName: "Claude Desktop test",
+	}
+	fileName, errAuthID := claudedesktop.StableAuthID(identity.AccountUUID, identity.OrganizationUUID)
+	if errAuthID != nil {
+		t.Fatal(errAuthID)
+	}
+	loginResult := &claudedesktop.LoginResult{
+		AuthID: fileName,
+		Token: claudedesktop.TokenData{
+			AccessToken:  accessToken,
+			RefreshToken: "refresh-token",
+			ExpiresIn:    3600,
+			Expire:       "2026-12-31T23:59:59Z",
+		},
+		Identity:   identity,
+		Enrollment: claudedesktop.NewEnrollment(fileName, identity, device, time.Date(2026, 9, 2, 0, 0, 0, 0, time.UTC)),
+		Device:     device,
+	}
+	tokenStorage, errStorage := claudedesktop.NewTokenStorage(loginResult)
+	if errStorage != nil {
+		t.Fatal(errStorage)
 	}
 	record := &coreauth.Auth{
 		ID:       fileName,
 		Provider: "claude",
 		FileName: fileName,
 		Storage:  tokenStorage,
-		Metadata: map[string]any{"email": tokenStorage.Email},
+		Metadata: claudedesktop.MetadataFromLogin(loginResult),
+		Attributes: map[string]string{
+			coreauth.AttributeAuthKind: coreauth.AuthKindOAuth,
+		},
 	}
 
 	if _, errSave := h.saveTokenRecord(context.Background(), record); errSave != nil {

@@ -1,6 +1,7 @@
 package management
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,13 +32,17 @@ var (
 )
 
 type oauthSession struct {
-	Provider  string
-	Status    string
-	Source    string
-	Metadata  map[string]any
-	Completed bool
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	Provider       string
+	Status         string
+	Source         string
+	Metadata       map[string]any
+	Completed      bool
+	Input          chan string
+	Done           chan struct{}
+	InputSubmitted bool
+	InputClosed    bool
+	CreatedAt      time.Time
+	ExpiresAt      time.Time
 }
 
 type oauthSessionStore struct {
@@ -65,8 +70,16 @@ func newOAuthSessionStore(ttl time.Duration) *oauthSessionStore {
 func (s *oauthSessionStore) purgeExpiredLocked(now time.Time) {
 	for state, session := range s.sessions {
 		if !session.ExpiresAt.IsZero() && now.After(session.ExpiresAt) {
+			s.closeSessionLocked(&session)
 			delete(s.sessions, state)
 		}
+	}
+}
+
+func (s *oauthSessionStore) closeSessionLocked(session *oauthSession) {
+	if session != nil && !session.InputClosed && session.Done != nil {
+		close(session.Done)
+		session.InputClosed = true
 	}
 }
 
@@ -86,6 +99,8 @@ func (s *oauthSessionStore) Register(state, provider string) {
 		Provider:  provider,
 		Status:    "",
 		Source:    oauthSessionSourceBuiltin,
+		Input:     make(chan string, 1),
+		Done:      make(chan struct{}),
 		CreatedAt: now,
 		ExpiresAt: now.Add(s.ttl),
 	}
@@ -114,6 +129,8 @@ func (s *oauthSessionStore) RegisterPlugin(state, provider string, metadata map[
 		Status:    "",
 		Source:    oauthSessionSourcePlugin,
 		Metadata:  cloneOAuthSessionMetadata(metadata),
+		Input:     make(chan string, 1),
+		Done:      make(chan struct{}),
 		CreatedAt: now,
 		ExpiresAt: now.Add(s.ttl),
 	}
@@ -141,6 +158,7 @@ func (s *oauthSessionStore) SetError(state, message string) {
 	}
 	session.Status = message
 	session.ExpiresAt = now.Add(s.ttl)
+	s.closeSessionLocked(&session)
 	s.sessions[state] = session
 }
 
@@ -163,6 +181,7 @@ func (s *oauthSessionStore) Complete(state string) {
 	session.Metadata = nil
 	session.Completed = true
 	session.ExpiresAt = now.Add(s.completedTTL)
+	s.closeSessionLocked(&session)
 	s.sessions[state] = session
 }
 
@@ -185,6 +204,7 @@ func (s *oauthSessionStore) CompleteProvider(provider string, source string) int
 			session.Metadata = nil
 			session.Completed = true
 			session.ExpiresAt = now.Add(s.completedTTL)
+			s.closeSessionLocked(&session)
 			s.sessions[state] = session
 			removed++
 		}
@@ -244,8 +264,80 @@ func (s *oauthSessionStore) Cancel(state string) bool {
 	if !ok || session.Completed || session.Status != "" {
 		return false
 	}
+	s.closeSessionLocked(&session)
 	delete(s.sessions, state)
 	return true
+}
+
+func (s *oauthSessionStore) SubmitInput(state, provider, value string) error {
+	state = strings.TrimSpace(state)
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	value = strings.TrimSpace(value)
+	if errState := ValidateOAuthState(state); errState != nil {
+		return errState
+	}
+	if provider == "" || value == "" {
+		return errOAuthSessionNotPending
+	}
+	now := time.Now()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.purgeExpiredLocked(now)
+	session, ok := s.sessions[state]
+	if !ok || session.Completed || session.Status != "" || !strings.EqualFold(session.Provider, provider) || session.InputSubmitted || session.Input == nil {
+		return errOAuthSessionNotPending
+	}
+	session.InputSubmitted = true
+	s.sessions[state] = session
+	session.Input <- value
+	return nil
+}
+
+func (s *oauthSessionStore) WaitInput(ctx context.Context, state, provider string) (string, error) {
+	state = strings.TrimSpace(state)
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	if errState := ValidateOAuthState(state); errState != nil {
+		return "", errState
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	now := time.Now()
+	s.mu.Lock()
+	s.purgeExpiredLocked(now)
+	session, ok := s.sessions[state]
+	if !ok || session.Completed || session.Status != "" || !strings.EqualFold(session.Provider, provider) || session.Input == nil || session.Done == nil {
+		s.mu.Unlock()
+		return "", errOAuthSessionNotPending
+	}
+	input := session.Input
+	done := session.Done
+	expiresAt := session.ExpiresAt
+	s.mu.Unlock()
+
+	wait := time.Until(expiresAt)
+	if wait <= 0 {
+		return "", errOAuthSessionNotPending
+	}
+	timer := time.NewTimer(wait)
+	defer timer.Stop()
+	select {
+	case value := <-input:
+		return strings.TrimSpace(value), nil
+	case <-done:
+		return "", errOAuthSessionNotPending
+	case <-timer.C:
+		s.mu.Lock()
+		current, exists := s.sessions[state]
+		if exists && current.Done == done && !current.Completed && current.Status == "" {
+			s.closeSessionLocked(&current)
+			delete(s.sessions, state)
+		}
+		s.mu.Unlock()
+		return "", errOAuthSessionNotPending
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
 }
 
 func cloneOAuthSessionMetadata(in map[string]any) map[string]any {
@@ -314,6 +406,14 @@ func guardOAuthSessionPendingForSave(state, provider string) error {
 // Background callback and device-code waiters observe IsOAuthSessionPending as false and exit without saving credentials.
 func CancelOAuthSession(state string) bool {
 	return oauthSessions.Cancel(state)
+}
+
+func SubmitOAuthSessionInput(state, provider, value string) error {
+	return oauthSessions.SubmitInput(state, provider, value)
+}
+
+func WaitOAuthSessionInput(ctx context.Context, state, provider string) (string, error) {
+	return oauthSessions.WaitInput(ctx, state, provider)
 }
 
 func oauthSessionErrorWithCause(message string, cause error) string {
@@ -426,6 +526,9 @@ func writeOAuthCallbackFile(authDir, canonicalProvider, state, code, errorMessag
 	canonicalProvider = strings.TrimSpace(canonicalProvider)
 	if canonicalProvider == "" {
 		return "", errUnsupportedOAuthFlow
+	}
+	if canonicalProvider == "anthropic" {
+		return "", fmt.Errorf("Claude Desktop authentication accepts an email magic link, not an OAuth callback")
 	}
 	if err := ValidateOAuthState(state); err != nil {
 		return "", err
