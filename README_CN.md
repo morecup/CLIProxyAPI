@@ -126,6 +126,10 @@ PackyCode 为本软件用户提供了特别优惠：使用<a href="https://www.p
 - 通过配置接入上游 OpenAI 兼容提供商（例如 OpenRouter）
 - 可复用的 Go SDK（见 `docs/sdk-usage_CN.md`）
 
+### 非 Windows Claude Desktop 认证
+
+在 Linux、macOS 等非 Windows 主机上，Claude Desktop 邮件魔法链接认证会启动本机 Chromium 或 Chrome，并使用隔离的临时配置目录获取 hCaptcha attestation。请安装 `chromium`、`chromium-browser`、`google-chrome-stable` 或 `google-chrome`；也可以通过 `CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_PATH` 指定浏览器路径。默认使用无头模式；仅在主机具有可交互显示环境时，才设置 `CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_HEADLESS=false`。浏览器会通过仅监听回环地址的临时 CONNECT 桥使用配置中的 `proxy-url`，代理凭据不会写入浏览器命令行。
+
 ## 新手入门
 
 CLIProxyAPI 用户手册： [https://help.router-for.me/](https://help.router-for.me/cn/)

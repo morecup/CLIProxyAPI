@@ -43,6 +43,7 @@ var desktopRefreshGroup singleflight.Group
 
 type Service struct {
 	httpClient                *http.Client
+	proxyURL                  string
 	apiHost                   string
 	claudeOrigin              string
 	loginURL                  string
@@ -56,8 +57,11 @@ type Service struct {
 type MagicLinkLoginOptions struct {
 	MagicLink string
 	Locale    string
-	Prompt    func(string) (string, error)
-	Timeout   time.Duration
+	// ProxyURL keeps browser attestation and the HTTP exchange on the same
+	// network path. Service callers normally inherit this automatically.
+	ProxyURL string
+	Prompt   func(string) (string, error)
+	Timeout  time.Duration
 }
 
 type LoginResult struct {
@@ -141,6 +145,7 @@ func NewServiceWithProxyURL(cfg *config.Config, proxyURL string) *Service {
 	client := util.SetProxy(&sdkCfg, &http.Client{})
 	return &Service{
 		httpClient:                client,
+		proxyURL:                  effectiveProxyURL,
 		apiHost:                   DefaultAPIHost,
 		claudeOrigin:              DefaultClaudeOrigin,
 		loginURL:                  DefaultLoginURL,
@@ -177,6 +182,9 @@ func (s *Service) Login(ctx context.Context, options MagicLinkLoginOptions) (*Lo
 	}
 	if options.Timeout <= 0 {
 		options.Timeout = 5 * time.Minute
+	}
+	if strings.TrimSpace(options.ProxyURL) == "" {
+		options.ProxyURL = s.proxyURL
 	}
 	loginCtx, cancelLogin := context.WithTimeout(ctx, options.Timeout)
 	defer cancelLogin()

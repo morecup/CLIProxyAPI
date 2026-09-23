@@ -53,16 +53,19 @@ type magicLinkVerifyRequest struct {
 	Source string `json:"source"`
 }
 
-// AcquireMagicLinkSession uses an isolated WebView2 profile to let the official
-// Claude magic-link page obtain its hCaptcha attestation. The WebView does not
-// submit the magic-link request or expose cookies; this function performs the
-// one-time exchange with a private Go CookieJar instead.
+// AcquireMagicLinkSession uses an isolated platform browser profile to let the
+// official Claude magic-link page obtain its hCaptcha attestation. The browser
+// does not submit the magic-link request or expose cookies; this function
+// performs the one-time exchange with a private Go CookieJar instead.
 func AcquireMagicLinkSession(ctx context.Context, baseClient *http.Client, claudeOrigin string, options MagicLinkLoginOptions) (*DesktopSession, error) {
 	credentials, errCredentials := readMagicLinkCredentials(options)
 	if errCredentials != nil {
 		return nil, errCredentials
 	}
-	return acquireMagicLinkSession(ctx, baseClient, claudeOrigin, credentials, acquireMagicLinkAttestation)
+	attestationOptions := magicLinkAttestationOptions{ProxyURL: strings.TrimSpace(options.ProxyURL)}
+	return acquireMagicLinkSession(ctx, baseClient, claudeOrigin, credentials, func(ctx context.Context, credentials magicLinkCredentials) (magicLinkAttestation, error) {
+		return acquireMagicLinkAttestation(ctx, credentials, attestationOptions)
+	})
 }
 
 func readMagicLinkCredentials(options MagicLinkLoginOptions) (magicLinkCredentials, error) {

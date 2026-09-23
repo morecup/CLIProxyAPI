@@ -21,73 +21,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-const magicLinkAttestationHook = `(function () {
-  const endpointPath = "/api/auth/verify_magic_link";
-  let submitted = false;
-
-  function submit(body) {
-    if (submitted || typeof body !== "string") return false;
-    let parsed;
-    try { parsed = JSON.parse(body); } catch (_) { return false; }
-    const token = parsed && parsed.client_attestation && parsed.client_attestation.hcaptcha_token;
-    if (typeof token !== "string" || token.length === 0) return false;
-    submitted = true;
-    const payload = JSON.stringify({
-      hcaptcha_token: token,
-      locale: typeof parsed.locale === "string" ? parsed.locale : (navigator.language || "en-US"),
-      user_agent: navigator.userAgent || ""
-    });
-    void window.cliproxyClaudeDesktopAttestation(payload);
-    return true;
-  }
-
-  function matches(input, init) {
-    let rawURL = "";
-    let method = "GET";
-    let body = init && init.body;
-    if (typeof input === "string" || input instanceof URL) {
-      rawURL = String(input);
-    } else if (input && typeof input.url === "string") {
-      rawURL = input.url;
-      method = input.method || method;
-    }
-    if (init && init.method) method = init.method;
-    let parsedURL;
-    try { parsedURL = new URL(rawURL, location.href); } catch (_) { return false; }
-    if (String(method).toUpperCase() !== "POST" || parsedURL.origin !== "https://claude.ai" || parsedURL.pathname !== endpointPath) {
-      return false;
-    }
-    return submit(body);
-  }
-
-  const originalFetch = window.fetch;
-  window.fetch = function (input, init) {
-    if (matches(input, init)) {
-      return Promise.resolve(new Response("{}", {status: 202, headers: {"content-type": "application/json"}}));
-    }
-    return originalFetch.apply(this, arguments);
-  };
-
-  const originalOpen = XMLHttpRequest.prototype.open;
-  const originalSend = XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.open = function (method, url) {
-    this.__cliproxyMethod = method;
-    this.__cliproxyURL = url;
-    return originalOpen.apply(this, arguments);
-  };
-  XMLHttpRequest.prototype.send = function (body) {
-    if (matches(this.__cliproxyURL, {method: this.__cliproxyMethod, body: body})) return;
-    return originalSend.apply(this, arguments);
-  };
-})();`
-
 const magicLinkAttestationHelperArg = "--claude-desktop-attestation-helper"
-
-type webViewAttestationPayload struct {
-	HCaptchaToken string `json:"hcaptcha_token"`
-	Locale        string `json:"locale"`
-	UserAgent     string `json:"user_agent"`
-}
 
 type webViewAttestationResult struct {
 	attestation magicLinkAttestation
@@ -106,7 +40,7 @@ type webViewAttestationHelperResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
-func acquireMagicLinkAttestation(ctx context.Context, credentials magicLinkCredentials) (magicLinkAttestation, error) {
+func acquireMagicLinkAttestation(ctx context.Context, credentials magicLinkCredentials, _ magicLinkAttestationOptions) (magicLinkAttestation, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -143,13 +77,13 @@ func acquireMagicLinkAttestation(ctx context.Context, credentials magicLinkCrede
 	if strings.TrimSpace(response.Error) != "" {
 		return magicLinkAttestation{}, errMagicLinkAttestationUnavailable
 	}
-	attestation := magicLinkAttestation{
+	attestation, errAttestation := normalizeMagicLinkAttestation(magicLinkAttestation{
 		HCaptchaToken: strings.TrimSpace(response.HCaptchaToken),
 		Locale:        strings.TrimSpace(response.Locale),
 		UserAgent:     strings.TrimSpace(response.UserAgent),
-	}
-	if attestation.HCaptchaToken == "" || len(attestation.HCaptchaToken) > maxAttestationSize || len(attestation.Locale) > 64 || len(attestation.UserAgent) > 1024 {
-		return magicLinkAttestation{}, errMagicLinkAttestationUnavailable
+	})
+	if errAttestation != nil {
+		return magicLinkAttestation{}, errAttestation
 	}
 	return attestation, nil
 }
@@ -214,24 +148,13 @@ func runMagicLinkAttestationWebView(ctx context.Context, credentials magicLinkCr
 			view.Terminate()
 		})
 	}
-	if errBind := view.Bind("cliproxyClaudeDesktopAttestation", func(raw string) (bool, error) {
-		var payload webViewAttestationPayload
-		if errDecode := json.Unmarshal([]byte(raw), &payload); errDecode != nil {
-			report(webViewAttestationResult{err: fmt.Errorf("decode Claude Desktop WebView attestation: %w", errDecode)})
+	if errBind := view.Bind(magicLinkAttestationBinding, func(raw string) (bool, error) {
+		attestation, errDecode := decodeMagicLinkAttestationPayload(raw)
+		if errDecode != nil {
+			report(webViewAttestationResult{err: errDecode})
 			return false, nil
 		}
-		payload.HCaptchaToken = strings.TrimSpace(payload.HCaptchaToken)
-		payload.Locale = strings.TrimSpace(payload.Locale)
-		payload.UserAgent = strings.TrimSpace(payload.UserAgent)
-		if payload.HCaptchaToken == "" || len(payload.HCaptchaToken) > maxAttestationSize || len(payload.Locale) > 64 || len(payload.UserAgent) > 1024 {
-			report(webViewAttestationResult{err: errMagicLinkAttestationUnavailable})
-			return false, nil
-		}
-		report(webViewAttestationResult{attestation: magicLinkAttestation{
-			HCaptchaToken: payload.HCaptchaToken,
-			Locale:        payload.Locale,
-			UserAgent:     payload.UserAgent,
-		}})
+		report(webViewAttestationResult{attestation: attestation})
 		return true, nil
 	}); errBind != nil {
 		view.Destroy()
@@ -240,12 +163,7 @@ func runMagicLinkAttestationWebView(ctx context.Context, credentials magicLinkCr
 	}
 	view.Init(magicLinkAttestationHook)
 	if anonymousID := strings.TrimSpace(credentials.AnonymousID); anonymousID != "" {
-		encodedAnonymousID, _ := json.Marshal(anonymousID)
-		view.Init(`(function () {
-  if (location.protocol === "https:" && location.hostname === "claude.ai") {
-    document.cookie = "_cross_domain_anonymous_id=" + encodeURIComponent(` + string(encodedAnonymousID) + `) + "; Path=/; Max-Age=31536000; SameSite=Lax; Secure";
-  }
-})();`)
+		view.Init(magicLinkAnonymousCookieHook(anonymousID))
 	}
 
 	stopCancellation := make(chan struct{})

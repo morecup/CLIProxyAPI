@@ -2,13 +2,10 @@
 
 package claudedesktop
 
-import (
-	"context"
-	"fmt"
-)
+import "context"
 
-func acquireMagicLinkAttestation(context.Context, magicLinkCredentials) (magicLinkAttestation, error) {
-	return magicLinkAttestation{}, fmt.Errorf("%w: WebView2 is available only on Windows", errMagicLinkAttestationUnavailable)
+func acquireMagicLinkAttestation(ctx context.Context, credentials magicLinkCredentials, options magicLinkAttestationOptions) (magicLinkAttestation, error) {
+	return acquireMagicLinkAttestationWithChromium(ctx, credentials, options)
 }
 
 func RunMagicLinkAttestationHelper() bool { return false }

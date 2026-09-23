@@ -3,6 +3,7 @@ package claudedesktop
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -162,6 +163,33 @@ func TestServiceLoginUsesDesktopOAuthAndEnrollsTrustedDevice(t *testing.T) {
 	}
 	if _, errValidate := ValidateEnrollment(result.AuthID, MetadataFromLogin(result)); errValidate != nil {
 		t.Fatalf("new enrollment validation failed: %v", errValidate)
+	}
+}
+
+func TestServiceLoginPassesConfiguredProxyToMagicLinkAcquisition(t *testing.T) {
+	stop := errors.New("stop after proxy assertion")
+	const configuredProxy = "socks5h://proxy-user:proxy-password@proxy.example.test:1080"
+	service := NewServiceWithProxyURL(nil, configuredProxy)
+	service.acquire = func(_ context.Context, _ *http.Client, _ string, options MagicLinkLoginOptions) (*DesktopSession, error) {
+		if options.ProxyURL != configuredProxy {
+			t.Fatalf("acquisition proxy = %q, want configured proxy", options.ProxyURL)
+		}
+		return nil, stop
+	}
+	_, errLogin := service.Login(context.Background(), MagicLinkLoginOptions{Timeout: time.Minute})
+	if !errors.Is(errLogin, stop) {
+		t.Fatalf("Login() error = %v, want acquisition sentinel", errLogin)
+	}
+
+	service.acquire = func(_ context.Context, _ *http.Client, _ string, options MagicLinkLoginOptions) (*DesktopSession, error) {
+		if options.ProxyURL != "direct" {
+			t.Fatalf("explicit acquisition proxy = %q, want direct", options.ProxyURL)
+		}
+		return nil, stop
+	}
+	_, errLogin = service.Login(context.Background(), MagicLinkLoginOptions{ProxyURL: "direct", Timeout: time.Minute})
+	if !errors.Is(errLogin, stop) {
+		t.Fatalf("Login() override error = %v, want acquisition sentinel", errLogin)
 	}
 }
 

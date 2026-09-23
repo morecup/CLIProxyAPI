@@ -8,6 +8,8 @@ require (
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/chromedp/cdproto v0.0.0-20260714215040-dc233986426f
+	github.com/chromedp/chromedp v0.16.0
 	github.com/dlclark/regexp2/v2 v2.5.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.10.1
@@ -15,6 +17,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jackc/pgx/v5 v5.9.2
+	github.com/jchv/go-webview2 v0.0.0-20260205173254-56598839c808
 	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/compress v1.17.4
 	github.com/minio/minio-go/v7 v7.0.66
@@ -42,7 +45,11 @@ require (
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/jchv/go-webview2 v0.0.0-20260205173254-56598839c808 // indirect
+	github.com/chromedp/sysutil v1.1.0 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260623181947-01eb4420fa68 // indirect
+	github.com/gobwas/httphead v0.1.0 // indirect
+	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/jchv/go-winloader v0.0.0-20250406163304-c1995be93bd1 // indirect
 	github.com/pion/datachannel v1.6.2 // indirect
 	github.com/pion/dtls/v3 v3.1.5 // indirect
@@ -118,7 +125,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/arch v0.8.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/text v0.40.0
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
