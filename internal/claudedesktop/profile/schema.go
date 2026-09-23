@@ -689,7 +689,7 @@ func (b *Bundle) Validate() error {
 			if clientPlatform == "" || clientVersion == "" || requestClass == "" {
 				return fmt.Errorf("claude desktop profile: variants[%d] has incomplete client identity headers", index)
 			}
-			if requestClass != "main" && requestClass != "auxiliary" {
+			if requestClass != "main" && requestClass != "auxiliary" && requestClass != "subagent" {
 				return fmt.Errorf("claude desktop profile: variants[%d] has unsupported request class %q", index, requestClass)
 			}
 		}

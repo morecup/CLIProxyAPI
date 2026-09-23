@@ -61,6 +61,85 @@ func TestConvertClaudeResponseToOpenAIResponses_CreatedIncludesOriginalRequestMo
 	}
 }
 
+func TestConvertClaudeResponseToOpenAIResponses_TerminalStopReasonEmitsIncomplete(t *testing.T) {
+	for _, test := range []struct {
+		stopReason string
+		wantReason string
+	}{
+		{stopReason: "max_tokens", wantReason: "max_output_tokens"},
+		{stopReason: "model_context_window_exceeded", wantReason: "max_output_tokens"},
+		{stopReason: "refusal", wantReason: "content_filter"},
+		{stopReason: "sensitive", wantReason: "content_filter"},
+	} {
+		t.Run(test.stopReason, func(t *testing.T) {
+			chunks := [][]byte{
+				[]byte(`data: {"type":"message_start","message":{"id":"msg_terminal","usage":{"input_tokens":3,"output_tokens":0}}}`),
+				[]byte(`data: {"type":"message_delta","delta":{"stop_reason":"` + test.stopReason + `","stop_details":null},"usage":{"output_tokens":0}}`),
+				[]byte(`data: {"type":"message_stop"}`),
+			}
+
+			var param any
+			var incomplete gjson.Result
+			for _, chunk := range chunks {
+				for _, output := range ConvertClaudeResponseToOpenAIResponses(context.Background(), "claude-opus-5-5", nil, nil, chunk, &param) {
+					event, data := parseClaudeResponsesSSEEvent(t, output)
+					if event == "response.completed" {
+						t.Fatalf("terminal stop emitted response.completed: %s", output)
+					}
+					if event == "response.incomplete" {
+						incomplete = data
+					}
+				}
+			}
+
+			if !incomplete.Exists() {
+				t.Fatal("expected response.incomplete event")
+			}
+			if got := incomplete.Get("response.status").String(); got != "incomplete" {
+				t.Fatalf("response.status = %q, want incomplete", got)
+			}
+			if got := incomplete.Get("response.incomplete_details.reason").String(); got != test.wantReason {
+				t.Fatalf("response.incomplete_details.reason = %q, want %q", got, test.wantReason)
+			}
+			if got := incomplete.Get("response.output.#").Int(); got != 0 {
+				t.Fatalf("terminal stop synthesized output items: %s", incomplete.Raw)
+			}
+		})
+	}
+}
+
+func TestConvertClaudeResponseToOpenAIResponsesNonStream_TerminalStopReasonIsIncomplete(t *testing.T) {
+	for _, test := range []struct {
+		stopReason string
+		wantReason string
+	}{
+		{stopReason: "max_tokens", wantReason: "max_output_tokens"},
+		{stopReason: "model_context_window_exceeded", wantReason: "max_output_tokens"},
+		{stopReason: "refusal", wantReason: "content_filter"},
+		{stopReason: "sensitive", wantReason: "content_filter"},
+	} {
+		t.Run(test.stopReason, func(t *testing.T) {
+			raw := []byte(strings.Join([]string{
+				`data: {"type":"message_start","message":{"id":"msg_terminal","usage":{"input_tokens":3,"output_tokens":0}}}`,
+				`data: {"type":"message_delta","delta":{"stop_reason":"` + test.stopReason + `","stop_details":null},"usage":{"output_tokens":0}}`,
+				`data: {"type":"message_stop"}`,
+			}, "\n"))
+
+			out := ConvertClaudeResponseToOpenAIResponsesNonStream(context.Background(), "claude-opus-5-5", nil, nil, raw, nil)
+			root := gjson.ParseBytes(out)
+			if got := root.Get("status").String(); got != "incomplete" {
+				t.Fatalf("status = %q, want incomplete; out=%s", got, out)
+			}
+			if got := root.Get("incomplete_details.reason").String(); got != test.wantReason {
+				t.Fatalf("incomplete_details.reason = %q, want %q; out=%s", got, test.wantReason, out)
+			}
+			if got := root.Get("output.#").Int(); got != 0 {
+				t.Fatalf("terminal stop synthesized output items: %s", out)
+			}
+		})
+	}
+}
+
 func translateClaudeResponsesStreamThroughRegistry(chunks [][]byte) [][]byte {
 	var param any
 	var outputs [][]byte

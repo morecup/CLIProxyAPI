@@ -144,7 +144,7 @@ func NewServiceWithProxyURL(cfg *config.Config, proxyURL string) *Service {
 		apiHost:                   DefaultAPIHost,
 		claudeOrigin:              DefaultClaudeOrigin,
 		loginURL:                  DefaultLoginURL,
-		appVersion:                DefaultDesktopVersion,
+		appVersion:                DefaultOAuthClientVersion,
 		now:                       time.Now,
 		acquire:                   AcquireMagicLinkSession,
 		resolveTelemetryMaterials: ResolveTelemetryMaterials,

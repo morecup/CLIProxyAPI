@@ -15,11 +15,11 @@ import (
 )
 
 const (
-	CountTokensLayoutV2255313           = "v2255313-opus-5-5"
-	currentCountTokensToolCatalogSHA256 = "dbf6dc100d0a558c38b47acd729618dd08e7ee466e3910b19c926a64cf82ed84"
+	CountTokensLayoutV270320            = "v270320-opus-5-5"
+	currentCountTokensToolCatalogSHA256 = "1fdc816a012d66f7fb76de9381ba32a24c705954293b49250dd976723ad60f06"
 )
 
-//go:embed v2255313.count_tokens_tools.b64
+//go:embed v270320.count_tokens_tools.b64
 var currentCountTokensToolCatalogBase64 string
 
 type currentCountTokensToolRequest struct {
@@ -41,7 +41,7 @@ var (
 )
 
 func builtinCurrentCountTokensToolCatalog(catalogID, model string) (CountTokensCalibrationTools, error) {
-	if catalogID != CountTokensLayoutV2255313 || strings.TrimSpace(model) != "claude-opus-5-5" {
+	if catalogID != CountTokensLayoutV270320 || strings.TrimSpace(model) != "claude-opus-5-5" {
 		return CountTokensCalibrationTools{}, fmt.Errorf("claude desktop profile: no observed count_tokens calibration catalog %q for model %q", catalogID, model)
 	}
 	catalog, errCatalog := loadCurrentCountTokensToolCatalog()
@@ -53,7 +53,7 @@ func builtinCurrentCountTokensToolCatalog(catalogID, model string) (CountTokensC
 		toolRequests[index] = cloneRawMessages(request.Tools)
 	}
 	return CountTokensCalibrationTools{
-		Layout:           CountTokensLayoutV2255313,
+		Layout:           CountTokensLayoutV270320,
 		ExpectedRequests: 39,
 		ToolRequests:     toolRequests,
 	}, nil
@@ -96,12 +96,12 @@ func loadCurrentCountTokensToolCatalog() (currentCountTokensToolCatalog, error) 
 }
 
 func validateCurrentCountTokensToolCatalog(catalog currentCountTokensToolCatalog) error {
-	if catalog.SchemaVersion != 2 || catalog.DesktopVersion != "2.2553.13" ||
-		catalog.Source != "sanitized-recorder-label-2026-09-23-opus-5-5-count-token-tool-catalog" {
+	if catalog.SchemaVersion != 2 || catalog.DesktopVersion != "2.7032.0" ||
+		catalog.Source != "recorder-label-h7-v270320-opus55-manual-select-r01-20260923-message" {
 		return fmt.Errorf("claude desktop profile: current count_tokens calibration catalog identity is invalid")
 	}
 	wantNames := []string{
-		"mcp-115", "skill-preload", "builtin-17",
+		"skill-preload", "mcp-117", "builtin-17",
 		"single-ArtifactComments", "single-ArtifactData", "single-CronCreate", "single-CronDelete",
 		"single-CronList", "single-DesignSync", "single-EnterPlanMode", "single-EnterWorktree",
 		"single-ExitPlanMode", "single-ExitWorktree", "single-ListPlugins", "single-ListSkills",
@@ -118,8 +118,8 @@ func validateCurrentCountTokensToolCatalog(catalog currentCountTokensToolCatalog
 		}
 		wantCount := 1
 		switch requestIndex {
-		case 0:
-			wantCount = 115
+		case 1:
+			wantCount = 117
 		case 2:
 			wantCount = 17
 		}

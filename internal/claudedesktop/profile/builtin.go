@@ -12,6 +12,9 @@ var builtinV140609JSON []byte
 //go:embed v2255313.request-profile.json
 var builtinV2255313RequestProfileJSON []byte
 
+//go:embed v270320.request-profile.json
+var builtinV270320RequestProfileJSON []byte
+
 func BuiltinV140609() (*Bundle, error) {
 	var bundle Bundle
 	if errUnmarshal := json.Unmarshal(builtinV140609JSON, &bundle); errUnmarshal != nil {
@@ -30,7 +33,7 @@ func BuiltinCurrent() (*Bundle, error) {
 		return nil, errBundle
 	}
 	var requestProfile RequestProfile
-	if errUnmarshal := json.Unmarshal(builtinV2255313RequestProfileJSON, &requestProfile); errUnmarshal != nil {
+	if errUnmarshal := json.Unmarshal(builtinV270320RequestProfileJSON, &requestProfile); errUnmarshal != nil {
 		return nil, fmt.Errorf("decode built-in current Claude Desktop request profile: %w", errUnmarshal)
 	}
 	bundle.RequestProfiles = append(bundle.RequestProfiles, requestProfile)

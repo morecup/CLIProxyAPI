@@ -163,7 +163,7 @@ func claudeDesktopThinkingDisplay(body []byte, role claudeprofile.RequestRole, m
 
 func normalizeClaudeDesktopCurrentModel(model string) string {
 	switch strings.ToLower(strings.TrimSpace(model)) {
-	case "claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001":
+	case "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001":
 		return strings.ToLower(strings.TrimSpace(model))
 	default:
 		return ""
@@ -171,12 +171,23 @@ func normalizeClaudeDesktopCurrentModel(model string) string {
 }
 
 func selectClaudeDesktopBetaVariant(body []byte, incomingHeaders http.Header, variant claudeprofile.RequestVariant) (string, []string, error) {
-	if strings.EqualFold(strings.TrimSpace(gjson.GetBytes(body, "speed").String()), "fast") {
-		betas, ok := variant.AnthropicBetaVariants["fast"]
+	fast := strings.EqualFold(strings.TrimSpace(gjson.GetBytes(body, "speed").String()), "fast")
+	computer := claudeRequestUsesComputerToolset(body)
+	requestedVariant := ""
+	switch {
+	case fast && computer:
+		requestedVariant = "fast-computer"
+	case fast:
+		requestedVariant = "fast"
+	case computer:
+		requestedVariant = "computer"
+	}
+	if requestedVariant != "" {
+		betas, ok := variant.AnthropicBetaVariants[requestedVariant]
 		if !ok {
-			return "", nil, claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: "claude desktop profile has no observed fast-mode variant for this request"}}
+			return "", nil, claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: fmt.Sprintf("claude desktop profile has no observed %s beta variant for this request", requestedVariant)}}
 		}
-		return "fast", append([]string(nil), betas...), nil
+		return requestedVariant, append([]string(nil), betas...), nil
 	}
 	candidates := []string{strings.Join(incomingHeaders.Values("Anthropic-Beta"), ",")}
 	bodyBetas := gjson.GetBytes(body, "anthropic_beta")

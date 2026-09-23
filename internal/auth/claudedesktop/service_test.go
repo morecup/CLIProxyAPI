@@ -37,7 +37,7 @@ func TestServiceLoginUsesDesktopOAuthAndEnrollsTrustedDevice(t *testing.T) {
 			if request.Header.Get("anthropic-client-platform") != "desktop_app" {
 				t.Errorf("authorize platform = %q", request.Header.Get("anthropic-client-platform"))
 			}
-			if request.Header.Get("anthropic-client-version") != DefaultDesktopVersion {
+			if request.Header.Get("anthropic-client-version") != DefaultOAuthClientVersion {
 				t.Errorf("authorize version = %q", request.Header.Get("anthropic-client-version"))
 			}
 			var body authorizeRequest
@@ -156,6 +156,9 @@ func TestServiceLoginUsesDesktopOAuthAndEnrollsTrustedDevice(t *testing.T) {
 	}
 	if result.TelemetryMaterials != testTelemetryMaterials() {
 		t.Fatal("login did not attach the resolved telemetry materials")
+	}
+	if result.Enrollment.ProfileVersion != DefaultDesktopVersion {
+		t.Fatalf("enrollment profile version = %q, want historical runtime profile %q", result.Enrollment.ProfileVersion, DefaultDesktopVersion)
 	}
 	if _, errValidate := ValidateEnrollment(result.AuthID, MetadataFromLogin(result)); errValidate != nil {
 		t.Fatalf("new enrollment validation failed: %v", errValidate)

@@ -34,6 +34,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	if baseURL == "" {
 		baseURL = "https://api.anthropic.com"
 	}
+	directAnthropic := isAnthropicUpstreamBase(baseURL)
 	url := fmt.Sprintf("%s/v1/messages?beta=true", baseURL)
 	desktopCapabilities := e.desktopCapabilities()
 	callerContext := ctx
@@ -112,7 +113,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	// keeps its own shape and other gateways never see this field.
 	diagnosticsState := claudeDiagnosticsRequestState{}
 	contextManagementState := claudeDesktopContextManagementState{
-		eligible:    e.desktopOnly && isAnthropicUpstreamBase(baseURL),
+		eligible:    e.desktopOnly && directAnthropic,
 		callerOwned: gjson.GetBytes(body, "context_management").Exists(),
 	}
 	if contextManagementState.eligible {
@@ -127,6 +128,9 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	body, contextManagementState.payloadRuleTouched = helps.ApplyPayloadConfigWithRequestTracked(e.cfg, baseModel, to.String(), from.String(), "", body, originalTranslated, requestedModel, requestPath, opts.Headers, "context_management")
 	body = ensureModelMaxTokens(body, baseModel)
 
+	if err = validateClaudeOpus55Request(body, directAnthropic); err != nil {
+		return nil, err
+	}
 	// Disable thinking if tool_choice forces tool use (Anthropic API constraint)
 	body = disableThinkingIfToolChoiceForced(body)
 	body = reconcileClaudeDesktopContextManagement(body, contextManagementState)
@@ -227,6 +231,9 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			return nil, errMidSystem
 		}
 	}
+	if err = validateClaudeOpus55Request(bodyForUpstream, directAnthropic); err != nil {
+		return nil, err
+	}
 	reporter.SetTranslatedReasoningEffort(bodyForUpstream, to.String())
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyForUpstream))
 	if err != nil {
@@ -248,7 +255,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	if desktopTelemetrySpan != nil {
 		desktopTelemetrySpan.ObserveRequest(bodyForUpstream, httpReq.Header)
 	}
-	fastRequest := isAnthropicUpstreamBase(baseURL) && claudeRequestIsFast(httpReq, bodyForUpstream)
+	fastRequest := directAnthropic && claudeRequestIsFast(httpReq, bodyForUpstream)
 	authID, authLabel, authType, authValue := claudeAuthLogIdentity(auth)
 	helps.RecordAPIRequest(ctx, e.cfg, helps.UpstreamRequestLog{
 		URL:       url,

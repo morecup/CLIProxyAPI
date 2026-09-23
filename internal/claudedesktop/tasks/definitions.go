@@ -130,7 +130,8 @@ var toolAliases = map[string]string{
 
 // LeanPromptModel reports whether a model takes the lean Agent prompt in the
 // default feature lane: -eap builds, models with the lean_prompt capability
-// (claude-opus-4-8, claude-opus-5, claude-fable-5) and claude-mythos-5 do;
+// (claude-opus-4-8, claude-opus-5, claude-opus-5-5, claude-fable-5) and
+// claude-mythos-5 do;
 // claude-3-*, haiku, sonnet and opus 4.0-4.7 do not; other first-party ids do.
 func LeanPromptModel(model string) bool {
 	if model == "" {
@@ -176,9 +177,9 @@ func CanonicalModelID(model string) string {
 var (
 	eapModelPattern  = regexp.MustCompile(`(?i)-eap($|\[)`)
 	datedModelSuffix = regexp.MustCompile(`-\d{8}$`)
-	leanPromptModels = map[string]bool{"claude-opus-4-8": true, "claude-opus-5": true, "claude-fable-5": true}
+	leanPromptModels = map[string]bool{"claude-opus-4-8": true, "claude-opus-5": true, "claude-opus-5-5": true, "claude-fable-5": true}
 	// modelAliasDefaults mirrors the catalog aliases' first-party defaults.
-	modelAliasDefaults = map[string]string{"opus": "claude-opus-5", "sonnet": "claude-sonnet-5", "haiku": "claude-haiku-4-5", "fable": "claude-fable-5"}
+	modelAliasDefaults = map[string]string{"opus": "claude-opus-5-5", "sonnet": "claude-sonnet-5", "haiku": "claude-haiku-4-5", "fable": "claude-fable-5"}
 	// canonicalModelRules follow the SDK's substring chain in order.
 	canonicalModelRules = []struct {
 		contains string
@@ -187,6 +188,7 @@ var (
 	}{
 		{contains: "claude-fable-5", id: "claude-fable-5"},
 		{contains: "claude-mythos-5", id: "claude-mythos-5"},
+		{contains: "claude-opus-5-5", id: "claude-opus-5-5"},
 		{contains: "claude-opus-5", id: "claude-opus-5"},
 		{contains: "claude-opus-4-8", id: "claude-opus-4-8"},
 		{contains: "claude-opus-4-7", id: "claude-opus-4-7"},

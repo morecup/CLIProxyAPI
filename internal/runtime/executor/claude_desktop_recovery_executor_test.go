@@ -375,3 +375,84 @@ func TestClaudeDesktopAutomaticPTLRecoveryAcrossEntries(t *testing.T) {
 		}
 	}
 }
+
+func TestClaudeDesktopOpus55CompactionContinuationRevalidatesRequest(t *testing.T) {
+	e := newClaudeDesktopTestExecutor(t)
+	auth := newClaudeDesktopRawRequestTestAuth(t)
+	session := uuid.NewString()
+	ctx := t.Context()
+
+	var (
+		messages []map[string]any
+		owner    *claudeprompt.Request
+		body     []byte
+	)
+	for index := 0; index < 3; index++ {
+		messages = append(messages, map[string]any{"role": "user", "content": fmt.Sprintf("synthetic input %d", index)})
+		requestBody := map[string]any{"model": "claude-opus-5-5", "messages": messages}
+		if index == 2 {
+			requestBody["tools"] = []map[string]any{{"type": "computer_20251124", "name": "computer"}}
+		}
+		var errMarshal error
+		body, errMarshal = json.Marshal(requestBody)
+		if errMarshal != nil {
+			t.Fatal(errMarshal)
+		}
+		owner = helps.BeginClaudeDesktopPrompt(&e.desktopPrompts, ctx, auth, e.desktopProfile.ProfileID, "main", session, uuid.NewString(), uuid.NewString(), body)
+		owner.ObserveSDKQuery(body)
+		if index == 2 {
+			break
+		}
+		var response claudeprompt.Response
+		response.ObservePayloadAt([]byte(fmt.Sprintf(`{"id":"msg_%d","type":"message","role":"assistant","model":"claude-opus-5-5","content":[{"type":"text","text":"synthetic reply"}],"stop_reason":"end_turn"}`, index)), false, time.Now())
+		owner.ObserveSDKHistory(response.SDKHistoryMessages())
+		owner.ObserveSDKWireResponse(response.SDKWireFingerprint())
+		owner.FinishSuccess(time.Now(), "end_turn", nil)
+		messages = append(messages, map[string]any{"role": "assistant", "content": "synthetic reply"})
+	}
+
+	view, errView := owner.CompactionView(body)
+	if errView != nil {
+		t.Fatal(errView)
+	}
+	defer view.Discard()
+	var summary claudeprompt.SDKCompactionResponse
+	summary.ObserveJSON([]byte(`{"type":"message","role":"assistant","content":[{"type":"text","text":"<summary>synthetic recovery summary</summary>"}]}`))
+	text, known := summary.TakeText(e.desktopProfile.DesktopVersion, e.desktopProfile.CodeVersion)
+	if !known {
+		t.Fatal("synthetic summary was not selected")
+	}
+	history := view.History()
+	groups := claudeprompt.GroupSDKHistory(history.Messages)
+	owner.RecordSDKCompactionSuccess("compact", "synthetic-helper", 100,
+		claudeprompt.CompletedSDKCompaction(claudeprompt.ObserveSDKCompactionInput(body), text.Fingerprint()))
+	application, errApplication := view.PrepareApplication(text, claudeprompt.SDKCompactionWrapOptions{SuppressFollowUpQuestions: true}, groups[len(groups)-1], "synthetic-helper")
+	if errApplication != nil {
+		t.Fatal(errApplication)
+	}
+	defer application.Discard()
+
+	plan, errPlan := e.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleMain, "claude-opus-5-5", nil)
+	if errPlan != nil {
+		t.Fatal(errPlan)
+	}
+	plan.PromptID = owner.Identity().PromptID
+	plan.ClientRequestID = uuid.NewString()
+	plan.NativePrompt = owner
+	facts := e.newClaudeDesktopRuntimeFactsForPlan(auth, session, "claude-opus-5-5", plan.PromptID, plan.ClientRequestID, "", plan)
+	facts.Prompt = owner
+	state := claudeDesktopRequestExecution{ctx: ctx, body: body, sourceBody: body, plan: plan, facts: facts}
+	original, errRequest := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", bytes.NewReader(body))
+	if errRequest != nil {
+		t.Fatal(errRequest)
+	}
+
+	_, continuation, err := e.prepareClaudeDesktopCompactionContinuation(auth, original, state, application)
+	assertClaudeOpus55RequestValidationError(t, err)
+	if continuation != nil {
+		t.Fatal("invalid Opus 5.5 continuation was rendered")
+	}
+	if owner.Snapshot().SDK.SawCompact {
+		t.Fatal("invalid Opus 5.5 continuation committed compacted history")
+	}
+}

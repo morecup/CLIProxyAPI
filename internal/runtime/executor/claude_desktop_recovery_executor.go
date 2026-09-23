@@ -277,6 +277,9 @@ func (e *ClaudeExecutor) prepareClaudeDesktopCompactionContinuation(auth *clipro
 	if err == nil {
 		state.body, err = e.finalizeClaudeDesktopBody(state.body, state.plan)
 	}
+	if err == nil {
+		err = validateClaudeOpus55Request(state.body, isAnthropicUpstreamURL(original.URL))
+	}
 	if err != nil {
 		return state, nil, err
 	}

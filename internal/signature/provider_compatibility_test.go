@@ -10,13 +10,19 @@ import (
 )
 
 func testClaudeThinkingSignature() string {
+	return testClaudeThinkingSignatureForModel("claude-sonnet-4-6")
+}
+
+func testClaudeThinkingSignatureForModel(model string) string {
 	channelBlock := []byte{}
 	channelBlock = protowire.AppendTag(channelBlock, 1, protowire.VarintType)
 	channelBlock = protowire.AppendVarint(channelBlock, 12)
 	channelBlock = protowire.AppendTag(channelBlock, 2, protowire.VarintType)
 	channelBlock = protowire.AppendVarint(channelBlock, 2)
-	channelBlock = protowire.AppendTag(channelBlock, 6, protowire.BytesType)
-	channelBlock = protowire.AppendString(channelBlock, "claude-sonnet-4-6")
+	if model != "" {
+		channelBlock = protowire.AppendTag(channelBlock, 6, protowire.BytesType)
+		channelBlock = protowire.AppendString(channelBlock, model)
+	}
 
 	container := []byte{}
 	container = protowire.AppendTag(container, 1, protowire.BytesType)

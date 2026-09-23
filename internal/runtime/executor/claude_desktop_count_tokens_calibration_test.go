@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	claudeprofile "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/profile"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 func TestClaudeDesktopCountTokensCalibrationMatchesCapturedModelBursts(t *testing.T) {
@@ -76,6 +78,203 @@ func TestClaudeDesktopCountTokensCalibrationMatchesCapturedModelBursts(t *testin
 				t.Fatalf("tool-count distribution = %#v", counts)
 			}
 		})
+	}
+}
+
+func TestClaudeDesktopCountTokensCalibrationMatchesV270320Opus55Burst(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	mainBody := renderClaudeDesktopCalibrationMainBody(t, executor, "claude-opus-5-5")
+	requests, errBuild := executor.buildClaudeDesktopCalibrationRequests("claude-opus-5-5", mainBody)
+	if errBuild != nil {
+		t.Fatal(errBuild)
+	}
+	if len(requests) != 39 {
+		t.Fatalf("requests = %d, want 39", len(requests))
+	}
+
+	toolCounts := make(map[int]int)
+	for index, request := range requests {
+		if !gjson.ValidBytes(request.body) {
+			t.Fatalf("request %d is invalid JSON", index)
+		}
+		if got := gjson.GetBytes(request.body, "model").String(); got != "claude-opus-5-5" {
+			t.Fatalf("request %d model = %q", index, got)
+		}
+		if !strings.HasPrefix(string(request.body), `{"model":`) ||
+			!strings.Contains(string(request.body), `,"messages":[`) ||
+			!strings.Contains(string(request.body), `],"tools":[`) {
+			t.Fatalf("request %d has the wrong top-level order: %s", index, request.body)
+		}
+		if gjson.GetBytes(request.body, "system").Exists() || gjson.GetBytes(request.body, "metadata").Exists() {
+			t.Fatalf("request %d inherited a top-level system or metadata field", index)
+		}
+		toolCounts[len(gjson.GetBytes(request.body, "tools").Array())]++
+	}
+	if toolCounts[0] != 12 || toolCounts[1] != 25 || toolCounts[17] != 1 || toolCounts[117] != 1 {
+		t.Fatalf("tool-count distribution = %#v", toolCounts)
+	}
+	if got := gjson.GetBytes(requests[0].body, "messages.0.content").String(); got != "hello" {
+		t.Fatalf("fallback dynamic content = %q, want caller user content", got)
+	}
+	for index := 0; index < 12; index++ {
+		if got := len(gjson.GetBytes(requests[index].body, "tools").Array()); got != 0 {
+			t.Fatalf("content request %d has %d tools, want 0", index, got)
+		}
+	}
+	if got := gjson.GetBytes(requests[12].body, "tools.0.name").String(); got != "Skill" {
+		t.Fatalf("skill preload tool = %q, want Skill", got)
+	}
+	if got := len(gjson.GetBytes(requests[13].body, "tools").Array()); got != 117 {
+		t.Fatalf("MCP tool count = %d, want 117", got)
+	}
+	if got := len(gjson.GetBytes(requests[14].body, "tools").Array()); got != 17 {
+		t.Fatalf("builtin tool count = %d, want 17", got)
+	}
+}
+
+func TestClaudeDesktopCountTokensCalibrationPreservesV270320CapturedDynamicHistory(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	mainBody := renderClaudeDesktopCalibrationMainBody(t, executor, "claude-opus-5-5")
+	historyMarkers := []string{
+		"# Environment",
+		"You are powered by the model named",
+		"The following deferred tools are now available",
+		"Available agent types for the Agent tool:",
+		"# MCP Server Instructions",
+		"The following skills are available for use with the Skill tool:",
+		"While auto mode is active:",
+		"<total_tokens>",
+		"Today's date is",
+	}
+	historySections := make([]string, len(historyMarkers))
+	for index, marker := range historyMarkers {
+		historySections[index] = marker + "\nsection-" + string(rune('0'+index))
+	}
+	messages, errJSON := json.Marshal([]any{
+		map[string]any{"role": "user", "content": []any{
+			map[string]any{"type": "text", "text": "user-zero"},
+			map[string]any{"type": "text", "text": "user-one"},
+			map[string]any{"type": "text", "text": "user-two"},
+		}},
+		map[string]any{"role": "system", "content": []any{
+			map[string]any{"type": "text", "text": strings.Join(historySections, "\n\n")},
+		}},
+	})
+	if errJSON != nil {
+		t.Fatal(errJSON)
+	}
+	mainBody, errSet := sjson.SetRawBytes(mainBody, "messages", messages)
+	if errSet != nil {
+		t.Fatal(errSet)
+	}
+	requests, errBuild := executor.buildClaudeDesktopCalibrationRequests("claude-opus-5-5", mainBody)
+	if errBuild != nil {
+		t.Fatal(errBuild)
+	}
+	content := gjson.GetBytes(requests[0].body, "messages.0.content")
+	if got := len(content.Array()); got != 12 {
+		t.Fatalf("captured dynamic block count = %d, want 12", got)
+	}
+	for path, want := range map[string]string{
+		"8.text":  "user-zero",
+		"10.text": "user-one",
+		"11.text": "user-two",
+	} {
+		if got := content.Get(path).String(); got != want {
+			t.Fatalf("captured dynamic content %s = %q, want %q", path, got, want)
+		}
+	}
+	if got := content.Get("9.text").String(); !strings.Contains(got, "Today's date is") {
+		t.Fatalf("captured date history block moved: %q", got)
+	}
+
+	driftedMessages, errJSON := json.Marshal([]any{
+		map[string]any{"role": "user", "content": []any{
+			map[string]any{"type": "text", "text": "user-zero"},
+			map[string]any{"type": "text", "text": "user-one"},
+			map[string]any{"type": "text", "text": "user-two"},
+		}},
+		map[string]any{"role": "system", "content": []any{
+			map[string]any{"type": "text", "text": "# Environment\n\ndrifted"},
+		}},
+	})
+	if errJSON != nil {
+		t.Fatal(errJSON)
+	}
+	driftedBody, errSet := sjson.SetRawBytes(mainBody, "messages", driftedMessages)
+	if errSet != nil {
+		t.Fatal(errSet)
+	}
+	if _, errBuild = executor.buildClaudeDesktopCalibrationRequests("claude-opus-5-5", driftedBody); errBuild == nil || !strings.Contains(errBuild.Error(), "calibration history") {
+		t.Fatalf("captured history drift error = %v", errBuild)
+	}
+}
+
+func TestClaudeDesktopCountTokensCalibrationRunsV270320Opus55OncePerSession(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	auth := newClaudeDesktopRawRequestTestAuth(t)
+	mainBody := renderClaudeDesktopCalibrationMainBody(t, executor, "claude-opus-5-5")
+	type observedRequest struct {
+		path   string
+		header http.Header
+	}
+	var mu sync.Mutex
+	var observed []observedRequest
+	transport := roundTripperFunc(func(request *http.Request) (*http.Response, error) {
+		_, _ = io.Copy(io.Discard, request.Body)
+		mu.Lock()
+		observed = append(observed, observedRequest{path: request.URL.Path, header: request.Header.Clone()})
+		mu.Unlock()
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Status:     "200 OK",
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(`{"input_tokens":1}`)),
+			Request:    request,
+		}, nil
+	})
+	ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	executor.runClaudeDesktopCountTokensCalibration(ctx, auth, claudeprofile.RoleMain, "opus55-session-one", mainBody)
+	executor.runClaudeDesktopCountTokensCalibration(ctx, auth, claudeprofile.RoleMain, "opus55-session-one", mainBody)
+
+	mu.Lock()
+	requests := append([]observedRequest(nil), observed...)
+	mu.Unlock()
+	if len(requests) != 39 {
+		t.Fatalf("requests = %d, want one 39-request burst", len(requests))
+	}
+	clientRequestIDs := make(map[string]struct{}, len(requests))
+	for index, request := range requests {
+		if request.path != "/v1/messages/count_tokens" {
+			t.Fatalf("request %d path = %q", index, request.path)
+		}
+		for name, want := range map[string]string{
+			"X-Claude-Code-Session-Id": "opus55-session-one",
+			"anthropic-client-version": "2.7032.0",
+			"anthropic-beta":           "claude-code-20250219,oauth-2025-04-20,interleaved-thinking-2025-05-14,context-management-2025-06-27,token-counting-2024-11-01",
+		} {
+			if got := headerValueFold(request.header, name); got != want {
+				t.Fatalf("request %d %s = %q, want %q", index, name, got, want)
+			}
+		}
+		if got := headerValueFold(request.header, "X-Stainless-Timeout"); got != "" {
+			t.Fatalf("request %d inherited timeout %q", index, got)
+		}
+		requestID := headerValueFold(request.header, "X-Client-Request-Id")
+		if requestID == "" {
+			t.Fatalf("request %d has no client request id", index)
+		}
+		clientRequestIDs[requestID] = struct{}{}
+	}
+	if len(clientRequestIDs) != len(requests) {
+		t.Fatalf("unique client request ids = %d, want %d", len(clientRequestIDs), len(requests))
+	}
+
+	executor.runClaudeDesktopCountTokensCalibration(ctx, auth, claudeprofile.RoleMain, "opus55-session-two", mainBody)
+	mu.Lock()
+	defer mu.Unlock()
+	if len(observed) != 78 {
+		t.Fatalf("requests after second session = %d, want 78", len(observed))
 	}
 }
 

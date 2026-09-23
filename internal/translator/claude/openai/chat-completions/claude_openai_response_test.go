@@ -131,7 +131,7 @@ func TestConvertClaudeResponseToOpenAINonStream_UsageMergesMessageStartUsage(t *
 	assertCachedCreationTokens(t, out, 31)
 }
 
-func TestConvertClaudeResponseToOpenAI_RefusalStopReason(t *testing.T) {
+func TestConvertClaudeResponseToOpenAI_TerminalStopReason(t *testing.T) {
 	testCases := []struct {
 		name                string
 		anthropicStopReason string
@@ -146,6 +146,11 @@ func TestConvertClaudeResponseToOpenAI_RefusalStopReason(t *testing.T) {
 			name:                "sensitive maps to content_filter",
 			anthropicStopReason: "sensitive",
 			wantFinishReason:    "content_filter",
+		},
+		{
+			name:                "context window maps to length",
+			anthropicStopReason: "model_context_window_exceeded",
+			wantFinishReason:    "length",
 		},
 	}
 
@@ -174,7 +179,7 @@ func TestConvertClaudeResponseToOpenAI_RefusalStopReason(t *testing.T) {
 	}
 }
 
-func TestConvertClaudeResponseToOpenAINonStream_RefusalStopReason(t *testing.T) {
+func TestConvertClaudeResponseToOpenAINonStream_TerminalStopReason(t *testing.T) {
 	testCases := []struct {
 		name                string
 		anthropicStopReason string
@@ -189,6 +194,11 @@ func TestConvertClaudeResponseToOpenAINonStream_RefusalStopReason(t *testing.T) 
 			name:                "sensitive maps to content_filter",
 			anthropicStopReason: "sensitive",
 			wantFinishReason:    "content_filter",
+		},
+		{
+			name:                "context window maps to length",
+			anthropicStopReason: "model_context_window_exceeded",
+			wantFinishReason:    "length",
 		},
 	}
 

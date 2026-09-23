@@ -3,6 +3,7 @@ package interactions
 import (
 	"bytes"
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/tidwall/gjson"
@@ -163,6 +164,50 @@ func TestConvertClaudeResponseToInteractionsNonStream(t *testing.T) {
 	}
 	if got := gjson.GetBytes(out, "usage.total_cached_tokens").Int(); got != 5 {
 		t.Fatalf("usage.total_cached_tokens = %d, want 5. Output: %s", got, string(out))
+	}
+}
+
+func TestConvertClaudeResponseToInteractions_TerminalStopReasonIsIncomplete(t *testing.T) {
+	for _, stopReason := range []string{"max_tokens", "model_context_window_exceeded", "refusal", "sensitive"} {
+		t.Run(stopReason, func(t *testing.T) {
+			direct := ConvertClaudeResponseToInteractionsNonStream(
+				context.Background(),
+				"claude-opus-5-5",
+				nil,
+				nil,
+				[]byte(`{"id":"msg_refusal","model":"claude-opus-5-5","content":[],"stop_reason":"`+stopReason+`"}`),
+				nil,
+			)
+			if got := gjson.GetBytes(direct, "status").String(); got != "incomplete" {
+				t.Fatalf("direct status = %q, want incomplete; output=%s", got, direct)
+			}
+
+			raw := []byte(strings.Join([]string{
+				`data: {"type":"message_start","message":{"id":"msg_refusal","model":"claude-opus-5-5","usage":{"input_tokens":1,"output_tokens":0}}}`,
+				`data: {"type":"message_delta","delta":{"stop_reason":"` + stopReason + `"},"usage":{"output_tokens":0}}`,
+				`data: {"type":"message_stop"}`,
+			}, "\n"))
+			nonStream := ConvertClaudeResponseToInteractionsNonStream(context.Background(), "claude-opus-5-5", nil, nil, raw, nil)
+			if got := gjson.GetBytes(nonStream, "status").String(); got != "incomplete" {
+				t.Fatalf("SSE non-stream status = %q, want incomplete; output=%s", got, nonStream)
+			}
+
+			var param any
+			var events [][]byte
+			for _, chunk := range [][]byte{
+				[]byte(`data: {"type":"message_start","message":{"id":"msg_refusal","model":"claude-opus-5-5"}}`),
+				[]byte(`data: {"type":"message_delta","delta":{"stop_reason":"` + stopReason + `"},"usage":{"output_tokens":0}}`),
+			} {
+				events = append(events, ConvertClaudeResponseToInteractions(context.Background(), "claude-opus-5-5", nil, nil, chunk, &param)...)
+			}
+			completed := findClaudeInteractionsEventPayload(events, "interaction.completed")
+			if len(completed) == 0 {
+				t.Fatalf("missing interaction.completed event: %q", events)
+			}
+			if got := gjson.GetBytes(completed, "interaction.status").String(); got != "incomplete" {
+				t.Fatalf("stream status = %q, want incomplete; output=%s", got, completed)
+			}
+		})
 	}
 }
 

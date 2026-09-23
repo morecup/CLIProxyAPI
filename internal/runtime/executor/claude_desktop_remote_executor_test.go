@@ -81,7 +81,7 @@ func TestClaudeDesktopRemoteActualIngressExecution(t *testing.T) {
 		if _, err := manager.Register(t.Context(), auth); err != nil {
 			t.Fatal(err)
 		}
-		registry.GetGlobalRegistry().RegisterClient(auth.ID, "claude", []*registry.ModelInfo{{ID: "claude-opus-5"}, {ID: "claude-sonnet-5"}})
+		registry.GetGlobalRegistry().RegisterClient(auth.ID, "claude", []*registry.ModelInfo{{ID: "claude-opus-5"}, {ID: "claude-opus-5-5"}, {ID: "claude-sonnet-5"}})
 		t.Cleanup(func() { registry.GetGlobalRegistry().UnregisterClient(auth.ID) })
 	}
 	auth := auths[0]
@@ -175,7 +175,7 @@ func TestClaudeDesktopRemoteActualIngressExecution(t *testing.T) {
 		}
 		return response, nil
 	})))
-	value, err := e.StartDesktopRemoteSession(setup, auth.ID, cliproxyexecutor.ClaudeDesktopRemoteStart{RemoteSessionID: "session_remoteOne", Folder: `C:\code`, Model: "claude-opus-5"})
+	value, err := e.StartDesktopRemoteSession(setup, auth.ID, cliproxyexecutor.ClaudeDesktopRemoteStart{RemoteSessionID: "session_remoteOne", Folder: `C:\code`, Model: "claude-opus-5-5"})
 	if err != nil || !value.Running || value.RemoteState != "attached" {
 		t.Fatal("start", value, err)
 	}
@@ -234,8 +234,21 @@ func TestClaudeDesktopRemoteActualIngressExecution(t *testing.T) {
 	firstPayload := `{"type":"user","uuid":"one","model":"injected-model","system":"injected-system","headers":{"User-Agent":"injected-header"},"message":{"role":"user","content":"first remote input"}}`
 	send(1, firstPayload)
 	first := awaitRemoteExecutor(t, requests)
-	if first.model != "claude-opus-5" || first.owner.accountID != auth.ID || first.owner.host.ID() != value.QueryID || !first.owner.remoteInput || strings.Contains(string(first.body), "injected-") || strings.Contains(first.headers.Get("User-Agent"), "injected-") {
+	if first.model != "claude-opus-5-5" || first.owner.accountID != auth.ID || first.owner.host.ID() != value.QueryID || !first.owner.remoteInput || strings.Contains(string(first.body), "injected-") || strings.Contains(first.headers.Get("User-Agent"), "injected-") {
 		t.Fatal("input lost owned request boundaries")
+	}
+	if got, want := first.headers.Get("Authorization"), "Bearer "+auth.Attributes[cliproxyauth.AttributeAPIKey]; got != want {
+		t.Fatalf("remote ingress OAuth authorization = %q, want account credential", got)
+	}
+	firstPlan, errPlan := inner.planClaudeDesktopRequestWithHints(first.body, "main", "claude-opus-5-5", nil)
+	if errPlan != nil {
+		t.Fatalf("plan remote Opus 5.5 request: %v", errPlan)
+	}
+	if got, want := first.headers.Get("Anthropic-Client-Version"), firstPlan.Variant.Headers.ClientVersion; got != want {
+		t.Fatalf("remote ingress client version = %q, want selected desktop profile %q", got, want)
+	}
+	if got, want := helps.HeaderValueCaseInsensitive(first.headers, "Anthropic-Beta"), firstPlan.anthropicBeta(); got != want {
+		t.Fatalf("remote ingress betas = %q, want selected desktop profile %q", got, want)
 	}
 	if err := first.owner.host.RecordShellTelemetry(claudefeatures.ShellTelemetryEvent{
 		Name: "tengu_powershell_tool_command_executed", Model: first.model, PromptID: "prompt-owned-shell",
@@ -265,7 +278,7 @@ func TestClaudeDesktopRemoteActualIngressExecution(t *testing.T) {
 		}
 		found = true
 		settings := record.Get("remote_control_spawn")
-		if settings.Get("model").String() != "claude-sonnet-5" || settings.Get("defaultModel").String() != "claude-opus-5" || settings.Get("systemPrompt").String() != "synthetic persisted remote system" {
+		if settings.Get("model").String() != "claude-sonnet-5" || settings.Get("defaultModel").String() != "claude-opus-5-5" || settings.Get("systemPrompt").String() != "synthetic persisted remote system" {
 			t.Fatal("bridge control acknowledged an uncommitted configuration")
 		}
 	}

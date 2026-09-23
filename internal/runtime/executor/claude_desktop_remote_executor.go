@@ -483,7 +483,7 @@ func (e *ClaudeExecutor) resolveDesktopAgentModel(parent, selected, agentType st
 	case "sonnet":
 		model = "claude-sonnet-5"
 	case "opus":
-		model = "claude-opus-5"
+		model = "claude-opus-5-5"
 	case "haiku":
 		model = "claude-haiku-4-5-20251001"
 	case "fable":

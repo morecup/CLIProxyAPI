@@ -23,15 +23,23 @@ const (
 	DefaultAPIHost                 = "https://api.anthropic.com"
 	DefaultClaudeOrigin            = "https://claude.ai"
 	DefaultLoginURL                = "https://claude.ai/login?client=desktop"
-	DefaultDesktopVersion          = "1.40609.0.0"
-	EnrollmentSchemaVersion        = 1
-	CredentialsEnvelopeVersion     = 3
-	MetadataAuthFlowKey            = "auth_flow"
-	MetadataEnrollmentKey          = "claude_desktop_enrollment"
-	MetadataCredentialsKey         = "claude_desktop_credentials"
-	MetadataSessionKeyKey          = "claude_desktop_session_key"
-	MetadataTrustedDeviceTokenKey  = "claude_desktop_trusted_device_token"
-	MetadataTelemetryMaterialsKey  = "claude_desktop_telemetry_materials"
+	// DefaultDesktopVersion is the version of the accepted Desktop runtime
+	// profile used by enrollment and emulation. It remains tied to the
+	// historical capture bundle until a newer profile is recorded and accepted.
+	DefaultDesktopVersion = "1.40609.0.0"
+	// DefaultOAuthClientVersion is the current first-party Desktop application
+	// version sent on OAuth authorize requests. The official client sends
+	// app.getVersion(), so this wire identity is intentionally independent from
+	// the accepted runtime profile above.
+	DefaultOAuthClientVersion     = "2.7032.0"
+	EnrollmentSchemaVersion       = 1
+	CredentialsEnvelopeVersion    = 3
+	MetadataAuthFlowKey           = "auth_flow"
+	MetadataEnrollmentKey         = "claude_desktop_enrollment"
+	MetadataCredentialsKey        = "claude_desktop_credentials"
+	MetadataSessionKeyKey         = "claude_desktop_session_key"
+	MetadataTrustedDeviceTokenKey = "claude_desktop_trusted_device_token"
+	MetadataTelemetryMaterialsKey = "claude_desktop_telemetry_materials"
 )
 
 type EnrollmentState string

@@ -2,6 +2,7 @@ package executor
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -14,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/andybalholm/brotli"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claudedesktop"
 	claudeprofile "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/profile"
 	claudetelemetry "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/telemetry"
@@ -149,6 +151,164 @@ func TestClaudeDesktopHttpRequestUsesProfilePlannerAndTransport(t *testing.T) {
 	if got := headerValueFold(capturedHeaders, "anthropic-beta"); got == "" || strings.Contains(got, "caller-unobserved-beta") {
 		t.Fatalf("anthropic-beta was not profile-owned: %q", got)
 	}
+}
+
+func TestClaudeDesktopHttpRequestRestoresCompressedStreamingToolAlias(t *testing.T) {
+	executor := NewClaudeExecutor(&config.Config{})
+	t.Cleanup(executor.Close)
+	auth := newClaudeDesktopRawRequestTestAuth(t)
+	var upstreamAlias string
+	transport := roundTripperFunc(func(request *http.Request) (*http.Response, error) {
+		if request.URL.Path == "/v1/messages/count_tokens" {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "200 OK",
+				Header:     http.Header{"Content-Type": {"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"input_tokens":1}`)),
+				Request:    request,
+			}, nil
+		}
+		body, errRead := io.ReadAll(request.Body)
+		if errRead != nil {
+			return nil, errRead
+		}
+		upstreamAlias = claudeDesktopAliasedToolName(t, body, "Agent")
+		stream := "event: message_start\n" +
+			`data: {"type":"message_start","message":{"id":"msg_alias_stream","type":"message","role":"assistant","model":"claude-opus-5-5","content":[],"stop_reason":null,"usage":{"input_tokens":1,"output_tokens":0}}}` + "\n\n" +
+			"event: content_block_start\n" +
+			`data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_alias","name":"` + upstreamAlias + `","input":{}}}` + "\n\n" +
+			"event: content_block_stop\n" +
+			`data: {"type":"content_block_stop","index":0}` + "\n\n" +
+			"event: message_delta\n" +
+			`data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":1}}` + "\n\n" +
+			"event: message_stop\n" +
+			`data: {"type":"message_stop"}` + "\n\n"
+		var compressed bytes.Buffer
+		writer := gzip.NewWriter(&compressed)
+		if _, errWrite := writer.Write([]byte(stream)); errWrite != nil {
+			return nil, errWrite
+		}
+		if errClose := writer.Close(); errClose != nil {
+			return nil, errClose
+		}
+		return &http.Response{
+			StatusCode:    http.StatusOK,
+			Status:        "200 OK",
+			Header:        http.Header{"Content-Type": {"text/event-stream"}, "Content-Encoding": {"gzip"}},
+			Body:          io.NopCloser(bytes.NewReader(compressed.Bytes())),
+			ContentLength: int64(compressed.Len()),
+			Request:       request,
+		}, nil
+	})
+	ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	request, errRequest := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", strings.NewReader(`{"model":"claude-opus-5-5","messages":[{"role":"user","content":"use Agent"}],"max_tokens":64,"stream":true,"tools":[{"name":"Agent","description":"launch agent","input_schema":{"type":"object"}}]}`))
+	if errRequest != nil {
+		t.Fatal(errRequest)
+	}
+	response, errDo := executor.HttpRequest(ctx, auth, request)
+	if errDo != nil {
+		t.Fatal(errDo)
+	}
+	responseBody, errRead := io.ReadAll(response.Body)
+	if errRead != nil {
+		t.Fatal(errRead)
+	}
+	if errClose := response.Body.Close(); errClose != nil {
+		t.Fatal(errClose)
+	}
+	if upstreamAlias == "" || upstreamAlias == "Agent" {
+		t.Fatalf("upstream Agent alias = %q", upstreamAlias)
+	}
+	if bytes.Contains(responseBody, []byte(upstreamAlias)) || !bytes.Contains(responseBody, []byte(`"name":"Agent"`)) {
+		t.Fatalf("stream tool alias was not restored: alias=%q body=%s", upstreamAlias, responseBody)
+	}
+	if got := response.Header.Get("Content-Encoding"); got != "" {
+		t.Fatalf("restored stream Content-Encoding = %q, want empty", got)
+	}
+	if !response.Uncompressed || response.ContentLength != -1 {
+		t.Fatalf("restored stream metadata uncompressed=%t contentLength=%d", response.Uncompressed, response.ContentLength)
+	}
+}
+
+func TestClaudeDesktopHttpRequestRestoresBrotliNonStreamingToolAlias(t *testing.T) {
+	executor := NewClaudeExecutor(&config.Config{})
+	t.Cleanup(executor.Close)
+	auth := newClaudeDesktopRawRequestTestAuth(t)
+	var upstreamAlias string
+	transport := roundTripperFunc(func(request *http.Request) (*http.Response, error) {
+		if request.URL.Path == "/v1/messages/count_tokens" {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "200 OK",
+				Header:     http.Header{"Content-Type": {"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"input_tokens":1}`)),
+				Request:    request,
+			}, nil
+		}
+		body, errRead := io.ReadAll(request.Body)
+		if errRead != nil {
+			return nil, errRead
+		}
+		upstreamAlias = claudeDesktopAliasedToolName(t, body, "Agent")
+		payload := []byte(`{"id":"msg_alias_json","type":"message","role":"assistant","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_alias","name":"` + upstreamAlias + `","input":{}}],"stop_reason":"tool_use","usage":{"input_tokens":1,"output_tokens":1}}`)
+		var compressed bytes.Buffer
+		writer := brotli.NewWriter(&compressed)
+		if _, errWrite := writer.Write(payload); errWrite != nil {
+			return nil, errWrite
+		}
+		if errClose := writer.Close(); errClose != nil {
+			return nil, errClose
+		}
+		return &http.Response{
+			StatusCode:    http.StatusOK,
+			Status:        "200 OK",
+			Header:        http.Header{"Content-Type": {"application/json"}, "Content-Encoding": {"br"}},
+			Body:          io.NopCloser(bytes.NewReader(compressed.Bytes())),
+			ContentLength: int64(compressed.Len()),
+			Request:       request,
+		}, nil
+	})
+	ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	request, errRequest := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", strings.NewReader(`{"model":"claude-opus-5-5","messages":[{"role":"user","content":"use Agent"}],"max_tokens":64,"stream":false,"tools":[{"name":"Agent","description":"launch agent","input_schema":{"type":"object"}}]}`))
+	if errRequest != nil {
+		t.Fatal(errRequest)
+	}
+	response, errDo := executor.HttpRequest(ctx, auth, request)
+	if errDo != nil {
+		t.Fatal(errDo)
+	}
+	responseBody, errRead := io.ReadAll(response.Body)
+	if errRead != nil {
+		t.Fatal(errRead)
+	}
+	if errClose := response.Body.Close(); errClose != nil {
+		t.Fatal(errClose)
+	}
+	if upstreamAlias == "" || upstreamAlias == "Agent" {
+		t.Fatalf("upstream Agent alias = %q", upstreamAlias)
+	}
+	if bytes.Contains(responseBody, []byte(upstreamAlias)) || gjson.GetBytes(responseBody, "content.0.name").String() != "Agent" {
+		t.Fatalf("JSON tool alias was not restored: alias=%q body=%s", upstreamAlias, responseBody)
+	}
+	if got := response.Header.Get("Content-Encoding"); got != "" {
+		t.Fatalf("restored JSON Content-Encoding = %q, want empty", got)
+	}
+	if !response.Uncompressed || response.ContentLength != int64(len(responseBody)) {
+		t.Fatalf("restored JSON metadata uncompressed=%t contentLength=%d body=%d", response.Uncompressed, response.ContentLength, len(responseBody))
+	}
+}
+
+func claudeDesktopAliasedToolName(t *testing.T, body []byte, semantic string) string {
+	t.Helper()
+	suffix := "_" + semantic
+	for _, tool := range gjson.GetBytes(body, "tools").Array() {
+		name := tool.Get("name").String()
+		if strings.HasPrefix(name, "mcp__") && strings.HasSuffix(name, suffix) {
+			return name
+		}
+	}
+	t.Fatalf("upstream request did not contain an MCP alias for %q: %s", semantic, body)
+	return ""
 }
 
 func TestClaudeDesktopVerifiedCodeWireRequestUsesOwnedProfile(t *testing.T) {

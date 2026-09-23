@@ -346,7 +346,7 @@ func TestClaudeCAISSignature_NotCompatibleWithGemini(t *testing.T) {
 	}
 }
 
-func TestClaudeCAISSignature_CompatibleWithAllClaudeTargets(t *testing.T) {
+func TestClaudeCAISSignature_Opus55ModelCompatibilityMatrix(t *testing.T) {
 	decision := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-fable-5", observedFable5Sample, SignatureBlockKindClaudeThinking)
 	if !decision.Compatible || decision.Action != SignatureActionPreserve || decision.NormalizedSignature != observedFable5Sample || decision.DetectedProvider != SignatureProviderClaude {
 		t.Fatalf("DecideSignatureCompatibilityForModel(Claude, claude-fable-5) = %+v, want compatible & preserved with DetectedProvider=claude", decision)
@@ -357,15 +357,54 @@ func TestClaudeCAISSignature_CompatibleWithAllClaudeTargets(t *testing.T) {
 		t.Fatalf("DecideSignatureCompatibilityForModel case-insensitive failed: %+v", decisionCase)
 	}
 
-	decisionDiff := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-opus-5", observedFable5Sample, SignatureBlockKindClaudeThinking)
-	if !decisionDiff.Compatible || decisionDiff.Action != SignatureActionPreserve || decisionDiff.NormalizedSignature != observedFable5Sample {
-		t.Fatalf("DecideSignatureCompatibilityForModel(Claude, claude-opus-5) = %+v, want compatible & preserved", decisionDiff)
+	opus55Signature := testClaudeCAISSignature("claude-opus-5-5")
+	for _, target := range []string{
+		"claude-opus-5-5",
+		"opus",
+		"anthropic.claude-opus-5-5-20260922-v1:0",
+		"claude-fable-5-1",
+		"claude-mythos-5-1",
+	} {
+		t.Run("opus 5.5 to "+target, func(t *testing.T) {
+			got := DecideSignatureCompatibilityForModel(SignatureProviderClaude, target, opus55Signature, SignatureBlockKindClaudeThinking)
+			if !got.Compatible || got.Action != SignatureActionPreserve || got.NormalizedSignature != opus55Signature {
+				t.Fatalf("decision = %+v, want preserved", got)
+			}
+		})
+	}
+	for _, target := range []string{"claude-opus-5", "claude-opus-4-8", "claude-sonnet-5"} {
+		t.Run("opus 5.5 rejects "+target, func(t *testing.T) {
+			got := DecideSignatureCompatibilityForModel(SignatureProviderClaude, target, opus55Signature, SignatureBlockKindClaudeThinking)
+			if got.Compatible || got.Action != SignatureActionDropBlock {
+				t.Fatalf("decision = %+v, want dropped block", got)
+			}
+		})
+	}
+	for _, source := range []string{"claude-opus-5", "claude-opus-4-8", "claude-sonnet-5", "claude-haiku-4-5-20251001", "claude-3-5-sonnet-20241022"} {
+		t.Run("opus 5.5 reads "+source, func(t *testing.T) {
+			signature := testClaudeCAISSignature(source)
+			got := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-opus-5-5", signature, SignatureBlockKindClaudeThinking)
+			if !got.Compatible || got.Action != SignatureActionPreserve || got.NormalizedSignature != signature {
+				t.Fatalf("decision = %+v, want preserved", got)
+			}
+		})
 	}
 
-	opus5Sig := testClaudeCAISSignature("claude-opus-5")
-	decisionOpusToOpus48 := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-opus-4-8", opus5Sig, SignatureBlockKindClaudeThinking)
-	if !decisionOpusToOpus48.Compatible || decisionOpusToOpus48.Action != SignatureActionPreserve || decisionOpusToOpus48.NormalizedSignature != opus5Sig {
-		t.Fatalf("DecideSignatureCompatibilityForModel(Claude, claude-opus-4-8) with opus-5 signature = %+v, want compatible & preserved", decisionOpusToOpus48)
+	decisionOlderToOpus55 := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-opus-5-5", observedFable5Sample, SignatureBlockKindClaudeThinking)
+	if decisionOlderToOpus55.Compatible || decisionOlderToOpus55.Action != SignatureActionDropBlock {
+		t.Fatalf("older Claude signature to Opus 5.5 = %+v, want dropped block", decisionOlderToOpus55)
+	}
+
+	classic := testClaudeThinkingSignature()
+	decisionClassic := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-opus-5-5", classic, SignatureBlockKindClaudeThinking)
+	if !decisionClassic.Compatible || decisionClassic.Action != SignatureActionPreserve {
+		t.Fatalf("model-tagged classic Claude signature to Opus 5.5 = %+v, want preserved", decisionClassic)
+	}
+
+	modelLessClassic := testClaudeThinkingSignatureForModel("")
+	decisionModelLess := DecideSignatureCompatibilityForModel(SignatureProviderClaude, "claude-opus-5-5", modelLessClassic, SignatureBlockKindClaudeThinking)
+	if !decisionModelLess.Compatible || decisionModelLess.Action != SignatureActionPreserve {
+		t.Fatalf("model-less classic Claude signature to Opus 5.5 = %+v, want preserved", decisionModelLess)
 	}
 
 	if normalized, ok := CompatibleSignatureForProvider(SignatureProviderClaude, observedFable5Sample); !ok || normalized != observedFable5Sample {
@@ -375,6 +414,42 @@ func TestClaudeCAISSignature_CompatibleWithAllClaudeTargets(t *testing.T) {
 	decisionGemini := DecideSignatureCompatibilityForModel(SignatureProviderGemini, "claude-fable-5", observedFable5Sample, SignatureBlockKindClaudeThinking)
 	if decisionGemini.Compatible {
 		t.Fatalf("DecideSignatureCompatibilityForModel(Gemini, claude-fable-5) = %+v, want incompatible", decisionGemini)
+	}
+}
+
+func TestSanitizeClaudeMessagesForClaudeUpstream_Opus55ModelMatrix(t *testing.T) {
+	for _, source := range []string{"claude-opus-5-5", "claude-fable-5-1"} {
+		target := "claude-opus-5"
+		if source == "claude-fable-5-1" {
+			target = "claude-opus-5-5"
+		}
+		t.Run(source+" to "+target, func(t *testing.T) {
+			signature := testClaudeCAISSignature(source)
+			input := []byte(`{"messages":[{"role":"assistant","content":[{"type":"thinking","thinking":"drop","signature":"` + signature + `"},{"type":"text","text":"answer"}]}]}`)
+			output, report := SanitizeClaudeMessagesForClaudeUpstream(input, target)
+			if report.DroppedBlocks != 1 || report.Preserved != 0 {
+				t.Fatalf("report = %+v, want one dropped thinking block", report)
+			}
+			parts := gjson.GetBytes(output, "messages.0.content").Array()
+			if len(parts) != 1 || parts[0].Get("type").String() != "text" {
+				t.Fatalf("content = %s, want only text block", gjson.GetBytes(output, "messages.0.content").Raw)
+			}
+		})
+	}
+
+	for _, source := range []string{"claude-opus-5", "claude-opus-4-8", "claude-sonnet-5", "claude-haiku-4-5-20251001"} {
+		t.Run(source+" to claude-opus-5-5", func(t *testing.T) {
+			signature := testClaudeCAISSignature(source)
+			input := []byte(`{"messages":[{"role":"assistant","content":[{"type":"thinking","thinking":"keep","signature":"` + signature + `"},{"type":"text","text":"answer"}]}]}`)
+			output, report := SanitizeClaudeMessagesForClaudeUpstream(input, "claude-opus-5-5")
+			if report.DroppedBlocks != 0 || report.Preserved != 1 {
+				t.Fatalf("report = %+v, want one preserved thinking block", report)
+			}
+			parts := gjson.GetBytes(output, "messages.0.content").Array()
+			if len(parts) != 2 || parts[0].Get("type").String() != "thinking" {
+				t.Fatalf("content = %s, want preserved thinking and text blocks", gjson.GetBytes(output, "messages.0.content").Raw)
+			}
+		})
 	}
 }
 

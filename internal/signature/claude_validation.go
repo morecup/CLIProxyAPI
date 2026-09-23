@@ -62,7 +62,9 @@
 // 8) and a context id (field 11). Observed traffic confirms this schema
 // appears under the classic 0x12 envelope too (opus-4-6/4-7/4-8, sonnet-5) and
 // under the CAIS envelope (opus-5, fable-5), so envelope form and channel schema
-// generation vary independently and must not be inferred from each other:
+// generation vary independently and must not be inferred from each other. The
+// Opus 5.5 replay matrix is therefore applied to model_text in either envelope
+// rather than assuming an unrecorded envelope shape:
 //
 //	Top-level protobuf
 //	|- Field 1 (varint): envelope version [required marker, observed as 2]
@@ -92,10 +94,10 @@
 // generation rather than on the provider:
 //
 //   - Claude Code OAuth subscription (Claude Code Max): opus-4-5, sonnet-4-6 and
-//     every later model up to opus-5 and fable-5. Emits the CAIS envelope for
-//     the newest models (opus-5, fable-5) and the single-layer E envelope for the
-//     opus-4-6/4-7/4-8 and sonnet-5 generation — but both carry the same
-//     channel_id 16 channel schema, so only the envelope differs.
+//     later model generations. Observed newer models such as opus-5 and fable-5
+//     emit the CAIS envelope, while the opus-4-6/4-7/4-8 and sonnet-5 generation
+//     emits the single-layer E envelope — but both can carry model_text, so
+//     replay compatibility must be decided independently of envelope form.
 //   - Claude Messages API: the full Claude model range, same envelopes as the
 //     Claude Code OAuth subscription.
 //   - Antigravity: only opus-4-6-think and sonnet-4-6, and always the

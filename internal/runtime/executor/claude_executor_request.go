@@ -191,6 +191,54 @@ func extractAndRemoveBetas(body []byte) ([]string, []byte) {
 	return betas, body
 }
 
+const (
+	claudeOpus55ModelID          = "claude-opus-5-5"
+	claudeOpus55ComputerToolType = "computer_toolset_20260801"
+)
+
+type claudeRequestValidationError struct {
+	statusErr
+}
+
+func (claudeRequestValidationError) IsRequestScoped() bool { return true }
+
+// validateClaudeOpus55Request rejects request shapes the model cannot accept.
+// It runs both before generic compatibility rewrites and against the finished
+// wire body so caller intent is not silently changed and late payload rules
+// cannot reintroduce an unsupported tool declaration. Computer tool versions
+// are API-platform specific, so that gate applies only to Anthropic's endpoint.
+func validateClaudeOpus55Request(body []byte, directAnthropic bool) error {
+	if claudetasks.CanonicalModelID(gjson.GetBytes(body, "model").String()) != claudeOpus55ModelID {
+		return nil
+	}
+
+	toolChoiceType := strings.ToLower(strings.TrimSpace(gjson.GetBytes(body, "tool_choice.type").String()))
+	if toolChoiceType == "any" || toolChoiceType == "tool" {
+		return claudeRequestValidationError{statusErr{code: http.StatusBadRequest, msg: "claude-opus-5-5 adaptive thinking does not support tool_choice type \"any\" or \"tool\"; use \"auto\" or \"none\""}}
+	}
+	if !directAnthropic {
+		return nil
+	}
+
+	for index, tool := range gjson.GetBytes(body, "tools").Array() {
+		toolType := strings.ToLower(strings.TrimSpace(tool.Get("type").String()))
+		if !strings.HasPrefix(toolType, "computer_") || toolType == claudeOpus55ComputerToolType {
+			continue
+		}
+		return claudeRequestValidationError{statusErr{code: http.StatusBadRequest, msg: fmt.Sprintf("claude-opus-5-5 does not support tools[%d].type %q; use %q", index, toolType, claudeOpus55ComputerToolType)}}
+	}
+	return nil
+}
+
+func claudeRequestUsesComputerToolset(body []byte) bool {
+	for _, tool := range gjson.GetBytes(body, "tools").Array() {
+		if strings.EqualFold(strings.TrimSpace(tool.Get("type").String()), claudeOpus55ComputerToolType) {
+			return true
+		}
+	}
+	return false
+}
+
 // disableThinkingIfToolChoiceForced checks if tool_choice forces tool use and disables thinking.
 // Anthropic API does not allow thinking when tool_choice is set to "any" or a specific tool.
 // See: https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#important-considerations

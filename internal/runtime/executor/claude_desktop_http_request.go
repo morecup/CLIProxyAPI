@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -92,6 +93,9 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 			}
 		}
 	}
+	if err = validateClaudeOpus55Request(body, true); err != nil {
+		return nil, err
+	}
 
 	planningHeaders := incomingHeaders
 	if codeWire {
@@ -148,8 +152,9 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 	}
 
 	_, body = extractAndRemoveBetas(body)
+	var oauthToolNamesReverseMap map[string]string
 	if e.desktopCapabilities().ToolAliases {
-		body, _ = prepareClaudeDesktopToolNamesForUpstream(body, resolveClaudeMCPAliasOptions(ctx))
+		body, oauthToolNamesReverseMap = prepareClaudeDesktopToolNamesForUpstream(body, resolveClaudeMCPAliasOptions(ctx))
 	}
 	body = sanitizeClaudeMessagesForClaudeUpstreamWithDebug(ctx, body, logicalModel)
 	if role == claudeprofile.RoleCountTokens {
@@ -181,6 +186,9 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 	if err != nil {
 		return nil, err
 	}
+	if err = validateClaudeOpus55Request(body, true); err != nil {
+		return nil, err
+	}
 
 	httpReq := req.Clone(ctx)
 	httpReq.Body = io.NopCloser(bytes.NewReader(body))
@@ -209,6 +217,13 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 		return nil, errSend
 	}
 	requestSent = true
+	if response.StatusCode >= http.StatusOK && response.StatusCode < http.StatusMultipleChoices && len(oauthToolNamesReverseMap) > 0 {
+		response, err = restoreClaudeDesktopRawHTTPResponse(response, transportStream, oauthToolNamesReverseMap)
+		if err != nil {
+			finishClaudeDesktopTelemetryFailure(ctx, span, err)
+			return nil, err
+		}
+	}
 	if response.StatusCode >= http.StatusOK && response.StatusCode < http.StatusMultipleChoices {
 		if errLineage := e.commitClaudeDesktopRequestLineage(lineageState, claudeDesktopResponseRequestID(response.Header)); errLineage != nil {
 			helps.LogWithRequestID(ctx).WithError(errLineage).Warn("claude desktop: failed to persist request lineage")
@@ -220,6 +235,104 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 	response = observeClaudeDesktopRawResponse(ctx, response, transportStream, diagnosticsState, span, onSuccess)
 	queryHandedOff = true
 	return helps.RetainClaudeDesktopResponseLifetime(response, releaseQuery), nil
+}
+
+func restoreClaudeDesktopRawHTTPResponse(response *http.Response, streaming bool, reverseMap map[string]string) (*http.Response, error) {
+	if response == nil || response.Body == nil || response.Body == http.NoBody || len(reverseMap) == 0 {
+		return response, nil
+	}
+
+	decodedBody, errDecode := decodeResponseBody(response.Body, claudeResponseContentEncoding(response.Header))
+	if errDecode != nil {
+		return nil, fmt.Errorf("decode Claude Desktop aliased response: %w", errDecode)
+	}
+	response.Body = decodedBody
+	response.Header.Del("Content-Encoding")
+	response.Header.Del("Content-Length")
+	response.ContentLength = -1
+	response.Uncompressed = true
+
+	if streaming {
+		response.Body = &claudeDesktopToolAliasStreamBody{
+			body:       decodedBody,
+			reader:     bufio.NewReader(decodedBody),
+			reverseMap: reverseMap,
+		}
+		return response, nil
+	}
+
+	payload, errRead := io.ReadAll(decodedBody)
+	errClose := decodedBody.Close()
+	if errRead != nil {
+		return nil, fmt.Errorf("read Claude Desktop aliased response: %w", errRead)
+	}
+	if errClose != nil {
+		return nil, fmt.Errorf("close Claude Desktop aliased response: %w", errClose)
+	}
+	restored, errRestore := restoreClaudeDesktopToolNamesFromResponse(payload, reverseMap)
+	if errRestore != nil {
+		return nil, fmt.Errorf("restore Claude Desktop tool aliases: %w", errRestore)
+	}
+	response.Body = io.NopCloser(bytes.NewReader(restored))
+	response.ContentLength = int64(len(restored))
+	return response, nil
+}
+
+type claudeDesktopToolAliasStreamBody struct {
+	body       io.ReadCloser
+	reader     *bufio.Reader
+	reverseMap map[string]string
+	pending    []byte
+	terminal   error
+}
+
+func (b *claudeDesktopToolAliasStreamBody) Read(destination []byte) (int, error) {
+	if len(destination) == 0 {
+		return 0, nil
+	}
+	for len(b.pending) == 0 {
+		if b.terminal != nil {
+			return 0, b.terminal
+		}
+		line, errRead := b.reader.ReadBytes('\n')
+		if len(line) == 0 {
+			if errRead == nil {
+				continue
+			}
+			b.terminal = errRead
+			return 0, errRead
+		}
+
+		content, ending := splitClaudeDesktopStreamLine(line)
+		restored, errRestore := restoreClaudeDesktopToolNamesFromStreamLine(content, b.reverseMap)
+		if errRestore != nil {
+			b.terminal = errRestore
+			return 0, fmt.Errorf("restore Claude Desktop stream tool aliases: %w", errRestore)
+		}
+		b.pending = append(append([]byte(nil), restored...), ending...)
+		if errRead != nil {
+			b.terminal = errRead
+		}
+	}
+
+	read := copy(destination, b.pending)
+	b.pending = b.pending[read:]
+	return read, nil
+}
+
+func (b *claudeDesktopToolAliasStreamBody) Close() error {
+	return b.body.Close()
+}
+
+func splitClaudeDesktopStreamLine(line []byte) (content, ending []byte) {
+	switch {
+	case bytes.HasSuffix(line, []byte("\r\n")):
+		return line[:len(line)-2], line[len(line)-2:]
+	case bytes.HasSuffix(line, []byte("\n")):
+		return line[:len(line)-1], line[len(line)-1:]
+	default:
+		return line, nil
+	}
 }
 
 func readClaudeDesktopRawRequestBody(req *http.Request) ([]byte, error) {

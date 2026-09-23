@@ -6,6 +6,18 @@ import (
 	"time"
 )
 
+func TestDesktopOAuthAndRuntimeVersionsRemainIndependent(t *testing.T) {
+	if DefaultOAuthClientVersion != "2.7032.0" {
+		t.Fatalf("OAuth client version = %q, want current official Desktop version", DefaultOAuthClientVersion)
+	}
+	if DefaultDesktopVersion != "1.40609.0.0" {
+		t.Fatalf("runtime profile version = %q, want accepted historical profile", DefaultDesktopVersion)
+	}
+	if DefaultOAuthClientVersion == DefaultDesktopVersion {
+		t.Fatal("OAuth wire identity unexpectedly shares the runtime profile version")
+	}
+}
+
 func TestValidateEnrollmentRejectsBindingDrift(t *testing.T) {
 	identity := AccountIdentity{AccountUUID: testAccountUUID, OrganizationUUID: testOrgAUUID}
 	device := TrustedDevice{DeviceID: testDeviceUUID, DeviceToken: "trusted-device", DisplayName: "Desktop"}

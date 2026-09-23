@@ -216,6 +216,9 @@ func (e *ClaudeExecutor) countTokensUpstream(ctx context.Context, auth *cliproxy
 			return cliproxyexecutor.Response{}, errPlan
 		}
 	}
+	if errPlan = validateClaudeOpus55Request(body, directAnthropic); errPlan != nil {
+		return cliproxyexecutor.Response{}, errPlan
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return cliproxyexecutor.Response{}, err

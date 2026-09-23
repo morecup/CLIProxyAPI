@@ -259,10 +259,24 @@ func DecideSignatureCompatibilityForModel(targetProvider SignatureProvider, targ
 	}
 
 	if signatureProviderMatchesTarget(targetProvider, detected) {
+		if targetProvider == SignatureProviderClaude {
+			compatible, constrained, reason := claudeModelSignatureCompatibility(rawSignature, targetModel)
+			if constrained && !compatible {
+				decision.Compatible = false
+				decision.Action = SignatureActionDropBlock
+				decision.Reason = reason
+				return decision
+			}
+			if constrained {
+				decision.Reason = reason
+			}
+		}
 		decision.Compatible = true
 		decision.Action = SignatureActionPreserve
 		decision.NormalizedSignature = normalizeCompatibleSignatureForProvider(targetProvider, rawSignature, blockKind)
-		decision.Reason = claudeCompatibleSignatureReason(targetProvider, rawSignature, targetModel)
+		if decision.Reason == "" {
+			decision.Reason = claudeCompatibleSignatureReason(targetProvider, rawSignature, targetModel)
+		}
 		return decision
 	}
 
@@ -379,6 +393,102 @@ func CompatibleAntigravityClaudeThinkingSignature(rawSignature string) (string, 
 	return normalized, true
 }
 
+// claudeModelSignatureCompatibility applies the model-level replay matrix carried by
+// model-tagged Claude signatures. Both CAIS and newer classic E/R envelopes can
+// carry model_text. Signatures without a model id deliberately remain
+// provider-compatible rather than being dropped on an inference the payload
+// cannot support.
+func claudeModelSignatureCompatibility(rawSignature, targetModel string) (compatible, constrained bool, reason string) {
+	source, modelTagged := claudeSignatureModelID(rawSignature)
+	if !modelTagged {
+		return true, false, ""
+	}
+
+	target := normalizeClaudeSignatureModelID(targetModel)
+	if target == "" {
+		return true, false, ""
+	}
+
+	if target == "claude-opus-5-5" && !claudeOpus55ReadableSourceModel(source) {
+		return false, true, "Claude Opus 5.5 can replay thinking blocks from Claude Opus 5.5, Opus 5, and earlier Opus, Sonnet, or Haiku models; source model is " + source
+	}
+
+	if source == "claude-opus-5-5" {
+		switch target {
+		case "claude-opus-5-5", "claude-fable-5-1", "claude-mythos-5-1":
+			return true, true, "Claude Opus 5.5 CAIS signature is compatible with target model " + target
+		default:
+			return false, true, "Claude Opus 5.5 CAIS signatures can only be replayed by Claude Opus 5.5, Fable 5.1, or Mythos 5.1; target model is " + target
+		}
+	}
+
+	return true, false, ""
+}
+
+func claudeOpus55ReadableSourceModel(source string) bool {
+	lower := strings.ToLower(strings.TrimSpace(source))
+	for _, marker := range []string{
+		"claude-opus-5-5",
+		"claude-opus-5",
+		"claude-opus-4",
+		"claude-3-opus",
+		"claude-sonnet-5",
+		"claude-sonnet-4",
+		"claude-3-7-sonnet",
+		"claude-3-5-sonnet",
+		"claude-3-sonnet",
+		"claude-haiku-4",
+		"claude-3-5-haiku",
+		"claude-3-haiku",
+	} {
+		if strings.Contains(lower, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func claudeSignatureModelID(rawSignature string) (string, bool) {
+	payload := stripClaudeSignaturePrefix(SignaturePayloadWithoutProviderPrefix(rawSignature))
+	if payload == "" {
+		return "", false
+	}
+	if info, err := InspectClaudeCAISSignature(payload); err == nil {
+		return normalizeClaudeSignatureModelID(info.ModelText), true
+	}
+
+	var (
+		tree *ClaudeSignatureTree
+		err  error
+	)
+	switch payload[0] {
+	case 'E':
+		tree, err = InspectClaudeSingleLayerSignature(payload)
+	case 'R':
+		tree, err = InspectClaudeDoubleLayerSignature(payload)
+	default:
+		return "", false
+	}
+	if err != nil || tree == nil || strings.TrimSpace(tree.ModelText) == "" {
+		return "", false
+	}
+	return normalizeClaudeSignatureModelID(tree.ModelText), true
+}
+
+func normalizeClaudeSignatureModelID(model string) string {
+	lower := strings.ToLower(strings.TrimSpace(model))
+	switch {
+	case lower == "opus", strings.Contains(lower, "claude-opus-5-5"):
+		return "claude-opus-5-5"
+	case strings.Contains(lower, "claude-fable-5-1"):
+		return "claude-fable-5-1"
+	case strings.Contains(lower, "claude-mythos-5-1"):
+		return "claude-mythos-5-1"
+	default:
+		return lower
+	}
+}
+
 // claudeCompatibleSignatureReason explains why a matching signature is
 // replayable. Claude CAIS signatures carry the issuing model inside the payload,
 // so the embedded model and the target model are both reported to make signature
@@ -392,9 +502,9 @@ func claudeCompatibleSignatureReason(targetProvider SignatureProvider, rawSignat
 	if err != nil {
 		return genericReason
 	}
-	reason := "valid Claude CAIS signature with embedded model " + info.ModelText + " is compatible with any Claude target"
+	reason := "valid Claude CAIS signature with embedded model " + info.ModelText + " matches the Claude provider"
 	if trimmedModel := strings.TrimSpace(targetModel); trimmedModel != "" {
-		reason += ", including target model " + trimmedModel
+		reason += " and is compatible with target model " + trimmedModel
 	}
 	return reason
 }

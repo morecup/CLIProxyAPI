@@ -110,7 +110,7 @@ func (e *ClaudeExecutor) buildClaudeDesktopCalibrationRequests(model string, mai
 	if errTools != nil {
 		return nil, errTools
 	}
-	if tools.Layout == claudeprofile.CountTokensLayoutV2255313 {
+	if tools.Layout == claudeprofile.CountTokensLayoutV270320 {
 		return buildClaudeDesktopCurrentCalibrationRequests(model, mainBody, tools)
 	}
 	sections, errSections := claudeDesktopCalibrationSystemSections(model, mainBody)
@@ -178,14 +178,73 @@ func claudeDesktopCurrentCalibrationContents(mainBody []byte) ([]any, error) {
 		return nil, fmt.Errorf("claude desktop current calibration requires the four-block main system")
 	}
 	messages := gjson.GetBytes(mainBody, "messages")
-	if !messages.IsArray() || len(messages.Array()) != 2 || messages.Array()[0].Get("role").String() != "user" || messages.Array()[1].Get("role").String() != "system" {
-		return nil, fmt.Errorf("claude desktop current calibration requires the captured user/system history pair")
+	if !messages.IsArray() {
+		return nil, fmt.Errorf("claude desktop current calibration requires a messages array")
 	}
-	userContent := messages.Array()[0].Get("content")
-	if !userContent.IsArray() || len(userContent.Array()) != 3 {
-		return nil, fmt.Errorf("claude desktop current calibration requires the captured three-block user turn")
+	dynamicContent, errDynamic := claudeDesktopCurrentCalibrationDynamicContent(messages)
+	if errDynamic != nil {
+		return nil, errDynamic
 	}
-	historyText := messages.Array()[1].Get("content.0.text").String()
+
+	sessionMarkers := []string{
+		"Write code that reads like the surrounding code:",
+		"When you use a pronoun for someone",
+		"For actions that are hard to reverse or outward-facing",
+		"# Session-specific guidance",
+		"# Memory",
+		"# Environment",
+		"# Context management",
+		"When you have enough information to act, act.",
+		"<total_tokens>",
+		"You are running inside the Claude desktop app (Code tab).",
+	}
+	sessionSections, errSession := splitClaudeDesktopCalibrationSystemBlock(system.Array()[3].Get("text").String(), sessionMarkers)
+	if errSession != nil {
+		return nil, fmt.Errorf("claude desktop current calibration session: %w", errSession)
+	}
+	if len(sessionSections) != 10 {
+		return nil, fmt.Errorf("claude desktop current calibration session section count is %d, want 10", len(sessionSections))
+	}
+	contents := make([]any, 0, 12)
+	contents = append(contents, dynamicContent, system.Array()[2].Get("text").String())
+	for _, section := range sessionSections {
+		contents = append(contents, section)
+	}
+	return contents, nil
+}
+
+func claudeDesktopCurrentCalibrationDynamicContent(messages gjson.Result) (any, error) {
+	messageArray := messages.Array()
+	if len(messageArray) == 2 && messageArray[0].Get("role").String() == "user" && messageArray[1].Get("role").String() == "system" {
+		userContent := messageArray[0].Get("content")
+		historyText := messageArray[1].Get("content.0.text").String()
+		if userContent.IsArray() && len(userContent.Array()) == 3 && strings.HasPrefix(historyText, "# Environment") {
+			return claudeDesktopCapturedCalibrationDynamicContent(userContent, historyText)
+		}
+	}
+
+	for _, message := range messageArray {
+		if message.Get("role").String() != "user" {
+			continue
+		}
+		content := message.Get("content")
+		switch {
+		case content.IsArray():
+			if len(content.Array()) == 0 {
+				continue
+			}
+			return json.RawMessage(content.Raw), nil
+		case content.Type == gjson.String:
+			if content.String() == "" {
+				continue
+			}
+			return content.String(), nil
+		}
+	}
+	return nil, fmt.Errorf("claude desktop current calibration requires a non-empty user message")
+}
+
+func claudeDesktopCapturedCalibrationDynamicContent(userContent gjson.Result, historyText string) (json.RawMessage, error) {
 	historyMarkers := []string{
 		"# Environment",
 		"You are powered by the model named",
@@ -224,32 +283,7 @@ func claudeDesktopCurrentCalibrationContents(mainBody []byte) ([]any, error) {
 	if errDynamic != nil {
 		return nil, fmt.Errorf("encode Claude Desktop current calibration dynamic history: %w", errDynamic)
 	}
-
-	sessionMarkers := []string{
-		"Write code that reads like the surrounding code:",
-		"When you use a pronoun for someone",
-		"For actions that are hard to reverse or outward-facing",
-		"# Session-specific guidance",
-		"# Memory",
-		"# Environment",
-		"# Context management",
-		"When you have enough information to act, act.",
-		"<total_tokens>",
-		"You are running inside the Claude desktop app (Code tab).",
-	}
-	sessionSections, errSession := splitClaudeDesktopCalibrationSystemBlock(system.Array()[3].Get("text").String(), sessionMarkers)
-	if errSession != nil {
-		return nil, fmt.Errorf("claude desktop current calibration session: %w", errSession)
-	}
-	if len(sessionSections) != 10 {
-		return nil, fmt.Errorf("claude desktop current calibration session section count is %d, want 10", len(sessionSections))
-	}
-	contents := make([]any, 0, 12)
-	contents = append(contents, json.RawMessage(dynamicContent), system.Array()[2].Get("text").String())
-	for _, section := range sessionSections {
-		contents = append(contents, section)
-	}
-	return contents, nil
+	return json.RawMessage(dynamicContent), nil
 }
 
 func claudeDesktopCalibrationSystemSections(model string, mainBody []byte) ([]string, error) {

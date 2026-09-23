@@ -52,6 +52,62 @@ func TestConvertClaudeResponseToGeminiNonStreamPreservesToolUseID(t *testing.T) 
 	}
 }
 
+func TestConvertClaudeResponseToGemini_StopReason(t *testing.T) {
+	for _, test := range []struct {
+		stopReason string
+		want       string
+	}{
+		{stopReason: "end_turn", want: "STOP"},
+		{stopReason: "max_tokens", want: "MAX_TOKENS"},
+		{stopReason: "model_context_window_exceeded", want: "MAX_TOKENS"},
+		{stopReason: "refusal", want: "SAFETY"},
+		{stopReason: "sensitive", want: "SAFETY"},
+	} {
+		t.Run(test.stopReason, func(t *testing.T) {
+			var param any
+			out := ConvertClaudeResponseToGemini(
+				context.Background(),
+				"claude-opus-5-5",
+				nil,
+				nil,
+				[]byte(`data: {"type":"message_delta","delta":{"stop_reason":"`+test.stopReason+`"},"usage":{"output_tokens":1}}`),
+				&param,
+			)
+			if len(out) != 1 {
+				t.Fatalf("expected one chunk, got %d", len(out))
+			}
+			if got := gjson.GetBytes(out[0], "candidates.0.finishReason").String(); got != test.want {
+				t.Fatalf("finishReason = %q, want %q; out=%s", got, test.want, out[0])
+			}
+		})
+	}
+}
+
+func TestConvertClaudeResponseToGeminiNonStream_StopReason(t *testing.T) {
+	for _, test := range []struct {
+		stopReason string
+		want       string
+	}{
+		{stopReason: "end_turn", want: "STOP"},
+		{stopReason: "max_tokens", want: "MAX_TOKENS"},
+		{stopReason: "model_context_window_exceeded", want: "MAX_TOKENS"},
+		{stopReason: "refusal", want: "SAFETY"},
+		{stopReason: "sensitive", want: "SAFETY"},
+	} {
+		t.Run(test.stopReason, func(t *testing.T) {
+			raw := []byte(strings.Join([]string{
+				`data: {"type":"message_start","message":{"id":"msg_stop_reason","model":"claude-opus-5-5"}}`,
+				`data: {"type":"message_delta","delta":{"stop_reason":"` + test.stopReason + `"},"usage":{"output_tokens":1}}`,
+				`data: {"type":"message_stop"}`,
+			}, "\n"))
+			out := ConvertClaudeResponseToGeminiNonStream(context.Background(), "claude-opus-5-5", nil, nil, raw, nil)
+			if got := gjson.GetBytes(out, "candidates.0.finishReason").String(); got != test.want {
+				t.Fatalf("finishReason = %q, want %q; out=%s", got, test.want, out)
+			}
+		})
+	}
+}
+
 func TestConvertClaudeResponseToGemini_StreamThinkingSignature(t *testing.T) {
 	const validGeminiSignature = "EjQKMgEMOdbHO0Gd+c9Mxk4ELwPGbpCEcp2mFfYYLix2UVtBH3fL8GECc4+JITVnHF4qZDsA"
 

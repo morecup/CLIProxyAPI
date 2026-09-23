@@ -129,6 +129,16 @@ func ValidateConfig(config ThinkingConfig, modelInfo *registry.ModelInfo, fromFo
 		config.Level = ""
 	}
 
+	// Some adaptive-only models cannot turn thinking off. Normalize every
+	// explicit disabled form (none, thinking.type=disabled, or budget 0) to the
+	// lowest supported effort before provider-specific handling can serialize a
+	// forbidden disabled payload.
+	if capability == CapabilityLevelOnly && config.Mode == ModeNone && !support.ZeroAllowed && !isLevelSupported(string(LevelNone), support.Levels) {
+		config.Mode = ModeLevel
+		config.Level = ThinkingLevel(support.Levels[0])
+		config.Budget = 0
+	}
+
 	if len(support.Levels) > 0 && config.Mode == ModeLevel {
 		if !isLevelSupported(string(config.Level), support.Levels) {
 			if allowClampUnsupported {
@@ -177,12 +187,10 @@ func ValidateConfig(config ThinkingConfig, modelInfo *registry.ModelInfo, fromFo
 			config.Budget = clampBudget(config.Budget, modelInfo, toFormat)
 		}
 
-		// ModeNone for a model that cannot be disabled falls back to the lowest
-		// supported level. Budget-capable models reach this path with Budget > 0;
-		// level-only models need the capability flags checked explicitly because
-		// their Min/Max range is zero.
-		cannotDisableLevelModel := !support.ZeroAllowed && !isLevelSupported(string(LevelNone), support.Levels)
-		if config.Mode == ModeNone && len(support.Levels) > 0 && (config.Budget > 0 || cannotDisableLevelModel) {
+		// ModeNone for a hybrid model that cannot be disabled falls back to the
+		// lowest supported level. Level-only models were normalized above so the
+		// provider applier receives ModeLevel rather than serializing disabled.
+		if config.Mode == ModeNone && len(support.Levels) > 0 && config.Budget > 0 {
 			config.Level = ThinkingLevel(support.Levels[0])
 		}
 	}

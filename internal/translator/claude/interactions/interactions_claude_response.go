@@ -30,6 +30,16 @@ type claudeToInteractionsStreamState struct {
 	ToolNames          map[int]string
 	ToolIDs            map[int]string
 	ToolArgs           map[int]*strings.Builder
+	StopReason         string
+}
+
+func claudeInteractionsTerminalStatus(stopReason string) string {
+	switch stopReason {
+	case "max_tokens", "model_context_window_exceeded", "refusal", "sensitive":
+		return "incomplete"
+	default:
+		return "completed"
+	}
 }
 
 func ConvertClaudeResponseToInteractions(ctx context.Context, modelName string, originalRequestRawJSON, requestRawJSON, rawJSON []byte, param *any) [][]byte {
@@ -64,6 +74,7 @@ func convertClaudeMessageToInteractions(modelName string, root gjson.Result) []b
 	out := []byte(`{"id":"","object":"interaction","status":"completed","model":"","steps":[]}`)
 	out, _ = sjson.SetBytes(out, "id", firstNonEmptyString(root.Get("id").String(), fmt.Sprintf("interaction_%d", time.Now().UnixNano())))
 	out, _ = sjson.SetBytes(out, "model", firstNonEmptyString(root.Get("model").String(), modelName))
+	out, _ = sjson.SetBytes(out, "status", claudeInteractionsTerminalStatus(root.Get("stop_reason").String()))
 	steps := make([][]byte, 0, 4)
 	root.Get("content").ForEach(func(_, part gjson.Result) bool {
 		if step := claudeContentBlockToInteractionsStep(part); len(step) > 0 {
@@ -125,8 +136,12 @@ func convertClaudeSSEToInteractionsNonStream(modelName string, rawJSON []byte) [
 			}
 		case "message_delta":
 			mergeClaudeUsage(st, root.Get("usage"))
+			if stopReason := root.Get("delta.stop_reason"); stopReason.Exists() && stopReason.String() != "" {
+				st.StopReason = stopReason.String()
+			}
 		}
 	}
+	out, _ = sjson.SetBytes(out, "status", claudeInteractionsTerminalStatus(st.StopReason))
 	if len(steps) > 0 {
 		out, _ = sjson.SetRawBytes(out, "steps", translatorcommon.JoinRawArray(steps))
 	}
@@ -158,6 +173,9 @@ func convertClaudeEventToInteractions(modelName string, rawJSON []byte, st *clau
 		return claudeContentBlockStopToInteractions(root, st)
 	case "message_delta":
 		mergeClaudeUsage(st, root.Get("usage"))
+		if stopReason := root.Get("delta.stop_reason"); stopReason.Exists() && stopReason.String() != "" {
+			st.StopReason = stopReason.String()
+		}
 		out := appendClaudeInteractionsStepStop(nil, st)
 		out = appendClaudeInteractionsCompleted(out, st, modelName, root)
 		return out
@@ -518,6 +536,8 @@ func appendClaudeInteractionsCompleted(out [][]byte, st *claudeToInteractionsStr
 	completed, _ = sjson.SetBytes(completed, "interaction.created", now)
 	completed, _ = sjson.SetBytes(completed, "interaction.updated", now)
 	completed, _ = sjson.SetBytes(completed, "interaction.model", firstNonEmptyString(st.Model, modelName))
+	stopReason := firstNonEmptyString(st.StopReason, root.Get("delta.stop_reason").String(), root.Get("stop_reason").String())
+	completed, _ = sjson.SetBytes(completed, "interaction.status", claudeInteractionsTerminalStatus(stopReason))
 	usage := claudeMergedUsage(st)
 	if !usage.Exists() {
 		usage = root.Get("usage")
