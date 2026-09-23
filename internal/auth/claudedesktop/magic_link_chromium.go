@@ -21,9 +21,10 @@ import (
 )
 
 const (
-	magicLinkChromiumPathEnv     = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_PATH"
-	magicLinkChromiumHeadlessEnv = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_HEADLESS"
-	magicLinkChromiumProfile     = "cliproxy-claude-desktop-chromium-"
+	magicLinkChromiumPathEnv      = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_PATH"
+	magicLinkChromiumHeadlessEnv  = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_HEADLESS"
+	magicLinkChromiumNoSandboxEnv = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_NO_SANDBOX"
+	magicLinkChromiumProfile      = "cliproxy-claude-desktop-chromium-"
 )
 
 type chromiumProxySettings struct {
@@ -49,6 +50,10 @@ func acquireMagicLinkAttestationWithChromium(ctx context.Context, credentials ma
 	headless, errHeadless := magicLinkChromiumHeadless()
 	if errHeadless != nil {
 		return magicLinkAttestation{}, errHeadless
+	}
+	noSandbox, errNoSandbox := magicLinkChromiumNoSandbox()
+	if errNoSandbox != nil {
+		return magicLinkAttestation{}, errNoSandbox
 	}
 	proxySettings, errProxy := prepareChromiumProxy(ctx, options.ProxyURL)
 	if errProxy != nil {
@@ -82,6 +87,9 @@ func acquireMagicLinkAttestationWithChromium(ctx context.Context, credentials ma
 	}
 	if headless {
 		allocatorOptions = append(allocatorOptions, chromedp.Headless)
+	}
+	if noSandbox {
+		allocatorOptions = append(allocatorOptions, chromedp.NoSandbox)
 	}
 	if proxySettings.serverURL != "" {
 		allocatorOptions = append(allocatorOptions, chromedp.ProxyServer(proxySettings.serverURL))
@@ -193,13 +201,21 @@ func chromiumAttestationError(ctx context.Context, proxySettings *chromiumProxyS
 	if cause == nil {
 		return fmt.Errorf("%w: Chromium closed before hCaptcha completed", errMagicLinkAttestationUnavailable)
 	}
-	return fmt.Errorf("%w: %s", errMagicLinkAttestationUnavailable, stage)
+	return fmt.Errorf("%w: %s: %v", errMagicLinkAttestationUnavailable, stage, cause)
 }
 
 func magicLinkChromiumHeadless() (bool, error) {
-	raw := strings.TrimSpace(os.Getenv(magicLinkChromiumHeadlessEnv))
+	return magicLinkChromiumBoolEnv(magicLinkChromiumHeadlessEnv, true)
+}
+
+func magicLinkChromiumNoSandbox() (bool, error) {
+	return magicLinkChromiumBoolEnv(magicLinkChromiumNoSandboxEnv, false)
+}
+
+func magicLinkChromiumBoolEnv(name string, defaultValue bool) (bool, error) {
+	raw := strings.TrimSpace(os.Getenv(name))
 	if raw == "" {
-		return true, nil
+		return defaultValue, nil
 	}
 	switch strings.ToLower(raw) {
 	case "yes", "on":
@@ -209,7 +225,7 @@ func magicLinkChromiumHeadless() (bool, error) {
 	}
 	value, errParse := strconv.ParseBool(raw)
 	if errParse != nil {
-		return false, fmt.Errorf("%w: %s must be true or false", errMagicLinkAttestationUnavailable, magicLinkChromiumHeadlessEnv)
+		return false, fmt.Errorf("%w: %s must be true or false", errMagicLinkAttestationUnavailable, name)
 	}
 	return value, nil
 }
