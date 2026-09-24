@@ -81,6 +81,29 @@ func TestClaudeDesktopTitleUsesConfiguredHaikuModel(t *testing.T) {
 	}
 }
 
+func TestClaudeDesktopCompactionUsesCapturedOpusModel(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	body := []byte(`{"model":"claude-opus-5-5","max_tokens":4096,"messages":[{"role":"user","content":"compact this conversation"}]}`)
+	plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleCompaction, "claude-opus-5-5", nil)
+	if errPlan != nil {
+		t.Fatal(errPlan)
+	}
+	if plan.Variant.Key.Model != helps.ClaudeDesktopCompactionModel || plan.Variant.Key.LogicalModel != helps.ClaudeDesktopCompactionModel {
+		t.Fatalf("compaction variant = model %q logical model %q, want %q", plan.Variant.Key.Model, plan.Variant.Key.LogicalModel, helps.ClaudeDesktopCompactionModel)
+	}
+	facts := executor.newClaudeDesktopRuntimeFactsForPlan(nil, "session", "claude-opus-5-5", "prompt", "request", "", plan)
+	if facts.LogicalModel != helps.ClaudeDesktopCompactionModel {
+		t.Fatalf("compaction telemetry model = %q, want %q", facts.LogicalModel, helps.ClaudeDesktopCompactionModel)
+	}
+	normalized, errNormalize := executor.normalizeClaudeDesktopBody(body, plan)
+	if errNormalize != nil {
+		t.Fatal(errNormalize)
+	}
+	if got := gjson.GetBytes(normalized, "model").String(); got != helps.ClaudeDesktopCompactionModel {
+		t.Fatalf("normalized compaction model = %q, want %q", got, helps.ClaudeDesktopCompactionModel)
+	}
+}
+
 func TestClaudeDesktopFinalCacheControlLimitPreservesProfileSystem(t *testing.T) {
 	executor := newClaudeDesktopTestExecutor(t)
 	body := []byte(`{"model":"claude-sonnet-4-6","max_tokens":4096,"system":"caller instruction","tools":[{"name":"first","description":"first","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}},{"name":"second","description":"second","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":[{"type":"text","text":"first turn","cache_control":{"type":"ephemeral"}}]},{"role":"assistant","content":[{"type":"text","text":"reply","cache_control":{"type":"ephemeral"}}]},{"role":"user","content":"latest turn"}]}`)

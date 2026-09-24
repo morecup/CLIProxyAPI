@@ -16,6 +16,10 @@ import (
 	"github.com/tidwall/sjson"
 )
 
+// ClaudeDesktopCompactionModel is the captured model used by Desktop's
+// compaction helper independently of the model selected for the main query.
+const ClaudeDesktopCompactionModel = "claude-opus-5"
+
 type ClaudeDesktopSummaryExecutor interface {
 	ExecuteStream(context.Context, *cliproxyauth.Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error)
 }
@@ -79,7 +83,7 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 	if json.Unmarshal(params.ParentRequest, &parent) != nil || parent.Model == "" {
 		return empty, errors.New("missing Desktop compaction model")
 	}
-	if _, err = params.Bundle.Resolve(claudeprofile.RequestVariantKey{Model: parent.Model, LogicalModel: parent.Model, Role: claudeprofile.RoleCompaction, ThinkingDisplay: "omitted"}); err != nil {
+	if _, err = params.Bundle.Resolve(claudeprofile.RequestVariantKey{Model: ClaudeDesktopCompactionModel, LogicalModel: ClaudeDesktopCompactionModel, Role: claudeprofile.RoleCompaction, ThinkingDisplay: "omitted"}); err != nil {
 		return empty, err
 	}
 	if ctx == nil {
@@ -110,7 +114,7 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 				Model    string            `json:"model"`
 				Messages []json.RawMessage `json:"messages"`
 				Tools    json.RawMessage   `json:"tools,omitempty"`
-			}{Model: parent.Model, Messages: rows, Tools: parent.Tools})
+			}{Model: ClaudeDesktopCompactionModel, Messages: rows, Tools: parent.Tools})
 			if errMarshal != nil {
 				return result, errMarshal
 			}
@@ -130,7 +134,7 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 				Metadata: map[string]any{"claude_desktop_prompt_id": uuid.NewString(), "claude_desktop_client_request_id": clientID}}
 			// Main request headers/system/thinking/diagnostics are not copied.
 			// The existing compact planner owns their model-specific rendering.
-			stream, errQuery := executor.ExecuteStream(child, params.Auth, cliproxyexecutor.Request{Model: parent.Model, Payload: body}, options)
+			stream, errQuery := executor.ExecuteStream(child, params.Auth, cliproxyexecutor.Request{Model: ClaudeDesktopCompactionModel, Payload: body}, options)
 			if errQuery != nil {
 				return classifyClaudeDesktopSummaryError(ctx, errQuery), nil
 			}

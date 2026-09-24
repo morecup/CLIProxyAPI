@@ -60,8 +60,8 @@ func (e *ClaudeExecutor) doClaudeDesktopRecoverableRequest(client *http.Client, 
 	if failure.Reason != "prompt_too_long" {
 		return response, nil
 	}
-	if _, errVariant := e.desktopProfile.Resolve(claudeprofile.RequestVariantKey{Model: gjson.GetBytes(state.body, "model").String(),
-		LogicalModel: gjson.GetBytes(state.body, "model").String(), Role: claudeprofile.RoleCompaction, ThinkingDisplay: "omitted"}); errVariant != nil {
+	if _, errVariant := e.desktopProfile.Resolve(claudeprofile.RequestVariantKey{Model: helps.ClaudeDesktopCompactionModel,
+		LogicalModel: helps.ClaudeDesktopCompactionModel, Role: claudeprofile.RoleCompaction, ThinkingDisplay: "omitted"}); errVariant != nil {
 		return response, nil
 	}
 	view, errView := state.span.prompt.CompactionView(state.body)

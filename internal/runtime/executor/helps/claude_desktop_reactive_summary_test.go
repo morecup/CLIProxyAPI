@@ -36,7 +36,7 @@ func summaryParamsFixture(t *testing.T) (ClaudeDesktopReactiveSummaryParams, *cl
 	var owner *claudeprompt.Request
 	for n := 0; n < 3; n++ {
 		messages = append(messages, map[string]any{"role": "user", "content": fmt.Sprintf("PRIVATE_INPUT_%d", n)})
-		params.ParentRequest, err = json.Marshal(map[string]any{"model": "claude-opus-5", "messages": messages})
+		params.ParentRequest, err = json.Marshal(map[string]any{"model": "claude-opus-5-5", "messages": messages})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -114,6 +114,12 @@ func TestClaudeDesktopSummaryCancellationAndLateResult(t *testing.T) {
 			var child context.Context
 			executor := summaryExecutorFunc(func(c context.Context, a *cliproxyauth.Auth, r cliproxyexecutor.Request, o cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
 				child = c
+				var body struct {
+					Model string `json:"model"`
+				}
+				if errBody := json.Unmarshal(r.Payload, &body); errBody != nil || r.Model != ClaudeDesktopCompactionModel || body.Model != ClaudeDesktopCompactionModel {
+					t.Fatalf("compaction helper model = request %q payload %q, want %q (decode error: %v)", r.Model, body.Model, ClaudeDesktopCompactionModel, errBody)
+				}
 				if ClaudeDesktopSessionUUID(c, a, params.Bundle.ProfileID, "wrong") != params.SessionID {
 					t.Fatal("bound session lost")
 				}

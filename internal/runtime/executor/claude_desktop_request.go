@@ -107,9 +107,13 @@ func (e *ClaudeExecutor) planClaudeDesktopRequestWithHints(body []byte, role cla
 	if strings.TrimSpace(logicalModel) == "" {
 		logicalModel = model
 	}
-	if role == claudeprofile.RoleTitle {
+	switch role {
+	case claudeprofile.RoleTitle:
 		model = claudeDesktopTitleModel
 		logicalModel = claudeDesktopTitleModel
+	case claudeprofile.RoleCompaction:
+		model = helps.ClaudeDesktopCompactionModel
+		logicalModel = helps.ClaudeDesktopCompactionModel
 	}
 	key := claudeprofile.RequestVariantKey{
 		Model:           model,
@@ -332,7 +336,7 @@ func (e *ClaudeExecutor) newClaudeDesktopRuntimeFacts(auth *cliproxyauth.Auth, s
 }
 
 func (e *ClaudeExecutor) newClaudeDesktopRuntimeFactsForPlan(auth *cliproxyauth.Auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID string, plan claudeDesktopRequestPlan, metadata ...map[string]any) claudeDesktopRuntimeFacts {
-	if plan.Variant.Key.Role == claudeprofile.RoleTitle && strings.TrimSpace(plan.Variant.Key.LogicalModel) != "" {
+	if (plan.Variant.Key.Role == claudeprofile.RoleTitle || plan.Variant.Key.Role == claudeprofile.RoleCompaction) && strings.TrimSpace(plan.Variant.Key.LogicalModel) != "" {
 		logicalModel = plan.Variant.Key.LogicalModel
 	}
 	workingDir := claudeDesktopWorkingDir(metadata...)
@@ -495,10 +499,10 @@ func (e *ClaudeExecutor) normalizeClaudeDesktopBody(payload []byte, plan claudeD
 		return nil, claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errProfile.Error()}}
 	}
 	var errSet error
-	if plan.Variant.Key.Role == claudeprofile.RoleTitle {
+	if plan.Variant.Key.Role == claudeprofile.RoleTitle || plan.Variant.Key.Role == claudeprofile.RoleCompaction {
 		payload, errSet = sjson.SetBytes(payload, "model", plan.Variant.Key.Model)
 		if errSet != nil {
-			return nil, fmt.Errorf("set Claude Desktop title model: %w", errSet)
+			return nil, fmt.Errorf("set Claude Desktop %s model: %w", plan.Variant.Key.Role, errSet)
 		}
 	}
 	if bodyProfile.MaxTokens > 0 {
