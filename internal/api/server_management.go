@@ -23,6 +23,7 @@ func (s *Server) registerManagementRoutes() {
 
 	s.engine.POST("/v0/management/oauth-callback", s.managementAvailabilityMiddleware(), s.mgmt.PostOAuthCallback)
 	s.engine.GET("/v0/management/oauth-callback", s.managementAvailabilityMiddleware(), s.mgmt.GetOAuthCallback)
+	s.engine.GET("/v0/management/oauth-session/:state/browser", s.managementAvailabilityMiddleware(), s.mgmt.StreamOAuthBrowser)
 
 	mgmt := s.engine.Group("/v0/management")
 	mgmt.Use(s.managementAvailabilityMiddleware(), s.mgmt.Middleware())
@@ -202,6 +203,7 @@ func (s *Server) registerManagementRoutes() {
 		mgmt.GET("/kimi-auth-url", s.mgmt.RequestKimiToken)
 		mgmt.GET("/xai-auth-url", s.mgmt.RequestXAIToken)
 		mgmt.GET("/get-auth-status", s.mgmt.GetAuthStatus)
+		mgmt.POST("/oauth-session/:state/browser-ticket", s.mgmt.CreateOAuthBrowserTicket)
 		mgmt.DELETE("/oauth-session", s.mgmt.CancelAuthSession)
 	}
 }

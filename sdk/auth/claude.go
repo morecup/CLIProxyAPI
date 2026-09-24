@@ -53,10 +53,11 @@ func (a *ClaudeAuthenticator) Login(ctx context.Context, cfg *config.Config, opt
 	service := newService(cfg)
 	metadata := opts.Metadata
 	loginOptions := claudedesktop.MagicLinkLoginOptions{
-		MagicLink: firstMetadataValue(metadata, "claude-desktop-magic-link", "magic-link", "magic_link"),
-		Locale:    firstMetadataValue(metadata, "locale"),
-		Prompt:    opts.Prompt,
-		Timeout:   5 * time.Minute,
+		MagicLink:            firstMetadataValue(metadata, "claude-desktop-magic-link", "magic-link", "magic_link"),
+		Locale:               firstMetadataValue(metadata, "locale"),
+		InteractiveSessionID: firstMetadataValue(metadata, claudedesktop.InteractiveSessionMetadataKey),
+		Prompt:               opts.Prompt,
+		Timeout:              5 * time.Minute,
 	}
 	fmt.Println("Starting Claude Desktop email magic-link authentication")
 	result, errLogin := service.Login(ctx, loginOptions)

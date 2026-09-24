@@ -55,8 +55,9 @@ type Service struct {
 }
 
 type MagicLinkLoginOptions struct {
-	MagicLink string
-	Locale    string
+	MagicLink            string
+	Locale               string
+	InteractiveSessionID string
 	// ProxyURL keeps browser attestation and the HTTP exchange on the same
 	// network path. Service callers normally inherit this automatically.
 	ProxyURL string

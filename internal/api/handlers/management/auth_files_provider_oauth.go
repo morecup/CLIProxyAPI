@@ -46,8 +46,12 @@ func (h *Handler) RequestAnthropicToken(c *gin.Context) {
 	}
 	RegisterOAuthSession(state, "anthropic")
 	go func() {
+		defer claudedesktop.CancelMagicLinkBrowserSession(state)
 		authenticator := sdkAuth.NewClaudeAuthenticator()
 		record, errLogin := authenticator.Login(ctx, h.cfg, &sdkAuth.LoginOptions{
+			Metadata: map[string]string{
+				claudedesktop.InteractiveSessionMetadataKey: state,
+			},
 			Prompt: func(string) (string, error) {
 				return WaitOAuthSessionInput(ctx, state, "anthropic")
 			},
@@ -637,6 +641,9 @@ func (h *Handler) CancelAuthSession(c *gin.Context) {
 		return
 	}
 	cancelled := CancelOAuthSession(state)
+	if cancelled {
+		claudedesktop.CancelMagicLinkBrowserSession(state)
+	}
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "cancelled": cancelled})
 }
 

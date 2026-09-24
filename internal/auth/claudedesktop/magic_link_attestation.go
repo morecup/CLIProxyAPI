@@ -69,7 +69,8 @@ const magicLinkAttestationHook = `(function () {
 })();`
 
 type magicLinkAttestationOptions struct {
-	ProxyURL string
+	ProxyURL             string
+	InteractiveSessionID string
 }
 
 type browserAttestationPayload struct {

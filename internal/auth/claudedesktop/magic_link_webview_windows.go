@@ -40,9 +40,12 @@ type webViewAttestationHelperResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
-func acquireMagicLinkAttestation(ctx context.Context, credentials magicLinkCredentials, _ magicLinkAttestationOptions) (magicLinkAttestation, error) {
+func acquireMagicLinkAttestation(ctx context.Context, credentials magicLinkCredentials, options magicLinkAttestationOptions) (magicLinkAttestation, error) {
 	if ctx == nil {
 		ctx = context.Background()
+	}
+	if strings.TrimSpace(options.InteractiveSessionID) != "" {
+		return acquireMagicLinkAttestationWithChromium(ctx, credentials, options)
 	}
 	profilePath, errProfile := os.MkdirTemp("", "cliproxy-claude-desktop-webview-")
 	if errProfile != nil {

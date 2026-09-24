@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	cdpinput "github.com/chromedp/cdproto/input"
 	"github.com/chromedp/cdproto/page"
 	cdpruntime "github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
@@ -25,6 +26,8 @@ const (
 	magicLinkChromiumHeadlessEnv  = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_HEADLESS"
 	magicLinkChromiumNoSandboxEnv = "CLIPROXY_CLAUDE_DESKTOP_CHROMIUM_NO_SANDBOX"
 	magicLinkChromiumProfile      = "cliproxy-claude-desktop-chromium-"
+	magicLinkChromiumWidth        = 900
+	magicLinkChromiumHeight       = 700
 )
 
 type chromiumProxySettings struct {
@@ -72,7 +75,7 @@ func acquireMagicLinkAttestationWithChromium(ctx context.Context, credentials ma
 		chromedp.NoFirstRun,
 		chromedp.NoDefaultBrowserCheck,
 		chromedp.UserDataDir(profilePath),
-		chromedp.WindowSize(900, 700),
+		chromedp.WindowSize(magicLinkChromiumWidth, magicLinkChromiumHeight),
 		chromedp.WSURLReadTimeout(30 * time.Second),
 		chromedp.Flag("disable-background-networking", true),
 		chromedp.Flag("disable-default-apps", true),
@@ -102,18 +105,6 @@ func acquireMagicLinkAttestationWithChromium(ctx context.Context, credentials ma
 	browserCtx, cancelBrowser := chromedp.NewContext(allocatorCtx)
 	defer cancelBrowser()
 
-	payloads := make(chan string, 1)
-	chromedp.ListenTarget(browserCtx, func(event any) {
-		binding, ok := event.(*cdpruntime.EventBindingCalled)
-		if !ok || binding.Name != magicLinkAttestationBinding {
-			return
-		}
-		select {
-		case payloads <- binding.Payload:
-		default:
-		}
-	})
-
 	initialScript := magicLinkAttestationHook
 	if anonymousID := strings.TrimSpace(credentials.AnonymousID); anonymousID != "" {
 		initialScript += "\n" + magicLinkAnonymousCookieHook(anonymousID)
@@ -134,6 +125,69 @@ func acquireMagicLinkAttestationWithChromium(ctx context.Context, credentials ma
 		return magicLinkAttestation{}, chromiumAttestationError(ctx, proxySettings, "start isolated Chromium", errSetup)
 	}
 
+	var interactive *MagicLinkBrowserSession
+	interactiveState := strings.TrimSpace(options.InteractiveSessionID)
+	if interactiveState != "" {
+		interactive = registerMagicLinkBrowserSession(interactiveState, cancelBrowser, func(event MagicLinkBrowserInput) error {
+			return dispatchMagicLinkBrowserInput(browserCtx, event)
+		})
+		if interactive == nil {
+			return magicLinkAttestation{}, fmt.Errorf("%w: initialize interactive Chromium session", errMagicLinkAttestationUnavailable)
+		}
+		defer unregisterMagicLinkBrowserSession(interactiveState, interactive)
+	}
+
+	payloads := make(chan string, 1)
+	chromedp.ListenTarget(browserCtx, func(event any) {
+		switch value := event.(type) {
+		case *cdpruntime.EventBindingCalled:
+			if value.Name != magicLinkAttestationBinding {
+				return
+			}
+			select {
+			case payloads <- value.Payload:
+			default:
+			}
+		case *page.EventScreencastFrame:
+			if interactive == nil {
+				return
+			}
+			width, height := float64(magicLinkChromiumWidth), float64(magicLinkChromiumHeight)
+			if value.Metadata != nil {
+				width = value.Metadata.DeviceWidth
+				height = value.Metadata.DeviceHeight
+			}
+			interactive.publishFrame(value.Data, width, height)
+			go acknowledgeMagicLinkBrowserFrame(browserCtx, value.SessionID)
+		case *page.EventFrameNavigated:
+			if interactive == nil || value.Frame == nil || value.Frame.ParentID != "" {
+				return
+			}
+			if !magicLinkBrowserMainFrameAllowed(value.Frame.URL) {
+				interactive.abort("Claude verification navigated outside the allowed page")
+			}
+		}
+	})
+
+	if interactive != nil {
+		errScreencast := chromedp.Run(browserCtx, chromedp.ActionFunc(func(actionCtx context.Context) error {
+			if errFront := page.BringToFront().Do(actionCtx); errFront != nil {
+				return errFront
+			}
+			return page.StartScreencast().
+				WithFormat(page.ScreencastFormatJpeg).
+				WithQuality(72).
+				WithMaxWidth(magicLinkChromiumWidth).
+				WithMaxHeight(magicLinkChromiumHeight).
+				WithEveryNthFrame(2).
+				Do(actionCtx)
+		}))
+		if errScreencast != nil {
+			return magicLinkAttestation{}, chromiumAttestationError(ctx, proxySettings, "start Claude verification stream", errScreencast)
+		}
+		interactive.markReady(magicLinkChromiumWidth, magicLinkChromiumHeight)
+	}
+
 	errNavigate := chromedp.Run(browserCtx, chromedp.Navigate(credentials.LoginPageURL))
 	if errNavigate != nil {
 		select {
@@ -148,8 +202,78 @@ func acquireMagicLinkAttestationWithChromium(ctx context.Context, credentials ma
 	case raw := <-payloads:
 		return decodeMagicLinkAttestationPayload(raw)
 	case <-browserCtx.Done():
+		if interactive != nil {
+			if reason := interactive.CloseReason(); reason != "" {
+				return magicLinkAttestation{}, fmt.Errorf("%w: %s", errMagicLinkAttestationUnavailable, reason)
+			}
+		}
 		return magicLinkAttestation{}, chromiumAttestationError(ctx, proxySettings, "wait for hCaptcha", context.Cause(browserCtx))
 	}
+}
+
+func dispatchMagicLinkBrowserInput(browserCtx context.Context, event MagicLinkBrowserInput) error {
+	if browserCtx == nil {
+		return errMagicLinkBrowserSessionUnavailable
+	}
+	return chromedp.Run(browserCtx, chromedp.ActionFunc(func(actionCtx context.Context) error {
+		var command *cdpinput.DispatchMouseEventParams
+		switch event.Action {
+		case "move":
+			command = cdpinput.DispatchMouseEvent(cdpinput.MouseMoved, event.X, event.Y)
+		case "down":
+			clickCount := event.ClickCount
+			if clickCount == 0 {
+				clickCount = 1
+			}
+			command = cdpinput.DispatchMouseEvent(cdpinput.MousePressed, event.X, event.Y).
+				WithButton(cdpinput.Left).
+				WithButtons(1).
+				WithClickCount(clickCount)
+		case "up":
+			clickCount := event.ClickCount
+			if clickCount == 0 {
+				clickCount = 1
+			}
+			command = cdpinput.DispatchMouseEvent(cdpinput.MouseReleased, event.X, event.Y).
+				WithButton(cdpinput.Left).
+				WithClickCount(clickCount)
+		case "wheel":
+			command = cdpinput.DispatchMouseEvent(cdpinput.MouseWheel, event.X, event.Y).
+				WithDeltaX(event.DeltaX).
+				WithDeltaY(event.DeltaY)
+		default:
+			return fmt.Errorf("unsupported Claude verification pointer action")
+		}
+		return command.Do(actionCtx)
+	}))
+}
+
+func acknowledgeMagicLinkBrowserFrame(browserCtx context.Context, sessionID int64) {
+	if browserCtx == nil {
+		return
+	}
+	_ = chromedp.Run(browserCtx, chromedp.ActionFunc(func(actionCtx context.Context) error {
+		return page.ScreencastFrameAck(sessionID).Do(actionCtx)
+	}))
+}
+
+func magicLinkBrowserMainFrameAllowed(rawURL string) bool {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" || rawURL == "about:blank" {
+		return true
+	}
+	parsed, errParse := url.Parse(rawURL)
+	if errParse != nil || parsed == nil {
+		return false
+	}
+	if parsed.Scheme == "chrome-error" {
+		return true
+	}
+	if !strings.EqualFold(parsed.Scheme, "https") {
+		return false
+	}
+	host := strings.ToLower(strings.TrimSpace(parsed.Hostname()))
+	return host == "claude.ai" || strings.HasSuffix(host, ".claude.ai")
 }
 
 func prepareChromiumProxy(ctx context.Context, rawProxyURL string) (*chromiumProxySettings, error) {
@@ -237,7 +361,21 @@ func findMagicLinkChromiumExecutable() (string, error) {
 		}
 		return "", fmt.Errorf("%w: Chromium configured by %s was not found", errMagicLinkAttestationUnavailable, magicLinkChromiumPathEnv)
 	}
-	candidates := []string{"chromium", "chromium-browser", "google-chrome-stable", "google-chrome", "headless-shell", "headless_shell"}
+	candidates := []string{"chromium", "chromium-browser", "google-chrome-stable", "google-chrome", "chrome", "msedge", "headless-shell", "headless_shell"}
+	if goruntime.GOOS == "windows" {
+		var windowsCandidates []string
+		for _, base := range []string{os.Getenv("PROGRAMFILES"), os.Getenv("PROGRAMFILES(X86)"), os.Getenv("LOCALAPPDATA")} {
+			base = strings.TrimSpace(base)
+			if base == "" {
+				continue
+			}
+			windowsCandidates = append(windowsCandidates,
+				filepath.Join(base, "Google", "Chrome", "Application", "chrome.exe"),
+				filepath.Join(base, "Microsoft", "Edge", "Application", "msedge.exe"),
+			)
+		}
+		candidates = append(windowsCandidates, candidates...)
+	}
 	if goruntime.GOOS == "darwin" {
 		candidates = append([]string{
 			"/Applications/Chromium.app/Contents/MacOS/Chromium",

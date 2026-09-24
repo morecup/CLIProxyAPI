@@ -62,7 +62,10 @@ func AcquireMagicLinkSession(ctx context.Context, baseClient *http.Client, claud
 	if errCredentials != nil {
 		return nil, errCredentials
 	}
-	attestationOptions := magicLinkAttestationOptions{ProxyURL: strings.TrimSpace(options.ProxyURL)}
+	attestationOptions := magicLinkAttestationOptions{
+		ProxyURL:             strings.TrimSpace(options.ProxyURL),
+		InteractiveSessionID: strings.TrimSpace(options.InteractiveSessionID),
+	}
 	return acquireMagicLinkSession(ctx, baseClient, claudeOrigin, credentials, func(ctx context.Context, credentials magicLinkCredentials) (magicLinkAttestation, error) {
 		return acquireMagicLinkAttestation(ctx, credentials, attestationOptions)
 	})
