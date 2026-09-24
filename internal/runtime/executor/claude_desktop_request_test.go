@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -11,7 +12,10 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 func newClaudeDesktopTestExecutor(t *testing.T) *ClaudeExecutor {
@@ -46,6 +50,144 @@ func TestClassifyClaudeDesktopRequestRoles(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := executor.classifyClaudeDesktopRequestRole([]byte(test.body)); got != test.want {
 				t.Fatalf("role = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestClaudeDesktopTitleUsesConfiguredHaikuModel(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	body := []byte(`{"model":"claude-sonnet-4-6","max_tokens":32000,"stream":true,"tools":[],"thinking":{"type":"disabled"},"output_config":{"format":{"type":"json_schema"}},"messages":[{"role":"user","content":"title this conversation"}]}`)
+	plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, "", "claude-sonnet-4-6", nil)
+	if errPlan != nil {
+		t.Fatal(errPlan)
+	}
+	if plan.Variant.Key.Role != claudeprofile.RoleTitle {
+		t.Fatalf("role = %q, want %q", plan.Variant.Key.Role, claudeprofile.RoleTitle)
+	}
+	if plan.Variant.Key.Model != claudeDesktopTitleModel || plan.Variant.Key.LogicalModel != claudeDesktopTitleModel {
+		t.Fatalf("title variant = model %q logical model %q, want %q", plan.Variant.Key.Model, plan.Variant.Key.LogicalModel, claudeDesktopTitleModel)
+	}
+	facts := executor.newClaudeDesktopRuntimeFactsForPlan(nil, "session", "claude-sonnet-4-6", "prompt", "request", "", plan)
+	if facts.LogicalModel != claudeDesktopTitleModel {
+		t.Fatalf("title telemetry model = %q, want %q", facts.LogicalModel, claudeDesktopTitleModel)
+	}
+	normalized, errNormalize := executor.normalizeClaudeDesktopBody(body, plan)
+	if errNormalize != nil {
+		t.Fatal(errNormalize)
+	}
+	if got := gjson.GetBytes(normalized, "model").String(); got != claudeDesktopTitleModel {
+		t.Fatalf("normalized title model = %q, want %q", got, claudeDesktopTitleModel)
+	}
+}
+
+func TestClaudeDesktopFinalCacheControlLimitPreservesProfileSystem(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	body := []byte(`{"model":"claude-sonnet-4-6","max_tokens":4096,"system":"caller instruction","tools":[{"name":"first","description":"first","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}},{"name":"second","description":"second","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":[{"type":"text","text":"first turn","cache_control":{"type":"ephemeral"}}]},{"role":"assistant","content":[{"type":"text","text":"reply","cache_control":{"type":"ephemeral"}}]},{"role":"user","content":"latest turn"}]}`)
+	plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleMain, "claude-sonnet-4-6", nil)
+	if errPlan != nil {
+		t.Fatal(errPlan)
+	}
+	facts := executor.newClaudeDesktopRuntimeFacts(nil, "session", "claude-sonnet-4-6", "prompt", "request", "")
+	updated, applied, errApply := executor.applyClaudeDesktopMessageProfile(t.Context(), nil, body, false, plan, facts)
+	if errApply != nil {
+		t.Fatal(errApply)
+	}
+	if !applied {
+		t.Fatal("Desktop profile was not applied")
+	}
+	if got := countCacheControls(updated); got != 4 {
+		t.Fatalf("cache_control count = %d, want 4: %s", got, updated)
+	}
+	for _, path := range []string{"system.2.cache_control", "system.3.cache_control"} {
+		if !gjson.GetBytes(updated, path).Exists() {
+			t.Fatalf("profile cache breakpoint %s was removed: %s", path, updated)
+		}
+	}
+	withoutSystem, errDelete := sjson.DeleteBytes(updated, "system")
+	if errDelete != nil {
+		t.Fatal(errDelete)
+	}
+	if got := countCacheControls(withoutSystem); got != 2 {
+		t.Fatalf("non-system cache_control count = %d, want 2: %s", got, updated)
+	}
+}
+
+func TestClaudeDesktopFinalCacheControlLimitAcrossEntryPoints(t *testing.T) {
+	for _, mode := range []string{"execute", "stream", "http"} {
+		t.Run(mode, func(t *testing.T) {
+			executor := newClaudeDesktopTestExecutor(t)
+			auth := newClaudeDesktopRawRequestTestAuth(t)
+			calls := 0
+			transport := roundTripperFunc(func(request *http.Request) (*http.Response, error) {
+				if request.URL.Path == "/v1/messages/count_tokens" {
+					return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"input_tokens":1}`)), Request: request}, nil
+				}
+				calls++
+				body, errRead := io.ReadAll(request.Body)
+				if errRead != nil {
+					return nil, errRead
+				}
+				if got := countCacheControls(body); got != 4 {
+					t.Fatalf("final wire cache_control count = %d, want 4: %s", got, body)
+				}
+				for _, path := range []string{"system.2.cache_control", "system.3.cache_control"} {
+					if !gjson.GetBytes(body, path).Exists() {
+						t.Fatalf("final wire lost profile cache breakpoint %s: %s", path, body)
+					}
+				}
+				header := make(http.Header)
+				response := `{"id":"msg_cache_limit","type":"message","role":"assistant","model":"claude-sonnet-4-6","content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`
+				if gjson.GetBytes(body, "stream").Bool() {
+					header.Set("Content-Type", "text/event-stream")
+					response = "data: {\"type\":\"message_start\",\"message\":{\"id\":\"msg_cache_limit\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-6\",\"content\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":0}}}\n\n" +
+						"data: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"\"}}\n\n" +
+						"data: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"ok\"}}\n\n" +
+						"data: {\"type\":\"content_block_stop\",\"index\":0}\n\n" +
+						"data: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"},\"usage\":{\"output_tokens\":1}}\n\n" +
+						"data: {\"type\":\"message_stop\"}\n\n"
+				}
+				return &http.Response{StatusCode: http.StatusOK, Header: header, Body: io.NopCloser(strings.NewReader(response)), Request: request, ContentLength: -1}, nil
+			})
+			ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
+			body := []byte(`{"model":"claude-sonnet-4-6","max_tokens":4096,"tools":[{"name":"first","description":"first","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}},{"name":"second","description":"second","input_schema":{"type":"object"},"cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":[{"type":"text","text":"first turn","cache_control":{"type":"ephemeral"}}]},{"role":"assistant","content":[{"type":"text","text":"reply","cache_control":{"type":"ephemeral"}}]},{"role":"user","content":"latest turn"}]}`)
+			headers := http.Header{"X-Session-Id": {"cache-limit-" + mode}}
+			request := cliproxyexecutor.Request{Model: "claude-sonnet-4-6", Payload: body, Metadata: map[string]any{}}
+			options := cliproxyexecutor.Options{Headers: headers, SourceFormat: sdktranslator.FormatClaude, Metadata: map[string]any{}}
+			switch mode {
+			case "execute":
+				if _, errRun := executor.Execute(ctx, auth, request, options); errRun != nil {
+					t.Fatal(errRun)
+				}
+			case "stream":
+				result, errRun := executor.ExecuteStream(ctx, auth, request, options)
+				if errRun != nil {
+					t.Fatal(errRun)
+				}
+				for chunk := range result.Chunks {
+					if chunk.Err != nil {
+						t.Fatal(chunk.Err)
+					}
+				}
+			case "http":
+				raw, errNew := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", strings.NewReader(string(body)))
+				if errNew != nil {
+					t.Fatal(errNew)
+				}
+				raw.Header = headers.Clone()
+				response, errRun := executor.HttpRequest(ctx, auth, raw)
+				if errRun != nil {
+					t.Fatal(errRun)
+				}
+				if _, errCopy := io.Copy(io.Discard, response.Body); errCopy != nil {
+					t.Fatal(errCopy)
+				}
+				if errClose := response.Body.Close(); errClose != nil {
+					t.Fatal(errClose)
+				}
+			}
+			if calls != 1 {
+				t.Fatalf("message calls = %d, want 1", calls)
 			}
 		})
 	}

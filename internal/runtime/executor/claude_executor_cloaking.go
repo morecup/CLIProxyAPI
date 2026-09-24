@@ -769,6 +769,16 @@ func normalizeCacheControlTTL(payload []byte) []byte {
 //	Phase 4: remaining system blocks (last system).
 //	Phase 5: remaining tool blocks (last tool).
 func enforceCacheControlLimit(payload []byte, maxBlocks int) []byte {
+	return enforceCacheControlLimitWithSystemPolicy(payload, maxBlocks, false)
+}
+
+// enforceCacheControlLimitPreservingSystem keeps verified Desktop-owned system
+// breakpoints and removes excess cache controls only from tools and messages.
+func enforceCacheControlLimitPreservingSystem(payload []byte, maxBlocks int) []byte {
+	return enforceCacheControlLimitWithSystemPolicy(payload, maxBlocks, true)
+}
+
+func enforceCacheControlLimitWithSystemPolicy(payload []byte, maxBlocks int, preserveSystem bool) []byte {
 	if len(payload) == 0 || !gjson.ValidBytes(payload) {
 		return payload
 	}
@@ -781,7 +791,7 @@ func enforceCacheControlLimit(payload []byte, maxBlocks int) []byte {
 	excess := total - maxBlocks
 
 	system := gjson.GetBytes(payload, "system")
-	if system.IsArray() {
+	if !preserveSystem && system.IsArray() {
 		lastIdx := -1
 		system.ForEach(func(idx, item gjson.Result) bool {
 			if item.Get("cache_control").Exists() {
@@ -886,7 +896,7 @@ func enforceCacheControlLimit(payload []byte, maxBlocks int) []byte {
 	}
 
 	system = gjson.GetBytes(payload, "system")
-	if system.IsArray() {
+	if !preserveSystem && system.IsArray() {
 		system.ForEach(func(idx, item gjson.Result) bool {
 			if excess <= 0 {
 				return false

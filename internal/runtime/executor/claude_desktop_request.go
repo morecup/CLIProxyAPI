@@ -24,6 +24,10 @@ type claudeDesktopPlanningError struct {
 
 func (claudeDesktopPlanningError) IsRequestScoped() bool { return true }
 
+// Desktop title generation uses the captured Haiku helper independently of
+// the model selected for the main conversation.
+const claudeDesktopTitleModel = "claude-haiku-4-5-20251001"
+
 type claudeDesktopRequestPlan struct {
 	Variant            claudeprofile.RequestVariant
 	BetaVariant        string
@@ -102,6 +106,10 @@ func (e *ClaudeExecutor) planClaudeDesktopRequestWithHints(body []byte, role cla
 	model := gjson.GetBytes(body, "model").String()
 	if strings.TrimSpace(logicalModel) == "" {
 		logicalModel = model
+	}
+	if role == claudeprofile.RoleTitle {
+		model = claudeDesktopTitleModel
+		logicalModel = claudeDesktopTitleModel
 	}
 	key := claudeprofile.RequestVariantKey{
 		Model:           model,
@@ -324,6 +332,9 @@ func (e *ClaudeExecutor) newClaudeDesktopRuntimeFacts(auth *cliproxyauth.Auth, s
 }
 
 func (e *ClaudeExecutor) newClaudeDesktopRuntimeFactsForPlan(auth *cliproxyauth.Auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID string, plan claudeDesktopRequestPlan, metadata ...map[string]any) claudeDesktopRuntimeFacts {
+	if plan.Variant.Key.Role == claudeprofile.RoleTitle && strings.TrimSpace(plan.Variant.Key.LogicalModel) != "" {
+		logicalModel = plan.Variant.Key.LogicalModel
+	}
 	workingDir := claudeDesktopWorkingDir(metadata...)
 	if workingDir == "" && e != nil && e.desktopProfile != nil {
 		workingDir = strings.TrimSpace(e.desktopProfile.Environment.DefaultWorkingDir)
@@ -393,6 +404,7 @@ func (e *ClaudeExecutor) applyClaudeDesktopMessageProfile(ctx context.Context, a
 		if errShape := e.validateClaudeDesktopSystem(payload, plan, values, cchSigning); errShape != nil {
 			return nil, false, errShape
 		}
+		payload = enforceCacheControlLimitPreservingSystem(payload, 4)
 		return payload, true, nil
 	}
 	// Verified Desktop Code input is a semantic input signal only. Its caller
@@ -426,6 +438,7 @@ func (e *ClaudeExecutor) applyClaudeDesktopMessageProfile(ctx context.Context, a
 	if errShape := e.validateClaudeDesktopSystem(payload, plan, values, cchSigning); errShape != nil {
 		return nil, false, errShape
 	}
+	payload = enforceCacheControlLimitPreservingSystem(payload, 4)
 	_ = ctx
 	return payload, true, nil
 }
@@ -482,6 +495,12 @@ func (e *ClaudeExecutor) normalizeClaudeDesktopBody(payload []byte, plan claudeD
 		return nil, claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errProfile.Error()}}
 	}
 	var errSet error
+	if plan.Variant.Key.Role == claudeprofile.RoleTitle {
+		payload, errSet = sjson.SetBytes(payload, "model", plan.Variant.Key.Model)
+		if errSet != nil {
+			return nil, fmt.Errorf("set Claude Desktop title model: %w", errSet)
+		}
+	}
 	if bodyProfile.MaxTokens > 0 {
 		payload, errSet = sjson.SetBytes(payload, "max_tokens", bodyProfile.MaxTokens)
 		if errSet != nil {
