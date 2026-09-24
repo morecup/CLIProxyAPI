@@ -16,10 +16,6 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-// ClaudeDesktopCompactionModel is the captured model used by Desktop's
-// compaction helper independently of the model selected for the main query.
-const ClaudeDesktopCompactionModel = "claude-opus-5"
-
 type ClaudeDesktopSummaryExecutor interface {
 	ExecuteStream(context.Context, *cliproxyauth.Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error)
 }
@@ -32,6 +28,9 @@ type ClaudeDesktopReactiveSummaryParams struct {
 	SessionID          string
 	CustomInstructions string
 	InitialTokenGap    *int64
+	// Zero retains the existing post-PTL entry. Other origins are supplied
+	// only by an in-process native owner using the shared summary engine.
+	Origin claudeprompt.SDKCompactionOrigin
 	// Called at the native iteration boundary, before preparing or dispatching
 	// its helper. HTTP retries inside that helper do not invoke this callback.
 	ObserveAttempt func(claudeprompt.SDKReactiveAttempt)
@@ -68,6 +67,13 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 	if executor == nil || params.Auth == nil || params.Bundle == nil || params.View == nil {
 		return empty, errors.New("missing Desktop compaction query owner")
 	}
+	origin := params.Origin
+	if origin.Kind == "" {
+		origin.Kind = "reactive"
+	}
+	if !origin.Valid() {
+		return empty, errors.New("invalid native Desktop compaction origin")
+	}
 	scope, _ := json.Marshal([]string{params.Auth.ID, params.Bundle.ProfileID, params.Auth.ProxyURL})
 	if !params.View.MatchesScope(string(scope), params.SessionID) || !params.View.MatchesRequestBody(params.ParentRequest) {
 		return empty, claudeprompt.ErrSDKCompactionViewStale
@@ -83,9 +89,6 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 	if json.Unmarshal(params.ParentRequest, &parent) != nil || parent.Model == "" {
 		return empty, errors.New("missing Desktop compaction model")
 	}
-	if _, err = params.Bundle.Resolve(claudeprofile.RequestVariantKey{Model: ClaudeDesktopCompactionModel, LogicalModel: ClaudeDesktopCompactionModel, Role: claudeprofile.RoleCompaction, ThinkingDisplay: "omitted"}); err != nil {
-		return empty, err
-	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -94,9 +97,12 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 		func(ctx context.Context, attempt claudeprompt.SDKReactiveAttempt) (claudeprompt.SDKReactiveQueryResult[ClaudeDesktopSummaryDraft], error) {
 			var result claudeprompt.SDKReactiveQueryResult[ClaudeDesktopSummaryDraft]
 			if params.ObserveAttempt != nil {
-				params.ObserveAttempt(attempt)
+				observedAttempt := attempt
+				observedAttempt.Summarize = append([]claudeprompt.SDKHistoryMessage(nil), attempt.Summarize...)
+				observedAttempt.Preserve = append([]claudeprompt.SDKHistoryMessage(nil), attempt.Preserve...)
+				params.ObserveAttempt(observedAttempt)
 			}
-			rows, errResolve := params.View.Resolve(attempt.Summarize)
+			rows, errResolve := params.View.ResolveReactiveSummary(attempt.Summarize)
 			if errResolve != nil {
 				return result, errResolve
 			}
@@ -114,12 +120,13 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 				Model    string            `json:"model"`
 				Messages []json.RawMessage `json:"messages"`
 				Tools    json.RawMessage   `json:"tools,omitempty"`
-			}{Model: ClaudeDesktopCompactionModel, Messages: rows, Tools: parent.Tools})
+			}{Model: parent.Model, Messages: rows, Tools: parent.Tools})
 			if errMarshal != nil {
 				return result, errMarshal
 			}
 			child, cancel := context.WithCancel(cliproxyexecutor.WithIndependentUpstreamAttempt(ctx, time.Now()))
 			defer cancel()
+			child = context.WithValue(child, claudeDesktopCompactionOriginContextKey{}, origin.Kind)
 			child = cliproxyexecutor.WithClaudeDesktopParentPromptID(child, params.View.ParentPromptID())
 			child = cliproxyexecutor.WithClaudeDesktopSessionBinding(child, cliproxyexecutor.ClaudeDesktopSessionBinding{
 				AccountID: params.Auth.ID, ProfileID: params.Bundle.ProfileID, Egress: params.Auth.ProxyURL, SessionID: params.SessionID})
@@ -134,7 +141,7 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 				Metadata: map[string]any{"claude_desktop_prompt_id": uuid.NewString(), "claude_desktop_client_request_id": clientID}}
 			// Main request headers/system/thinking/diagnostics are not copied.
 			// The existing compact planner owns their model-specific rendering.
-			stream, errQuery := executor.ExecuteStream(child, params.Auth, cliproxyexecutor.Request{Model: ClaudeDesktopCompactionModel, Payload: body}, options)
+			stream, errQuery := executor.ExecuteStream(child, params.Auth, cliproxyexecutor.Request{Model: parent.Model, Payload: body}, options)
 			if errQuery != nil {
 				return classifyClaudeDesktopSummaryError(ctx, errQuery), nil
 			}
@@ -161,7 +168,10 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 						if !known {
 							return claudeprompt.SDKReactiveQueryResult[ClaudeDesktopSummaryDraft]{Reason: "error"}, nil
 						}
-						wrapped, errWrap := text.Wrap(claudeprompt.SDKCompactionWrapOptions{SuppressFollowUpQuestions: true})
+						wrapOptions := claudeprompt.SDKCompactionWrapOptions{
+							RecentMessagesPreserved: attempt.HeadTruncations > 0, SuppressFollowUpQuestions: true,
+						}
+						wrapped, errWrap := text.Wrap(wrapOptions)
 						if errWrap != nil {
 							return result, errWrap
 						}
@@ -174,8 +184,7 @@ func RunClaudeDesktopReactiveSummary(ctx context.Context, executor ClaudeDesktop
 						}
 						history, _ := observed.SDKHistoryMessages()
 						usage, usageKnown := forkUsage.Snapshot()
-						application, errApplication := params.View.PrepareApplication(text,
-							claudeprompt.SDKCompactionWrapOptions{SuppressFollowUpQuestions: true}, attempt.Preserve, clientID)
+						application, errApplication := params.View.PrepareReactiveApplication(text, wrapOptions, attempt.Preserve, attempt.SplitKind, clientID)
 						if errApplication != nil {
 							return result, errApplication
 						}
@@ -217,7 +226,8 @@ func classifyClaudeDesktopSummaryError(ctx context.Context, err error) claudepro
 		return claudeprompt.SDKReactiveQueryResult[ClaudeDesktopSummaryDraft]{Reason: "error"}
 	}
 	failure := claudeprompt.ClassifySDKReactiveFailure(err.Error())
-	return claudeprompt.SDKReactiveQueryResult[ClaudeDesktopSummaryDraft]{Reason: failure.Reason, TokenGap: failure.TokenGap}
+	code := status.StatusCode()
+	return claudeprompt.SDKReactiveQueryResult[ClaudeDesktopSummaryDraft]{Reason: failure.Reason, TokenGap: failure.TokenGap, Status: &code}
 }
 
 func marshalClaudeDesktopSummaryJSON(value any) ([]byte, error) {

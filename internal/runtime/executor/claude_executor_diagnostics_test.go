@@ -12,7 +12,7 @@ import (
 )
 
 func TestClaudeDesktopHelperDiagnosticsDoNotInheritOrCommitMainChain(t *testing.T) {
-	for _, role := range []claudeprofile.RequestRole{claudeprofile.RoleTitle, claudeprofile.RoleLightHelper, claudeprofile.RoleWebSearchHelper, claudeprofile.RoleSecurityMonitor, claudeprofile.RoleCompaction, claudeprofile.RoleCountTokens} {
+	for _, role := range []claudeprofile.RequestRole{claudeprofile.RoleTitle, claudeprofile.RoleLightHelper, claudeprofile.RoleWebSearchHelper, claudeprofile.RoleSecurityMonitor, claudeprofile.RoleCountTokens} {
 		t.Run(string(role), func(t *testing.T) {
 			auth := &cliproxyauth.Auth{ID: uuid.NewString()}
 			session := uuid.NewString()
@@ -28,6 +28,49 @@ func TestClaudeDesktopHelperDiagnosticsDoNotInheritOrCommitMainChain(t *testing.
 				t.Fatal("helper changed main diagnostics")
 			}
 		})
+	}
+}
+
+func TestClaudeDesktopCurrentCompactionContinuesDiagnosticsChain(t *testing.T) {
+	bundle, errBundle := claudeprofile.BuiltinCurrent()
+	if errBundle != nil {
+		t.Fatal(errBundle)
+	}
+	executor := &ClaudeExecutor{desktopOnly: true, desktopProfile: bundle}
+	auth := &cliproxyauth.Auth{ID: uuid.NewString()}
+	session := uuid.NewString()
+	_, main := injectClaudeDiagnosticsForRole([]byte(`{"messages":[]}`), auth, session, claudeprofile.RoleMain)
+	commitClaudeDiagnostics(main, "msg_main")
+
+	body, compaction := executor.injectClaudeDesktopDiagnosticsForRole([]byte(`{"model":"claude-opus-5-5","messages":[]}`), auth, session, claudeprofile.RoleCompaction)
+	if got := gjson.GetBytes(body, "diagnostics.previous_message_id").String(); got != "msg_main" {
+		t.Fatalf("compaction previous_message_id = %q, want msg_main", got)
+	}
+	if compaction.key == "" || compaction.sequence == 0 {
+		t.Fatal("compaction did not reserve diagnostics continuity")
+	}
+	commitClaudeDiagnostics(compaction, "msg_compaction")
+
+	next, _ := injectClaudeDiagnosticsForRole([]byte(`{"messages":[]}`), auth, session, claudeprofile.RoleMain)
+	if got := gjson.GetBytes(next, "diagnostics.previous_message_id").String(); got != "msg_compaction" {
+		t.Fatalf("main previous_message_id = %q, want msg_compaction", got)
+	}
+}
+
+func TestClaudeDesktopHistoricalCompactionDoesNotUseDiagnosticsChain(t *testing.T) {
+	bundle, errBundle := claudeprofile.BuiltinV140609()
+	if errBundle != nil {
+		t.Fatal(errBundle)
+	}
+	executor := &ClaudeExecutor{desktopOnly: true, desktopProfile: bundle}
+	body, state := executor.injectClaudeDesktopDiagnosticsForRole(
+		[]byte(`{"model":"claude-opus-5","messages":[]}`),
+		&cliproxyauth.Auth{ID: uuid.NewString()},
+		uuid.NewString(),
+		claudeprofile.RoleCompaction,
+	)
+	if gjson.GetBytes(body, "diagnostics").Exists() || state.key != "" || state.sequence != 0 {
+		t.Fatalf("historical compaction unexpectedly joined diagnostics chain: body=%s state=%+v", body, state)
 	}
 }
 

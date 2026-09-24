@@ -62,6 +62,20 @@ func TestClaudeDesktopAutomaticPTLRecoveryAcrossEntries(t *testing.T) {
 						if request.URL.Path == "/v1/messages" {
 							if e.classifyClaudeDesktopRequestRole(body) == claudeprofile.RoleCompaction {
 								summaryCalls++
+								if kind, errKind := helps.ClaudeDesktopCompactionRequestKind(request.Context(), nil); kind != "reactive" || errKind != nil {
+									t.Errorf("PTL helper origin=%q err=%v", kind, errKind)
+									return nil, fmt.Errorf("PTL helper lost its trigger")
+								}
+								for _, name := range []string{"X-CC-Compaction-Request", "X-Claude-Code-Compaction"} {
+									want := ""
+									if helps.HeaderValueCaseInsensitive(request.Header, "X-Claude-Code-Request-Class") == "compaction" {
+										want = "reactive"
+									}
+									if got := helps.HeaderValueCaseInsensitive(request.Header, name); got != want {
+										t.Errorf("PTL helper %s=%q, want %q", name, got, want)
+										return nil, fmt.Errorf("PTL helper lost its trigger")
+									}
+								}
 								if telemetry {
 									if err := e.desktopTelemetry.Flush(t.Context()); err != nil {
 										t.Fatal(err)
@@ -231,8 +245,32 @@ func TestClaudeDesktopAutomaticPTLRecoveryAcrossEntries(t *testing.T) {
 						if outcome == "non-ptl" || outcome == "unowned-history" || outcome == "telemetry-event-failed" {
 							wantTriggers = 0
 						}
-						if len(events["tengu_reactive_compact_triggered"]) != wantTriggers || len(events["tengu_reactive_compact_attempt"]) != summaryCalls || len(events["tengu_reactive_compact_succeeded"]) != 0 {
+						wantFailures := 0
+						failureReason := ""
+						switch outcome {
+						case "summary-failed":
+							wantFailures, failureReason = 1, "error"
+						case "summary-exhausted":
+							wantFailures, failureReason = 1, "exhausted"
+						case "cancel-summary":
+							wantFailures, failureReason = 1, "aborted"
+						}
+						if len(events["tengu_reactive_compact_triggered"]) != wantTriggers || len(events["tengu_reactive_compact_attempt"]) != summaryCalls ||
+							len(events["tengu_reactive_compact_succeeded"]) != 0 || len(events["tengu_reactive_compact_failed"]) != wantFailures {
 							t.Fatal("failed/retried/cancelled recovery misreported its actual lifecycle")
+						}
+						if wantFailures == 1 {
+							metadata := events["tengu_reactive_compact_failed"][0]
+							var wantSplit, wantTruncations any
+							if outcome == "summary-exhausted" {
+								wantSplit, wantTruncations = "summarize_all", float64(3)
+							}
+							if metadata["reason"] != failureReason || metadata["trigger"] != "auto" || metadata["querySource"] != "sdk" ||
+								metadata["attempts"] != float64(summaryCalls) || metadata["totalGroups"] == nil || metadata["durationMs"] == nil ||
+								metadata["preCompactTokens"] == nil || metadata["desktop_app_version"] != "1.40609.0.0" ||
+								metadata["splitKind"] != wantSplit || metadata["headTruncations"] != wantTruncations {
+								t.Fatalf("summary failure metadata=%v", metadata)
+							}
 						}
 						for index, metadata := range events["tengu_reactive_compact_attempt"] {
 							wantAttempt := index + 1
@@ -251,8 +289,11 @@ func TestClaudeDesktopAutomaticPTLRecoveryAcrossEntries(t *testing.T) {
 						return
 					}
 					wantSummaryCalls := 1
-					if outcome == "summary-ptl" || outcome == "summary-media" || outcome == "summary-exhausted" {
+					if outcome == "summary-ptl" || outcome == "summary-media" {
 						wantSummaryCalls = 2
+					} else if outcome == "summary-exhausted" {
+						// Two round attempts, then summarize_all with head truncations 1..3.
+						wantSummaryCalls = 5
 					}
 					if summaryCalls != wantSummaryCalls {
 						t.Fatalf("summary calls=%d main calls=%d error=%v status=%d", summaryCalls, mainCalls, err, status)
@@ -311,8 +352,8 @@ func TestClaudeDesktopAutomaticPTLRecoveryAcrossEntries(t *testing.T) {
 						if len(events["tengu_turn_end"]) != 4 || len(events["desktop_ccd_message_cycle_start"]) != 4 || len(events["desktop_ccd_message_cycle_outcome"]) != 4 {
 							t.Fatalf("recovery prematurely ended or restarted the logical cycle: turn=%d start=%d outcome=%d", len(events["tengu_turn_end"]), len(events["desktop_ccd_message_cycle_start"]), len(events["desktop_ccd_message_cycle_outcome"]))
 						}
-						if len(events["tengu_reactive_compact_succeeded"]) != 0 {
-							t.Fatal("text-only recovery claimed unimplemented native restoration/hook success")
+						if len(events["tengu_reactive_compact_succeeded"]) != 0 || len(events["tengu_reactive_compact_failed"]) != 0 {
+							t.Fatal("text-only recovery claimed a terminal native application or summary failure")
 						}
 						{
 							visible := false

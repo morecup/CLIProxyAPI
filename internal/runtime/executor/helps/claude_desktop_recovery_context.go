@@ -24,6 +24,18 @@ type ClaudeDesktopRecoveryContext struct {
 	SnapshotAndReset func(context.Context, []claudeprompt.SDKHistoryMessage) (claudeprompt.SDKCompactionRestorationOps, error)
 	Normalize        claudeprompt.SDKAttachmentNormalizeOptions
 	RemoteEnabled    bool
+	// Diagnostics observes the real precompact normalizer, cache age and
+	// preserved-thinking decision. No wire row or API usage guesses replace it.
+	Diagnostics func(context.Context, []claudeprompt.SDKHistoryMessage) (ClaudeDesktopCompactionDiagnostics, error)
+}
+
+type ClaudeDesktopCompactionDiagnostics struct {
+	PreservedUUIDCount         *int
+	Breakdown                  *claudeprompt.SDKCompactionBreakdown
+	CacheCold                  *bool
+	KeptThinkingBlockCount     *int
+	KeptThinkingStripped       *bool
+	KeptThinkingStripDecidedBy string
 }
 
 func WithClaudeDesktopRecoveryContext(ctx context.Context, value ClaudeDesktopRecoveryContext) context.Context {

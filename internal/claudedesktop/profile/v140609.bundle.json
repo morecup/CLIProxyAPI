@@ -666,9 +666,25 @@
         "event_name": "tengu_reactive_compact_triggered",
         "required_facts": ["owned_main_recovery", "session_default_betas", "query_source", "precompute_decision"]
       },
+      "auto_compact_routed_reactive": {
+        "event_name": "tengu_auto_compact_routed_reactive",
+        "required_facts": ["owned_native_preflight", "threshold_source", "session_default_betas"]
+      },
+      "auto_compact_succeeded": {
+        "event_name": "tengu_auto_compact_succeeded",
+        "required_facts": ["owned_native_preflight", "native_application_success", "threshold_source", "native_summary_usage", "session_default_betas"]
+      },
       "reactive_compact_attempt": {
         "event_name": "tengu_reactive_compact_attempt",
         "required_facts": ["owned_main_recovery", "native_summary_iteration", "native_group_partition", "media_retry_state"]
+      },
+      "reactive_compact_succeeded": {
+        "event_name": "tengu_reactive_compact_succeeded",
+        "required_facts": ["owned_main_recovery", "native_application_success", "native_summary_usage", "session_default_betas"]
+      },
+      "reactive_compact_failed": {
+        "event_name": "tengu_reactive_compact_failed",
+        "required_facts": ["owned_main_recovery", "native_summary_failure", "session_default_betas"]
       },
       "tool_search_mode_decision": {
         "event_name": "tengu_tool_search_mode_decision",

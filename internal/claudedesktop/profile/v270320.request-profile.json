@@ -1,5 +1,16 @@
 {
   "agent_sdk_version": "0.3.280",
+  "sdk_input_betas": {
+    "claude-opus-5-5": [
+      "claude-code-20250219",
+      "oauth-2025-04-20",
+      "interleaved-thinking-2025-05-14",
+      "thinking-token-count-2026-05-13",
+      "context-management-2025-06-27",
+      "prompt-caching-scope-2026-01-05",
+      "mid-conversation-system-2026-04-07"
+    ]
+  },
   "artifacts": {
     "agent-sdk-identity": {
       "bytes": 94,
@@ -24,11 +35,50 @@
   },
   "body": {
     "bindings": {
+      "compaction|claude-opus-5-5": "compaction-adaptive-128k-updates",
       "count-tokens|*": "count-tokens",
       "main|claude-opus-5-5": "main-adaptive-128k-updates",
       "subagent|claude-opus-5-5": "main-adaptive-128k-updates"
     },
     "profiles": {
+      "compaction-adaptive-128k-updates": {
+        "context_management": {
+          "edits": [
+            {
+              "keep": "all",
+              "type": "clear_thinking_20251015"
+            }
+          ]
+        },
+        "diagnostics": {
+          "previous_message_id": null
+        },
+        "ensure_tools": true,
+        "fallbacks": "default",
+        "max_tokens": 128000,
+        "output_config": {
+          "effort": "medium"
+        },
+        "remove_unlisted_keys": true,
+        "thinking": {
+          "display": "updates",
+          "type": "adaptive"
+        },
+        "top_level_order": [
+          "model",
+          "messages",
+          "system",
+          "tools",
+          "metadata",
+          "max_tokens",
+          "thinking",
+          "context_management",
+          "fallbacks",
+          "output_config",
+          "diagnostics",
+          "stream"
+        ]
+      },
       "count-tokens": {
         "ensure_tools": true,
         "remove_unlisted_keys": true,
@@ -184,6 +234,146 @@
           "artifact": "session-opus-5-5",
           "cache_control": {
             "ttl": "1h",
+            "type": "ephemeral"
+          },
+          "kind": "artifact"
+        }
+      ],
+      "system_block_count": 4,
+      "top_level_system_policy": "bundle-owned"
+    },
+    {
+      "anthropic_beta": [
+        "claude-code-20250219",
+        "oauth-2025-04-20",
+        "interleaved-thinking-2025-05-14",
+        "thinking-token-count-2026-05-13",
+        "context-management-2025-06-27",
+        "prompt-caching-scope-2026-01-05",
+        "mid-conversation-system-2026-04-07",
+        "per-turn-control-2026-07-01",
+        "mid-conversation-tool-changes-2026-07-01",
+        "advisor-tool-2026-03-01",
+        "advanced-tool-use-2025-11-20",
+        "mid-conversation-system-clear-at-2026-08-21",
+        "effort-2025-11-24",
+        "server-side-fallback-2026-07-01",
+        "fallback-credit-2026-06-01",
+        "thinking-binding-controls-2026-08-01",
+        "thinking-display-updates-2026-08-18",
+        "cache-diagnosis-2026-04-07"
+      ],
+      "headers": {
+        "accept": "application/json",
+        "accept_encoding": "gzip, deflate, br, zstd",
+        "client_platform": "desktop_app",
+        "client_version": "2.7032.0",
+        "dispatch_id": "v2d",
+        "include_async": false,
+        "include_client_request_id": true,
+        "include_session_id": true,
+        "include_timeout": true,
+        "request_class": "compaction",
+        "timeout": "900"
+      },
+      "instruction_carrier": "mid-conversation-system",
+      "key": {
+        "diagnostics": false,
+        "logical_model": "claude-opus-5-5",
+        "model": "claude-opus-5-5",
+        "role": "compaction",
+        "thinking_display": "updates"
+      },
+      "stream_policy": "transport",
+      "system": [
+        {
+          "kind": "billing"
+        },
+        {
+          "artifact": "agent-sdk-identity",
+          "kind": "artifact"
+        },
+        {
+          "artifact": "intro-opus-5-5",
+          "cache_control": {
+            "scope": "global",
+            "type": "ephemeral"
+          },
+          "kind": "artifact"
+        },
+        {
+          "artifact": "session-opus-5-5",
+          "cache_control": {
+            "type": "ephemeral"
+          },
+          "kind": "artifact"
+        }
+      ],
+      "system_block_count": 4,
+      "top_level_system_policy": "bundle-owned"
+    },
+    {
+      "anthropic_beta": [
+        "claude-code-20250219",
+        "oauth-2025-04-20",
+        "interleaved-thinking-2025-05-14",
+        "thinking-token-count-2026-05-13",
+        "context-management-2025-06-27",
+        "prompt-caching-scope-2026-01-05",
+        "mid-conversation-system-2026-04-07",
+        "per-turn-control-2026-07-01",
+        "mid-conversation-tool-changes-2026-07-01",
+        "advisor-tool-2026-03-01",
+        "advanced-tool-use-2025-11-20",
+        "mid-conversation-system-clear-at-2026-08-21",
+        "effort-2025-11-24",
+        "server-side-fallback-2026-07-01",
+        "fallback-credit-2026-06-01",
+        "thinking-binding-controls-2026-08-01",
+        "thinking-display-updates-2026-08-18",
+        "cache-diagnosis-2026-04-07"
+      ],
+      "headers": {
+        "accept": "application/json",
+        "accept_encoding": "gzip, deflate, br, zstd",
+        "client_platform": "desktop_app",
+        "client_version": "2.7032.0",
+        "dispatch_id": "v2d",
+        "include_async": false,
+        "include_client_request_id": true,
+        "include_session_id": true,
+        "include_timeout": true,
+        "request_class": "compaction",
+        "timeout": "900"
+      },
+      "instruction_carrier": "mid-conversation-system",
+      "key": {
+        "diagnostics": true,
+        "logical_model": "claude-opus-5-5",
+        "model": "claude-opus-5-5",
+        "role": "compaction",
+        "thinking_display": "updates"
+      },
+      "stream_policy": "transport",
+      "system": [
+        {
+          "kind": "billing"
+        },
+        {
+          "artifact": "agent-sdk-identity",
+          "kind": "artifact"
+        },
+        {
+          "artifact": "intro-opus-5-5",
+          "cache_control": {
+            "scope": "global",
+            "type": "ephemeral"
+          },
+          "kind": "artifact"
+        },
+        {
+          "artifact": "session-opus-5-5",
+          "cache_control": {
             "type": "ephemeral"
           },
           "kind": "artifact"

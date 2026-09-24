@@ -710,6 +710,18 @@ func (m *Manager) enqueueSDKEventAt(worker *accountWorker, fact string, facts Re
 	}
 	timestamp := at.UTC()
 	eventID := uuid.New().String()
+	environment := m.sdkEnvironment()
+	if version := strings.TrimSpace(facts.CodeVersion); version != "" {
+		environment.Version = version
+		environment.VersionBase = version
+	}
+	agentSDKVersion := strings.TrimSpace(facts.AgentSDKVersion)
+	if agentSDKVersion == "" {
+		agentSDKVersion = m.sdkAgentSDKVersion
+	}
+	if agentSDKVersion == "" {
+		agentSDKVersion = m.bundle.AgentSDKVersion
+	}
 	payload, errPayload := json.Marshal(sdkEventWrapper{
 		EventType: m.sdkProfile.EventType,
 		EventData: sdkEventData{
@@ -720,9 +732,9 @@ func (m *Manager) enqueueSDKEventAt(worker *accountWorker, fact string, facts Re
 			SessionID:          facts.SessionID,
 			UserType:           "external",
 			Betas:              facts.Betas,
-			Environment:        m.sdkEnvironment(),
+			Environment:        environment,
 			Entrypoint:         "claude-desktop",
-			AgentSDKVersion:    m.bundle.AgentSDKVersion,
+			AgentSDKVersion:    agentSDKVersion,
 			IsInteractive:      false,
 			ClientType:         "claude-desktop",
 			Process:            process,

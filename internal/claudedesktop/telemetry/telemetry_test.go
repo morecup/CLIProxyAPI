@@ -195,6 +195,69 @@ func TestSDKEventLoggingUsesIndependentEndpointAuthAndSchema(t *testing.T) {
 	}
 }
 
+func TestCurrentRequestProfileBrandsSDKTelemetry(t *testing.T) {
+	clock := &testClock{now: time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC)}
+	doer := &testDoer{}
+	bundle, errBundle := claudeprofile.BuiltinCurrent()
+	if errBundle != nil {
+		t.Fatal(errBundle)
+	}
+	bundle.Telemetry.Batch.FlushIntervalMS = int(time.Hour / time.Millisecond)
+	bundle.SDKTelemetry.Batch.FlushIntervalMS = int(time.Hour / time.Millisecond)
+	bundle.Telemetry.Batch.JitterMinimum, bundle.Telemetry.Batch.JitterMaximum = 1, 1
+	bundle.SDKTelemetry.Batch.JitterMinimum, bundle.SDKTelemetry.Batch.JitterMaximum = 1, 1
+	manager := NewManager(Options{StatePath: t.TempDir(), Bundle: bundle, DoerFactory: func(string) HTTPDoer { return doer }, Now: clock.Now, RandomFloat: func() float64 { return 0 }})
+	t.Cleanup(manager.Close)
+	auth := newTelemetryTestAuth(t, testAccountA, testOrgA, testDeviceA)
+	facts := testRequestFacts("99999999-9999-4999-8999-999999999999")
+	facts.Model = "claude-opus-5-5"
+	facts.DesktopVersion, facts.CodeVersion, facts.AgentSDKVersion = "2.7032.0", "2.1.280", "0.3.280"
+	facts.Betas = strings.Join(bundle.RequestProfiles[len(bundle.RequestProfiles)-1].SDKInputBetas[facts.Model], ",")
+	span := manager.BeginRequest(t.Context(), auth, facts)
+	body := []byte(`{"model":"claude-opus-5-5","messages":[{"role":"user","content":"PRIVATE_PROMPT"}]}`)
+	span.ObserveRequest(body, http.Header{"Anthropic-Beta": {facts.Betas}})
+	span.ObserveHTTPResponse(http.StatusOK, http.Header{})
+	span.ObserveResponse("req_current_telemetry", "end_turn")
+	span.FinishSuccess(t.Context())
+	if err := manager.Flush(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	var sdk *recordedRequest
+	for _, request := range doer.Requests() {
+		if strings.HasPrefix(request.URL, "https://api.anthropic.com/") {
+			copy := request
+			sdk = &copy
+			break
+		}
+	}
+	if sdk == nil {
+		t.Fatal("current SDK telemetry request was not delivered")
+	}
+	if got := sdk.Header.Get("User-Agent"); got != "claude-code/2.1.280" {
+		t.Fatalf("current SDK User-Agent=%q", got)
+	}
+	var batch struct {
+		Events []struct {
+			EventData struct {
+				Model           string         `json:"model"`
+				Betas           string         `json:"betas"`
+				AgentSDKVersion string         `json:"agent_sdk_version"`
+				Environment     sdkEnvironment `json:"env"`
+			} `json:"event_data"`
+		} `json:"events"`
+	}
+	if err := json.Unmarshal(sdk.Body, &batch); err != nil || len(batch.Events) == 0 {
+		t.Fatalf("decode current SDK batch: events=%d err=%v", len(batch.Events), err)
+	}
+	for _, event := range batch.Events {
+		data := event.EventData
+		if data.Model != facts.Model || data.Betas != facts.Betas || data.AgentSDKVersion != "0.3.280" ||
+			data.Environment.Version != "2.1.280" || data.Environment.VersionBase != "2.1.280" {
+			t.Fatalf("current SDK envelope=%+v", data)
+		}
+	}
+}
+
 func TestBeginRequestGeneratesDesktopOwnedRequestIdentities(t *testing.T) {
 	clock := &testClock{now: time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC)}
 	manager := newTelemetryTestManager(t, t.TempDir(), clock, &testDoer{}, nil)

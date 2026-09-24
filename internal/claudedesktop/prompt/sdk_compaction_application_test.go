@@ -193,6 +193,56 @@ func TestSDKCompactionApplicationReplacesHistoryAndQueryAtomically(t *testing.T)
 	}
 }
 
+func TestSDKReactiveApplicationAllowsOnlySummarizeAllWireSuffix(t *testing.T) {
+	for _, mode := range []string{"partial", "empty"} {
+		t.Run(mode, func(t *testing.T) {
+			owner, body := compactionViewFixture(t, true)
+			view, err := owner.CompactionView(body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer view.Discard()
+			var response SDKCompactionResponse
+			response.ObserveJSON([]byte(`{"type":"message","role":"assistant","content":[{"type":"text","text":"<summary>PRIVATE_SUMMARY</summary>"}]}`))
+			text, known := response.TakeText("1.40609.0.0", "2.1.247")
+			if !known {
+				t.Fatal("synthetic summary was not selected")
+			}
+			history := view.History()
+			var preserve []SDKHistoryMessage
+			wantRows := 1
+			if mode == "partial" {
+				preserve = history.Messages[len(history.Messages)-1:]
+				wantRows++
+			}
+			helperID := "reactive-" + mode
+			owner.RecordSDKCompactionSuccess("compact", helperID, 100, CompletedSDKCompaction(ObserveSDKCompactionInput(body), text.Fingerprint()))
+			options := SDKCompactionWrapOptions{SuppressFollowUpQuestions: true}
+			if _, err = view.PrepareApplication(text, options, preserve, helperID); !errors.Is(err, ErrSDKCompactionContentUnknown) {
+				t.Fatal("strict round application accepted an empty or partial group suffix")
+			}
+			application, err := view.PrepareReactiveApplication(text, options, preserve, "summarize_all", helperID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer application.Discard()
+			if rows := application.Messages(); len(rows) != wantRows {
+				t.Fatalf("application rows=%d want=%d", len(rows), wantRows)
+			}
+			if _, err = view.PrepareReactiveApplication(text, options, preserve, "unknown", helperID); !errors.Is(err, ErrSDKCompactionContentUnknown) {
+				t.Fatal("unknown reactive split kind was accepted")
+			}
+			if mode == "partial" {
+				changed := append([]SDKHistoryMessage(nil), preserve...)
+				changed[0].UUID = "foreign"
+				if _, err = view.PrepareReactiveApplication(text, options, changed, "summarize_all", helperID); !errors.Is(err, ErrSDKCompactionContentUnknown) {
+					t.Fatal("non-owned reactive suffix was accepted")
+				}
+			}
+		})
+	}
+}
+
 func TestSDKCompactionApplicationRejectsWrongOrStaleCommitWithoutMutation(t *testing.T) {
 	for _, mode := range []string{"account", "session", "parent", "role", "retry", "body", "identity", "cancelled", "context-cancelled", "concurrent", "discarded", "unknown-helper", "unobserved-helper-input", "already-adopted-helper", "different-summary"} {
 		t.Run(mode, func(t *testing.T) {

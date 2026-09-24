@@ -44,9 +44,17 @@ func TestSDKReactiveCompactionAttemptsMatchNativeVectors(t *testing.T) {
 	}
 	for _, tc := range fixture.Cases {
 		t.Run(tc.Name, func(t *testing.T) {
+			for index := range tc.Attempts {
+				// The 2.1.280 automatic path adds these dimensions to the
+				// otherwise unchanged round-selection vectors captured at 2.1.247.
+				tc.Attempts[index].SplitKind = "round"
+				tc.Attempts[index].HeadTruncations = 0
+			}
 			var attempts []SDKReactiveAttempt
 			history := SDKHistorySnapshot{Messages: tc.Messages, OwnedMessagesKnown: true}
-			result, err := RunSDKReactiveCompaction(t.Context(), history, tc.InitialTokenGap, func(ctx context.Context, plan SDKReactiveAttempt) (SDKReactiveQueryResult[int], error) {
+			// These captured 2.1.247 vectors isolate the round ladder. The public
+			// 2.1.280 path enables summarize_all and is covered separately below.
+			result, err := runSDKReactiveCompaction(t.Context(), history, tc.InitialTokenGap, false, func(ctx context.Context, plan SDKReactiveAttempt) (SDKReactiveQueryResult[int], error) {
 				index := len(attempts)
 				if len(plan.Summarize) != plan.MessagesToSummarize {
 					t.Fatal("message count differs from planned input")
@@ -81,6 +89,9 @@ func TestSDKReactiveCompactionAttemptsMatchNativeVectors(t *testing.T) {
 			}
 			if result.ReadyToApply && result.Payload != 123 {
 				t.Fatal("summary payload lost")
+			}
+			if result.ReadyToApply && (result.SplitKind != "round" || result.HeadTruncations != 0) {
+				t.Fatalf("automatic split metadata=%q/%d", result.SplitKind, result.HeadTruncations)
 			}
 		})
 	}
@@ -175,5 +186,95 @@ func TestSDKReactiveCompactionCancellationAndQueryErrors(t *testing.T) {
 	})
 	if !errors.Is(err, sentinel) || result.ReadyToApply || result.Attempts != 1 {
 		t.Fatalf("failed result=%+v err=%v", result, err)
+	}
+}
+
+func TestSDKReactiveCompactionSummarizeAllKeepsExactTrailingUser(t *testing.T) {
+	history := SDKHistorySnapshot{OwnedMessagesKnown: true, Messages: []SDKHistoryMessage{
+		{Type: "user", UUID: "opening-user", TokenEstimate: SDKTokenEstimate{Tokens: 10, Known: true}},
+		{Type: "assistant", UUID: "assistant", MessageID: "assistant", TokenEstimate: SDKTokenEstimate{Tokens: 10, Known: true}},
+		{Type: "user", UUID: "trailing-user", TokenEstimate: SDKTokenEstimate{Tokens: 10, Known: true}},
+	}}
+	calls := 0
+	result, err := RunSDKReactiveCompaction(t.Context(), history, nil, func(_ context.Context, attempt SDKReactiveAttempt) (SDKReactiveQueryResult[string], error) {
+		calls++
+		if !ValidateSDKReactiveAttempt(history, attempt) || attempt.SplitKind != "summarize_all" || attempt.HeadTruncations != 0 ||
+			attempt.GroupsToSummarize != 2 || attempt.GroupsToPreserve != 0 || len(attempt.Preserve) != 1 || attempt.Preserve[0].UUID != "trailing-user" {
+			t.Fatalf("summarize_all attempt=%+v", attempt)
+		}
+		if calls == 1 {
+			attempt.Summarize[0].UUID = "mutated"
+			attempt.Preserve[0].UUID = "mutated"
+			return SDKReactiveQueryResult[string]{Reason: "media_too_large"}, nil
+		}
+		if !attempt.StrippedMedia || attempt.Attempt != 1 || attempt.Summarize[0].UUID != "opening-user" || attempt.Preserve[0].UUID != "trailing-user" {
+			t.Fatal("callback mutation changed the repeated fallback attempt")
+		}
+		return SDKReactiveQueryResult[string]{Success: true, Payload: "summary"}, nil
+	})
+	if err != nil || !result.ReadyToApply || result.Payload != "summary" || result.Attempts != 1 || calls != 2 ||
+		result.SplitKind != "summarize_all" || result.HeadTruncations != 0 || result.GroupsPreserved != 0 ||
+		len(result.Preserve) != 1 || result.Preserve[0].UUID != "trailing-user" {
+		t.Fatalf("result=%+v calls=%d err=%v", result, calls, err)
+	}
+}
+
+func sdkReactiveLongHistory(assistantCount int) SDKHistorySnapshot {
+	messages := []SDKHistoryMessage{{Type: "user", UUID: "opening", TokenEstimate: SDKTokenEstimate{Tokens: 10, Known: true}}}
+	for index := range assistantCount {
+		id := string(rune('a' + index))
+		messages = append(messages, SDKHistoryMessage{Type: "assistant", UUID: id, MessageID: id, TokenEstimate: SDKTokenEstimate{Tokens: 10, Known: true}})
+	}
+	return SDKHistorySnapshot{Messages: messages, OwnedMessagesKnown: true}
+}
+
+func TestSDKReactiveHeadTruncationUsesGroupsAndTokenGap(t *testing.T) {
+	history := sdkReactiveLongHistory(10)
+	active := sdkReactiveFlatten(GroupSDKHistory(history.Messages))
+	tests := []struct {
+		name string
+		gap  *int64
+		want string
+	}{
+		{name: "twenty-percent", want: "b"},
+		{name: "gap-guided", gap: func() *int64 { value := int64(35); return &value }(), want: "d"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			truncated, err := sdkReactiveTruncateHead(active, tc.gap)
+			if err != nil || len(truncated) < 2 || !sdkReactiveIsHeadMarker(truncated[0]) || truncated[1].UUID != tc.want {
+				t.Fatalf("truncated=%+v err=%v", truncated, err)
+			}
+			again, err := sdkReactiveTruncateHead(truncated, nil)
+			if err != nil || len(again) >= len(truncated) || !sdkReactiveIsHeadMarker(again[0]) {
+				t.Fatalf("repeated truncation=%+v err=%v", again, err)
+			}
+		})
+	}
+}
+
+func TestSDKReactiveCompactionStopsAfterThreeHeadTruncations(t *testing.T) {
+	history := sdkReactiveLongHistory(10)
+	var fallbackHeads []int
+	var fallbackLengths []int
+	result, err := RunSDKReactiveCompaction(t.Context(), history, nil, func(_ context.Context, attempt SDKReactiveAttempt) (SDKReactiveQueryResult[bool], error) {
+		if !ValidateSDKReactiveAttempt(history, attempt) {
+			t.Fatalf("invalid attempt=%+v", attempt)
+		}
+		if attempt.SplitKind == "summarize_all" {
+			fallbackHeads = append(fallbackHeads, attempt.HeadTruncations)
+			fallbackLengths = append(fallbackLengths, len(attempt.Summarize))
+			if !sdkReactiveIsHeadMarker(attempt.Summarize[0]) {
+				t.Fatal("assistant-leading truncation omitted its temporary marker")
+			}
+		}
+		return SDKReactiveQueryResult[bool]{Reason: "prompt_too_long"}, nil
+	})
+	if err != nil || result.ReadyToApply || result.Reason != "exhausted" || result.SplitKind != "summarize_all" || result.HeadTruncations != 3 {
+		t.Fatalf("result=%+v err=%v", result, err)
+	}
+	if !reflect.DeepEqual(fallbackHeads, []int{1, 2, 3}) || len(fallbackLengths) != 3 ||
+		!(fallbackLengths[0] > fallbackLengths[1] && fallbackLengths[1] > fallbackLengths[2]) {
+		t.Fatalf("heads=%v lengths=%v", fallbackHeads, fallbackLengths)
 	}
 }

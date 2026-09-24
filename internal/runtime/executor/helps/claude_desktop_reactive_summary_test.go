@@ -24,9 +24,14 @@ func (f summaryExecutorFunc) ExecuteStream(ctx context.Context, auth *cliproxyau
 	return f(ctx, auth, request, options)
 }
 
+type summaryStatusError string
+
+func (e summaryStatusError) Error() string { return string(e) }
+func (summaryStatusError) StatusCode() int { return 400 }
+
 func summaryParamsFixture(t *testing.T) (ClaudeDesktopReactiveSummaryParams, *claudeprompt.Request) {
 	t.Helper()
-	bundle, err := claudeprofile.BuiltinV140609()
+	bundle, err := claudeprofile.BuiltinCurrent()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,14 +122,20 @@ func TestClaudeDesktopSummaryCancellationAndLateResult(t *testing.T) {
 				var body struct {
 					Model string `json:"model"`
 				}
-				if errBody := json.Unmarshal(r.Payload, &body); errBody != nil || r.Model != ClaudeDesktopCompactionModel || body.Model != ClaudeDesktopCompactionModel {
-					t.Fatalf("compaction helper model = request %q payload %q, want %q (decode error: %v)", r.Model, body.Model, ClaudeDesktopCompactionModel, errBody)
+				if errBody := json.Unmarshal(r.Payload, &body); errBody != nil || r.Model != "claude-opus-5-5" || body.Model != "claude-opus-5-5" {
+					t.Fatalf("compaction helper model = request %q payload %q, want claude-opus-5-5 (decode error: %v)", r.Model, body.Model, errBody)
 				}
 				if ClaudeDesktopSessionUUID(c, a, params.Bundle.ProfileID, "wrong") != params.SessionID {
 					t.Fatal("bound session lost")
 				}
 				if len(o.Headers) != 0 || strings.Contains(string(r.Payload), "diagnostics") {
 					t.Fatal("main request decoration inherited")
+				}
+				if kind, errKind := ClaudeDesktopCompactionRequestKind(c, nil); kind != "reactive" || errKind != nil {
+					t.Fatalf("PTL helper origin=%q err=%v", kind, errKind)
+				}
+				if kind, errKind := ClaudeDesktopCompactionRequestKind(ctx, nil); kind != "manual" || errKind != nil {
+					t.Fatal("helper origin leaked to parent context")
 				}
 				if mode == "cancel-during" {
 					cancel()
@@ -158,6 +169,59 @@ func TestClaudeDesktopSummaryCancellationAndLateResult(t *testing.T) {
 				t.Fatal("draft generation applied history")
 			}
 		})
+	}
+}
+
+func TestClaudeDesktopSummaryFallbackBuildsMarkerAndRecentWrapper(t *testing.T) {
+	params, _ := summaryParamsFixture(t)
+	var attempts []claudeprompt.SDKReactiveAttempt
+	params.ObserveAttempt = func(attempt claudeprompt.SDKReactiveAttempt) {
+		attempt.Summarize, attempt.Preserve = nil, nil
+		attempts = append(attempts, attempt)
+	}
+	calls := 0
+	executor := summaryExecutorFunc(func(_ context.Context, _ *cliproxyauth.Auth, request cliproxyexecutor.Request, _ cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+		calls++
+		var body struct {
+			Messages []struct {
+				Role    string          `json:"role"`
+				Content json.RawMessage `json:"content"`
+			} `json:"messages"`
+		}
+		if err := json.Unmarshal(request.Payload, &body); err != nil || len(body.Messages) == 0 {
+			t.Fatalf("invalid summary request: %v", err)
+		}
+		if calls == 1 {
+			return nil, summaryStatusError("prompt is too long")
+		}
+		var marker string
+		if body.Messages[0].Role != "user" || json.Unmarshal(body.Messages[0].Content, &marker) != nil || marker != "[earlier conversation truncated for compaction retry]" {
+			t.Fatalf("fallback marker=%q row=%+v", marker, body.Messages[0])
+		}
+		return summarySyntheticStream(), nil
+	})
+	result, err := RunClaudeDesktopReactiveSummary(t.Context(), executor, params)
+	defer result.Payload.Discard()
+	if err != nil || !result.ReadyToApply || calls != 2 || result.SplitKind != "summarize_all" || result.HeadTruncations != 1 ||
+		result.GroupsPreserved != 0 || len(result.Preserve) != 1 {
+		t.Fatalf("result=%+v calls=%d err=%v", result, calls, err)
+	}
+	if len(attempts) != 2 || attempts[0].SplitKind != "round" || attempts[1].SplitKind != "summarize_all" ||
+		attempts[1].HeadTruncations != 1 || attempts[1].GroupsToPreserve != 0 {
+		t.Fatalf("attempts=%+v", attempts)
+	}
+	var draft struct {
+		Content string `json:"content"`
+	}
+	if json.Unmarshal(result.Payload.Message, &draft) != nil || !strings.Contains(draft.Content, "Recent messages are preserved verbatim.") {
+		t.Fatal("draft wrapper omitted the head-truncation preservation notice")
+	}
+	rows := result.Payload.Application.Messages()
+	var applied struct {
+		Content string `json:"content"`
+	}
+	if len(rows) != 2 || json.Unmarshal(rows[0], &applied) != nil || !strings.Contains(applied.Content, "Recent messages are preserved verbatim.") {
+		t.Fatal("application wrapper omitted the head-truncation preservation notice")
 	}
 }
 

@@ -94,7 +94,7 @@ func TestSDKReactiveCompactionEventsUseOwnedParentAndIteration(t *testing.T) {
 				t.Fatal("incorrect recovery lifecycle events")
 			}
 			trigger := events["tengu_reactive_compact_triggered"][0]
-			want := map[string]any{"subscription_type": "pro", "cc_prompt_id": span.facts.PromptID, "querySource": "sdk", "precomputed": false, "precomputedKind": "none"}
+			want := map[string]any{"subscription_type": "pro", "cc_prompt_id": span.facts.PromptID, "desktop_app_version": "1.40609.0.0", "querySource": "sdk", "precomputed": false, "precomputedKind": "none"}
 			if !strings.Contains(model, "haiku") {
 				want["effort_level"] = "high"
 			}
@@ -106,9 +106,10 @@ func TestSDKReactiveCompactionEventsUseOwnedParentAndIteration(t *testing.T) {
 				if index == 2 {
 					attempt, summarize, preserve = 2, 2, 2
 				}
-				want := map[string]any{"subscription_type": "pro", "cc_prompt_id": span.facts.PromptID,
+				want := map[string]any{"subscription_type": "pro", "cc_prompt_id": span.facts.PromptID, "desktop_app_version": "1.40609.0.0",
 					"attempt": float64(attempt), "groupsToSummarize": float64(summarize), "groupsToPreserve": float64(preserve),
-					"messagesToSummarize": float64(2*summarize - 1), "strippedMedia": index > 0}
+					"messagesToSummarize": float64(2*summarize - 1), "strippedMedia": index > 0,
+					"splitKind": "round", "headTruncations": float64(0)}
 				if index == 2 {
 					want["stepMode"], want["stepSize"] = "gap_unparseable", float64(1)
 				}
@@ -145,6 +146,170 @@ func TestSDKReactiveCompactionEventsUseOwnedParentAndIteration(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSDKReactiveCompactionTerminalEventsMatchAutomaticLifecycle(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		f, span, view := reactiveTelemetryFixture(t, "claude-opus-5", 4)
+		if !view.ClaimReactiveFailure() {
+			t.Fatal("fixture did not claim main recovery")
+		}
+		operation := span.BeginSDKReactiveCompaction(view)
+		defer operation.Close()
+		span.FinishFailure(t.Context(), "invalid_request", errors.New("PRIVATE_FAILURE"))
+		result, err := claudeprompt.RunSDKReactiveCompaction(t.Context(), view.History(), nil,
+			func(_ context.Context, attempt claudeprompt.SDKReactiveAttempt) (claudeprompt.SDKReactiveQueryResult[bool], error) {
+				f.clock.Advance(time.Millisecond)
+				operation.ObserveAttempt(attempt)
+				return claudeprompt.SDKReactiveQueryResult[bool]{Success: true, Payload: true}, nil
+			})
+		if err != nil || !result.ReadyToApply {
+			t.Fatalf("summary result=%+v err=%v", result, err)
+		}
+		f.clock.Advance(27 * time.Millisecond)
+		pre, post := view.History().TokenEstimate.Tokens, int64(42)
+		preservedUUIDs := 0
+		for _, message := range result.Preserve {
+			if message.UUID != "" {
+				preservedUUIDs++
+			}
+		}
+		operation.RecordSuccess(SDKReactiveCompactionSuccess{
+			Attempts: result.Attempts, GroupsPreserved: result.GroupsPreserved, TotalGroups: result.TotalGroups,
+			SplitKind: result.SplitKind, HeadTruncations: result.HeadTruncations,
+			PreservedUUIDCount: preservedUUIDs, PreservedMessageCount: len(result.Preserve), ForkAssistantMessageCount: 1,
+			RestoredItemCount: 3, PreCompactTokens: &pre, PostCompactTokens: &post, UsageKnown: true,
+			Usage: claudeprompt.SDKTokenUsage{InputTokens: 10, OutputTokens: 7, CacheReadInputTokens: 30, CacheCreationInputTokens: 5},
+		})
+		operation.RecordFailure(SDKReactiveCompactionFailure{Reason: "error", Attempts: 1, TotalGroups: result.TotalGroups})
+		events := f.events(t)
+		if len(events["tengu_reactive_compact_succeeded"]) != 1 || len(events["tengu_reactive_compact_failed"]) != 0 {
+			t.Fatalf("terminal events=%v", events)
+		}
+		metadata := events["tengu_reactive_compact_succeeded"][0]
+		want := map[string]any{
+			"attempts": float64(result.Attempts), "groupsPreserved": float64(result.GroupsPreserved), "totalGroups": float64(result.TotalGroups),
+			"splitKind": "round", "headTruncations": float64(0), "preservedUuidCount": float64(preservedUUIDs),
+			"preservedMessageCount": float64(len(result.Preserve)), "forkAssistantMessageCount": float64(1), "trigger": "auto",
+			"restoredAttachmentCount": float64(3), "durationMs": float64(28), "userWaitMs": float64(28), "precomputed": false,
+			"querySource": "sdk", "effort_level": "high", "preCompactTokens": float64(pre), "postCompactTokens": float64(post),
+			"compactionInputTokens": float64(10), "compactionOutputTokens": float64(7), "compactionCacheReadTokens": float64(30),
+			"compactionCacheCreationTokens": float64(5), "compactionTotalTokens": float64(52), "cacheHitRate": float64(2) / 3,
+			"subscription_type": "pro", "cc_prompt_id": span.facts.PromptID, "desktop_app_version": "1.40609.0.0",
+		}
+		if !reflect.DeepEqual(metadata, want) {
+			t.Fatalf("success metadata=%v want=%v", metadata, want)
+		}
+		for name, items := range events {
+			if strings.HasPrefix(name, "tengu_auto_compact_") && len(items) > 0 {
+				t.Fatalf("post-PTL recovery fabricated a threshold preflight lifecycle: %s", name)
+			}
+		}
+	})
+
+	t.Run("failure", func(t *testing.T) {
+		f, span, view := reactiveTelemetryFixture(t, "claude-opus-5", 3)
+		if !view.ClaimReactiveFailure() {
+			t.Fatal("fixture did not claim main recovery")
+		}
+		operation := span.BeginSDKReactiveCompaction(view)
+		defer operation.Close()
+		span.FinishFailure(t.Context(), "invalid_request", errors.New("PRIVATE_FAILURE"))
+		result, err := claudeprompt.RunSDKReactiveCompaction(t.Context(), view.History(), nil,
+			func(_ context.Context, attempt claudeprompt.SDKReactiveAttempt) (claudeprompt.SDKReactiveQueryResult[bool], error) {
+				f.clock.Advance(time.Millisecond)
+				operation.ObserveAttempt(attempt)
+				return claudeprompt.SDKReactiveQueryResult[bool]{Reason: "error"}, nil
+			})
+		if err != nil || result.ReadyToApply || result.Reason != "error" {
+			t.Fatalf("summary result=%+v err=%v", result, err)
+		}
+		f.clock.Advance(12 * time.Millisecond)
+		pre := view.History().TokenEstimate.Tokens
+		operation.RecordFailure(SDKReactiveCompactionFailure{
+			Reason: result.Reason, Attempts: result.Attempts, TotalGroups: result.TotalGroups, PreCompactTokens: &pre,
+		})
+		operation.RecordSuccess(SDKReactiveCompactionSuccess{Attempts: 1, GroupsPreserved: 1, TotalGroups: result.TotalGroups, SplitKind: "round"})
+		events := f.events(t)
+		if len(events["tengu_reactive_compact_failed"]) != 1 || len(events["tengu_reactive_compact_succeeded"]) != 0 {
+			t.Fatalf("terminal events=%v", events)
+		}
+		metadata := events["tengu_reactive_compact_failed"][0]
+		want := map[string]any{
+			"reason": "error", "trigger": "auto", "attempts": float64(1), "totalGroups": float64(result.TotalGroups),
+			"durationMs": float64(13), "querySource": "sdk", "effort_level": "high", "preCompactTokens": float64(pre),
+			"subscription_type": "pro", "cc_prompt_id": span.facts.PromptID, "desktop_app_version": "1.40609.0.0",
+		}
+		if !reflect.DeepEqual(metadata, want) {
+			t.Fatalf("failure metadata=%v want=%v", metadata, want)
+		}
+	})
+}
+
+func TestSDKReactiveCompactionSummarizeAllTelemetry(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		f, span, view := reactiveTelemetryFixture(t, "claude-opus-5", 5)
+		view.ClaimReactiveFailure()
+		operation := span.BeginSDKReactiveCompaction(view)
+		defer operation.Close()
+		result, err := claudeprompt.RunSDKReactiveCompaction(t.Context(), view.History(), nil,
+			func(_ context.Context, attempt claudeprompt.SDKReactiveAttempt) (claudeprompt.SDKReactiveQueryResult[bool], error) {
+				f.clock.Advance(time.Millisecond)
+				operation.ObserveAttempt(attempt)
+				if attempt.SplitKind == "round" {
+					return claudeprompt.SDKReactiveQueryResult[bool]{Reason: "prompt_too_long"}, nil
+				}
+				return claudeprompt.SDKReactiveQueryResult[bool]{Success: true, Payload: true}, nil
+			})
+		if err != nil || !result.ReadyToApply || result.SplitKind != "summarize_all" || result.HeadTruncations != 1 || result.GroupsPreserved != 0 {
+			t.Fatalf("result=%+v err=%v", result, err)
+		}
+		operation.RecordSuccess(SDKReactiveCompactionSuccess{
+			Attempts: result.Attempts, GroupsPreserved: result.GroupsPreserved, TotalGroups: result.TotalGroups,
+			SplitKind: result.SplitKind, HeadTruncations: result.HeadTruncations,
+			PreservedUUIDCount: len(result.Preserve), PreservedMessageCount: len(result.Preserve),
+		})
+		events := f.events(t)
+		attempts := events["tengu_reactive_compact_attempt"]
+		if len(attempts) != result.Attempts || len(attempts) == 0 {
+			t.Fatalf("attempt events=%d result=%+v", len(attempts), result)
+		}
+		last := attempts[len(attempts)-1]
+		if last["splitKind"] != "summarize_all" || last["headTruncations"] != float64(1) ||
+			last["groupsToSummarize"] != float64(result.TotalGroups) || last["groupsToPreserve"] != float64(0) {
+			t.Fatalf("fallback attempt metadata=%v", last)
+		}
+		success := events["tengu_reactive_compact_succeeded"]
+		if len(success) != 1 || success[0]["splitKind"] != "summarize_all" || success[0]["headTruncations"] != float64(1) ||
+			success[0]["groupsPreserved"] != float64(0) {
+			t.Fatalf("fallback success metadata=%v", success)
+		}
+	})
+
+	t.Run("failed-after-head-limit", func(t *testing.T) {
+		f, span, view := reactiveTelemetryFixture(t, "claude-opus-5", 8)
+		view.ClaimReactiveFailure()
+		operation := span.BeginSDKReactiveCompaction(view)
+		defer operation.Close()
+		result, err := claudeprompt.RunSDKReactiveCompaction(t.Context(), view.History(), nil,
+			func(_ context.Context, attempt claudeprompt.SDKReactiveAttempt) (claudeprompt.SDKReactiveQueryResult[bool], error) {
+				operation.ObserveAttempt(attempt)
+				return claudeprompt.SDKReactiveQueryResult[bool]{Reason: "prompt_too_long"}, nil
+			})
+		if err != nil || result.Reason != "exhausted" || result.SplitKind != "summarize_all" || result.HeadTruncations != 3 {
+			t.Fatalf("result=%+v err=%v", result, err)
+		}
+		head := result.HeadTruncations
+		operation.RecordFailure(SDKReactiveCompactionFailure{
+			Reason: result.Reason, Attempts: result.Attempts, TotalGroups: result.TotalGroups,
+			SplitKind: result.SplitKind, HeadTruncations: &head,
+		})
+		events := f.events(t)
+		failed := events["tengu_reactive_compact_failed"]
+		if len(failed) != 1 || failed[0]["splitKind"] != "summarize_all" || failed[0]["headTruncations"] != float64(3) {
+			t.Fatalf("fallback failure metadata=%v", failed)
+		}
+	})
 }
 
 func TestSDKReactiveCompactionRejectsForeignUnclaimedAndLateObservers(t *testing.T) {

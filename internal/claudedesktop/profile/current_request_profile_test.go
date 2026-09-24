@@ -22,6 +22,10 @@ func TestBuiltinCurrentUsesV270320Opus55RequestProfile(t *testing.T) {
 	if current.CountTokensCatalog != CountTokensLayoutV270320 {
 		t.Fatalf("count_tokens catalog = %q, want %q", current.CountTokensCatalog, CountTokensLayoutV270320)
 	}
+	wantLifecycleBetas := "claude-code-20250219,oauth-2025-04-20,interleaved-thinking-2025-05-14,thinking-token-count-2026-05-13,context-management-2025-06-27,prompt-caching-scope-2026-01-05,mid-conversation-system-2026-04-07"
+	if got := strings.Join(current.SDKInputBetas["claude-opus-5-5"], ","); got != wantLifecycleBetas {
+		t.Fatalf("Opus 5.5 SDK lifecycle betas = %q, want %q", got, wantLifecycleBetas)
+	}
 	computerVariantCount := 0
 	for index, variant := range current.Variants {
 		if variant.Headers.ClientVersion != "2.7032.0" {
@@ -102,6 +106,53 @@ func TestBuiltinCurrentUsesV270320Opus55RequestProfile(t *testing.T) {
 		!strings.Contains(string(body.OutputConfig), `"effort":"medium"`) ||
 		!strings.Contains(string(body.Diagnostics), `"previous_message_id":null`) {
 		t.Fatalf("subagent body profile = %+v", body)
+	}
+
+	for _, diagnostics := range []bool{false, true} {
+		compaction, errCompaction := bundle.Resolve(RequestVariantKey{
+			Model:           "claude-opus-5-5",
+			LogicalModel:    "claude-opus-5-5",
+			Role:            RoleCompaction,
+			Diagnostics:     diagnostics,
+			ThinkingDisplay: "updates",
+		})
+		if errCompaction != nil {
+			t.Fatal(errCompaction)
+		}
+		if compaction.Headers.ClientVersion != "2.7032.0" ||
+			compaction.Headers.ClientPlatform != "desktop_app" ||
+			compaction.Headers.DispatchID != "v2d" ||
+			compaction.Headers.RequestClass != "compaction" ||
+			compaction.SystemBlockCount != 4 || len(compaction.System) != 4 {
+			t.Fatalf("compaction request variant = %+v", compaction)
+		}
+		if compaction.System[2].CacheControl == nil || compaction.System[2].CacheControl.Scope != "global" || compaction.System[2].CacheControl.TTL != "" ||
+			compaction.System[3].CacheControl == nil || compaction.System[3].CacheControl.TTL != "" {
+			t.Fatalf("compaction cache controls = %+v", compaction.System)
+		}
+		betas := strings.Join(compaction.AnthropicBeta, ",")
+		for _, required := range []string{"server-side-fallback-2026-07-01", "fallback-credit-2026-06-01", "thinking-display-updates-2026-08-18"} {
+			if !strings.Contains(betas, required) {
+				t.Fatalf("compaction beta profile %q is missing %q", betas, required)
+			}
+		}
+		for _, forbidden := range []string{"afk-mode-2026-01-31", "extended-cache-ttl-2025-04-11"} {
+			if strings.Contains(betas, forbidden) {
+				t.Fatalf("compaction beta profile %q contains %q", betas, forbidden)
+			}
+		}
+		compactionBody, errCompactionBody := bundle.BodyForVariant(compaction)
+		if errCompactionBody != nil {
+			t.Fatal(errCompactionBody)
+		}
+		wantOrder := "model,messages,system,tools,metadata,max_tokens,thinking,context_management,fallbacks,output_config,diagnostics,stream"
+		if compactionBody.MaxTokens != 128000 || !compactionBody.EnsureTools || !compactionBody.RemoveUnlistedKeys ||
+			string(compactionBody.Fallbacks) != `"default"` ||
+			!strings.Contains(string(compactionBody.Thinking), `"display":"updates"`) ||
+			!strings.Contains(string(compactionBody.OutputConfig), `"effort":"medium"`) ||
+			strings.Join(compactionBody.TopLevelOrder, ",") != wantOrder {
+			t.Fatalf("compaction body profile = %+v", compactionBody)
+		}
 	}
 
 	tools, errTools := bundle.CountTokensCalibrationTools("claude-opus-5-5")

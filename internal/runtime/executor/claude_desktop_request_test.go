@@ -81,26 +81,145 @@ func TestClaudeDesktopTitleUsesConfiguredHaikuModel(t *testing.T) {
 	}
 }
 
-func TestClaudeDesktopCompactionUsesCapturedOpusModel(t *testing.T) {
+func TestClaudeDesktopCompactionPreservesSelectedOpus55Model(t *testing.T) {
 	executor := newClaudeDesktopTestExecutor(t)
 	body := []byte(`{"model":"claude-opus-5-5","max_tokens":4096,"messages":[{"role":"user","content":"compact this conversation"}]}`)
 	plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleCompaction, "claude-opus-5-5", nil)
 	if errPlan != nil {
 		t.Fatal(errPlan)
 	}
-	if plan.Variant.Key.Model != helps.ClaudeDesktopCompactionModel || plan.Variant.Key.LogicalModel != helps.ClaudeDesktopCompactionModel {
-		t.Fatalf("compaction variant = model %q logical model %q, want %q", plan.Variant.Key.Model, plan.Variant.Key.LogicalModel, helps.ClaudeDesktopCompactionModel)
+	if plan.Variant.Key.Model != "claude-opus-5-5" || plan.Variant.Key.LogicalModel != "claude-opus-5-5" {
+		t.Fatalf("compaction variant = model %q logical model %q, want claude-opus-5-5", plan.Variant.Key.Model, plan.Variant.Key.LogicalModel)
 	}
 	facts := executor.newClaudeDesktopRuntimeFactsForPlan(nil, "session", "claude-opus-5-5", "prompt", "request", "", plan)
-	if facts.LogicalModel != helps.ClaudeDesktopCompactionModel {
-		t.Fatalf("compaction telemetry model = %q, want %q", facts.LogicalModel, helps.ClaudeDesktopCompactionModel)
+	if facts.LogicalModel != "claude-opus-5-5" {
+		t.Fatalf("compaction telemetry model = %q, want claude-opus-5-5", facts.LogicalModel)
 	}
 	normalized, errNormalize := executor.normalizeClaudeDesktopBody(body, plan)
 	if errNormalize != nil {
 		t.Fatal(errNormalize)
 	}
-	if got := gjson.GetBytes(normalized, "model").String(); got != helps.ClaudeDesktopCompactionModel {
-		t.Fatalf("normalized compaction model = %q, want %q", got, helps.ClaudeDesktopCompactionModel)
+	if got := gjson.GetBytes(normalized, "model").String(); got != "claude-opus-5-5" {
+		t.Fatalf("normalized compaction model = %q, want claude-opus-5-5", got)
+	}
+}
+
+func TestClaudeDesktopOpus55CompactionMatchesCurrentWireProfile(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	body := []byte(`{"model":"claude-opus-5-5","messages":[{"role":"user","content":"compact this conversation"}],"tools":[],"metadata":{"user_id":"synthetic"},"diagnostics":{"previous_message_id":"msg_previous"},"stream":true}`)
+	plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleCompaction, "claude-opus-5-5", nil)
+	if errPlan != nil {
+		t.Fatal(errPlan)
+	}
+	facts := executor.newClaudeDesktopRuntimeFactsForPlan(nil, "session", "claude-opus-5-5", "prompt", "request", "", plan)
+	profiled, applied, errApply := executor.applyClaudeDesktopMessageProfile(t.Context(), nil, body, false, plan, facts)
+	if errApply != nil {
+		t.Fatal(errApply)
+	}
+	if !applied {
+		t.Fatal("Desktop compaction profile was not applied")
+	}
+	profiled = applyClaudeDesktopStreamPolicy(profiled, plan, true)
+	final, errFinalize := executor.finalizeClaudeDesktopBody(profiled, plan)
+	if errFinalize != nil {
+		t.Fatal(errFinalize)
+	}
+	for path, want := range map[string]string{
+		"model":                           "claude-opus-5-5",
+		"thinking.type":                   "adaptive",
+		"thinking.display":                "updates",
+		"fallbacks":                       "default",
+		"output_config.effort":            "medium",
+		"diagnostics.previous_message_id": "msg_previous",
+	} {
+		if got := gjson.GetBytes(final, path).String(); got != want {
+			t.Fatalf("%s = %q, want %q: %s", path, got, want, final)
+		}
+	}
+	if got := gjson.GetBytes(final, "max_tokens").Int(); got != 128000 {
+		t.Fatalf("max_tokens = %d, want 128000", got)
+	}
+	for _, path := range []string{"system.2.cache_control.ttl", "system.3.cache_control.ttl"} {
+		if gjson.GetBytes(final, path).Exists() {
+			t.Fatalf("compaction system cache control unexpectedly has TTL at %s: %s", path, final)
+		}
+	}
+	if got := gjson.GetBytes(final, "system.2.cache_control.scope").String(); got != "global" {
+		t.Fatalf("compaction intro cache scope = %q, want global", got)
+	}
+	wantOrder := []string{"model", "messages", "system", "tools", "metadata", "max_tokens", "thinking", "context_management", "fallbacks", "output_config", "diagnostics", "stream"}
+	previous := -1
+	for _, key := range wantOrder {
+		index := strings.Index(string(final), `"`+key+`":`)
+		if index <= previous {
+			t.Fatalf("top-level key %q is out of order: %s", key, final)
+		}
+		previous = index
+	}
+}
+
+func TestClaudeDesktopCompactionHeadersPreserveTrigger(t *testing.T) {
+	executor := newClaudeDesktopTestExecutor(t)
+	if !claudeDesktopCodeHeaderAllowed("x-cc-compaction-request") {
+		t.Fatal("captured compaction request header is not allowed on the Code wire")
+	}
+	body := []byte(`{"model":"claude-opus-5-5","messages":[{"role":"user","content":"compact"}]}`)
+	trusted := http.Header{
+		"User-Agent":                  []string{"claude-cli/2.1.280 (external, claude-desktop, agent-sdk/0.3.280)"},
+		"Anthropic-Client-Platform":   []string{"desktop_app"},
+		"X-Claude-Code-Request-Class": []string{"compaction"},
+		"X-CC-Compaction-Request":     []string{"manual"},
+		"X-Claude-Code-Compaction":    []string{"manual"},
+	}
+	for _, kind := range []string{"manual", "auto", "reactive"} {
+		headers := trusted.Clone()
+		headers["X-CC-Compaction-Request"] = []string{kind}
+		headers["X-Claude-Code-Compaction"] = []string{kind}
+		plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleCompaction, "claude-opus-5-5", headers)
+		if errPlan != nil {
+			t.Fatal(errPlan)
+		}
+		if plan.CompactionRequestKind != kind {
+			t.Fatalf("compaction request kind = %q, want %s", plan.CompactionRequestKind, kind)
+		}
+		plan.ClientRequestID = "33333333-3333-4333-8333-333333333333"
+		request, _ := http.NewRequest(http.MethodPost, "https://api.anthropic.com/v1/messages", strings.NewReader(string(body)))
+		if errHeaders := executor.applyClaudeHeadersWithProfile(request, nil, "test-token", true, nil, body, plan, headers, "session-id"); errHeaders != nil {
+			t.Fatal(errHeaders)
+		}
+		for name, want := range map[string]string{
+			"Anthropic-Dispatch-Id":       "v2d",
+			"X-CC-Compaction-Request":     kind,
+			"X-Claude-Code-Compaction":    kind,
+			"X-Claude-Code-Request-Class": "compaction",
+		} {
+			if got := request.Header.Get(name); got != want {
+				t.Fatalf("%s = %q, want %q", name, got, want)
+			}
+		}
+	}
+
+	plan, errPlan := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleCompaction, "claude-opus-5-5", nil)
+	if errPlan != nil || plan.CompactionRequestKind != "manual" {
+		t.Fatalf("unmarked explicit compaction kind=%q err=%v", plan.CompactionRequestKind, errPlan)
+	}
+	mismatched := trusted.Clone()
+	mismatched.Set("X-Claude-Code-Compaction", "auto")
+	if _, err := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleCompaction, "claude-opus-5-5", mismatched); err == nil {
+		t.Fatal("conflicting compaction triggers were silently normalized")
+	}
+	// A compaction hint does not turn ordinary messages into a helper or leak
+	// the helper's headers onto a normal request/continuation.
+	main, errMain := executor.planClaudeDesktopRequestWithHints(body, claudeprofile.RoleMain, "claude-opus-5-5", mismatched)
+	if errMain != nil || main.CompactionRequestKind != "" {
+		t.Fatalf("main request inherited compaction origin=%q err=%v", main.CompactionRequestKind, errMain)
+	}
+	request, _ := http.NewRequest(http.MethodPost, "https://api.anthropic.com/v1/messages", strings.NewReader(string(body)))
+	if errHeaders := executor.applyClaudeHeadersWithProfile(request, nil, "test-token", true, nil, body, main, mismatched, "session-id"); errHeaders != nil {
+		t.Fatal(errHeaders)
+	}
+	if request.Header.Get("X-CC-Compaction-Request") != "" || request.Header.Get("X-Claude-Code-Compaction") != "" {
+		t.Fatal("main request emitted compaction headers")
 	}
 }
 

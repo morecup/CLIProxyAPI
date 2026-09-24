@@ -16,6 +16,7 @@ import (
 	claudeprompt "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/prompt"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -82,7 +83,7 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 	transportStream := gjson.GetBytes(body, "stream").Bool()
 	if role != claudeprofile.RoleCountTokens {
 		body, _ = injectClaudeDesktopContextManagement(body)
-		body, diagnosticsState = injectClaudeDiagnosticsForRole(body, auth, sessionID, role)
+		body, diagnosticsState = e.injectClaudeDesktopDiagnosticsForRole(body, auth, sessionID, role)
 		body = normalizeClaudeSamplingForUpstream(body, true)
 		body = enforceCacheControlLimit(body, 4)
 		body = normalizeCacheControlTTL(body)
@@ -103,9 +104,16 @@ func (e *ClaudeExecutor) httpRequestClaudeDesktop(ctx context.Context, auth *cli
 		// session, but it does not own the outbound beta/header profile.
 		planningHeaders = nil
 	}
-	plan, errPlan := e.planClaudeDesktopRequestWithHints(body, role, logicalModel, planningHeaders)
+	plan, errPlan := e.planClaudeDesktopRequestInContext(ctx, body, role, logicalModel, planningHeaders)
 	if errPlan != nil {
 		return nil, errPlan
+	}
+	if role == claudeprofile.RoleCompaction && codeWire {
+		kind, errKind := helps.ClaudeDesktopCompactionRequestKind(ctx, incomingHeaders)
+		if errKind != nil {
+			return nil, claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: errKind.Error()}}
+		}
+		plan.CompactionRequestKind = kind
 	}
 	plan.ProgramOwnedSystem = codeWire
 	var desktopContext *helps.ClaudeDesktopContextLease
@@ -412,13 +420,28 @@ func observeClaudeDesktopRawResponse(
 		}
 		return response
 	}
-	response.Body = &claudeDesktopObservedResponseBody{
+	observed := &claudeDesktopObservedResponseBody{
 		body:        response.Body,
 		ctx:         ctx,
 		streaming:   streaming,
 		diagnostics: diagnostics,
 		span:        span,
 		onSuccess:   onSuccess,
+	}
+	encoding := strings.TrimSpace(claudeResponseContentEncoding(response.Header))
+	if encoding != "" && !strings.EqualFold(encoding, "identity") {
+		response.Body = helps.ObserveResponseBody(response.Body, func(source io.Reader) {
+			decoded, errDecode := decodeResponseBody(io.NopCloser(source), encoding)
+			if errDecode != nil {
+				observed.finish(errDecode)
+				return
+			}
+			observed.body = decoded
+			_, _ = io.Copy(io.Discard, observed)
+			_ = observed.Close()
+		})
+	} else {
+		response.Body = observed
 	}
 	return response
 }
@@ -564,6 +587,7 @@ func (b *claudeDesktopObservedResponseBody) finish(cause error) {
 	if cause == nil && b.streaming && !b.completed {
 		cause = errClaudeDesktopStreamIncomplete
 	}
+	cliproxyexecutor.ReportHTTPResult(b.ctx, cause)
 	if cause != nil {
 		finishClaudeDesktopTelemetryFailure(b.ctx, b.span, cause)
 		return

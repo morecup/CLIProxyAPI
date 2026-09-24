@@ -409,6 +409,35 @@ func (r *ClaudeDesktopTransportRegistry) Client(
 	return r.clientForProfile(ctx, cfg, auth, bundle, transportProfile, policy)
 }
 
+// ClientForVariant binds request-version-specific header order while reusing
+// the base bundle's account-isolated transport and connection pool.
+func (r *ClaudeDesktopTransportRegistry) ClientForVariant(
+	ctx context.Context,
+	cfg *config.Config,
+	auth *cliproxyauth.Auth,
+	bundle *claudeprofile.Bundle,
+	variant claudeprofile.RequestVariant,
+) (*http.Client, error) {
+	if r == nil {
+		return nil, fmt.Errorf("claude desktop transport registry is nil")
+	}
+	if auth == nil || strings.TrimSpace(auth.ID) == "" {
+		return nil, fmt.Errorf("claude desktop transport requires an Auth.ID")
+	}
+	if bundle == nil {
+		return nil, fmt.Errorf("claude desktop transport requires a profile bundle")
+	}
+	transportProfile, errProfile := bundle.TransportForVariant(variant)
+	if errProfile != nil {
+		return nil, errProfile
+	}
+	policy, errPolicy := claudeDesktopRoleRequestPolicy(variant.Key.Role)
+	if errPolicy != nil {
+		return nil, errPolicy
+	}
+	return r.clientForProfile(ctx, cfg, auth, bundle, transportProfile, policy)
+}
+
 // EndpointClient returns an account-isolated Desktop transport for a background
 // endpoint. Compatible roles on the same origin share the physical pool, as
 // the official Desktop does, while request policy and header order stay bound

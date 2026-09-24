@@ -167,7 +167,7 @@ func (h *ClaudeCodeAPIHandler) handleClaudeDesktopCodeRequest(c *gin.Context, ra
 	}
 	upstreamRequest.Header = requestHeaders
 
-	response, errHTTP := h.AuthManager.HttpRequest(cliCtx, selectedAuth, upstreamRequest)
+	response, errHTTP := h.AuthManager.ExecuteHTTPRequest(cliCtx, selectedAuth, upstreamRequest, modelName, selectionOptions)
 	if errHTTP != nil {
 		selectionReason = "request_failed"
 		terminalErr = errHTTP

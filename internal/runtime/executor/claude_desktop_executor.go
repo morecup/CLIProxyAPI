@@ -125,7 +125,7 @@ func (e *ClaudeExecutor) newClaudeUpstreamHTTPClient(ctx context.Context, auth *
 	if e.desktopTransports == nil {
 		e.desktopTransports = helps.NewClaudeDesktopTransportRegistry()
 	}
-	client, errClient := e.desktopTransports.Client(ctx, e.cfg, auth, e.desktopProfile, plan.Variant.Key.Role)
+	client, errClient := e.desktopTransports.ClientForVariant(ctx, e.cfg, auth, e.desktopProfile, plan.Variant)
 	if errClient != nil {
 		return nil, claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: "claude desktop transport is unavailable: " + errClient.Error()}}
 	}

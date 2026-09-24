@@ -9,6 +9,7 @@ import (
 
 type SDKCompactionRestoreParams struct {
 	Owner         *Request
+	Trigger       string
 	Summary       SDKCompactionText
 	Operations    SDKCompactionRestorationOps
 	PostHooks     SDKCompactHookRunner
@@ -30,11 +31,18 @@ func (a *SDKCompactionApplication) RestoreContext(ctx context.Context, params SD
 	if !params.Isolated && params.PostHooks == nil {
 		return SDKCompactionRestoration{}, ErrSDKCompactionHooksUnknown
 	}
+	trigger := params.Trigger
+	if trigger == "" {
+		trigger = "auto"
+	}
+	if trigger != "auto" && trigger != "manual" {
+		return SDKCompactionRestoration{}, ErrSDKCompactionHooksUnknown
+	}
 	restored, err := RestoreSDKCompactionContext(ctx, params.Operations, params.Isolated, params.RemoteEnabled)
 	if err != nil {
 		return restored, err
 	}
-	post, err := RunSDKPostCompactHooks(ctx, params.PostHooks, "auto", params.Summary.SelectedText(), params.Isolated)
+	post, err := RunSDKPostCompactHooks(ctx, params.PostHooks, trigger, params.Summary.SelectedText(), params.Isolated)
 	if err != nil {
 		return restored, err
 	}

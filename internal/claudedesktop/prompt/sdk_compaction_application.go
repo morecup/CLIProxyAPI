@@ -25,6 +25,7 @@ type SDKCompactionApplication struct {
 	helperKey    string
 	postTokens   int64
 	restored     bool
+	committed    bool
 	nativeRows   []SDKNativeMessage
 }
 
@@ -33,23 +34,43 @@ type SDKCompactionApplication struct {
 // restored attachments, hidden yields and unowned tool history require their own
 // application contract; this method does not silently reconstruct them.
 func (v *SDKCompactionView) PrepareApplication(text SDKCompactionText, options SDKCompactionWrapOptions, preserve []SDKHistoryMessage, helperCallID string) (*SDKCompactionApplication, error) {
+	return v.prepareApplication(text, options, preserve, helperCallID, false)
+}
+
+// PrepareReactiveApplication keeps PrepareApplication's strict round contract
+// while allowing summarize_all to retain an empty or partial-group exact wire
+// suffix selected by the reviewed automatic fallback.
+func (v *SDKCompactionView) PrepareReactiveApplication(text SDKCompactionText, options SDKCompactionWrapOptions, preserve []SDKHistoryMessage, splitKind, helperCallID string) (*SDKCompactionApplication, error) {
+	switch splitKind {
+	case "round":
+		return v.PrepareApplication(text, options, preserve, helperCallID)
+	case "summarize_all":
+		return v.prepareApplication(text, options, preserve, helperCallID, true)
+	default:
+		return nil, ErrSDKCompactionContentUnknown
+	}
+}
+
+func (v *SDKCompactionView) prepareApplication(text SDKCompactionText, options SDKCompactionWrapOptions, preserve []SDKHistoryMessage, helperCallID string, allowPartialSuffix bool) (*SDKCompactionApplication, error) {
 	if !v.Current() {
 		return nil, ErrSDKCompactionViewStale
 	}
-	if !text.known || len(preserve) == 0 || len(preserve) >= len(v.history.Messages) {
+	if !text.known || len(preserve) >= len(v.history.Messages) || helperCallID == "" || (!allowPartialSuffix && len(preserve) == 0) {
 		return nil, ErrSDKCompactionContentUnknown
 	}
 	start := len(v.history.Messages) - len(preserve)
-	groupStart, wholeGroup := 0, false
-	for _, group := range GroupSDKHistory(v.history.Messages) {
-		if groupStart == start {
-			wholeGroup = true
-			break
+	if !allowPartialSuffix {
+		groupStart, wholeGroup := 0, false
+		for _, group := range GroupSDKHistory(v.history.Messages) {
+			if groupStart == start {
+				wholeGroup = true
+				break
+			}
+			groupStart += len(group)
 		}
-		groupStart += len(group)
-	}
-	if !wholeGroup || helperCallID == "" {
-		return nil, ErrSDKCompactionContentUnknown
+		if !wholeGroup {
+			return nil, ErrSDKCompactionContentUnknown
+		}
 	}
 	for index, message := range preserve {
 		if message != v.history.Messages[start+index] {
@@ -128,6 +149,12 @@ func (a *SDKCompactionApplication) PostTokens() int64 {
 		return 0
 	}
 	return a.postTokens
+}
+
+// CommittedNative reports both completed native restoration and atomic
+// adoption. A successful helper response or an arbitrary callback is not proof.
+func (a *SDKCompactionApplication) CommittedNative() bool {
+	return a != nil && a.restored && a.committed
 }
 
 // Commit atomically changes both native history and active query ownership.
@@ -217,6 +244,7 @@ func (a *SDKCompactionApplication) Commit(ctx context.Context, input Input) (*Re
 	operation.applied = true
 	s.sdk.pendingCompactions--
 	s.requests[requestKey], s.active, s.lastAt = next, next, input.StartedAt
+	a.committed = true
 	return &Request{tracker: previous.tracker, call: next, identity: identity, attempt: 1}, nil
 }
 

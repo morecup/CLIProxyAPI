@@ -374,7 +374,8 @@ func (e *ClaudeExecutor) beginClaudeDesktopTelemetry(
 	var accounting *helps.ClaudeDesktopSDKAccounting
 	if e.desktopOnly {
 		accounting = helps.BeginClaudeDesktopSDKAccounting(&e.desktopPrompts, auth, e.desktopProfile, facts.Prompt, role,
-			facts.SessionID, helps.ClaudeDesktopParentPromptID(ctx, metadata...), facts.ClientRequestID, telemetryStartedAt, telemetryChainStartedAt)
+			facts.SessionID, helps.ClaudeDesktopParentPromptID(ctx, metadata...), facts.ClientRequestID, telemetryStartedAt, telemetryChainStartedAt,
+			facts.DesktopVersion, facts.CodeVersion)
 	}
 	var controlSpan *claudecontrol.RequestSpan
 	var desktopSessionID, queryID string
@@ -462,6 +463,9 @@ func (e *ClaudeExecutor) beginClaudeDesktopTelemetry(
 			ClientRequestID:       facts.ClientRequestID,
 			PreviousRequestID:     facts.PreviousRequestID,
 			Model:                 facts.LogicalModel,
+			DesktopVersion:        facts.DesktopVersion,
+			CodeVersion:           facts.CodeVersion,
+			AgentSDKVersion:       facts.AgentSDKVersion,
 			PermissionMode:        permissionMode,
 			MCPServerCount:        claudeDesktopMCPServerCount(body),
 			TranscriptSize:        claudeDesktopTranscriptSize(metadata...),

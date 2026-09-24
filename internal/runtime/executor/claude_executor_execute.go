@@ -112,7 +112,7 @@ func (e *ClaudeExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 	if contextManagementState.eligible {
 		body, contextManagementState.automaticallyInjected = injectClaudeDesktopContextManagement(body)
 		if desktopCapabilities.Diagnostics {
-			body, diagnosticsState = injectClaudeDiagnosticsForRole(body, auth, claudeSessionID, desktopRole)
+			body, diagnosticsState = e.injectClaudeDesktopDiagnosticsForRole(body, auth, claudeSessionID, desktopRole)
 		}
 	}
 
@@ -145,7 +145,7 @@ func (e *ClaudeExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 	// A 1h-TTL block must not appear after a 5m-TTL block in evaluation order (tools→system→messages).
 	body = normalizeCacheControlTTL(body)
 	var errPlan error
-	desktopPlan, errPlan = e.planClaudeDesktopRequestWithHints(body, desktopRole, baseModel, incomingHeaders)
+	desktopPlan, errPlan = e.planClaudeDesktopRequestInContext(ctx, body, desktopRole, baseModel, incomingHeaders)
 	if errPlan != nil {
 		return resp, errPlan
 	}

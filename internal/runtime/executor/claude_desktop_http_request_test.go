@@ -22,6 +22,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
 	"github.com/tidwall/gjson"
 )
 
@@ -698,6 +699,79 @@ func TestClaudeDesktopObservedResponseParsesFinalSSELineWithoutNewline(t *testin
 	}
 	if !observed.completed || observed.messageID != "msg_final_line" || !observed.finished {
 		t.Fatalf("final SSE state = completed:%t message:%q finished:%t", observed.completed, observed.messageID, observed.finished)
+	}
+}
+
+func TestClaudeDesktopObservedResponseReportsProtocolOutcome(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		payload     string
+		wantFailure bool
+	}{
+		{name: "complete", payload: "data: {\"type\":\"message_stop\"}"},
+		{name: "incomplete", payload: "data: {\"type\":\"message_start\"}\n\n", wantFailure: true},
+		{name: "stream error", payload: "event: error\ndata: {\"type\":\"error\",\"error\":{\"type\":\"overloaded_error\"}}\n\n", wantFailure: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			calls := 0
+			var outcome error
+			ctx, fallback := cliproxyexecutor.WithHTTPResultObserver(t.Context(), func(err error) {
+				calls++
+				outcome = err
+			})
+			observed := &claudeDesktopObservedResponseBody{
+				body: io.NopCloser(strings.NewReader(tc.payload)), ctx: ctx, streaming: true,
+			}
+			payload, err := io.ReadAll(observed)
+			if err != nil || string(payload) != tc.payload {
+				t.Fatalf("raw response changed: payload=%q err=%v", payload, err)
+			}
+			fallback(nil)
+			_ = observed.Close()
+			if calls != 1 || (outcome != nil) != tc.wantFailure {
+				t.Fatalf("calls=%d outcome=%v, want one result with failure=%t", calls, outcome, tc.wantFailure)
+			}
+		})
+	}
+}
+
+func TestClaudeDesktopObservedCompressedResponsePreservesBytesAndOutcome(t *testing.T) {
+	for _, encoding := range []string{"gzip", "br"} {
+		for _, complete := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/complete=%t", encoding, complete), func(t *testing.T) {
+				payload := "data: {\"type\":\"message_start\"}\n\n"
+				if complete {
+					payload += "data: {\"type\":\"message_stop\"}\n\n"
+				}
+				var compressed bytes.Buffer
+				var compressor io.WriteCloser = gzip.NewWriter(&compressed)
+				if encoding == "br" {
+					compressor = brotli.NewWriter(&compressed)
+				}
+				_, _ = io.WriteString(compressor, payload)
+				_ = compressor.Close()
+				calls := 0
+				var outcome error
+				ctx, fallback := cliproxyexecutor.WithHTTPResultObserver(t.Context(), func(err error) {
+					calls++
+					outcome = err
+				})
+				response := observeClaudeDesktopRawResponse(ctx, &http.Response{
+					StatusCode: http.StatusOK, ContentLength: int64(compressed.Len()),
+					Header: http.Header{"Content-Encoding": {encoding}},
+					Body:   io.NopCloser(bytes.NewReader(compressed.Bytes())),
+				}, true, claudeDiagnosticsRequestState{}, nil, nil)
+				raw, err := io.ReadAll(response.Body)
+				if err != nil || !bytes.Equal(raw, compressed.Bytes()) || response.Header.Get("Content-Encoding") != encoding {
+					t.Fatalf("encoded response changed: err=%v", err)
+				}
+				fallback(nil)
+				_ = response.Body.Close()
+				if calls != 1 || (outcome == nil) != complete {
+					t.Fatalf("calls=%d outcome=%v, want complete=%t", calls, outcome, complete)
+				}
+			})
+		}
 	}
 }
 

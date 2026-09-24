@@ -13,6 +13,7 @@ import (
 	claudefeatures "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/features"
 	claudeprofile "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/profile"
 	claudeprompt "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/prompt"
+	claudetelemetry "github.com/router-for-me/CLIProxyAPI/v7/internal/claudedesktop/telemetry"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
@@ -60,8 +61,14 @@ func (e *ClaudeExecutor) doClaudeDesktopRecoverableRequest(client *http.Client, 
 	if failure.Reason != "prompt_too_long" {
 		return response, nil
 	}
-	if _, errVariant := e.desktopProfile.Resolve(claudeprofile.RequestVariantKey{Model: helps.ClaudeDesktopCompactionModel,
-		LogicalModel: helps.ClaudeDesktopCompactionModel, Role: claudeprofile.RoleCompaction, ThinkingDisplay: "omitted"}); errVariant != nil {
+	model := gjson.GetBytes(state.body, "model").String()
+	compactionProbe, errProbe := sjson.SetBytes([]byte(`{}`), "model", model)
+	if errProbe != nil {
+		return response, nil
+	}
+	if _, errVariant := e.desktopProfile.Resolve(claudeprofile.RequestVariantKey{Model: model,
+		LogicalModel: model, Role: claudeprofile.RoleCompaction, Diagnostics: e.claudeDesktopRoleUsesDiagnostics(compactionProbe, claudeprofile.RoleCompaction),
+		ThinkingDisplay: claudeDesktopThinkingDisplay(compactionProbe, claudeprofile.RoleCompaction, model, model)}); errVariant != nil {
 		return response, nil
 	}
 	view, errView := state.span.prompt.CompactionView(state.body)
@@ -74,6 +81,12 @@ func (e *ClaudeExecutor) doClaudeDesktopRecoverableRequest(client *http.Client, 
 	}
 	reactive := state.span.telemetry.BeginSDKReactiveCompaction(view)
 	defer reactive.Close()
+	history := view.History()
+	var preCompactTokens *int64
+	if history.TokenEstimate.Known {
+		value := history.TokenEstimate.Tokens
+		preCompactTokens = &value
+	}
 	physicalError := classifyClaudeUpstreamError(response.StatusCode, response.Header, body)
 	helps.RecordAPIResponseMetadata(state.ctx, e.cfg, response.StatusCode, response.Header.Clone())
 	helps.AppendAPIResponseChunk(state.ctx, e.cfg, body)
@@ -93,28 +106,48 @@ func (e *ClaudeExecutor) doClaudeDesktopRecoverableRequest(client *http.Client, 
 		reactive.RecordContextUnavailable()
 		return stopRecovery()
 	}
-	customInstructions := ""
-	var compactHooks claudeprompt.SDKCompactHookRunner
 	if nativeContext != nil {
-		compactHooks = e.claudeDesktopCompactHookTelemetryRunner(auth, state.facts.SessionID, state.facts.LogicalModel, state.facts.PromptID, nativeContext.Hooks)
-		pre, errPre := claudeprompt.RunSDKPreCompactHooks(state.ctx, compactHooks, "auto", nil, false)
-		if errPre != nil {
-			reactive.RecordContextUnavailable()
+		nativeContext.Hooks = e.claudeDesktopCompactHookTelemetryRunner(auth, state.facts.SessionID, state.facts.LogicalModel, state.facts.PromptID, nativeContext.Hooks)
+		nativeCtx := helps.WithClaudeDesktopRecoveryContext(state.ctx, *nativeContext)
+		var next claudeDesktopRequestExecution
+		var nextRequest *http.Request
+		outcome, errNative := helps.RunClaudeDesktopNativeCompaction(nativeCtx, e, helps.ClaudeDesktopNativeCompactionParams{
+			Summary: helps.ClaudeDesktopReactiveSummaryParams{Auth: auth, Bundle: e.desktopProfile, View: view,
+				ParentRequest: state.body, SessionID: state.facts.SessionID, InitialTokenGap: failure.TokenGap,
+				Origin: claudeprompt.SDKCompactionOrigin{Kind: "reactive"}},
+			Owner: state.span.prompt, Telemetry: state.span.telemetry,
+			Apply: func(application *claudeprompt.SDKCompactionApplication) error {
+				var errApply error
+				next, nextRequest, errApply = e.prepareClaudeDesktopCompactionContinuation(auth, request, *state, application)
+				return errApply
+			},
+		})
+		if errNative != nil || !outcome.Applied {
 			return stopRecovery()
 		}
-		if pre.BlockedBy != "" {
-			return stopRecovery()
-		}
-		customInstructions = pre.NewCustomInstructions
-	} else {
-		// Ordinary text recovery still works, but cannot be reported as native
-		// context recovery when no owning runtime supplied its real operations.
-		reactive.RecordContextUnavailable()
+		return e.completeClaudeDesktopCompactionRequest(client, auth, state, next, nextRequest, response, metadata...)
 	}
+	// Ordinary HTTP recovery remains usable without impersonating the native
+	// context owner. Its absent hooks and restoration cannot emit success.
+	reactive.RecordContextUnavailable()
 	result, errSummary := helps.RunClaudeDesktopReactiveSummary(state.ctx, e, helps.ClaudeDesktopReactiveSummaryParams{
 		Auth: auth, Bundle: e.desktopProfile, View: view, ParentRequest: state.body, SessionID: state.facts.SessionID, InitialTokenGap: failure.TokenGap,
-		CustomInstructions: customInstructions, ObserveAttempt: reactive.ObserveAttempt})
+		ObserveAttempt: reactive.ObserveAttempt})
 	defer result.Payload.Discard()
+	if errSummary != nil {
+		reactive.RecordContextUnavailable()
+	} else if !result.ReadyToApply && result.Reason != "" {
+		var headTruncations *int
+		if result.SplitKind != "" {
+			value := result.HeadTruncations
+			headTruncations = &value
+		}
+		reactive.RecordFailure(claudetelemetry.SDKReactiveCompactionFailure{
+			Reason: result.Reason, Attempts: result.Attempts, TotalGroups: result.TotalGroups,
+			SplitKind: result.SplitKind, HeadTruncations: headTruncations, PreCompactTokens: preCompactTokens,
+			Status: result.Status,
+		})
+	}
 	if errCancelled := state.ctx.Err(); errCancelled != nil {
 		if errClose := response.Body.Close(); errClose != nil {
 			helps.LogWithRequestID(state.ctx).WithError(errClose).Warn("claude desktop: cancelled recovery response close failed")
@@ -124,29 +157,15 @@ func (e *ClaudeExecutor) doClaudeDesktopRecoverableRequest(client *http.Client, 
 	if errSummary != nil || !result.ReadyToApply {
 		return response, nil
 	}
-	if nativeContext != nil {
-		operations, errSnapshot := nativeContext.SnapshotAndReset(state.ctx, append([]claudeprompt.SDKHistoryMessage(nil), result.Preserve...))
-		if errSnapshot != nil {
-			reactive.RecordContextUnavailable()
-			return stopRecovery()
-		}
-		restored, errRestore := result.Payload.Application.RestoreContext(state.ctx, claudeprompt.SDKCompactionRestoreParams{
-			Owner: state.span.prompt, Summary: result.Payload.Text, Operations: operations, PostHooks: compactHooks,
-			Normalize: nativeContext.Normalize, RemoteEnabled: nativeContext.RemoteEnabled})
-		if errRestore != nil || restored.RestoreError != nil || restored.FallbackError != nil {
-			reactive.RecordContextUnavailable()
-		}
-		if errRestore != nil {
-			return stopRecovery()
-		}
-	}
-	// Restoration has completed only for a supplied, scope-checked native
-	// context. Final native lifecycle telemetry still requires its full schema,
-	// boundary/transcript and timing facts; do not infer success from adoption.
 	next, nextRequest, errPrepare := e.prepareClaudeDesktopCompactionContinuation(auth, request, *state, result.Payload.Application)
 	if errPrepare != nil {
+		reactive.RecordContextUnavailable()
 		return response, nil
 	}
+	return e.completeClaudeDesktopCompactionRequest(client, auth, state, next, nextRequest, response, metadata...)
+}
+
+func (e *ClaudeExecutor) completeClaudeDesktopCompactionRequest(client *http.Client, auth *cliproxyauth.Auth, state *claudeDesktopRequestExecution, next claudeDesktopRequestExecution, nextRequest *http.Request, response *http.Response, metadata ...map[string]any) (*http.Response, error) {
 	// Persistence follows actual adoption, never merely a successful helper.
 	// Failure leaves the API continuation usable and exposes the missing
 	// durable state; it must not revert the already-committed prompt owner.
@@ -166,7 +185,7 @@ func (e *ClaudeExecutor) doClaudeDesktopRecoverableRequest(client *http.Client, 
 	helps.RecordAPIRequest(state.ctx, e.cfg, helps.UpstreamRequestLog{URL: nextRequest.URL.String(), Method: nextRequest.Method,
 		Headers: nextRequest.Header.Clone(), Body: state.body, Provider: e.upstreamRequestLogProvider(),
 		AuthID: authID, AuthLabel: authLabel, AuthType: authType, AuthValue: authValue})
-	response, err = e.doClaudeUpstreamRequest(client, nextRequest)
+	response, err := e.doClaudeUpstreamRequest(client, nextRequest)
 	if err == nil && state.span != nil {
 		state.span.ObserveFirstByte(time.Now())
 		state.span.ObserveHTTPResponse(response.StatusCode, response.Header)
@@ -264,7 +283,7 @@ func (e *ClaudeExecutor) prepareClaudeDesktopCompactionContinuation(auth *clipro
 	state.facts.ClientRequestID = uuid.NewString()
 	state.facts.Input = claudeprompt.Submission{}
 	state.plan.ClientRequestID = state.facts.ClientRequestID
-	state.body, state.diagnostics = injectClaudeDiagnosticsForRole(state.body, auth, state.facts.SessionID, claudeprofile.RoleMain)
+	state.body, state.diagnostics = e.injectClaudeDesktopDiagnosticsForRole(state.body, auth, state.facts.SessionID, claudeprofile.RoleMain)
 	cchSigning := claudeDesktopCCHSigningEnabled(claudeCredsToken(auth), original.URL.String())
 	state.body, _, err = e.applyClaudeDesktopMessageProfile(state.ctx, auth, state.body, cchSigning, state.plan, state.facts)
 	if err != nil {

@@ -38,6 +38,9 @@ type Manager struct {
 	bundle               *claudeprofile.Bundle
 	profile              claudeprofile.TelemetryProfile
 	sdkProfile           claudeprofile.SDKTelemetryProfile
+	sdkDesktopVersion    string
+	sdkCodeVersion       string
+	sdkAgentSDKVersion   string
 	auxiliaryProfiles    map[string]claudeprofile.AuxiliaryTelemetryProfile
 	rendererDelivery     deliveryProfile
 	sdkDelivery          deliveryProfile
@@ -135,6 +138,30 @@ func NewManager(options Options) *Manager {
 	if manager.bundle != nil {
 		manager.profile = manager.bundle.Telemetry
 		manager.sdkProfile = manager.bundle.SDKTelemetry
+		manager.sdkProfile.Headers = append([]claudeprofile.TelemetryHeader(nil), manager.sdkProfile.Headers...)
+		manager.sdkProfile.Environment = cloneSDKEnvironment(manager.sdkProfile.Environment)
+		manager.sdkProfile.InputBetas = cloneSDKInputBetas(manager.sdkProfile.InputBetas)
+		manager.sdkDesktopVersion = strings.TrimSpace(manager.bundle.DesktopVersion)
+		manager.sdkCodeVersion = strings.TrimSpace(manager.bundle.CodeVersion)
+		manager.sdkAgentSDKVersion = strings.TrimSpace(manager.bundle.AgentSDKVersion)
+		if count := len(manager.bundle.RequestProfiles); count > 0 {
+			current := manager.bundle.RequestProfiles[count-1]
+			manager.sdkDesktopVersion = strings.TrimSpace(current.DesktopVersion)
+			manager.sdkCodeVersion = strings.TrimSpace(current.CodeVersion)
+			manager.sdkAgentSDKVersion = strings.TrimSpace(current.AgentSDKVersion)
+			for model, betas := range current.SDKInputBetas {
+				manager.sdkProfile.InputBetas[model] = append([]string(nil), betas...)
+			}
+		}
+		if manager.sdkCodeVersion != "" {
+			manager.sdkProfile.Environment["version"] = manager.sdkCodeVersion
+			manager.sdkProfile.Environment["version_base"] = manager.sdkCodeVersion
+			for index := range manager.sdkProfile.Headers {
+				if strings.EqualFold(strings.TrimSpace(manager.sdkProfile.Headers[index].Name), "User-Agent") {
+					manager.sdkProfile.Headers[index].Value = "claude-code/" + manager.sdkCodeVersion
+				}
+			}
+		}
 		manager.rendererDelivery = deliveryProfile{
 			endpointRole:      manager.profile.EndpointRole,
 			endpoint:          manager.profile.Endpoint,
@@ -201,6 +228,22 @@ func NewManager(options Options) *Manager {
 		log.WithError(errRestore).Warn("claude desktop telemetry: persisted queues were not fully restored")
 	}
 	return manager
+}
+
+func cloneSDKEnvironment(source map[string]any) map[string]any {
+	result := make(map[string]any, len(source)+2)
+	for key, value := range source {
+		result[key] = value
+	}
+	return result
+}
+
+func cloneSDKInputBetas(source map[string][]string) map[string][]string {
+	result := make(map[string][]string, len(source)+1)
+	for model, betas := range source {
+		result[model] = append([]string(nil), betas...)
+	}
+	return result
 }
 
 func (m *Manager) profileID() string {

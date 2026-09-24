@@ -327,7 +327,9 @@ func (r *SDKCompactionResponse) TakeSummary(desktopVersion, codeVersion string) 
 // exported by SDKCompactionText's JSON representation or retained by Tracker.
 func (r *SDKCompactionResponse) TakeText(desktopVersion, codeVersion string) (SDKCompactionText, bool) {
 	defer r.Discard()
-	if r.invalid || !r.started || !r.done || r.selected < 0 || desktopVersion != "1.40609.0.0" || codeVersion != "2.1.247" {
+	versionKnown := desktopVersion == "1.40609.0.0" && codeVersion == "2.1.247" ||
+		desktopVersion == "2.7032.0" && codeVersion == "2.1.280"
+	if r.invalid || !r.started || !r.done || r.selected < 0 || !versionKnown {
 		return SDKCompactionText{}, false
 	}
 	selected := trimInputSpace(string(r.text))

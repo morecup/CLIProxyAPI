@@ -47,7 +47,7 @@ func (a *ClaudeDesktopSDKAccounting) SDKSessionStateError() error {
 	return a.helper.SDKSessionStateError()
 }
 
-func BeginClaudeDesktopSDKAccounting(tracker *claudeprompt.Tracker, auth *cliproxyauth.Auth, bundle *claudeprofile.Bundle, main *claudeprompt.Request, role claudeprofile.RequestRole, sessionID, parentID, clientID string, startedAt, chainStartedAt time.Time) *ClaudeDesktopSDKAccounting {
+func BeginClaudeDesktopSDKAccounting(tracker *claudeprompt.Tracker, auth *cliproxyauth.Auth, bundle *claudeprofile.Bundle, main *claudeprompt.Request, role claudeprofile.RequestRole, sessionID, parentID, clientID string, startedAt, chainStartedAt time.Time, requestVersions ...string) *ClaudeDesktopSDKAccounting {
 	if auth == nil || auth.ID == "" || bundle == nil || role == claudeprofile.RoleCountTokens {
 		return nil
 	}
@@ -57,8 +57,15 @@ func BeginClaudeDesktopSDKAccounting(tracker *claudeprompt.Tracker, auth *clipro
 	if chainStartedAt.IsZero() || chainStartedAt.After(startedAt) {
 		chainStartedAt = startedAt
 	}
+	desktopVersion, codeVersion := bundle.DesktopVersion, bundle.CodeVersion
+	if len(requestVersions) > 0 && requestVersions[0] != "" {
+		desktopVersion = requestVersions[0]
+	}
+	if len(requestVersions) > 1 && requestVersions[1] != "" {
+		codeVersion = requestVersions[1]
+	}
 	value := &ClaudeDesktopSDKAccounting{main: main, role: role, clientID: clientID,
-		desktopVersion: bundle.DesktopVersion, codeVersion: bundle.CodeVersion, startedAt: startedAt, chainStartedAt: chainStartedAt}
+		desktopVersion: desktopVersion, codeVersion: codeVersion, startedAt: startedAt, chainStartedAt: chainStartedAt}
 	if role != claudeprofile.RoleMain {
 		scope := ClaudeDesktopPromptAccountScope(auth, bundle.ProfileID)
 		value.helper = tracker.BindSDKHelper(claudeprompt.Input{AccountID: scope, SessionID: sessionID, ParentPromptID: parentID, StartedAt: startedAt})

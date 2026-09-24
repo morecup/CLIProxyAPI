@@ -18,6 +18,7 @@ const maxClaudeSessionImportBody = 16 << 10
 
 type claudeSessionImportRequest struct {
 	SessionKey string `json:"session_key"`
+	ProxyURL   string `json:"proxy_url,omitempty"`
 }
 
 // ImportClaudeSession imports an already authenticated Claude.ai sessionKey.
@@ -40,16 +41,22 @@ func (h *Handler) ImportClaudeSession(c *gin.Context) {
 		return
 	}
 	sessionKey := strings.TrimSpace(body.SessionKey)
+	proxyURL, errProxy := normalizeClaudeLoginProxyURL(body.ProxyURL)
 	body.SessionKey = ""
+	body.ProxyURL = ""
 	if sessionKey == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": "Claude sessionKey is required"})
+		return
+	}
+	if errProxy != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": errProxy.Error()})
 		return
 	}
 
 	h.mu.Lock()
 	var cfg *config.Config
 	if h.cfg != nil {
-		cfg = h.cfg.CloneForRuntime()
+		cfg = cloneClaudeLoginConfig(h.cfg, proxyURL)
 	}
 	login := h.claudeSessionKeyLogin
 	h.mu.Unlock()
@@ -65,7 +72,7 @@ func (h *Handler) ImportClaudeSession(c *gin.Context) {
 	}
 	RegisterOAuthSession(state, "anthropic")
 	authContext := PopulateAuthContext(context.Background(), c)
-	go func(importKey string) {
+	go func(importKey, loginProxyURL string) {
 		importCtx, cancelImport := context.WithCancel(authContext)
 		defer cancelImport()
 		go watchOAuthSessionCancel(importCtx, cancelImport, state, "anthropic")
@@ -85,6 +92,7 @@ func (h *Handler) ImportClaudeSession(c *gin.Context) {
 			SetOAuthSessionError(state, "Claude sessionKey import returned no credential")
 			return
 		}
+		applyClaudeLoginProxy(record, loginProxyURL)
 		if errGuard := guardOAuthSessionPendingForSave(state, "anthropic"); errGuard != nil {
 			return
 		}
@@ -95,7 +103,7 @@ func (h *Handler) ImportClaudeSession(c *gin.Context) {
 		}
 		log.WithField("auth_file", record.FileName).Info("Claude sessionKey credential imported")
 		CompleteOAuthSession(state)
-	}(sessionKey)
+	}(sessionKey, proxyURL)
 	sessionKey = ""
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "state": state, "flow": "session_key"})

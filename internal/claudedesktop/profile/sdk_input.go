@@ -16,7 +16,11 @@ func validateSDKInputProfile(p SDKTelemetryProfile) error {
 	if !mapped || event.EventName != "tengu_input_prompt" || len(p.InputBetas) == 0 {
 		return fmt.Errorf("claude desktop profile: SDK input event and model betas must be configured together")
 	}
-	for model, betas := range p.InputBetas {
+	return validateSDKInputBetas(p.InputBetas)
+}
+
+func validateSDKInputBetas(input map[string][]string) error {
+	for model, betas := range input {
 		if model == "" || strings.TrimSpace(model) != model || len(betas) == 0 || len(betas) > 32 {
 			return fmt.Errorf("claude desktop profile: invalid SDK input model beta policy")
 		}

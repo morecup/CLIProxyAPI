@@ -279,8 +279,21 @@ func TestClaudeDesktopNativeRecoveryContextAcrossEntries(t *testing.T) {
 				if errFlush := e.desktopTelemetry.Flush(t.Context()); errFlush != nil {
 					t.Fatal(errFlush)
 				}
-				if len(promptDeliveredEvents(t, doer)["tengu_reactive_compact_succeeded"]) != 0 {
-					t.Fatal("restoration integration invented unimplemented final lifecycle facts")
+				events := promptDeliveredEvents(t, doer)
+				wantSuccessEvents := 0
+				if success {
+					wantSuccessEvents = 1
+				}
+				if len(events["tengu_reactive_compact_succeeded"]) != wantSuccessEvents || len(events["tengu_reactive_compact_failed"]) != 0 {
+					t.Fatalf("native recovery terminal events: success=%d failed=%d", len(events["tengu_reactive_compact_succeeded"]), len(events["tengu_reactive_compact_failed"]))
+				}
+				if success {
+					metadata := events["tengu_reactive_compact_succeeded"][0]
+					if metadata["trigger"] != "auto" || metadata["splitKind"] != "round" || metadata["headTruncations"] != float64(0) ||
+						metadata["precomputed"] != false || metadata["querySource"] != "sdk" || metadata["desktop_app_version"] != "1.40609.0.0" ||
+						metadata["attempts"] != float64(1) || metadata["restoredAttachmentCount"] == nil || metadata["postCompactTokens"] == nil {
+						t.Fatalf("native recovery success metadata=%v", metadata)
+					}
 				}
 				if !success && outcome != "pre-blocked" || outcome == "restore-fallback" {
 					visible := false

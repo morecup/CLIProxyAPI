@@ -302,6 +302,80 @@ func TestWriteClaudeDesktopRequestUsesCapturedHeaderOrder(t *testing.T) {
 	}
 }
 
+func TestWriteClaudeDesktopCurrentCompactionUsesCapturedHeaderOrder(t *testing.T) {
+	bundle, errLoad := claudeprofile.BuiltinCurrent()
+	if errLoad != nil {
+		t.Fatal(errLoad)
+	}
+	variant, errVariant := bundle.Resolve(claudeprofile.RequestVariantKey{
+		Model:           "claude-opus-5-5",
+		LogicalModel:    "claude-opus-5-5",
+		Role:            claudeprofile.RoleCompaction,
+		Diagnostics:     true,
+		ThinkingDisplay: "updates",
+	})
+	if errVariant != nil {
+		t.Fatal(errVariant)
+	}
+	profile, errProfile := bundle.TransportForVariant(variant)
+	if errProfile != nil {
+		t.Fatal(errProfile)
+	}
+	request, _ := http.NewRequest(http.MethodPost, "https://api.anthropic.com/v1/messages?beta=true", strings.NewReader("{}"))
+	for _, pair := range [][2]string{
+		{"Accept", "application/json"},
+		{"Authorization", "Bearer test"},
+		{"Content-Type", "application/json"},
+		{"User-Agent", "desktop"},
+		{"X-Claude-Code-Session-Id", "session"},
+		{"X-Stainless-Arch", "x64"},
+		{"X-Stainless-Lang", "js"},
+		{"X-Stainless-OS", "Windows"},
+		{"X-Stainless-Package-Version", "0.112.1"},
+		{"X-Stainless-Retry-Count", "0"},
+		{"X-Stainless-Runtime", "node"},
+		{"X-Stainless-Runtime-Version", "v26.3.0"},
+		{"X-Stainless-Timeout", "900"},
+		{"anthropic-beta", "beta"},
+		{"anthropic-client-platform", "desktop_app"},
+		{"anthropic-client-version", "2.7032.0"},
+		{"anthropic-dangerous-direct-browser-access", "true"},
+		{"anthropic-dispatch-id", "v2d"},
+		{"anthropic-version", "2023-06-01"},
+		{"x-app", "cli"},
+		{"x-cc-compaction-request", "reactive"},
+		{"x-claude-code-compaction", "reactive"},
+		{"x-claude-code-request-class", "compaction"},
+		{"x-client-request-id", "request"},
+		{"Connection", "keep-alive"},
+		{"Accept-Encoding", "gzip, deflate, br, zstd"},
+	} {
+		request.Header[pair[0]] = []string{pair[1]}
+	}
+	var raw bytes.Buffer
+	if errWrite := writeClaudeDesktopRequest(bufio.NewWriter(&raw), request, []byte("{}"), profile); errWrite != nil {
+		t.Fatal(errWrite)
+	}
+	want := []string{
+		"Accept", "Authorization", "Content-Type", "User-Agent", "X-Claude-Code-Session-Id",
+		"X-Stainless-Arch", "X-Stainless-Lang", "X-Stainless-OS", "X-Stainless-Package-Version",
+		"X-Stainless-Retry-Count", "X-Stainless-Runtime", "X-Stainless-Runtime-Version",
+		"X-Stainless-Timeout", "anthropic-beta", "anthropic-client-platform", "anthropic-client-version",
+		"anthropic-dangerous-direct-browser-access", "anthropic-dispatch-id", "anthropic-version", "x-app",
+		"x-cc-compaction-request", "x-claude-code-compaction", "x-claude-code-request-class",
+		"x-client-request-id", "Connection", "Host", "Accept-Encoding", "Content-Length",
+	}
+	lines := strings.Split(strings.SplitN(raw.String(), "\r\n\r\n", 2)[0], "\r\n")[1:]
+	if len(lines) != len(want) {
+		t.Fatalf("compaction header count = %d, want %d\n%s", len(lines), len(want), raw.String())
+	}
+	for index, name := range want {
+		if !strings.HasPrefix(lines[index], name+": ") {
+			t.Fatalf("compaction header[%d] = %q, want %q", index, lines[index], name)
+		}
+	}
+}
+
 func TestWriteClaudeDesktopCountTokensOmitsTimeoutInPlace(t *testing.T) {
 	bundle, errLoad := claudeprofile.BuiltinV140609()
 	if errLoad != nil {

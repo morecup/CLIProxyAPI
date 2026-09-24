@@ -64,6 +64,7 @@ type HeaderProfile struct {
 	IncludeSessionID bool   `json:"include_session_id"`
 	ClientPlatform   string `json:"client_platform,omitempty"`
 	ClientVersion    string `json:"client_version,omitempty"`
+	DispatchID       string `json:"dispatch_id,omitempty"`
 	RequestClass     string `json:"request_class,omitempty"`
 }
 
@@ -102,6 +103,7 @@ type BodyProfile struct {
 	MaxTokens          int64           `json:"max_tokens,omitempty"`
 	Thinking           json.RawMessage `json:"thinking,omitempty"`
 	ContextManagement  json.RawMessage `json:"context_management,omitempty"`
+	Fallbacks          json.RawMessage `json:"fallbacks,omitempty"`
 	OutputConfig       json.RawMessage `json:"output_config,omitempty"`
 	Diagnostics        json.RawMessage `json:"diagnostics,omitempty"`
 	Temperature        json.RawMessage `json:"temperature,omitempty"`
@@ -514,6 +516,7 @@ type RequestProfile struct {
 	DesktopVersion     string                  `json:"desktop_version"`
 	CodeVersion        string                  `json:"code_version"`
 	AgentSDKVersion    string                  `json:"agent_sdk_version"`
+	SDKInputBetas      map[string][]string     `json:"sdk_input_betas,omitempty"`
 	Software           SoftwareProfile         `json:"software"`
 	Body               BodyProfiles            `json:"body"`
 	Environment        EnvironmentProfile      `json:"environment"`
@@ -689,7 +692,7 @@ func (b *Bundle) Validate() error {
 			if clientPlatform == "" || clientVersion == "" || requestClass == "" {
 				return fmt.Errorf("claude desktop profile: variants[%d] has incomplete client identity headers", index)
 			}
-			if requestClass != "main" && requestClass != "auxiliary" && requestClass != "subagent" {
+			if requestClass != "main" && requestClass != "auxiliary" && requestClass != "compaction" && requestClass != "subagent" {
 				return fmt.Errorf("claude desktop profile: variants[%d] has unsupported request class %q", index, requestClass)
 			}
 		}
@@ -736,6 +739,9 @@ func (b *Bundle) Validate() error {
 		if requestProfile.ProfileID == "" || strings.TrimSpace(requestProfile.DesktopVersion) == "" ||
 			strings.TrimSpace(requestProfile.CodeVersion) == "" || strings.TrimSpace(requestProfile.AgentSDKVersion) == "" {
 			return fmt.Errorf("claude desktop profile: request_profiles[%d] has incomplete identity", index)
+		}
+		if errBetas := validateSDKInputBetas(requestProfile.SDKInputBetas); errBetas != nil {
+			return fmt.Errorf("claude desktop profile: request profile %q: %w", requestProfile.ProfileID, errBetas)
 		}
 		if requestProfile.ProfileID == b.ProfileID {
 			return fmt.Errorf("claude desktop profile: request profile %q duplicates the bundle profile id", requestProfile.ProfileID)
@@ -1678,6 +1684,51 @@ func (b *Bundle) TransportForRole(role RequestRole) (TransportProfile, error) {
 	return transport, nil
 }
 
+// TransportForVariant applies request-version-specific wire header slots to
+// the immutable transport captured by the historical bundle. TLS and
+// connection behavior remain inherited from the base transport profile.
+func (b *Bundle) TransportForVariant(variant RequestVariant) (TransportProfile, error) {
+	transport, errTransport := b.TransportForRole(variant.Key.Role)
+	if errTransport != nil {
+		return TransportProfile{}, errTransport
+	}
+	var errInsert error
+	if strings.TrimSpace(variant.Headers.DispatchID) != "" {
+		transport.HeaderOrder, errInsert = insertTransportHeaderBefore(transport.HeaderOrder, "anthropic-dispatch-id", "anthropic-version")
+		if errInsert != nil {
+			return TransportProfile{}, errInsert
+		}
+	}
+	if variant.Key.Role == RoleCompaction && strings.EqualFold(strings.TrimSpace(variant.Headers.RequestClass), string(RoleCompaction)) {
+		for _, header := range []string{"x-cc-compaction-request", "x-claude-code-compaction"} {
+			transport.HeaderOrder, errInsert = insertTransportHeaderBefore(transport.HeaderOrder, header, "x-claude-code-request-class")
+			if errInsert != nil {
+				return TransportProfile{}, errInsert
+			}
+		}
+	}
+	return transport, nil
+}
+
+func insertTransportHeaderBefore(order []string, header, before string) ([]string, error) {
+	for _, candidate := range order {
+		if strings.EqualFold(strings.TrimSpace(candidate), header) {
+			return order, nil
+		}
+	}
+	for index, candidate := range order {
+		if !strings.EqualFold(strings.TrimSpace(candidate), before) {
+			continue
+		}
+		updated := make([]string, 0, len(order)+1)
+		updated = append(updated, order[:index]...)
+		updated = append(updated, header)
+		updated = append(updated, order[index:]...)
+		return updated, nil
+	}
+	return nil, fmt.Errorf("claude desktop transport header order has no %q slot for %q", before, header)
+}
+
 func (b *Bundle) BodyForVariant(variant RequestVariant) (BodyProfile, error) {
 	if b == nil {
 		return BodyProfile{}, fmt.Errorf("claude desktop profile: bundle is nil")
@@ -1952,6 +2003,7 @@ func validateBodyProfiles(profiles *BodyProfiles) error {
 		}{
 			{name: "thinking", value: &body.Thinking},
 			{name: "context_management", value: &body.ContextManagement},
+			{name: "fallbacks", value: &body.Fallbacks},
 			{name: "output_config", value: &body.OutputConfig},
 			{name: "diagnostics", value: &body.Diagnostics},
 			{name: "temperature", value: &body.Temperature},

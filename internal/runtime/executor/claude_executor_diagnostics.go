@@ -17,8 +17,8 @@ type claudeDiagnosticsRequestState struct {
 	sequence uint64
 }
 
-// Only the captured main/subagent variants have diagnostics. Helper and
-// compaction responses must not reserve or commit the main diagnostic chain.
+// Only the captured main/subagent variants always have diagnostics. Helper
+// requests must not reserve or commit the main diagnostic chain.
 func injectClaudeDiagnosticsForRole(body []byte, auth *cliproxyauth.Auth, sessionID string, role claudeprofile.RequestRole) ([]byte, claudeDiagnosticsRequestState) {
 	if role == claudeprofile.RoleMain || role == claudeprofile.RoleSubagent {
 		return injectClaudeDiagnostics(body, auth, sessionID)
@@ -27,6 +27,28 @@ func injectClaudeDiagnosticsForRole(body []byte, auth *cliproxyauth.Auth, sessio
 		body = updated
 	}
 	return body, claudeDiagnosticsRequestState{}
+}
+
+func (e *ClaudeExecutor) claudeDesktopRoleUsesDiagnostics(body []byte, role claudeprofile.RequestRole) bool {
+	if role == claudeprofile.RoleMain || role == claudeprofile.RoleSubagent {
+		return true
+	}
+	if e == nil || e.desktopProfile == nil || role != claudeprofile.RoleCompaction {
+		return false
+	}
+	model := gjson.GetBytes(body, "model").String()
+	_, errResolve := e.desktopProfile.Resolve(claudeprofile.RequestVariantKey{
+		Model: model, LogicalModel: model, Role: role, Diagnostics: true,
+		ThinkingDisplay: claudeDesktopThinkingDisplay(body, role, model, model),
+	})
+	return errResolve == nil
+}
+
+func (e *ClaudeExecutor) injectClaudeDesktopDiagnosticsForRole(body []byte, auth *cliproxyauth.Auth, sessionID string, role claudeprofile.RequestRole) ([]byte, claudeDiagnosticsRequestState) {
+	if e.claudeDesktopRoleUsesDiagnostics(body, role) {
+		return injectClaudeDiagnostics(body, auth, sessionID)
+	}
+	return injectClaudeDiagnosticsForRole(body, auth, sessionID, role)
 }
 
 func injectClaudeDiagnostics(body []byte, auth *cliproxyauth.Auth, sessionID string) ([]byte, claudeDiagnosticsRequestState) {

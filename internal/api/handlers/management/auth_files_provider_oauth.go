@@ -34,6 +34,21 @@ type codexOAuthService interface {
 }
 
 func (h *Handler) RequestAnthropicToken(c *gin.Context) {
+	proxyURL, errProxy := readClaudeLoginProxy(c)
+	if errProxy != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": errProxy.Error()})
+		return
+	}
+
+	h.mu.Lock()
+	cfg := cloneClaudeLoginConfig(h.cfg, proxyURL)
+	login := h.claudeLogin
+	h.mu.Unlock()
+	if cfg == nil || login == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"status": "error", "error": "Claude Desktop authentication is unavailable"})
+		return
+	}
+
 	ctx := context.Background()
 	ctx = PopulateAuthContext(ctx, c)
 
@@ -47,8 +62,7 @@ func (h *Handler) RequestAnthropicToken(c *gin.Context) {
 	RegisterOAuthSession(state, "anthropic")
 	go func() {
 		defer claudedesktop.CancelMagicLinkBrowserSession(state)
-		authenticator := sdkAuth.NewClaudeAuthenticator()
-		record, errLogin := authenticator.Login(ctx, h.cfg, &sdkAuth.LoginOptions{
+		record, errLogin := login(ctx, cfg, &sdkAuth.LoginOptions{
 			Metadata: map[string]string{
 				claudedesktop.InteractiveSessionMetadataKey: state,
 			},
@@ -61,6 +75,7 @@ func (h *Handler) RequestAnthropicToken(c *gin.Context) {
 			SetOAuthSessionError(state, oauthSessionErrorWithCause("Claude Desktop authentication failed", errLogin))
 			return
 		}
+		applyClaudeLoginProxy(record, proxyURL)
 		if errGuard := guardOAuthSessionPendingForSave(state, "anthropic"); errGuard != nil {
 			return
 		}

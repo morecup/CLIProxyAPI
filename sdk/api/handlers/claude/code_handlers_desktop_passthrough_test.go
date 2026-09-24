@@ -150,6 +150,13 @@ func TestClaudeMessagesDesktopCodePassthroughPreservesRawRequest(t *testing.T) {
 	if !bytes.Equal(response.Body.Bytes(), executor.response) {
 		t.Fatal("response body was not relayed unchanged")
 	}
+	auth, ok := manager.GetByID("desktop-code-oauth")
+	if !ok {
+		t.Fatal("selected auth is missing")
+	}
+	if auth.Success != 1 || auth.Failed != 0 {
+		t.Fatalf("auth request totals = %d/%d, want success=1 failed=0", auth.Success, auth.Failed)
+	}
 
 	httpCalls, executeCalls, authID, method, targetURL, headers, body := executor.snapshot()
 	if httpCalls != 1 {

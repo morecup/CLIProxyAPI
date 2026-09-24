@@ -119,7 +119,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	if contextManagementState.eligible {
 		body, contextManagementState.automaticallyInjected = injectClaudeDesktopContextManagement(body)
 		if desktopCapabilities.Diagnostics {
-			body, diagnosticsState = injectClaudeDiagnosticsForRole(body, auth, claudeSessionID, desktopRole)
+			body, diagnosticsState = e.injectClaudeDesktopDiagnosticsForRole(body, auth, claudeSessionID, desktopRole)
 		}
 	}
 
@@ -149,7 +149,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	// Normalize TTL values to prevent ordering violations under prompt-caching-scope-2026-01-05.
 	body = normalizeCacheControlTTL(body)
 	var errPlan error
-	desktopPlan, errPlan = e.planClaudeDesktopRequestWithHints(body, desktopRole, baseModel, incomingHeaders)
+	desktopPlan, errPlan = e.planClaudeDesktopRequestInContext(ctx, body, desktopRole, baseModel, incomingHeaders)
 	if errPlan != nil {
 		return nil, errPlan
 	}

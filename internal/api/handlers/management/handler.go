@@ -54,6 +54,7 @@ type Handler struct {
 	logDir                  string
 	postAuthHook            coreauth.PostAuthHook
 	postAuthPersistHook     coreauth.PostAuthHook
+	claudeLogin             func(context.Context, *config.Config, *sdkAuth.LoginOptions) (*coreauth.Auth, error)
 	claudeSessionKeyLogin   func(context.Context, *config.Config, string) (*coreauth.Auth, error)
 	pluginHost              *pluginhost.Host
 	configReloadHook        func(context.Context, *config.Config)
@@ -79,6 +80,9 @@ func NewHandler(cfg *config.Config, configFilePath string, manager *coreauth.Man
 		failedAttempts: make(map[string]*attemptInfo),
 		authManager:    manager,
 		tokenStore:     sdkAuth.GetTokenStore(),
+		claudeLogin: func(ctx context.Context, cfg *config.Config, opts *sdkAuth.LoginOptions) (*coreauth.Auth, error) {
+			return sdkAuth.NewClaudeAuthenticator().Login(ctx, cfg, opts)
+		},
 		claudeSessionKeyLogin: func(ctx context.Context, cfg *config.Config, sessionKey string) (*coreauth.Auth, error) {
 			return sdkAuth.NewClaudeAuthenticator().LoginWithSessionKey(ctx, cfg, sessionKey)
 		},

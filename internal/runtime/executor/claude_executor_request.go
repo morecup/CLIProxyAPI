@@ -563,6 +563,11 @@ func (e *ClaudeExecutor) applyClaudeHeadersWithProfile(
 	} else {
 		r.Header.Del("Anthropic-Client-Version")
 	}
+	if value := strings.TrimSpace(headers.DispatchID); value != "" {
+		r.Header.Set("Anthropic-Dispatch-Id", value)
+	} else {
+		r.Header.Del("Anthropic-Dispatch-Id")
+	}
 	if value := strings.TrimSpace(headers.RequestClass); value != "" {
 		r.Header.Set("X-Claude-Code-Request-Class", value)
 	} else {
@@ -619,6 +624,22 @@ func (e *ClaudeExecutor) applyClaudeHeadersWithProfile(
 		r.Header.Set("X-Client-Request-Id", clientRequestID)
 	} else {
 		r.Header.Del("X-Client-Request-Id")
+	}
+	if desktopPlan.Variant.Key.Role == claudeprofile.RoleCompaction && strings.EqualFold(strings.TrimSpace(headers.RequestClass), string(claudeprofile.RoleCompaction)) {
+		kind := strings.TrimSpace(desktopPlan.CompactionRequestKind)
+		if kind == "" {
+			kind = "manual"
+		}
+		switch kind {
+		case "manual", "auto", "reactive":
+		default:
+			return claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: "invalid Claude Desktop compaction trigger"}}
+		}
+		r.Header.Set("X-CC-Compaction-Request", kind)
+		r.Header.Set("X-Claude-Code-Compaction", kind)
+	} else {
+		r.Header.Del("X-CC-Compaction-Request")
+		r.Header.Del("X-Claude-Code-Compaction")
 	}
 	atis := ""
 	if e.desktopATIS != nil {

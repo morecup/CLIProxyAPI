@@ -29,13 +29,14 @@ func (claudeDesktopPlanningError) IsRequestScoped() bool { return true }
 const claudeDesktopTitleModel = "claude-haiku-4-5-20251001"
 
 type claudeDesktopRequestPlan struct {
-	Variant            claudeprofile.RequestVariant
-	BetaVariant        string
-	SelectedBetas      []string
-	PromptID           string
-	ClientRequestID    string
-	NativePrompt       *claudeprompt.Request
-	ProgramOwnedSystem bool
+	Variant               claudeprofile.RequestVariant
+	BetaVariant           string
+	SelectedBetas         []string
+	CompactionRequestKind string
+	PromptID              string
+	ClientRequestID       string
+	NativePrompt          *claudeprompt.Request
+	ProgramOwnedSystem    bool
 }
 
 type claudeDesktopRuntimeFacts struct {
@@ -50,6 +51,9 @@ type claudeDesktopRuntimeFacts struct {
 	ClientRequestID   string
 	PreviousRequestID string
 	LogicalModel      string
+	DesktopVersion    string
+	CodeVersion       string
+	AgentSDKVersion   string
 	WorkingDir        string
 	UserHome          string
 	MemoryDir         string
@@ -91,6 +95,10 @@ func (e *ClaudeExecutor) planClaudeDesktopRequest(body []byte, role claudeprofil
 }
 
 func (e *ClaudeExecutor) planClaudeDesktopRequestWithHints(body []byte, role claudeprofile.RequestRole, logicalModel string, incomingHeaders http.Header) (claudeDesktopRequestPlan, error) {
+	return e.planClaudeDesktopRequestInContext(nil, body, role, logicalModel, incomingHeaders)
+}
+
+func (e *ClaudeExecutor) planClaudeDesktopRequestInContext(ctx context.Context, body []byte, role claudeprofile.RequestRole, logicalModel string, incomingHeaders http.Header) (claudeDesktopRequestPlan, error) {
 	if e == nil || !e.desktopOnly {
 		return claudeDesktopRequestPlan{}, nil
 	}
@@ -107,13 +115,9 @@ func (e *ClaudeExecutor) planClaudeDesktopRequestWithHints(body []byte, role cla
 	if strings.TrimSpace(logicalModel) == "" {
 		logicalModel = model
 	}
-	switch role {
-	case claudeprofile.RoleTitle:
+	if role == claudeprofile.RoleTitle {
 		model = claudeDesktopTitleModel
 		logicalModel = claudeDesktopTitleModel
-	case claudeprofile.RoleCompaction:
-		model = helps.ClaudeDesktopCompactionModel
-		logicalModel = helps.ClaudeDesktopCompactionModel
 	}
 	key := claudeprofile.RequestVariantKey{
 		Model:           model,
@@ -133,7 +137,15 @@ func (e *ClaudeExecutor) planClaudeDesktopRequestWithHints(body []byte, role cla
 	if errBetas != nil {
 		return claudeDesktopRequestPlan{}, errBetas
 	}
-	return claudeDesktopRequestPlan{Variant: variant, BetaVariant: selectedName, SelectedBetas: selectedBetas}, nil
+	plan := claudeDesktopRequestPlan{Variant: variant, BetaVariant: selectedName, SelectedBetas: selectedBetas}
+	if role == claudeprofile.RoleCompaction {
+		kind, errKind := helps.ClaudeDesktopCompactionRequestKind(ctx, incomingHeaders)
+		if errKind != nil {
+			return claudeDesktopRequestPlan{}, claudeDesktopPlanningError{statusErr{code: http.StatusBadRequest, msg: errKind.Error()}}
+		}
+		plan.CompactionRequestKind = kind
+	}
+	return plan, nil
 }
 
 func claudeDesktopThinkingDisplay(body []byte, role claudeprofile.RequestRole, model, logicalModel string) string {
@@ -148,6 +160,9 @@ func claudeDesktopThinkingDisplay(body []byte, role claudeprofile.RequestRole, m
 		}
 		fallthrough
 	case claudeprofile.RoleCompaction:
+		if strings.EqualFold(strings.TrimSpace(model), "claude-opus-5-5") && strings.EqualFold(strings.TrimSpace(model), strings.TrimSpace(logicalModel)) {
+			return "updates"
+		}
 		display := gjson.GetBytes(body, "thinking.display")
 		if !display.Exists() {
 			return "omitted"
@@ -336,16 +351,26 @@ func (e *ClaudeExecutor) newClaudeDesktopRuntimeFacts(auth *cliproxyauth.Auth, s
 }
 
 func (e *ClaudeExecutor) newClaudeDesktopRuntimeFactsForPlan(auth *cliproxyauth.Auth, sessionID, logicalModel, promptID, clientRequestID, previousRequestID string, plan claudeDesktopRequestPlan, metadata ...map[string]any) claudeDesktopRuntimeFacts {
-	if (plan.Variant.Key.Role == claudeprofile.RoleTitle || plan.Variant.Key.Role == claudeprofile.RoleCompaction) && strings.TrimSpace(plan.Variant.Key.LogicalModel) != "" {
+	if plan.Variant.Key.Role == claudeprofile.RoleTitle && strings.TrimSpace(plan.Variant.Key.LogicalModel) != "" {
 		logicalModel = plan.Variant.Key.LogicalModel
 	}
 	workingDir := claudeDesktopWorkingDir(metadata...)
-	if workingDir == "" && e != nil && e.desktopProfile != nil {
-		workingDir = strings.TrimSpace(e.desktopProfile.Environment.DefaultWorkingDir)
+	desktopVersion, codeVersion, agentSDKVersion := "", "", ""
+	if e != nil && e.desktopProfile != nil {
+		desktopVersion = strings.TrimSpace(e.desktopProfile.DesktopVersion)
+		codeVersion = strings.TrimSpace(e.desktopProfile.CodeVersion)
+		agentSDKVersion = strings.TrimSpace(e.desktopProfile.AgentSDKVersion)
+		profileWorkingDir := strings.TrimSpace(e.desktopProfile.Environment.DefaultWorkingDir)
 		if plan.Variant.Key.Model != "" {
 			if requestProfile, errProfile := e.desktopProfile.RequestProfileForVariant(plan.Variant); errProfile == nil {
-				workingDir = strings.TrimSpace(requestProfile.Environment.DefaultWorkingDir)
+				desktopVersion = strings.TrimSpace(requestProfile.DesktopVersion)
+				codeVersion = strings.TrimSpace(requestProfile.CodeVersion)
+				agentSDKVersion = strings.TrimSpace(requestProfile.AgentSDKVersion)
+				profileWorkingDir = strings.TrimSpace(requestProfile.Environment.DefaultWorkingDir)
 			}
+		}
+		if workingDir == "" {
+			workingDir = profileWorkingDir
 		}
 	}
 	userHome, _ := os.UserHomeDir()
@@ -358,7 +383,8 @@ func (e *ClaudeExecutor) newClaudeDesktopRuntimeFactsForPlan(auth *cliproxyauth.
 	return claudeDesktopRuntimeFacts{
 		Now: claudeDesktopCurrentTime(auth), SessionID: strings.TrimSpace(sessionID), PromptID: strings.TrimSpace(promptID),
 		ClientRequestID: strings.TrimSpace(clientRequestID), PreviousRequestID: strings.TrimSpace(previousRequestID),
-		LogicalModel: strings.ToLower(strings.TrimSpace(logicalModel)), WorkingDir: workingDir, UserHome: userHome,
+		LogicalModel: strings.ToLower(strings.TrimSpace(logicalModel)), DesktopVersion: desktopVersion, CodeVersion: codeVersion,
+		AgentSDKVersion: agentSDKVersion, WorkingDir: workingDir, UserHome: userHome,
 		MemoryDir: memoryDir, ScratchpadDir: scratchpadDir,
 	}
 }
@@ -499,10 +525,10 @@ func (e *ClaudeExecutor) normalizeClaudeDesktopBody(payload []byte, plan claudeD
 		return nil, claudeDesktopPlanningError{statusErr{code: http.StatusServiceUnavailable, msg: errProfile.Error()}}
 	}
 	var errSet error
-	if plan.Variant.Key.Role == claudeprofile.RoleTitle || plan.Variant.Key.Role == claudeprofile.RoleCompaction {
+	if plan.Variant.Key.Role == claudeprofile.RoleTitle {
 		payload, errSet = sjson.SetBytes(payload, "model", plan.Variant.Key.Model)
 		if errSet != nil {
-			return nil, fmt.Errorf("set Claude Desktop %s model: %w", plan.Variant.Key.Role, errSet)
+			return nil, fmt.Errorf("set Claude Desktop title model: %w", errSet)
 		}
 	}
 	if bodyProfile.MaxTokens > 0 {
@@ -514,11 +540,20 @@ func (e *ClaudeExecutor) normalizeClaudeDesktopBody(payload []byte, plan claudeD
 	for key, raw := range map[string][]byte{
 		"thinking":           bodyProfile.Thinking,
 		"context_management": bodyProfile.ContextManagement,
+		"fallbacks":          bodyProfile.Fallbacks,
 		"output_config":      bodyProfile.OutputConfig,
 		"diagnostics":        bodyProfile.Diagnostics,
 		"temperature":        bodyProfile.Temperature,
 		"tool_choice":        bodyProfile.ToolChoice,
 	} {
+		if key == "diagnostics" && len(raw) > 0 {
+			previous := gjson.GetBytes(payload, "diagnostics.previous_message_id")
+			if previous.Exists() && (previous.Type == gjson.String || previous.Type == gjson.Null) {
+				if updated, errPrevious := sjson.SetRawBytes(raw, "previous_message_id", []byte(previous.Raw)); errPrevious == nil {
+					raw = updated
+				}
+			}
+		}
 		if len(raw) > 0 {
 			payload, errSet = sjson.SetRawBytes(payload, key, raw)
 		} else {

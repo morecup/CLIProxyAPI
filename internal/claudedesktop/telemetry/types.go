@@ -156,6 +156,9 @@ type RequestFacts struct {
 	ClientRequestID   string
 	PreviousRequestID string
 	Model             string
+	DesktopVersion    string
+	CodeVersion       string
+	AgentSDKVersion   string
 	PermissionMode    string
 	MCPServerCount    int
 	Betas             string

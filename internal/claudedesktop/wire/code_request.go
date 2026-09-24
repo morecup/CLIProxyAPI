@@ -40,7 +40,7 @@ func HeaderAllowed(name string) bool {
 	case "accept", "accept-encoding", "content-type", "user-agent", "connection",
 		"anthropic-beta", "anthropic-client-platform", "anthropic-client-version",
 		"anthropic-dangerous-direct-browser-access", "anthropic-version", "x-app",
-		"x-cc-atis", "x-client-request-id", "x-claude-code-request-class", "x-claude-code-session-id":
+		"x-cc-atis", "x-cc-compaction-request", "x-client-request-id", "x-claude-code-request-class", "x-claude-code-session-id":
 		return true
 	}
 	return strings.HasPrefix(name, "x-stainless-") || strings.HasPrefix(name, "x-claude-code-")

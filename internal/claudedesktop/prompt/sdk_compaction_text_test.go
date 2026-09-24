@@ -49,3 +49,13 @@ func TestSDKCompactionSelectedEmptyAndNormalizedEmptyAreDifferent(t *testing.T) 
 		}
 	}
 }
+
+func TestSDKCompactionTextAcceptsCurrentDesktopCodeIdentity(t *testing.T) {
+	var response SDKCompactionResponse
+	response.ObserveJSON(compactResponseJSON(t, "<summary>current automatic compaction</summary>"))
+	text, known := response.TakeText("2.7032.0", "2.1.280")
+	wrapped, err := text.Wrap(SDKCompactionWrapOptions{SuppressFollowUpQuestions: true})
+	if !known || err != nil || wrapped == "" || !text.Fingerprint().matches(wrapped) {
+		t.Fatalf("current compaction response was not accepted: known=%v err=%v", known, err)
+	}
+}

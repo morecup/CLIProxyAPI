@@ -87,7 +87,7 @@ func TestClaudeDesktopCurrentCaptureProbe(t *testing.T) {
 	}
 
 	t.Logf("source_bytes=%d source_sha256=%s outgoing_bytes=%d outgoing_sha256=%s", len(source), digestHex(source), len(outgoing), digestHex(outgoing))
-	for _, key := range []string{"model", "messages", "system", "tools", "metadata", "max_tokens", "thinking", "context_management", "output_config", "diagnostics", "stream"} {
+	for _, key := range []string{"model", "messages", "system", "tools", "metadata", "max_tokens", "thinking", "context_management", "fallbacks", "output_config", "diagnostics", "stream"} {
 		sourceValue, outgoingValue := gjson.GetBytes(source, key), gjson.GetBytes(outgoing, key)
 		t.Logf("field=%s source_present=%t outgoing_present=%t exact=%t", key, sourceValue.Exists(), outgoingValue.Exists(), sourceValue.Raw == outgoingValue.Raw)
 	}
