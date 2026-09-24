@@ -166,6 +166,95 @@ func TestServiceLoginUsesDesktopOAuthAndEnrollsTrustedDevice(t *testing.T) {
 	}
 }
 
+func TestServiceLoginWithSessionKeyBootstrapsAndCompletesDesktopOAuth(t *testing.T) {
+	const importedSessionKey = "sk-ant-sid-test-session-key"
+	var authorizeCalls atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
+		switch request.URL.Path {
+		case bootstrapPath:
+			cookie, errCookie := request.Cookie("sessionKey")
+			if errCookie != nil || cookie.Value != importedSessionKey {
+				t.Errorf("bootstrap session cookie = %v, %v", cookie, errCookie)
+			}
+			writeTestJSON(w, map[string]any{
+				"account":      map[string]any{"uuid": testAccountUUID, "email": "desktop@example.com"},
+				"organization": map[string]any{"uuid": testOrgAUUID, "name": "Desktop org"},
+			})
+		case "/v1/oauth/" + testOrgAUUID + "/authorize":
+			if request.Header.Get("Authorization") != "Bearer "+importedSessionKey {
+				t.Errorf("authorize Authorization = %q", request.Header.Get("Authorization"))
+			}
+			var body authorizeRequest
+			if errDecode := json.NewDecoder(request.Body).Decode(&body); errDecode != nil {
+				http.Error(w, errDecode.Error(), http.StatusBadRequest)
+				return
+			}
+			authorizeCalls.Add(1)
+			code := "desktop-code"
+			redirectURI := OAuthRedirectURI
+			if body.Scope == CoworkSessionsOAuthScope {
+				code = "sessions-code"
+				redirectURI = CoworkSessionsOAuthRedirectURI
+			}
+			writeTestJSON(w, map[string]any{"redirect_uri": redirectURI + "?code=" + code + "&state=" + body.State})
+		case "/v1/oauth/token":
+			var body authorizationCodeRequest
+			if errDecode := json.NewDecoder(request.Body).Decode(&body); errDecode != nil {
+				http.Error(w, errDecode.Error(), http.StatusBadRequest)
+				return
+			}
+			response := testTokenResponse(testOrgAUUID)
+			if body.Code == "sessions-code" {
+				response["access_token"] = "sessions-access"
+				response["refresh_token"] = "sessions-refresh"
+			}
+			writeTestJSON(w, response)
+		case "/api/auth/trusted_devices":
+			if request.Header.Get("Authorization") != "Bearer sessions-access" {
+				t.Errorf("trusted-device Authorization = %q", request.Header.Get("Authorization"))
+			}
+			writeTestJSON(w, map[string]any{"device_id": testDeviceUUID, "device_token": "trusted-device"})
+		default:
+			http.NotFound(w, request)
+		}
+	}))
+	defer server.Close()
+
+	service := NewService(&config.Config{AuthDir: t.TempDir()})
+	service.claudeOrigin = server.URL
+	service.apiHost = server.URL
+	service.httpClient = server.Client()
+	service.resolveTelemetryMaterials = func(context.Context, string) (TelemetryMaterials, error) {
+		return TelemetryMaterials{}, nil
+	}
+	service.reuseDevice = func(AccountIdentity) (TrustedDevice, Enrollment, bool, error) {
+		return TrustedDevice{}, Enrollment{}, false, nil
+	}
+
+	result, errLogin := service.LoginWithSessionKey(context.Background(), importedSessionKey, time.Minute)
+	if errLogin != nil {
+		t.Fatalf("LoginWithSessionKey() error = %v", errLogin)
+	}
+	if authorizeCalls.Load() != 2 {
+		t.Fatalf("authorize calls = %d, want 2", authorizeCalls.Load())
+	}
+	if result.SessionKey != importedSessionKey || result.Identity.Email != "desktop@example.com" || result.Identity.OrganizationUUID != testOrgAUUID {
+		t.Fatalf("unexpected imported result: %+v", result)
+	}
+	if result.Token.AccessToken != "sessions-access" || result.Device.DeviceToken != "trusted-device" {
+		t.Fatalf("unexpected imported token/device: token=%+v device=%+v", result.Token, result.Device)
+	}
+}
+
+func TestServiceLoginWithSessionKeyRejectsInvalidCookieValue(t *testing.T) {
+	service := NewService(nil)
+	for _, sessionKey := range []string{"", "short", "invalid;cookie-value"} {
+		if _, errLogin := service.LoginWithSessionKey(context.Background(), sessionKey, time.Second); errLogin == nil {
+			t.Fatalf("LoginWithSessionKey(%q) succeeded, want rejection", sessionKey)
+		}
+	}
+}
+
 func TestServiceLoginPassesConfiguredProxyToMagicLinkAcquisition(t *testing.T) {
 	stop := errors.New("stop after proxy assertion")
 	const configuredProxy = "socks5h://proxy-user:proxy-password@proxy.example.test:1080"

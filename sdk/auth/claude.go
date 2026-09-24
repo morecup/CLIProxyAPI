@@ -64,6 +64,33 @@ func (a *ClaudeAuthenticator) Login(ctx context.Context, cfg *config.Config, opt
 	if errLogin != nil {
 		return nil, errLogin
 	}
+	return authRecordFromClaudeLoginResult(result)
+}
+
+// LoginWithSessionKey imports an already authenticated Claude.ai sessionKey
+// and performs the same Desktop OAuth and enrollment flow as magic-link login.
+func (a *ClaudeAuthenticator) LoginWithSessionKey(ctx context.Context, cfg *config.Config, sessionKey string) (*coreauth.Auth, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("cliproxy auth: configuration is required")
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	newService := a.newService
+	if newService == nil {
+		newService = claudedesktop.NewService
+	}
+	result, errLogin := newService(cfg).LoginWithSessionKey(ctx, sessionKey, 3*time.Minute)
+	if errLogin != nil {
+		return nil, errLogin
+	}
+	return authRecordFromClaudeLoginResult(result)
+}
+
+func authRecordFromClaudeLoginResult(result *claudedesktop.LoginResult) (*coreauth.Auth, error) {
+	if result == nil {
+		return nil, fmt.Errorf("cliproxy auth: Claude Desktop login returned no result")
+	}
 	activeEnrollment, errActivate := claudedesktop.TransitionEnrollment(result.Enrollment, claudedesktop.EnrollmentActive, "", time.Now())
 	if errActivate != nil {
 		return nil, fmt.Errorf("cliproxy auth: activate Claude Desktop enrollment: %w", errActivate)

@@ -27,6 +27,8 @@ import (
 const (
 	credentialRequestTimeout    = 30 * time.Second
 	trustedDeviceTimeout        = 10 * time.Second
+	sessionKeyLoginTimeout      = 3 * time.Minute
+	maxSessionKeyLength         = 8192
 	desktopTokenLifetime        = 365 * 24 * time.Hour
 	coworkSessionsTokenLifetime = 30 * 24 * time.Hour
 )
@@ -201,11 +203,56 @@ func (s *Service) Login(ctx context.Context, options MagicLinkLoginOptions) (*Lo
 	if session == nil {
 		return nil, fmt.Errorf("Claude Desktop magic-link login returned no session")
 	}
-	token, identity, errAuthorize := s.AuthorizeSession(loginCtx, *session)
+	return s.completeSessionLogin(loginCtx, *session)
+}
+
+// LoginWithSessionKey imports an already authenticated Claude.ai session. It
+// skips email magic-link and hCaptcha verification, resolves the active account
+// from Claude bootstrap, then performs the normal Desktop OAuth and trusted-
+// device enrollment flow.
+func (s *Service) LoginWithSessionKey(ctx context.Context, sessionKey string, timeout time.Duration) (*LoginResult, error) {
+	if s == nil {
+		return nil, fmt.Errorf("Claude Desktop login service is nil")
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	sessionKey = strings.TrimSpace(sessionKey)
+	if len(sessionKey) < 16 || len(sessionKey) > maxSessionKeyLength {
+		return nil, fmt.Errorf("invalid Claude Desktop sessionKey")
+	}
+	if timeout <= 0 {
+		timeout = sessionKeyLoginTimeout
+	}
+	loginCtx, cancelLogin := context.WithTimeout(ctx, timeout)
+	defer cancelLogin()
+
+	origin, errOrigin := parseClaudeOrigin(s.claudeOrigin)
+	if errOrigin != nil {
+		return nil, errOrigin
+	}
+	cookie := &http.Cookie{Name: "sessionKey", Value: sessionKey, Path: "/", Secure: origin.Scheme == "https", HttpOnly: true}
+	if errCookie := cookie.Valid(); errCookie != nil {
+		return nil, fmt.Errorf("invalid Claude Desktop sessionKey")
+	}
+	client, jar, errClient := newMagicLinkHTTPClient(s.httpClient, origin)
+	if errClient != nil {
+		return nil, errClient
+	}
+	jar.SetCookies(origin, []*http.Cookie{cookie})
+	identity, errIdentity := fetchBootstrapIdentity(loginCtx, client, origin)
+	if errIdentity != nil {
+		return nil, fmt.Errorf("Claude Desktop sessionKey bootstrap failed: %w", errIdentity)
+	}
+	return s.completeSessionLogin(loginCtx, DesktopSession{SessionKey: sessionKey, Identity: identity})
+}
+
+func (s *Service) completeSessionLogin(loginCtx context.Context, session DesktopSession) (*LoginResult, error) {
+	token, identity, errAuthorize := s.AuthorizeSession(loginCtx, session)
 	if errAuthorize != nil {
 		return nil, errAuthorize
 	}
-	sessionsToken, sessionsIdentity, errSessionsAuthorize := s.AuthorizeCoworkSessions(loginCtx, *session)
+	sessionsToken, sessionsIdentity, errSessionsAuthorize := s.AuthorizeCoworkSessions(loginCtx, session)
 	if errSessionsAuthorize != nil {
 		return nil, fmt.Errorf("Claude Desktop Cowork Sessions authorization failed: %w", errSessionsAuthorize)
 	}

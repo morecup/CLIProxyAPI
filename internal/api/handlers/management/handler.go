@@ -54,6 +54,7 @@ type Handler struct {
 	logDir                  string
 	postAuthHook            coreauth.PostAuthHook
 	postAuthPersistHook     coreauth.PostAuthHook
+	claudeSessionKeyLogin   func(context.Context, *config.Config, string) (*coreauth.Auth, error)
 	pluginHost              *pluginhost.Host
 	configReloadHook        func(context.Context, *config.Config)
 	pluginStoreRegistryURL  string
@@ -73,11 +74,14 @@ func NewHandler(cfg *config.Config, configFilePath string, manager *coreauth.Man
 	envSecret = strings.TrimSpace(envSecret)
 
 	h := &Handler{
-		cfg:                 cfg,
-		configFilePath:      configFilePath,
-		failedAttempts:      make(map[string]*attemptInfo),
-		authManager:         manager,
-		tokenStore:          sdkAuth.GetTokenStore(),
+		cfg:            cfg,
+		configFilePath: configFilePath,
+		failedAttempts: make(map[string]*attemptInfo),
+		authManager:    manager,
+		tokenStore:     sdkAuth.GetTokenStore(),
+		claudeSessionKeyLogin: func(ctx context.Context, cfg *config.Config, sessionKey string) (*coreauth.Auth, error) {
+			return sdkAuth.NewClaudeAuthenticator().LoginWithSessionKey(ctx, cfg, sessionKey)
+		},
 		allowRemoteOverride: envSecret != "",
 		envSecret:           envSecret,
 	}
