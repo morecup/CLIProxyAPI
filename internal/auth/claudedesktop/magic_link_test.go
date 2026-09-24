@@ -127,6 +127,28 @@ func TestAcquireMagicLinkSessionExchangesOnceWithPrivateJar(t *testing.T) {
 			w.WriteHeader(http.StatusNoContent)
 		case bootstrapPath:
 			bootstrapCalls.Add(1)
+			if request.URL.RawQuery != bootstrapQuery {
+				t.Errorf("bootstrap query = %q, want %q", request.URL.RawQuery, bootstrapQuery)
+			}
+			wantHeaders := map[string]string{
+				"Accept":                    "*/*",
+				"Accept-Language":           "en-US",
+				"Referer":                   server.URL + "/",
+				"User-Agent":                bootstrapUserAgent,
+				"Sec-CH-UA":                 bootstrapSecCHUA,
+				"Sec-CH-UA-Mobile":          "?0",
+				"Sec-CH-UA-Platform":        `"Windows"`,
+				"Sec-Fetch-Dest":            "empty",
+				"Sec-Fetch-Mode":            "cors",
+				"Sec-Fetch-Site":            "same-origin",
+				"anthropic-client-platform": "desktop_app",
+				"anthropic-client-version":  bootstrapClientVersion,
+			}
+			for name, want := range wantHeaders {
+				if got := request.Header.Get(name); got != want {
+					t.Errorf("bootstrap %s = %q, want %q", name, got, want)
+				}
+			}
 			if cookie, errCookie := request.Cookie("sessionKey"); errCookie != nil || cookie.Value != "private-session" {
 				t.Errorf("bootstrap session cookie = %v, %v", cookie, errCookie)
 			}

@@ -17,11 +17,15 @@ import (
 )
 
 const (
-	magicLinkPath       = "/magic-link"
-	magicLinkVerifyPath = "/api/auth/verify_magic_link"
-	bootstrapPath       = "/edge-api/bootstrap"
-	maxMagicLinkLength  = 8192
-	maxAttestationSize  = 16384
+	magicLinkPath          = "/magic-link"
+	magicLinkVerifyPath    = "/api/auth/verify_magic_link"
+	bootstrapPath          = "/edge-api/bootstrap"
+	bootstrapQuery         = "statsig_hashing_algorithm=djb2&growthbook_format=sdk"
+	bootstrapClientVersion = "1.40609.0"
+	bootstrapSecCHUA       = `"Not/A)Brand";v="99", "Chromium";v="148"`
+	bootstrapUserAgent     = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Claude/1.40609.0 Chrome/148.0.7778.280 Electron/42.10.0 Safari/537.36 MSIX"
+	maxMagicLinkLength     = 8192
+	maxAttestationSize     = 16384
 )
 
 var errMagicLinkAttestationUnavailable = errors.New("Claude Desktop magic-link client attestation is unavailable")
@@ -284,13 +288,12 @@ func verifyMagicLink(ctx context.Context, client *http.Client, origin *url.URL, 
 }
 
 func fetchBootstrapIdentity(ctx context.Context, client *http.Client, origin *url.URL) (AccountIdentity, error) {
-	endpoint := origin.ResolveReference(&url.URL{Path: bootstrapPath})
+	endpoint := origin.ResolveReference(&url.URL{Path: bootstrapPath, RawQuery: bootstrapQuery})
 	request, errRequest := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if errRequest != nil {
 		return AccountIdentity{}, fmt.Errorf("create Claude Desktop bootstrap request: %w", errRequest)
 	}
-	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Referer", origin.Scheme+"://"+origin.Host+magicLinkPath+"?client=desktop")
+	setBootstrapRequestHeaders(request, origin)
 	response, errDo := client.Do(request)
 	if errDo != nil {
 		return AccountIdentity{}, fmt.Errorf("Claude Desktop bootstrap request failed: %w", errDo)
@@ -313,6 +316,28 @@ func fetchBootstrapIdentity(ctx context.Context, client *http.Client, origin *ur
 		return AccountIdentity{}, fmt.Errorf("Claude Desktop bootstrap contained no organization UUID")
 	}
 	return identity, nil
+}
+
+// setBootstrapRequestHeaders mirrors the accepted Claude Desktop browser
+// profile. Claude's edge rejects the default Go HTTP identity even when the
+// sessionKey itself is valid, so bootstrap must look like the first-party
+// Desktop fetch that owns the session.
+func setBootstrapRequestHeaders(request *http.Request, origin *url.URL) {
+	if request == nil || origin == nil {
+		return
+	}
+	request.Header.Set("Accept", "*/*")
+	request.Header.Set("Accept-Language", "en-US")
+	request.Header.Set("Referer", origin.Scheme+"://"+origin.Host+"/")
+	request.Header.Set("User-Agent", bootstrapUserAgent)
+	request.Header.Set("Sec-CH-UA", bootstrapSecCHUA)
+	request.Header.Set("Sec-CH-UA-Mobile", "?0")
+	request.Header.Set("Sec-CH-UA-Platform", `"Windows"`)
+	request.Header.Set("Sec-Fetch-Dest", "empty")
+	request.Header.Set("Sec-Fetch-Mode", "cors")
+	request.Header.Set("Sec-Fetch-Site", "same-origin")
+	request.Header.Set("anthropic-client-platform", "desktop_app")
+	request.Header.Set("anthropic-client-version", bootstrapClientVersion)
 }
 
 func sessionKeyFromJar(jar http.CookieJar, origin *url.URL) string {
