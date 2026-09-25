@@ -18,8 +18,6 @@ type preparedModelRouteContextKey struct{}
 
 type executionSessionContextKey struct{}
 
-type disallowFreeAuthContextKey struct{}
-
 type nestedExecutionTrackerKey struct{}
 
 type nestedExecutionTracker struct {
@@ -123,14 +121,6 @@ func WithExecutionSessionID(ctx context.Context, sessionID string) context.Conte
 	return context.WithValue(ctx, executionSessionContextKey{}, sessionID)
 }
 
-// WithDisallowFreeAuth returns a child context that requests skipping known free-tier credentials.
-func WithDisallowFreeAuth(ctx context.Context) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return context.WithValue(ctx, disallowFreeAuthContextKey{}, true)
-}
-
 // headersFromContext extracts the original HTTP request headers from the gin context
 // embedded in the provided context. This allows session affinity selectors to read
 // client-provided session headers.
@@ -197,12 +187,4 @@ func executionSessionIDFromContext(ctx context.Context) string {
 	default:
 		return ""
 	}
-}
-
-func disallowFreeAuthFromContext(ctx context.Context) bool {
-	if ctx == nil {
-		return false
-	}
-	raw, ok := ctx.Value(disallowFreeAuthContextKey{}).(bool)
-	return ok && raw
 }

@@ -26,7 +26,7 @@ func healthTestManager(t *testing.T, dir, token string) (*Manager, *Auth) {
 func TestCredentialHealthCapturesStreamBootstrapFailure(t *testing.T) {
 	executor := &claudeCancellationTestExecutor{
 		streamFn: func(context.Context, *Auth) (*cliproxyexecutor.StreamResult, error) {
-			return nil, compactTestStatusError{code: 401, msg: `{"error":{"message":"OAuth access token has been revoked."}}`}
+			return nil, customStatusError{code: 401, msg: `{"error":{"message":"OAuth access token has been revoked."}}`}
 		},
 	}
 	m, auth, model := newClaudeCancellationTestManager(t, executor, nil)

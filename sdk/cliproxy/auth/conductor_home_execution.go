@@ -8,13 +8,9 @@ import (
 	"time"
 
 	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	"github.com/tidwall/sjson"
 )
 
 func (m *Manager) executeHome(ctx context.Context, providers []string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, countTokens bool) (cliproxyexecutor.Response, error) {
-	if unlockSession := m.lockHomeWebsocketSession(ctx, opts); unlockSession != nil {
-		defer unlockSession()
-	}
 	defaultRequestRetry, maxRetryCredentials, maxWait := m.retrySettings()
 	retryModel := authSelectionModelFromOptions(opts, req.Model)
 	homeRetryLimit := -1
@@ -110,10 +106,6 @@ func (m *Manager) executeHomeOnce(ctx context.Context, providers []string, req c
 		attempted[auth.ID] = struct{}{}
 		entry := logEntryWithRequestID(ctx)
 		debugLogAuthSelection(entry, auth, selection.Provider, routeModel)
-		if errRuntimeAuth := m.bindHomeSelectionRuntimeAuth(ctx, opts, selection); errRuntimeAuth != nil {
-			selection.End("runtime_auth_bind_failed")
-			return cliproxyexecutor.Response{}, errRuntimeAuth
-		}
 		publishSelectedAuthMetadata(opts.Metadata, auth)
 		execCtx, releaseAttempt, errBind := homeExecutionAttemptContext(ctx, selection)
 		if errBind != nil {
@@ -260,9 +252,7 @@ func (m *Manager) executeHomeOnce(ctx context.Context, providers []string, req c
 				releaseAttempt()
 				attemptAliasResult := resolveAttemptAliasResult(routing, preparedAuth, routeModel, upstreamModel, aliasResult)
 				rewriteForceMappedResponse(&response, attemptAliasResult)
-				if !m.retainHomeWebsocketSelection(ctx, opts, routeModel, selection) {
-					selection.End("completed")
-				}
+				selection.End("completed")
 				return response, nil
 			}
 			result.Error = resultErrorFromError(errExecute)
@@ -352,16 +342,4 @@ func wrapHomeStream(ctx context.Context, result *cliproxyexecutor.StreamResult, 
 		}
 	}()
 	return &cliproxyexecutor.StreamResult{Headers: result.Headers, Chunks: out}
-}
-
-func sanitizeDownstreamWebsocketFallbackRequest(ctx context.Context, auth *Auth, req cliproxyexecutor.Request) cliproxyexecutor.Request {
-	if !cliproxyexecutor.DownstreamWebsocket(ctx) || authWebsocketsEnabled(auth) || len(req.Payload) == 0 {
-		return req
-	}
-	updated, errDelete := sjson.DeleteBytes(req.Payload, "generate")
-	if errDelete != nil {
-		return req
-	}
-	req.Payload = updated
-	return req
 }

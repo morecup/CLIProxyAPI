@@ -91,16 +91,15 @@ type homeStreamingLogWriter struct {
 	chunkChan chan []byte
 	doneChan  chan struct{}
 
-	responseStatus   int
-	statusWritten    bool
-	responseHeaders  map[string][]string
-	responseBody     bytes.Buffer
-	apiRequest       []byte
-	apiResponse      []byte
-	apiWebsocketTime []byte
-	requestID        string
-	apiResponseTS    time.Time
-	firstChunkTS     time.Time
+	responseStatus  int
+	statusWritten   bool
+	responseHeaders map[string][]string
+	responseBody    bytes.Buffer
+	apiRequest      []byte
+	apiResponse     []byte
+	requestID       string
+	apiResponseTS   time.Time
+	firstChunkTS    time.Time
 }
 
 func newHomeStreamingLogWriter(url, method string, headers map[string][]string, body []byte, requestID string) *homeStreamingLogWriter {
@@ -179,14 +178,6 @@ func (w *homeStreamingLogWriter) WriteAPIResponse(apiResponse []byte) error {
 	return nil
 }
 
-func (w *homeStreamingLogWriter) WriteAPIWebsocketTimeline(apiWebsocketTimeline []byte) error {
-	if w == nil || len(apiWebsocketTimeline) == 0 {
-		return nil
-	}
-	w.apiWebsocketTime = bytes.Clone(apiWebsocketTimeline)
-	return nil
-}
-
 func (w *homeStreamingLogWriter) SetFirstChunkTimestamp(timestamp time.Time) {
 	if w == nil {
 		return
@@ -216,11 +207,8 @@ func (w *homeStreamingLogWriter) Close() error {
 	responsePayload := w.responseBody.Bytes()
 
 	var buf bytes.Buffer
-	upstreamTransport := inferUpstreamTransport(w.apiRequest, nil, w.apiResponse, nil, w.apiWebsocketTime, nil, nil)
+	upstreamTransport := inferUpstreamTransport(w.apiRequest, nil, w.apiResponse, nil, nil)
 	if errWrite := writeRequestInfoWithBody(&buf, w.url, w.method, w.requestHeaders, w.requestBody, "", w.timestamp, "http", upstreamTransport, true); errWrite != nil {
-		return errWrite
-	}
-	if errWrite := writeAPISection(&buf, "=== API WEBSOCKET TIMELINE ===\n", "=== API WEBSOCKET TIMELINE", w.apiWebsocketTime, time.Time{}); errWrite != nil {
 		return errWrite
 	}
 	if errWrite := writeAPISection(&buf, "=== API REQUEST ===\n", "=== API REQUEST", w.apiRequest, time.Time{}); errWrite != nil {

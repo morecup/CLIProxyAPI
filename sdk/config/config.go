@@ -20,16 +20,7 @@ type PayloadRule = internalconfig.PayloadRule
 type PayloadFilterRule = internalconfig.PayloadFilterRule
 type PayloadModelRule = internalconfig.PayloadModelRule
 
-type GeminiKey = internalconfig.GeminiKey
-type CodexKey = internalconfig.CodexKey
-type XAIKey = internalconfig.XAIKey
-type XAIModel = internalconfig.XAIModel
 type ClaudeKey = internalconfig.ClaudeKey
-type VertexCompatKey = internalconfig.VertexCompatKey
-type VertexCompatModel = internalconfig.VertexCompatModel
-type OpenAICompatibility = internalconfig.OpenAICompatibility
-type OpenAICompatibilityAPIKey = internalconfig.OpenAICompatibilityAPIKey
-type OpenAICompatibilityModel = internalconfig.OpenAICompatibilityModel
 
 type TLS = internalconfig.TLSConfig
 

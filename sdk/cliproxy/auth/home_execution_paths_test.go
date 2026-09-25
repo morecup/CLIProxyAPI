@@ -298,32 +298,6 @@ func (*retainingHomeExecutionExecutor) HttpRequest(context.Context, *Auth, *http
 	return nil, nil
 }
 
-func TestHomeWebsocketSessionReusesRetainedSelection(t *testing.T) {
-	dispatcher := &retainingHomeExecutionDispatcher{}
-	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{Home: internalconfig.HomeConfig{Enabled: true}})
-	manager.PublishHomeDispatch(dispatcher, executionregistry.New(), 1)
-	executor := &retainingHomeExecutionExecutor{}
-	manager.RegisterExecutor(executor)
-
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "session-1",
-		cliproxyexecutor.PinnedAuthMetadataKey:       "home-auth",
-	}}
-	for range 2 {
-		if _, errExecute := manager.Execute(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-a"}, opts); errExecute != nil {
-			t.Fatalf("Execute() error = %v", errExecute)
-		}
-	}
-	if got := dispatcher.calls.Load(); got != 1 {
-		t.Fatalf("Home RPOP calls = %d, want 1 for one retained session target", got)
-	}
-	if got := executor.calls.Load(); got != 2 {
-		t.Fatalf("executor calls = %d, want 2", got)
-	}
-}
-
 type changingHomeTargetDispatcher struct {
 	calls              atomic.Int32
 	firstSelection     *HomeDispatchSelection
@@ -363,34 +337,6 @@ func (*selectionRecordingExecutor) CountTokens(context.Context, *Auth, cliproxye
 }
 func (*selectionRecordingExecutor) HttpRequest(context.Context, *Auth, *http.Request) (*http.Response, error) {
 	return nil, nil
-}
-
-func TestHomeWebsocketTargetChangeEndsSelectionBeforeRedispatch(t *testing.T) {
-	dispatcher := &changingHomeTargetDispatcher{}
-	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{Home: internalconfig.HomeConfig{Enabled: true}})
-	manager.PublishHomeDispatch(dispatcher, executionregistry.New(), 1)
-	executor := &selectionRecordingExecutor{}
-	manager.RegisterExecutor(executor)
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "session-1",
-		cliproxyexecutor.PinnedAuthMetadataKey:       "home-auth",
-	}}
-
-	if _, errExecute := manager.Execute(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-a"}, opts); errExecute != nil {
-		t.Fatalf("first Execute() error = %v", errExecute)
-	}
-	dispatcher.firstSelection = executor.first
-	if _, errExecute := manager.Execute(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-b"}, opts); errExecute != nil {
-		t.Fatalf("second Execute() error = %v", errExecute)
-	}
-	if got := dispatcher.calls.Load(); got != 2 {
-		t.Fatalf("Home RPOP calls = %d, want 2 after target change", got)
-	}
-	if !dispatcher.oldEndedBeforeRPop.Load() {
-		t.Fatal("previous selection remained active when target-change RPOP started")
-	}
 }
 
 type unpinnedTargetChangeDispatcher struct {
@@ -452,39 +398,6 @@ func (*bindingSelectionRecordingExecutor) HttpRequest(context.Context, *Auth, *h
 	return nil, nil
 }
 
-func TestHomeWebsocketUnpinnedModelChangeClosesSelectionBeforeRedispatch(t *testing.T) {
-	var closeCalls atomic.Int32
-	dispatcher := &unpinnedTargetChangeDispatcher{closeCalls: &closeCalls}
-	registry := executionregistry.New()
-	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{Home: internalconfig.HomeConfig{Enabled: true}})
-	manager.PublishHomeDispatch(dispatcher, registry, 1)
-	executor := &bindingSelectionRecordingExecutor{closeCalls: &closeCalls}
-	manager.RegisterExecutor(executor)
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "session-1",
-	}}
-
-	if _, errExecute := manager.Execute(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-a"}, opts); errExecute != nil {
-		t.Fatalf("first Execute() error = %v", errExecute)
-	}
-	dispatcher.first = executor.first
-	if _, errExecute := manager.Execute(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-b"}, opts); errExecute != nil {
-		t.Fatalf("second Execute() error = %v", errExecute)
-	}
-	if got := dispatcher.calls.Load(); got != 2 {
-		t.Fatalf("Home RPOP calls = %d, want 2", got)
-	}
-	if !dispatcher.oldClosedBeforeDispatch.Load() {
-		t.Fatal("old unpinned selection was not ended and closed before the second RPOP")
-	}
-	manager.CloseExecutionSession("session-1")
-	if errDrain := registry.Drain(context.Background()); errDrain != nil {
-		t.Fatalf("Drain() error = %v", errDrain)
-	}
-}
-
 type lifecycleRetryDispatcher struct {
 	calls                      atomic.Int32
 	executor                   *lifecycleRetryExecutor
@@ -535,40 +448,6 @@ func (*lifecycleRetryExecutor) CountTokens(context.Context, *Auth, cliproxyexecu
 }
 func (*lifecycleRetryExecutor) HttpRequest(context.Context, *Auth, *http.Request) (*http.Response, error) {
 	return nil, nil
-}
-
-func TestHomeStreamLifecycleFailureEndsBeforeFreshDispatch(t *testing.T) {
-	executor := &lifecycleRetryExecutor{}
-	dispatcher := &lifecycleRetryDispatcher{executor: executor}
-	registry := executionregistry.New()
-	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{Home: internalconfig.HomeConfig{Enabled: true}})
-	manager.SetRetryConfig(0, time.Second, 1)
-	manager.PublishHomeDispatch(dispatcher, registry, 1)
-	manager.RegisterExecutor(executor)
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Stream: true, Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "session-426",
-	}}
-
-	result, errExecute := manager.ExecuteStream(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-a"}, opts)
-	if errExecute != nil {
-		t.Fatalf("ExecuteStream() error = %v", errExecute)
-	}
-	for range result.Chunks {
-	}
-	if got := executor.calls.Load(); got != 2 {
-		t.Fatalf("executor invocations = %d, want 2", got)
-	}
-	if got := dispatcher.calls.Load(); got != 2 {
-		t.Fatalf("Home RPOP calls = %d, want 2", got)
-	}
-	if !dispatcher.firstEndedBeforeRedispatch.Load() {
-		t.Fatal("failed stream attempt remained active when the fresh Home selection was dispatched")
-	}
-	if errDrain := registry.Drain(context.Background()); errDrain != nil {
-		t.Fatalf("Drain() error = %v", errDrain)
-	}
 }
 
 func TestHomeSelectionCancellationPreventsExecute(t *testing.T) {
@@ -759,52 +638,6 @@ func TestHomeStreamEndsOnTerminalChunk(t *testing.T) {
 	}
 }
 
-func TestHomeWebsocketSessionReusesSelectionWithoutPinnedMetadataAndCachesRuntimeAuth(t *testing.T) {
-	dispatcher := &retainingHomeExecutionDispatcher{}
-	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{Home: internalconfig.HomeConfig{Enabled: true}})
-	manager.PublishHomeDispatch(dispatcher, executionregistry.New(), 1)
-	executor := &retainingHomeExecutionExecutor{}
-	manager.RegisterExecutor(executor)
-
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "session-without-pin",
-	}}
-	for range 2 {
-		if _, errExecute := manager.Execute(ctx, []string{"home-execution"}, cliproxyexecutor.Request{Model: "model-a"}, opts); errExecute != nil {
-			t.Fatalf("Execute() error = %v", errExecute)
-		}
-	}
-	if got := dispatcher.calls.Load(); got != 1 {
-		t.Fatalf("Home RPOP calls = %d, want 1 for a retained session without a pin", got)
-	}
-	if auth, ok := manager.GetExecutionSessionAuthByID("session-without-pin", "home-auth"); !ok || auth == nil {
-		t.Fatal("retained selection did not populate the handler runtime auth cache")
-	}
-}
-
-func TestCloseExecutionSessionReclaimsHomeSessionLock(t *testing.T) {
-	manager := NewManager(nil, nil, nil)
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "reclaim-lock",
-	}}
-	unlock := manager.lockHomeWebsocketSession(ctx, opts)
-	if unlock == nil {
-		t.Fatal("lockHomeWebsocketSession() = nil")
-	}
-	unlock()
-	if _, ok := manager.homeSessionLocks.Load("reclaim-lock"); !ok {
-		t.Fatal("session lock was not created")
-	}
-
-	manager.CloseExecutionSession("reclaim-lock")
-	if _, ok := manager.homeSessionLocks.Load("reclaim-lock"); ok {
-		t.Fatal("closed session retained its mutex entry")
-	}
-}
-
 type homePerSelectionDispatcher struct {
 	auths             []Auth
 	calls             atomic.Int32
@@ -824,81 +657,6 @@ func (d *homePerSelectionDispatcher) RPopAuth(context.Context, string, string, h
 	return json.Marshal(homeAuthDispatchResponse{Auth: d.auths[call-1]})
 }
 func (*homePerSelectionDispatcher) AbortAmbiguousDispatch() {}
-
-type homePerSelectionFailureExecutor struct {
-	dispatcher  *homePerSelectionDispatcher
-	selections  []*HomeDispatchSelection
-	invocations []string
-}
-
-func (*homePerSelectionFailureExecutor) Identifier() string { return openAICompatPoolProviderKey }
-func (e *homePerSelectionFailureExecutor) invoke(auth *Auth, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	selection, _ := opts.ExecutionLifecycle.(*HomeDispatchSelection)
-	if e.selections == nil {
-		e.selections = append(e.selections, selection)
-	}
-	if selection != nil && len(e.selections) == 1 {
-		e.selections[0] = selection
-		if e.dispatcher != nil {
-			e.dispatcher.first = selection
-		}
-	}
-	e.invocations = append(e.invocations, auth.ID)
-	return cliproxyexecutor.Response{}, &Error{HTTPStatus: http.StatusBadGateway, Message: "upstream failed"}
-}
-func (e *homePerSelectionFailureExecutor) Execute(_ context.Context, auth *Auth, _ cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return e.invoke(auth, opts)
-}
-func (*homePerSelectionFailureExecutor) ExecuteStream(context.Context, *Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
-	return nil, nil
-}
-func (*homePerSelectionFailureExecutor) Refresh(context.Context, *Auth) (*Auth, error) {
-	return nil, nil
-}
-func (e *homePerSelectionFailureExecutor) CountTokens(_ context.Context, auth *Auth, _ cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return e.invoke(auth, opts)
-}
-func (*homePerSelectionFailureExecutor) HttpRequest(context.Context, *Auth, *http.Request) (*http.Response, error) {
-	return nil, nil
-}
-
-func TestHomeNonstreamAndCountUseOneModelPerSelection(t *testing.T) {
-	for _, countTokens := range []bool{false, true} {
-		t.Run(map[bool]string{false: "Execute", true: "CountTokens"}[countTokens], func(t *testing.T) {
-			dispatcher := &homePerSelectionDispatcher{auths: []Auth{
-				{ID: "home-auth-a", Provider: "home-pool", Status: StatusActive, Attributes: map[string]string{"api_key": "test-key", "compat_name": "pool", "provider_key": "pool"}},
-				{ID: "home-auth-b", Provider: "home-pool", Status: StatusActive, Attributes: map[string]string{"api_key": "test-key", "compat_name": "pool", "provider_key": "pool"}},
-			}}
-			manager := NewManager(nil, nil, nil)
-			manager.SetConfig(&internalconfig.Config{
-				Home: internalconfig.HomeConfig{Enabled: true},
-				OpenAICompatibility: []internalconfig.OpenAICompatibility{{
-					Name:   "pool",
-					Models: []internalconfig.OpenAICompatibilityModel{{Name: "upstream-a", Alias: "requested"}, {Name: "upstream-b", Alias: "requested"}},
-				}},
-			})
-			manager.PublishHomeDispatch(dispatcher, executionregistry.New(), 1)
-			executor := &homePerSelectionFailureExecutor{dispatcher: dispatcher}
-			manager.RegisterExecutor(executor)
-
-			var errExecute error
-			if countTokens {
-				_, errExecute = manager.ExecuteCount(context.Background(), []string{openAICompatPoolProviderKey}, cliproxyexecutor.Request{Model: "requested"}, cliproxyexecutor.Options{})
-			} else {
-				_, errExecute = manager.Execute(context.Background(), []string{openAICompatPoolProviderKey}, cliproxyexecutor.Request{Model: "requested"}, cliproxyexecutor.Options{})
-			}
-			if errExecute == nil {
-				t.Fatal("execution error = nil, want upstream failure")
-			}
-			if len(executor.invocations) != 2 {
-				t.Fatalf("execution error = %v; upstream invocations = %v, want one per Home selection", errExecute, executor.invocations)
-			}
-			if !dispatcher.firstEndedBefore2.Load() {
-				t.Fatal("first Home selection was not ended before the next dispatch")
-			}
-		})
-	}
-}
 
 func TestHomeStreamEndsOnErrorChunk(t *testing.T) {
 	manager := NewManager(nil, nil, nil)

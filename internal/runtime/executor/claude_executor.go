@@ -140,20 +140,19 @@ func sanitizeClaudeWebSearchDomains(body []byte) []byte {
 }
 
 func logClaudeSignatureSanitizeReport(ctx context.Context, baseModel string, report sigcompat.SignatureSanitizeReport) {
-	if report.DroppedBlocks == 0 && report.DroppedSignatures == 0 && report.ReplacedSignatures == 0 {
+	if report.DroppedBlocks == 0 && report.DroppedSignatures == 0 {
 		return
 	}
 
 	fields := log.Fields{
-		"component":           "signature_sanitizer",
-		"executor":            "claude",
-		"action":              "sanitize_claude_messages",
-		"target_provider":     string(report.TargetProvider),
-		"target_model":        baseModel,
-		"preserved":           report.Preserved,
-		"dropped_blocks":      report.DroppedBlocks,
-		"dropped_signatures":  report.DroppedSignatures,
-		"replaced_signatures": report.ReplacedSignatures,
+		"component":          "signature_sanitizer",
+		"executor":           "claude",
+		"action":             "sanitize_claude_messages",
+		"target_provider":    string(report.TargetProvider),
+		"target_model":       baseModel,
+		"preserved":          report.Preserved,
+		"dropped_blocks":     report.DroppedBlocks,
+		"dropped_signatures": report.DroppedSignatures,
 	}
 	if len(report.Decisions) > 0 {
 		decision := report.Decisions[0]

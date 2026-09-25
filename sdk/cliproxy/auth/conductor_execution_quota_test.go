@@ -25,7 +25,7 @@ func (quotaAttemptIsolationSelector) Pick(_ context.Context, _, _ string, _ clip
 
 type quotaAttemptIsolationExecutor struct{}
 
-func (*quotaAttemptIsolationExecutor) Identifier() string { return "codex" }
+func (*quotaAttemptIsolationExecutor) Identifier() string { return "claude" }
 
 func (*quotaAttemptIsolationExecutor) ShouldPrepareRequestAuth(auth *Auth) bool {
 	return auth != nil && strings.HasSuffix(auth.ID, "-b")
@@ -59,10 +59,10 @@ func (*quotaAttemptIsolationExecutor) HttpRequest(context.Context, *Auth, *http.
 
 func setQuotaAttemptIsolationHeaders(ctx context.Context) {
 	internallogging.SetResponseHeaders(ctx, http.Header{
-		"X-Codex-Plan-Type":                   []string{"pro"},
-		"X-Codex-Primary-Used-Percent":        []string{"91"},
-		"X-Codex-Primary-Window-Minutes":      []string{"10080"},
-		"X-Codex-Primary-Reset-After-Seconds": []string{"3600"},
+		"Anthropic-Ratelimit-Unified-Status":      []string{"allowed"},
+		"Anthropic-Ratelimit-Unified-Utilization": []string{"0.91"},
+		"Anthropic-Ratelimit-Unified-Reset":       []string{"1782951970"},
+		"Anthropic-Ratelimit-Unified-5h-Status":   []string{"allowed"},
 	})
 }
 
@@ -78,14 +78,14 @@ func TestExecutionAttemptsDoNotReuseQuotaResponseHeaders(t *testing.T) {
 		{
 			name: "non-stream",
 			run: func(manager *Manager, ctx context.Context, model string) error {
-				_, errExecute := manager.Execute(ctx, []string{"codex"}, cliproxyexecutor.Request{Model: model}, cliproxyexecutor.Options{})
+				_, errExecute := manager.Execute(ctx, []string{"claude"}, cliproxyexecutor.Request{Model: model}, cliproxyexecutor.Options{})
 				return errExecute
 			},
 		},
 		{
 			name: "stream",
 			run: func(manager *Manager, ctx context.Context, model string) error {
-				_, errExecute := manager.ExecuteStream(ctx, []string{"codex"}, cliproxyexecutor.Request{Model: model}, cliproxyexecutor.Options{Stream: true})
+				_, errExecute := manager.ExecuteStream(ctx, []string{"claude"}, cliproxyexecutor.Request{Model: model}, cliproxyexecutor.Options{Stream: true})
 				return errExecute
 			},
 		},
@@ -94,18 +94,18 @@ func TestExecutionAttemptsDoNotReuseQuotaResponseHeaders(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			manager := NewManager(nil, quotaAttemptIsolationSelector{}, nil)
 			manager.RegisterExecutor(&quotaAttemptIsolationExecutor{})
-			model := "gpt-quota-attempt-isolation-" + test.name
+			model := "claude-quota-attempt-isolation-" + test.name
 			firstID := "quota-attempt-" + test.name + "-a"
 			secondID := "quota-attempt-" + test.name + "-b"
 			for _, id := range []string{firstID, secondID} {
 				if _, errRegister := manager.Register(context.Background(), &Auth{
 					ID:       id,
-					Provider: "codex",
+					Provider: "claude",
 					Status:   StatusActive,
 				}); errRegister != nil {
 					t.Fatalf("Register(%s) error = %v", id, errRegister)
 				}
-				registry.GetGlobalRegistry().RegisterClient(id, "codex", []*registry.ModelInfo{{ID: model}})
+				registry.GetGlobalRegistry().RegisterClient(id, "claude", []*registry.ModelInfo{{ID: model}})
 				t.Cleanup(func() { registry.GetGlobalRegistry().UnregisterClient(id) })
 			}
 
@@ -119,8 +119,8 @@ func TestExecutionAttemptsDoNotReuseQuotaResponseHeaders(t *testing.T) {
 			if !okFirst || first == nil || !okSecond || second == nil {
 				t.Fatalf("auth lookup failed: first=%#v second=%#v", first, second)
 			}
-			if got := first.Quota.Signals["X-Codex-Primary-Used-Percent"]; got != "91" {
-				t.Fatalf("first attempt observation = %q, want 91; quota=%#v", got, first.Quota)
+			if got := first.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization"]; got != "0.91" {
+				t.Fatalf("first attempt observation = %q, want 0.91; quota=%#v", got, first.Quota)
 			}
 			if len(second.Quota.Signals) != 0 || !second.Quota.ObservedAt.IsZero() {
 				t.Fatalf("pre-response failure inherited earlier attempt headers: %#v", second.Quota)

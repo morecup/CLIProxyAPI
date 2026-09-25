@@ -32,10 +32,10 @@ func TestModelQuotaObservationPayloadSkipsNilAndEmptyStates(t *testing.T) {
 		"empty": &coreauth.ModelState{},
 		"observed": &coreauth.ModelState{Quota: coreauth.QuotaState{
 			ObservedAt: time.Unix(10, 0),
-			Signals:    map[string]string{"X-Codex-Plan-Type": "pro"},
+			Signals:    map[string]string{"Anthropic-Ratelimit-Unified-5h-Utilization": "0.42"},
 		}},
 	}
-	got := modelQuotaObservationPayload("codex", states)
+	got := modelQuotaObservationPayload("claude", states)
 	if len(got) != 1 {
 		t.Fatalf("model observations = %#v, want only observed state", got)
 	}
@@ -51,7 +51,7 @@ func TestQuotaObservationPayloadExcludesCooldownState(t *testing.T) {
 		NextRecoverAt: time.Unix(20, 0),
 		BackoffLevel:  3,
 		ObservedAt:    time.Unix(10, 0),
-		Signals:       map[string]string{"X-Codex-Plan-Type": "pro"},
+		Signals:       map[string]string{"Anthropic-Ratelimit-Unified-5h-Utilization": "0.42"},
 	})
 	if _, ok := payload["exceeded"]; ok {
 		t.Fatalf("cooldown exceeded leaked: %#v", payload)

@@ -16,7 +16,7 @@ const (
 // passive credential-level quota snapshot understood by collectQuotaSignals.
 func ProviderSupportsQuotaObservation(provider string) bool {
 	switch strings.ToLower(strings.TrimSpace(provider)) {
-	case "claude", "anthropic-compatible", "codex":
+	case "claude", "anthropic-compatible":
 		return true
 	default:
 		return false
@@ -151,17 +151,6 @@ func quotaSignalRetentionRank(name string) int {
 	switch {
 	case lower == "retry-after", strings.HasPrefix(lower, "anthropic-ratelimit-unified-"):
 		return 0
-	case lower == "x-codex-plan-type", lower == "x-codex-active-limit", strings.HasPrefix(lower, "x-codex-credits-"):
-		return 1
-	case lower == "x-codex-allowed", lower == "x-codex-limit-reached",
-		strings.HasPrefix(lower, "x-codex-primary-"), strings.HasPrefix(lower, "x-codex-secondary-"):
-		return 2
-	case strings.HasPrefix(lower, "x-codex-code-review-"):
-		return 3
-	case strings.HasPrefix(lower, "x-codex-additional-"):
-		return 5
-	case strings.HasPrefix(lower, "x-codex-"):
-		return 4
 	default:
 		return 6
 	}
@@ -170,48 +159,10 @@ func quotaSignalRetentionRank(name string) int {
 func isQuotaSignalHeaderForProvider(provider, name string) bool {
 	provider = strings.ToLower(strings.TrimSpace(provider))
 	name = strings.ToLower(strings.TrimSpace(name))
-	if name == "retry-after" {
-		return provider == "claude" || provider == "anthropic-compatible" || provider == "codex"
-	}
-	if strings.HasPrefix(name, "anthropic-ratelimit-unified-") {
-		return provider == "claude" || provider == "anthropic-compatible"
-	}
-	if strings.HasPrefix(name, "x-ratelimit-") {
-		// Observed Codex responses do not carry x-ratelimit-* headers; the only
-		// upstream seen emitting them is Grok, which is excluded from quota
-		// observation. The rule is kept so a future Codex rollout is captured
-		// without another change, but it is expected to be inert today.
-		return provider == "codex"
-	}
-	if !strings.HasPrefix(name, "x-codex-") {
+	if provider != "claude" && provider != "anthropic-compatible" {
 		return false
 	}
-	if provider != "codex" {
-		return false
-	}
-	if name == "x-codex-active-limit" || name == "x-codex-plan-type" ||
-		strings.HasPrefix(name, "x-codex-credits-") {
-		return true
-	}
-	// Codex namespaces each additional limit by a short name on the HTTP path
-	// (x-codex-bengalfox-primary-used-percent) and by limit name on the
-	// websocket path (x-codex-additional-<limit>-primary-used-percent), so the
-	// suffix is matched instead of an exhaustive header list.
-	for _, marker := range []string{
-		"-allowed",
-		"-limit-reached",
-		"-limit-name",
-		"-used-percent",
-		"-window-minutes",
-		"-reset-after-seconds",
-		"-reset-at",
-		"-over-secondary-limit-percent",
-	} {
-		if strings.Contains(name, marker) {
-			return true
-		}
-	}
-	return false
+	return name == "retry-after" || strings.HasPrefix(name, "anthropic-ratelimit-unified-")
 }
 
 // mergeQuotaObservation keeps the newest observation snapshot instead of

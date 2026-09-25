@@ -40,13 +40,6 @@ func ApplyPayloadConfigWithRequestTracked(cfg *config.Config, model, protocol, f
 	trackedPath = strings.TrimSpace(trackedPath)
 	trackedPathTouched := false
 
-	// Apply disable-image-generation filtering before payload rules so config payload
-	// overrides can explicitly re-enable image_generation when desired.
-	if shouldStripImageGeneration(cfg.DisableImageGeneration, requestPath) {
-		out = removeToolTypeFromPayloadWithRoot(out, root, "image_generation")
-		out = removeToolChoiceFromPayloadWithRoot(out, root, "image_generation")
-	}
-
 	rules := cfg.Payload
 	hasPayloadRules := len(rules.Default) != 0 || len(rules.DefaultRaw) != 0 || len(rules.Override) != 0 || len(rules.OverrideRaw) != 0 || len(rules.Filter) != 0
 	if hasPayloadRules {
@@ -189,41 +182,6 @@ func ApplyPayloadConfigWithRequestTracked(cfg *config.Config, model, protocol, f
 		}
 	}
 	return out, trackedPathTouched
-}
-
-func isImagesEndpointRequestPath(path string) bool {
-	path = strings.TrimSpace(path)
-	if path == "" {
-		return false
-	}
-	if path == "/v1/images/generations" || path == "/v1/images/edits" {
-		return true
-	}
-	// Be tolerant of prefix routers that may report a longer matched route.
-	if strings.HasSuffix(path, "/v1/images/generations") || strings.HasSuffix(path, "/v1/images/edits") {
-		return true
-	}
-	if strings.HasSuffix(path, "/images/generations") || strings.HasSuffix(path, "/images/edits") {
-		return true
-	}
-	return false
-}
-
-// shouldStripImageGeneration reports whether the built-in image_generation tool must be
-// removed from the outbound payload for the given mode and request path.
-//   - All: strip on every endpoint.
-//   - Chat: strip only on non-images endpoints; keep it on /v1/images/* endpoints.
-//   - Off / Passthrough: never strip. Off injects the tool elsewhere; Passthrough forwards
-//     the client payload untouched.
-func shouldStripImageGeneration(mode config.DisableImageGenerationMode, requestPath string) bool {
-	switch mode {
-	case config.DisableImageGenerationAll:
-		return true
-	case config.DisableImageGenerationChat:
-		return !isImagesEndpointRequestPath(requestPath)
-	default:
-		return false
-	}
 }
 
 func payloadModelRulesMatch(rules []config.PayloadModelRule, protocol string, fromProtocol string, headers http.Header, payload []byte, root string, models []string) bool {
@@ -745,96 +703,6 @@ func payloadQueryTermMatches(item gjson.Result, term string) bool {
 	return gjson.GetBytes(wrapped, "#("+term+")").Exists()
 }
 
-func removeToolTypeFromPayloadWithRoot(payload []byte, root string, toolType string) []byte {
-	if len(payload) == 0 {
-		return payload
-	}
-	toolType = strings.TrimSpace(toolType)
-	if toolType == "" {
-		return payload
-	}
-	toolsPath := buildPayloadPath(root, "tools")
-	return removeToolTypeFromToolsArray(payload, toolsPath, toolType)
-}
-
-func removeToolChoiceFromPayloadWithRoot(payload []byte, root string, toolType string) []byte {
-	if len(payload) == 0 {
-		return payload
-	}
-	toolType = strings.TrimSpace(toolType)
-	if toolType == "" {
-		return payload
-	}
-	toolChoicePath := buildPayloadPath(root, "tool_choice")
-	return removeToolChoiceFromPayload(payload, toolChoicePath, toolType)
-}
-
-func removeToolChoiceFromPayload(payload []byte, toolChoicePath string, toolType string) []byte {
-	choice := gjson.GetBytes(payload, toolChoicePath)
-	if !choice.Exists() {
-		return payload
-	}
-	if choice.Type == gjson.String {
-		if strings.EqualFold(strings.TrimSpace(choice.String()), toolType) {
-			updated, errDel := sjson.DeleteBytes(payload, toolChoicePath)
-			if errDel == nil {
-				return updated
-			}
-		}
-		return payload
-	}
-	if choice.Type != gjson.JSON {
-		return payload
-	}
-	choiceType := strings.TrimSpace(choice.Get("type").String())
-	if strings.EqualFold(choiceType, toolType) {
-		updated, errDel := sjson.DeleteBytes(payload, toolChoicePath)
-		if errDel == nil {
-			return updated
-		}
-		return payload
-	}
-	if strings.EqualFold(choiceType, "tool") {
-		name := strings.TrimSpace(choice.Get("name").String())
-		if strings.EqualFold(name, toolType) {
-			updated, errDel := sjson.DeleteBytes(payload, toolChoicePath)
-			if errDel == nil {
-				return updated
-			}
-		}
-	}
-	return payload
-}
-
-func removeToolTypeFromToolsArray(payload []byte, toolsPath string, toolType string) []byte {
-	tools := gjson.GetBytes(payload, toolsPath)
-	if !tools.Exists() || !tools.IsArray() {
-		return payload
-	}
-	toolItems := tools.Array()
-	removed := false
-	for _, tool := range toolItems {
-		if tool.Get("type").String() == toolType {
-			removed = true
-			break
-		}
-	}
-	if !removed {
-		return payload
-	}
-	filtered := make([][]byte, 0, len(toolItems))
-	for _, tool := range toolItems {
-		if tool.Get("type").String() != toolType {
-			filtered = append(filtered, []byte(tool.Raw))
-		}
-	}
-	updated, errSet := sjson.SetRawBytes(payload, toolsPath, JoinRawJSONArray(filtered))
-	if errSet != nil {
-		return payload
-	}
-	return updated
-}
-
 func setPayloadValueIfDifferent(payload []byte, path string, value any) []byte {
 	updated, _ := setPayloadValueIfDifferentTracked(payload, path, value)
 	return updated
@@ -962,7 +830,7 @@ func PayloadRequestPath(opts cliproxyexecutor.Options) string {
 //
 //	"*-5" matches "gpt-5"
 //	"gpt-*" matches "gpt-5" and "gpt-4"
-//	"gemini-*-pro" matches "gemini-2.5-pro" and "gemini-3-pro".
+//	"claude-*-5" matches "claude-sonnet-4-5" and "claude-opus-4-5".
 func matchModelPattern(pattern, model string) bool {
 	pattern = strings.TrimSpace(pattern)
 	model = strings.TrimSpace(model)

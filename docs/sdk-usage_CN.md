@@ -106,10 +106,10 @@ func (myRTProvider) RoundTripperFor(a *coreauth.Auth) http.RoundTripper {
 
 ```go
 // 非流式
-resp, err := core.Execute(ctx, []string{"gemini"}, req, opts)
+resp, err := core.Execute(ctx, []string{"claude"}, req, opts)
 
 // 流式
-chunks, err := core.ExecuteStream(ctx, []string{"gemini"}, req, opts)
+chunks, err := core.ExecuteStream(ctx, []string{"claude"}, req, opts)
 for ch := range chunks { /* ... */ }
 ```
 
@@ -160,5 +160,4 @@ _ = svc.Shutdown(ctx)
 
 - 热更新：`config.yaml` 与 `auths/` 变化会被自动侦测并应用。
 - 请求日志可通过管理 API 在运行时开关。
-- `gemini-web.*` 相关配置在内嵌服务器中会被遵循。
 

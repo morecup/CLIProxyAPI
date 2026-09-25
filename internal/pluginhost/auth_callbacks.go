@@ -199,9 +199,6 @@ func (h *Host) listAuthFilesFromDisk() ([]pluginapi.HostAuthFileEntry, error) {
 				if note, ok := metadata["note"].(string); ok {
 					fileEntry.Note = strings.TrimSpace(note)
 				}
-				if websockets, okWebsockets := parseWebsocketsValue(metadata["websockets"]); okWebsockets {
-					fileEntry.Websockets = websockets
-				}
 			}
 		}
 		files = append(files, fileEntry)
@@ -474,9 +471,6 @@ func (h *Host) buildHostAuthFileEntry(auth *coreauth.Auth) *pluginapi.HostAuthFi
 			entry.Note = strings.TrimSpace(rawNote)
 		}
 	}
-	if websockets, ok := authWebsocketsValue(auth); ok {
-		entry.Websockets = websockets
-	}
 	return entry
 }
 
@@ -578,24 +572,6 @@ func isRuntimeOnlyAuth(auth *coreauth.Auth) bool {
 	return strings.EqualFold(strings.TrimSpace(auth.Attributes["runtime_only"]), "true")
 }
 
-func authWebsocketsValue(auth *coreauth.Auth) (bool, bool) {
-	if auth == nil {
-		return false, false
-	}
-	if auth.Attributes != nil {
-		if raw := strings.TrimSpace(auth.Attributes["websockets"]); raw != "" {
-			parsed, errParse := strconv.ParseBool(raw)
-			if errParse == nil {
-				return parsed, true
-			}
-		}
-	}
-	if auth.Metadata == nil {
-		return false, false
-	}
-	return parseWebsocketsValue(auth.Metadata["websockets"])
-}
-
 func parsePriorityValue(raw any) (int, bool) {
 	switch v := raw.(type) {
 	case int:
@@ -613,19 +589,6 @@ func parsePriorityValue(raw any) (int, bool) {
 		}
 	}
 	return 0, false
-}
-
-func parseWebsocketsValue(raw any) (bool, bool) {
-	switch v := raw.(type) {
-	case bool:
-		return v, true
-	case string:
-		parsed, errParse := strconv.ParseBool(strings.TrimSpace(v))
-		if errParse == nil {
-			return parsed, true
-		}
-	}
-	return false, false
 }
 
 func bytesTrimSpace(raw []byte) []byte {

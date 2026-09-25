@@ -42,11 +42,6 @@ func mergeRecentRequestBuckets(dst, src []coreauth.RecentRequestBucket) []coreau
 
 func apiKeyUsageProviderKey(auth *coreauth.Auth) string {
 	provider := strings.ToLower(strings.TrimSpace(auth.Provider))
-	if auth.Attributes != nil {
-		if compatName := strings.TrimSpace(auth.Attributes["compat_name"]); compatName != "" {
-			provider = strings.ToLower(compatName)
-		}
-	}
 	if provider == "" {
 		return "unknown"
 	}

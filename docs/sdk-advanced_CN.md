@@ -9,8 +9,8 @@
 
 ## 概念
 
-- Provider 执行器：实现 `auth.ProviderExecutor` 的运行时组件，负责某个 provider key（如 `gemini`、`claude`、`codex`）的真正出站调用。若实现 `RequestPreparer` 接口，可在原始 HTTP 请求上注入凭据。
-- 翻译器注册表：由 `sdk/translator` 驱动的协议转换函数。内置了 OpenAI/Gemini/Claude/Codex 的互转；你也可以注册新的格式转换。
+- Provider 执行器：实现 `auth.ProviderExecutor` 的运行时组件，负责某个 provider key（如 `claude`、`anthropic-compatible`）的真正出站调用。若实现 `RequestPreparer` 接口，可在原始 HTTP 请求上注入凭据。
+- 翻译器注册表：由 `sdk/translator` 驱动的协议转换函数。内置了 OpenAI/Claude 的互转；你也可以注册新的格式转换。
 - 模型注册表：对外发布可用模型列表，供 `/v1/models` 与路由参考。
 
 ## 1) 实现 Provider 执行器
@@ -64,7 +64,7 @@ svc, _ := cliproxy.NewBuilder().WithConfig(cfg).WithConfigPath(cfgPath).WithCore
 
 ## 2) 注册翻译器
 
-内置处理器接受 OpenAI/Gemini/Claude/Codex 的入站格式。要支持新的 provider 协议，需要在 `sdk/translator` 的默认注册表中注册转换函数。
+内置处理器接受 OpenAI/Claude 的入站格式。要支持新的 provider 协议，需要在 `sdk/translator` 的默认注册表中注册转换函数。
 
 方向很重要：
 - 请求：从“入站格式”转换为“provider 格式”

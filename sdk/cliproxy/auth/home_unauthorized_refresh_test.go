@@ -169,32 +169,6 @@ func TestHomeUnauthorizedRefreshesSameSelectionBeforeRedispatch(t *testing.T) {
 	}
 }
 
-func TestHomeUnauthorizedRefreshUpdatesRetainedSelection(t *testing.T) {
-	dispatcher := &homeUnauthorizedRefreshDispatcher{}
-	executor := &homeUnauthorizedRefreshExecutor{retainSelection: true}
-	manager := newHomeUnauthorizedRefreshManager(dispatcher, executor)
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "refresh-session",
-		cliproxyexecutor.PinnedAuthMetadataKey:       "home-refresh-auth",
-	}}
-
-	for range 2 {
-		if _, errExecute := manager.Execute(ctx, []string{homeUnauthorizedRefreshProvider}, cliproxyexecutor.Request{Model: "model-a"}, opts); errExecute != nil {
-			t.Fatalf("Execute() error = %v", errExecute)
-		}
-	}
-	if got := dispatcher.calls.Load(); got != 1 {
-		t.Fatalf("Home dispatch calls = %d, want one retained selection", got)
-	}
-	if got := executor.refreshCalls.Load(); got != 1 {
-		t.Fatalf("refresh calls = %d, want refreshed token reused by retained selection", got)
-	}
-	if got := executor.executeCalls.Load(); got != 3 {
-		t.Fatalf("execute calls = %d, want stale attempt, retry, and retained reuse", got)
-	}
-}
-
 func TestRefreshHomeSelectionReusesConcurrentNewerToken(t *testing.T) {
 	executor := &homeUnauthorizedRefreshExecutor{}
 	selection := &HomeDispatchSelection{

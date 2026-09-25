@@ -16,56 +16,56 @@ import (
 func TestQuotaStateObserveResponseHeadersKeepsProviderScopedSignals(t *testing.T) {
 	observedAt := time.Unix(123, 0)
 	var quota QuotaState
-	if !quota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"X-Codex-Active-Limit":             []string{"codex_bengalfox"},
-		"X-Codex-Primary-Used-Percent":     []string{"2"},
-		"X-Codex-Turn-State":               []string{"opaque-state"},
-		"X-Codex-Safety-Buffering-Enabled": []string{"true"},
-		"Retry-After":                      []string{"120"},
-		"Authorization":                    []string{"Bearer secret"},
+	if !quota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"Anthropic-Ratelimit-Unified-Status-X":      []string{"limit_bucket"},
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"2"},
+		"X-Claude-Turn-State":                       []string{"opaque-state"},
+		"X-Claude-Safety-Buffering-Enabled":         []string{"true"},
+		"Retry-After":                               []string{"120"},
+		"Authorization":                             []string{"Bearer secret"},
 	}, observedAt) {
 		t.Fatal("ObserveResponseHeadersForProvider() reported no change")
 	}
 	if !quota.ObservedAt.Equal(observedAt) {
 		t.Fatalf("ObservedAt = %v, want %v", quota.ObservedAt, observedAt)
 	}
-	if quota.Signals["X-Codex-Active-Limit"] != "codex_bengalfox" || quota.Signals["Retry-After"] != "120" {
+	if quota.Signals["Anthropic-Ratelimit-Unified-Status-X"] != "limit_bucket" || quota.Signals["Retry-After"] != "120" {
 		t.Fatalf("quota signals = %#v", quota.Signals)
 	}
 	if _, ok := quota.Signals["Authorization"]; ok {
 		t.Fatal("authorization header was retained as a quota signal")
 	}
-	if _, ok := quota.Signals["X-Codex-Turn-State"]; ok {
-		t.Fatal("non-quota Codex response header was retained as a quota signal")
+	if _, ok := quota.Signals["X-Claude-Turn-State"]; ok {
+		t.Fatal("non-quota response header was retained as a quota signal")
 	}
-	if _, ok := quota.Signals["X-Codex-Safety-Buffering-Enabled"]; ok {
-		t.Fatal("Codex safety-buffering metadata was retained as a quota signal")
+	if _, ok := quota.Signals["X-Claude-Safety-Buffering-Enabled"]; ok {
+		t.Fatal("safety-buffering metadata was retained as a quota signal")
 	}
 }
 
 func TestQuotaStateObserveResponseHeadersBoundsAndCanonicalizesValues(t *testing.T) {
 	var quota QuotaState
 	longValue := strings.Repeat("x", maxQuotaSignalValue+1)
-	if quota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"X-Codex-Empty": []string{""},
-		"X-Codex-Long":  []string{longValue},
+	if quota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"Anthropic-Ratelimit-Unified-Empty-X": []string{""},
+		"Anthropic-Ratelimit-Unified-Long-X":  []string{longValue},
 	}, time.Unix(123, 0)) {
 		t.Fatal("invalid-only headers reported a change")
 	}
 	if quota.Signals != nil || !quota.ObservedAt.IsZero() {
 		t.Fatalf("invalid signals were retained: %#v", quota)
 	}
-	if !quota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"x-codex-plan-type": []string{"pro"},
+	if !quota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"anthropic-ratelimit-unified-plan-x": []string{"pro"},
 	}, time.Unix(124, 0)) {
 		t.Fatal("canonical valid header reported no change")
 	}
-	if quota.Signals["X-Codex-Plan-Type"] != "pro" {
+	if quota.Signals["Anthropic-Ratelimit-Unified-Plan-X"] != "pro" {
 		t.Fatalf("canonical signal = %#v", quota.Signals)
 	}
 }
 
-func TestQuotaStateObserveResponseHeadersRetainsMeasuredClaudeAndCodexWatermarks(t *testing.T) {
+func TestQuotaStateObserveResponseHeadersRetainsMeasuredWatermarks(t *testing.T) {
 	var claudeQuota QuotaState
 	if !claudeQuota.ObserveResponseHeadersForProvider("claude", http.Header{
 		"Anthropic-Ratelimit-Unified-5h-Status":               []string{"allowed"},
@@ -106,28 +106,28 @@ func TestQuotaStateObserveResponseHeadersRetainsMeasuredClaudeAndCodexWatermarks
 		t.Fatal("workspace identity header was retained as a quota signal")
 	}
 
-	var codexQuota QuotaState
-	if !codexQuota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"X-Codex-Plan-Type":                        []string{"pro"},
-		"X-Codex-Primary-Used-Percent":             []string{"51"},
-		"X-Codex-Primary-Window-Minutes":           []string{"10080"},
-		"X-Codex-Primary-Reset-After-Seconds":      []string{"309718"},
-		"X-Codex-Primary-Reset-At":                 []string{"1787588999"},
-		"X-Codex-Bengalfox-Limit-Name":             []string{"GPT-5.3-Codex-Spark"},
-		"X-Codex-Bengalfox-Secondary-Used-Percent": []string{"35"},
-		"X-Codex-Credits-Has-Credits":              []string{"False"},
+	var extraQuota QuotaState
+	if !extraQuota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"Anthropic-Ratelimit-Unified-Plan-X":        []string{"pro"},
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"51"},
+		"Anthropic-Ratelimit-Unified-Window-X":      []string{"10080"},
+		"Anthropic-Ratelimit-Unified-Resetafter-X":  []string{"309718"},
+		"Anthropic-Ratelimit-Unified-Resetat-X":     []string{"1787588999"},
+		"Anthropic-Ratelimit-Unified-Limitname-X":   []string{"Claude-Opus"},
+		"Anthropic-Ratelimit-Unified-Secondary-X":   []string{"35"},
+		"Anthropic-Ratelimit-Unified-Credits-X":     []string{"False"},
 	}, time.Unix(1787279282, 0)) {
-		t.Fatal("Codex observation reported no change")
+		t.Fatal("second observation reported no change")
 	}
 	for key, want := range map[string]string{
-		"X-Codex-Plan-Type":                        "pro",
-		"X-Codex-Primary-Used-Percent":             "51",
-		"X-Codex-Bengalfox-Limit-Name":             "GPT-5.3-Codex-Spark",
-		"X-Codex-Bengalfox-Secondary-Used-Percent": "35",
-		"X-Codex-Credits-Has-Credits":              "False",
+		"Anthropic-Ratelimit-Unified-Plan-X":        "pro",
+		"Anthropic-Ratelimit-Unified-Utilization-X": "51",
+		"Anthropic-Ratelimit-Unified-Limitname-X":   "Claude-Opus",
+		"Anthropic-Ratelimit-Unified-Secondary-X":   "35",
+		"Anthropic-Ratelimit-Unified-Credits-X":     "False",
 	} {
-		if got := codexQuota.Signals[key]; got != want {
-			t.Fatalf("Codex quota signal %s = %q, want %q", key, got, want)
+		if got := extraQuota.Signals[key]; got != want {
+			t.Fatalf("quota signal %s = %q, want %q", key, got, want)
 		}
 	}
 }
@@ -160,8 +160,8 @@ func TestCooldownEqualityIgnoresObservationSignals(t *testing.T) {
 	observed := base.Clone()
 	observed.ObservedAt = time.Unix(1787279282, 0)
 	observed.Signals = map[string]string{
-		"X-Codex-Primary-Used-Percent": "51",
-		"X-Codex-Primary-Reset-At":     "1787588999",
+		"Anthropic-Ratelimit-Unified-Utilization-X": "51",
+		"Anthropic-Ratelimit-Unified-Resetat-X":     "1787588999",
 	}
 	if !cooldownQuotaEqual(base, observed) {
 		t.Fatal("observation-only quota signals changed cooldown equality")
@@ -172,7 +172,7 @@ func TestManagerMarkResultRecordsResponseQuotaSignalsInMemory(t *testing.T) {
 	manager := NewManager(nil, nil, nil)
 	auth, errRegister := manager.Register(context.Background(), &Auth{
 		ID:       "quota-signal-auth",
-		Provider: "codex",
+		Provider: "claude",
 	})
 	if errRegister != nil || auth == nil {
 		t.Fatalf("Register() auth=%#v err=%v", auth, errRegister)
@@ -180,15 +180,15 @@ func TestManagerMarkResultRecordsResponseQuotaSignalsInMemory(t *testing.T) {
 
 	ctx := internallogging.WithResponseHeadersHolder(context.Background())
 	internallogging.SetResponseHeaders(ctx, http.Header{
-		"X-Codex-Active-Limit":           []string{"codex_bengalfox"},
-		"X-Codex-Primary-Used-Percent":   []string{"2"},
-		"X-Codex-Primary-Window-Minutes": []string{"10080"},
-		"X-Codex-Primary-Reset-At":       []string{"1782951970"},
+		"Anthropic-Ratelimit-Unified-Status-X":      []string{"limit_bucket"},
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"2"},
+		"Anthropic-Ratelimit-Unified-Window-X":      []string{"10080"},
+		"Anthropic-Ratelimit-Unified-Resetat-X":     []string{"1782951970"},
 	})
 	manager.MarkResult(ctx, Result{
 		AuthID:   auth.ID,
-		Provider: "codex",
-		Model:    "gpt-5.3-codex",
+		Provider: "claude",
+		Model:    "claude-model-a",
 		Success:  true,
 	})
 
@@ -196,8 +196,8 @@ func TestManagerMarkResultRecordsResponseQuotaSignalsInMemory(t *testing.T) {
 	if !ok || updated == nil {
 		t.Fatal("auth not found after MarkResult")
 	}
-	if updated.Quota.Signals["X-Codex-Active-Limit"] != "codex_bengalfox" ||
-		updated.Quota.Signals["X-Codex-Primary-Used-Percent"] != "2" {
+	if updated.Quota.Signals["Anthropic-Ratelimit-Unified-Status-X"] != "limit_bucket" ||
+		updated.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "2" {
 		t.Fatalf("in-memory quota signals = %#v", updated.Quota.Signals)
 	}
 }
@@ -248,35 +248,35 @@ func TestResetModelStatePreservesObservationSignals(t *testing.T) {
 			NextRecoverAt: time.Unix(20, 0),
 			BackoffLevel:  2,
 			ObservedAt:    time.Unix(10, 0),
-			Signals:       map[string]string{"X-Codex-Active-Limit": "premium"},
+			Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Status-X": "premium"},
 		},
 	}
 	resetModelState(state, time.Unix(30, 0))
 	if state.Quota.Exceeded || state.Quota.Reason != "" || !state.Quota.NextRecoverAt.IsZero() || state.Quota.BackoffLevel != 0 {
 		t.Fatalf("cooldown state was not reset: %#v", state.Quota)
 	}
-	if !state.Quota.ObservedAt.Equal(time.Unix(10, 0)) || state.Quota.Signals["X-Codex-Active-Limit"] != "premium" {
+	if !state.Quota.ObservedAt.Equal(time.Unix(10, 0)) || state.Quota.Signals["Anthropic-Ratelimit-Unified-Status-X"] != "premium" {
 		t.Fatalf("observation signals were lost during reset: %#v", state.Quota)
 	}
 }
 
 func TestMergeModelStateKeepsNewestObservationSnapshot(t *testing.T) {
 	target := &ModelState{UpdatedAt: time.Unix(20, 0), Quota: QuotaState{
-		ObservedAt: time.Unix(20, 0), Signals: map[string]string{"X-Codex-Plan-Type": "pro"},
+		ObservedAt: time.Unix(20, 0), Signals: map[string]string{"Anthropic-Ratelimit-Unified-Plan-X": "pro"},
 	}}
 	source := &ModelState{UpdatedAt: time.Unix(30, 0), Quota: QuotaState{
-		ObservedAt: time.Unix(30, 0), Signals: map[string]string{"X-Codex-Active-Limit": "codex_bengalfox"},
+		ObservedAt: time.Unix(30, 0), Signals: map[string]string{"Anthropic-Ratelimit-Unified-Status-X": "limit_bucket"},
 	}}
 	mergeModelState(target, source)
 	if !target.Quota.ObservedAt.Equal(time.Unix(30, 0)) {
 		t.Fatalf("merged ObservedAt = %v, want newest snapshot time", target.Quota.ObservedAt)
 	}
-	if target.Quota.Signals["X-Codex-Active-Limit"] != "codex_bengalfox" {
+	if target.Quota.Signals["Anthropic-Ratelimit-Unified-Status-X"] != "limit_bucket" {
 		t.Fatalf("newest snapshot was lost: %#v", target.Quota.Signals)
 	}
 	// Unioning snapshots taken at different times would resurrect the older
 	// watermark, so the stale key must be gone.
-	if _, ok := target.Quota.Signals["X-Codex-Plan-Type"]; ok {
+	if _, ok := target.Quota.Signals["Anthropic-Ratelimit-Unified-Plan-X"]; ok {
 		t.Fatalf("stale snapshot key survived the merge: %#v", target.Quota.Signals)
 	}
 }
@@ -285,9 +285,9 @@ func TestMergeModelStateKeepsNewestObservationSnapshot(t *testing.T) {
 // Later responses must not keep advertising it.
 func TestObserveResponseHeadersReplacesStaleWatermarks(t *testing.T) {
 	var quota QuotaState
-	if !quota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"Retry-After":                  []string{"120"},
-		"X-Codex-Primary-Used-Percent": []string{"99"},
+	if !quota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"Retry-After": []string{"120"},
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"99"},
 	}, time.Unix(100, 0)) {
 		t.Fatal("initial observation reported no change")
 	}
@@ -295,15 +295,15 @@ func TestObserveResponseHeadersReplacesStaleWatermarks(t *testing.T) {
 		t.Fatalf("initial snapshot = %#v", quota.Signals)
 	}
 
-	if !quota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"X-Codex-Primary-Used-Percent": []string{"5"},
+	if !quota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"5"},
 	}, time.Unix(200, 0)) {
 		t.Fatal("second observation reported no change")
 	}
 	if _, ok := quota.Signals["Retry-After"]; ok {
 		t.Fatalf("expired Retry-After survived a later response: %#v", quota.Signals)
 	}
-	if quota.Signals["X-Codex-Primary-Used-Percent"] != "5" {
+	if quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "5" {
 		t.Fatalf("snapshot not refreshed: %#v", quota.Signals)
 	}
 	if !quota.ObservedAt.Equal(time.Unix(200, 0)) {
@@ -316,14 +316,14 @@ func TestObserveResponseHeadersReplacesStaleWatermarks(t *testing.T) {
 func TestObserveResponseHeadersKeepsSnapshotWhenResponseCarriesNoSignal(t *testing.T) {
 	quota := QuotaState{
 		ObservedAt: time.Unix(100, 0),
-		Signals:    map[string]string{"X-Codex-Primary-Used-Percent": "5"},
+		Signals:    map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "5"},
 	}
-	if quota.ObserveResponseHeadersForProvider("codex", http.Header{
+	if quota.ObserveResponseHeadersForProvider("claude", http.Header{
 		"Content-Type": []string{"application/json"},
 	}, time.Unix(200, 0)) {
 		t.Fatal("signal-free response reported a change")
 	}
-	if quota.Signals["X-Codex-Primary-Used-Percent"] != "5" || !quota.ObservedAt.Equal(time.Unix(100, 0)) {
+	if quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "5" || !quota.ObservedAt.Equal(time.Unix(100, 0)) {
 		t.Fatalf("snapshot was disturbed: %#v", quota)
 	}
 }
@@ -332,9 +332,9 @@ func TestObserveResponseHeadersKeepsSnapshotWhenResponseCarriesNoSignal(t *testi
 // otherwise consumers cannot tell a fresh reading from a stale one.
 func TestObserveResponseHeadersAdvancesObservedAtOnRepeatedValues(t *testing.T) {
 	var quota QuotaState
-	headers := http.Header{"X-Codex-Primary-Used-Percent": []string{"5"}}
-	quota.ObserveResponseHeadersForProvider("codex", headers, time.Unix(100, 0))
-	quota.ObserveResponseHeadersForProvider("codex", headers, time.Unix(200, 0))
+	headers := http.Header{"Anthropic-Ratelimit-Unified-Utilization-X": []string{"5"}}
+	quota.ObserveResponseHeadersForProvider("claude", headers, time.Unix(100, 0))
+	quota.ObserveResponseHeadersForProvider("claude", headers, time.Unix(200, 0))
 	if !quota.ObservedAt.Equal(time.Unix(200, 0)) {
 		t.Fatalf("ObservedAt = %v, want 200", quota.ObservedAt)
 	}
@@ -344,8 +344,8 @@ func TestObserveResponseHeadersAdvancesObservedAtOnRepeatedValues(t *testing.T) 
 // characters must never be stored.
 func TestObserveResponseHeadersRejectsControlCharacterValues(t *testing.T) {
 	var quota QuotaState
-	if quota.ObserveResponseHeadersForProvider("codex", http.Header{
-		"X-Codex-Bengalfox-Limit-Name": []string{"evil\r\nX-Injected: 1"},
+	if quota.ObserveResponseHeadersForProvider("claude", http.Header{
+		"Anthropic-Ratelimit-Unified-Limitname-X": []string{"evil\r\nX-Injected: 1"},
 	}, time.Unix(100, 0)) {
 		t.Fatal("control-character value was accepted")
 	}
@@ -358,16 +358,16 @@ func TestObserveResponseHeadersRejectsControlCharacterValues(t *testing.T) {
 func TestObserveResponseHeadersTruncatesDeterministically(t *testing.T) {
 	headers := make(http.Header, maxQuotaSignalHeaders*2)
 	for i := 0; i < maxQuotaSignalHeaders*2; i++ {
-		headers.Set(fmt.Sprintf("X-Codex-L%03d-Primary-Used-Percent", i), strconv.Itoa(i))
+		headers.Set(fmt.Sprintf("Anthropic-Ratelimit-Unified-L%03d-X", i), strconv.Itoa(i))
 	}
 	var first QuotaState
-	first.ObserveResponseHeadersForProvider("codex", headers, time.Unix(100, 0))
+	first.ObserveResponseHeadersForProvider("claude", headers, time.Unix(100, 0))
 	if len(first.Signals) != maxQuotaSignalHeaders {
 		t.Fatalf("snapshot size = %d, want %d", len(first.Signals), maxQuotaSignalHeaders)
 	}
 	for attempt := 0; attempt < 5; attempt++ {
 		var next QuotaState
-		next.ObserveResponseHeadersForProvider("codex", headers, time.Unix(100, 0))
+		next.ObserveResponseHeadersForProvider("claude", headers, time.Unix(100, 0))
 		if !reflect.DeepEqual(first.Signals, next.Signals) {
 			t.Fatal("truncated snapshot varied between identical observations")
 		}
@@ -384,7 +384,7 @@ func TestProviderSupportsQuotaObservation(t *testing.T) {
 			t.Fatalf("provider %q unexpectedly supports quota observation", provider)
 		}
 	}
-	for _, provider := range []string{"codex", "claude", "CODEX", " Claude "} {
+	for _, provider := range []string{"claude", "CLAUDE", " Claude ", "anthropic-compatible"} {
 		if !ProviderSupportsQuotaObservation(provider) {
 			t.Fatalf("provider %q unexpectedly excluded from quota observation", provider)
 		}
@@ -392,10 +392,10 @@ func TestProviderSupportsQuotaObservation(t *testing.T) {
 }
 
 func TestQuotaStateCloneCopiesSignals(t *testing.T) {
-	original := QuotaState{Signals: map[string]string{"X-Codex-Plan-Type": "pro"}}
+	original := QuotaState{Signals: map[string]string{"Anthropic-Ratelimit-Unified-Plan-X": "pro"}}
 	clone := original.Clone()
-	clone.Signals["X-Codex-Plan-Type"] = "team"
-	if original.Signals["X-Codex-Plan-Type"] != "pro" {
+	clone.Signals["Anthropic-Ratelimit-Unified-Plan-X"] = "team"
+	if original.Signals["Anthropic-Ratelimit-Unified-Plan-X"] != "pro" {
 		t.Fatalf("mutating cloned quota changed original: %#v", original.Signals)
 	}
 }
@@ -407,7 +407,7 @@ func TestApplyCooldownFieldsPreservesObservation(t *testing.T) {
 		NextRecoverAt: time.Unix(20, 0),
 		BackoffLevel:  1,
 		ObservedAt:    time.Unix(10, 0),
-		Signals:       map[string]string{"X-Codex-Primary-Used-Percent": "51"},
+		Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "51"},
 	}
 	applyCooldownFields(&quota, QuotaState{
 		Exceeded:      true,
@@ -418,7 +418,7 @@ func TestApplyCooldownFieldsPreservesObservation(t *testing.T) {
 	if !quota.Exceeded || quota.Reason != "credential_quota" || quota.BackoffLevel != 2 || !quota.NextRecoverAt.Equal(time.Unix(40, 0)) {
 		t.Fatalf("cooldown fields were not applied: %#v", quota)
 	}
-	if !quota.ObservedAt.Equal(time.Unix(10, 0)) || quota.Signals["X-Codex-Primary-Used-Percent"] != "51" {
+	if !quota.ObservedAt.Equal(time.Unix(10, 0)) || quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "51" {
 		t.Fatalf("cooldown overwrote the last observation: %#v", quota)
 	}
 }
@@ -432,10 +432,10 @@ func TestClearCooldownStateForAuthPreservesObservation(t *testing.T) {
 			Reason:        "credential_quota",
 			NextRecoverAt: time.Unix(40, 0),
 			ObservedAt:    time.Unix(10, 0),
-			Signals:       map[string]string{"X-Codex-Primary-Used-Percent": "51"},
+			Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "51"},
 		},
 		ModelStates: map[string]*ModelState{
-			"gpt-5.3-codex": {
+			"claude-model-a": {
 				Unavailable:    true,
 				NextRetryAfter: time.Unix(40, 0),
 				Quota: QuotaState{
@@ -443,7 +443,7 @@ func TestClearCooldownStateForAuthPreservesObservation(t *testing.T) {
 					Reason:        "quota",
 					NextRecoverAt: time.Unix(40, 0),
 					ObservedAt:    time.Unix(11, 0),
-					Signals:       map[string]string{"X-Codex-Plan-Type": "pro"},
+					Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Plan-X": "pro"},
 				},
 			},
 		},
@@ -454,14 +454,14 @@ func TestClearCooldownStateForAuthPreservesObservation(t *testing.T) {
 	if auth.Unavailable || auth.Quota.Exceeded || auth.Quota.Reason != "" {
 		t.Fatalf("cooldown was not cleared: %#v", auth.Quota)
 	}
-	if !auth.Quota.ObservedAt.Equal(time.Unix(10, 0)) || auth.Quota.Signals["X-Codex-Primary-Used-Percent"] != "51" {
+	if !auth.Quota.ObservedAt.Equal(time.Unix(10, 0)) || auth.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "51" {
 		t.Fatalf("clearing cooldown overwrote auth observation: %#v", auth.Quota)
 	}
-	state := auth.ModelStates["gpt-5.3-codex"]
+	state := auth.ModelStates["claude-model-a"]
 	if state.Unavailable || state.Quota.Exceeded {
 		t.Fatalf("model cooldown was not cleared: %#v", state.Quota)
 	}
-	if !state.Quota.ObservedAt.Equal(time.Unix(11, 0)) || state.Quota.Signals["X-Codex-Plan-Type"] != "pro" {
+	if !state.Quota.ObservedAt.Equal(time.Unix(11, 0)) || state.Quota.Signals["Anthropic-Ratelimit-Unified-Plan-X"] != "pro" {
 		t.Fatalf("clearing cooldown overwrote model observation: %#v", state.Quota)
 	}
 }
@@ -478,7 +478,7 @@ func TestCooldownStateRecordOmitsObservation(t *testing.T) {
 			NextRecoverAt: now.Add(time.Hour),
 			BackoffLevel:  2,
 			ObservedAt:    time.Unix(10, 0),
-			Signals:       map[string]string{"X-Codex-Primary-Used-Percent": "51"},
+			Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "51"},
 		},
 	}
 	record, ok := authCooldownStateRecord(auth, now)
@@ -497,20 +497,20 @@ func TestMarkResultQuotaFailureDoesNotEraseSiblingObservation(t *testing.T) {
 	manager := NewManager(nil, nil, nil)
 	auth, errRegister := manager.Register(context.Background(), &Auth{
 		ID:       "quota-sibling-auth",
-		Provider: "codex",
+		Provider: "claude",
 		ModelStates: map[string]*ModelState{
-			"gpt-5.3-codex": {
+			"claude-model-a": {
 				Status: StatusActive,
 				Quota: QuotaState{
 					ObservedAt: time.Unix(10, 0),
-					Signals:    map[string]string{"X-Codex-Primary-Used-Percent": "40"},
+					Signals:    map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "40"},
 				},
 			},
-			"gpt-5.4": {
+			"claude-model-b": {
 				Status: StatusActive,
 				Quota: QuotaState{
 					ObservedAt: time.Unix(11, 0),
-					Signals:    map[string]string{"X-Codex-Primary-Used-Percent": "41"},
+					Signals:    map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "41"},
 				},
 			},
 		},
@@ -521,13 +521,13 @@ func TestMarkResultQuotaFailureDoesNotEraseSiblingObservation(t *testing.T) {
 
 	ctx := internallogging.WithResponseHeadersHolder(context.Background())
 	internallogging.SetResponseHeaders(ctx, http.Header{
-		"Retry-After":                  []string{"120"},
-		"X-Codex-Primary-Used-Percent": []string{"99"},
+		"Retry-After": []string{"120"},
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"99"},
 	})
 	manager.MarkResult(ctx, Result{
 		AuthID:          auth.ID,
-		Provider:        "codex",
-		Model:           "gpt-5.3-codex",
+		Provider:        "claude",
+		Model:           "claude-model-a",
 		Success:         false,
 		CredentialScope: true,
 		Error:           &Error{HTTPStatus: 429, Message: "quota"},
@@ -537,18 +537,18 @@ func TestMarkResultQuotaFailureDoesNotEraseSiblingObservation(t *testing.T) {
 	if !ok || updated == nil {
 		t.Fatal("auth not found after MarkResult")
 	}
-	current := updated.ModelStates["gpt-5.3-codex"]
+	current := updated.ModelStates["claude-model-a"]
 	if current == nil || !current.Quota.Exceeded || current.Quota.Reason != "quota" {
 		t.Fatalf("current model cooldown missing: %#v", current)
 	}
-	if current.Quota.Signals["X-Codex-Primary-Used-Percent"] != "99" || current.Quota.Signals["Retry-After"] != "120" {
+	if current.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "99" || current.Quota.Signals["Retry-After"] != "120" {
 		t.Fatalf("current model observation was not refreshed: %#v", current.Quota.Signals)
 	}
-	sibling := updated.ModelStates["gpt-5.4"]
+	sibling := updated.ModelStates["claude-model-b"]
 	if sibling == nil || !sibling.Quota.Exceeded || sibling.Quota.Reason != "credential_quota" {
 		t.Fatalf("sibling cooldown missing: %#v", sibling)
 	}
-	if sibling.Quota.Signals["X-Codex-Primary-Used-Percent"] != "41" {
+	if sibling.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "41" {
 		t.Fatalf("credential-scope cooldown erased sibling observation: %#v", sibling.Quota.Signals)
 	}
 	if _, ok := sibling.Quota.Signals["Retry-After"]; ok {
@@ -561,16 +561,16 @@ func TestMarkResultRetainedCredentialQuotaStillObservesModel(t *testing.T) {
 	recoverAt := time.Now().Add(time.Hour)
 	auth, errRegister := manager.Register(context.Background(), &Auth{
 		ID:       "quota-retain-auth",
-		Provider: "codex",
+		Provider: "claude",
 		Quota: QuotaState{
 			Exceeded:      true,
 			Reason:        "credential_quota",
 			NextRecoverAt: recoverAt,
 			ObservedAt:    time.Unix(10, 0),
-			Signals:       map[string]string{"X-Codex-Primary-Used-Percent": "10"},
+			Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "10"},
 		},
 		ModelStates: map[string]*ModelState{
-			"gpt-5.3-codex": {
+			"claude-model-a": {
 				Status:         StatusError,
 				Unavailable:    true,
 				NextRetryAfter: recoverAt,
@@ -579,7 +579,7 @@ func TestMarkResultRetainedCredentialQuotaStillObservesModel(t *testing.T) {
 					Reason:        "credential_quota",
 					NextRecoverAt: recoverAt,
 					ObservedAt:    time.Unix(10, 0),
-					Signals:       map[string]string{"X-Codex-Primary-Used-Percent": "10"},
+					Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "10"},
 				},
 			},
 		},
@@ -590,12 +590,12 @@ func TestMarkResultRetainedCredentialQuotaStillObservesModel(t *testing.T) {
 
 	ctx := internallogging.WithResponseHeadersHolder(context.Background())
 	internallogging.SetResponseHeaders(ctx, http.Header{
-		"X-Codex-Primary-Used-Percent": []string{"20"},
+		"Anthropic-Ratelimit-Unified-Utilization-X": []string{"20"},
 	})
 	manager.MarkResult(ctx, Result{
 		AuthID:   auth.ID,
-		Provider: "codex",
-		Model:    "gpt-5.3-codex",
+		Provider: "claude",
+		Model:    "claude-model-a",
 		Success:  true,
 	})
 
@@ -606,14 +606,14 @@ func TestMarkResultRetainedCredentialQuotaStillObservesModel(t *testing.T) {
 	if !updated.Quota.Exceeded || updated.Quota.Reason != "credential_quota" {
 		t.Fatalf("retained cooldown was disturbed: %#v", updated.Quota)
 	}
-	if updated.Quota.Signals["X-Codex-Primary-Used-Percent"] != "20" {
+	if updated.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "20" {
 		t.Fatalf("auth observation was not refreshed: %#v", updated.Quota.Signals)
 	}
-	state := updated.ModelStates["gpt-5.3-codex"]
+	state := updated.ModelStates["claude-model-a"]
 	if state == nil || !state.Quota.Exceeded || state.Quota.Reason != "credential_quota" {
 		t.Fatalf("model cooldown was disturbed: %#v", state)
 	}
-	if state.Quota.Signals["X-Codex-Primary-Used-Percent"] != "20" {
+	if state.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "20" {
 		t.Fatalf("retained cooldown prevented model observation: %#v", state.Quota.Signals)
 	}
 }
@@ -622,7 +622,7 @@ func TestRestoreCooldownRecordDoesNotOverwriteNewerObservation(t *testing.T) {
 	nextRetry := time.Now().Add(time.Hour).UTC().Truncate(time.Second)
 	store := &recordingCooldownStateStore{
 		load: []CooldownStateRecord{{
-			Provider:       "codex",
+			Provider:       "claude",
 			AuthID:         "auth-restore-obs",
 			Status:         "cooling",
 			NextRetryAfter: nextRetry,
@@ -632,7 +632,7 @@ func TestRestoreCooldownRecordDoesNotOverwriteNewerObservation(t *testing.T) {
 				Reason:        "quota",
 				NextRecoverAt: nextRetry,
 				ObservedAt:    time.Unix(5, 0),
-				Signals:       map[string]string{"X-Codex-Primary-Used-Percent": "1"},
+				Signals:       map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "1"},
 			},
 			UpdatedAt: nextRetry.Add(-time.Minute),
 		}},
@@ -641,10 +641,10 @@ func TestRestoreCooldownRecordDoesNotOverwriteNewerObservation(t *testing.T) {
 	manager.SetCooldownStateStore(store)
 	if _, errRegister := manager.Register(WithSkipPersist(context.Background()), &Auth{
 		ID:       "auth-restore-obs",
-		Provider: "codex",
+		Provider: "claude",
 		Quota: QuotaState{
 			ObservedAt: time.Unix(50, 0),
-			Signals:    map[string]string{"X-Codex-Primary-Used-Percent": "77"},
+			Signals:    map[string]string{"Anthropic-Ratelimit-Unified-Utilization-X": "77"},
 		},
 	}); errRegister != nil {
 		t.Fatalf("Register() returned error: %v", errRegister)
@@ -659,27 +659,7 @@ func TestRestoreCooldownRecordDoesNotOverwriteNewerObservation(t *testing.T) {
 	if !auth.Unavailable || !auth.Quota.Exceeded || auth.Quota.Reason != "quota" {
 		t.Fatalf("cooldown was not restored: %#v", auth.Quota)
 	}
-	if auth.Quota.Signals["X-Codex-Primary-Used-Percent"] != "77" {
+	if auth.Quota.Signals["Anthropic-Ratelimit-Unified-Utilization-X"] != "77" {
 		t.Fatalf("restoring cooldown overwrote a newer observation: %#v", auth.Quota.Signals)
-	}
-}
-
-func TestObserveResponseHeadersKeepsPrimaryWhenTruncatingAdditional(t *testing.T) {
-	headers := make(http.Header, maxQuotaSignalHeaders+8)
-	headers.Set("X-Codex-Plan-Type", "pro")
-	headers.Set("X-Codex-Primary-Used-Percent", "81")
-	headers.Set("X-Codex-Credits-Balance", "0")
-	for i := 0; i < maxQuotaSignalHeaders; i++ {
-		headers.Set(fmt.Sprintf("X-Codex-Additional-L%03d-Primary-Used-Percent", i), strconv.Itoa(i))
-	}
-	var quota QuotaState
-	quota.ObserveResponseHeadersForProvider("codex", headers, time.Unix(100, 0))
-	if quota.Signals["X-Codex-Plan-Type"] != "pro" ||
-		quota.Signals["X-Codex-Primary-Used-Percent"] != "81" ||
-		quota.Signals["X-Codex-Credits-Balance"] != "0" {
-		t.Fatalf("credential-level watermarks were truncated: %#v", quota.Signals)
-	}
-	if len(quota.Signals) != maxQuotaSignalHeaders {
-		t.Fatalf("snapshot size = %d, want %d", len(quota.Signals), maxQuotaSignalHeaders)
 	}
 }

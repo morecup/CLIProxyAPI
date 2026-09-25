@@ -354,7 +354,6 @@ func (m configTabModel) parseConfig(cfg map[string]any) []configField {
 	}
 
 	// WebSocket auth
-	fields = append(fields, configField{"WebSocket Auth", "ws-auth", "bool", fmt.Sprintf("%v", getBool(cfg, "ws-auth")), nil})
 
 	return fields
 }
@@ -371,8 +370,6 @@ func fieldSection(apiPath string) string {
 		return T("section_server")
 	case "logging-to-file", "logs-max-total-size-mb", "error-logs-max-files", "usage-statistics-enabled", "request-log":
 		return T("section_logging")
-	case "ws-auth":
-		return T("section_websocket")
 	default:
 		return T("section_other")
 	}

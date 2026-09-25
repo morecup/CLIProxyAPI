@@ -68,14 +68,14 @@ func TestResponsesSSEFramerFlushesMultilineDataWithoutDelimiter(t *testing.T) {
 
 func TestResponsesSSEFramerUsesPayloadErrorOverCompletedEvent(t *testing.T) {
 	var output bytes.Buffer
-	framer := &responsesSSEFramer{failureEvent: "response.failed"}
+	framer := &responsesSSEFramer{}
 	framer.WriteChunk(&output, []byte("data: {\"type\":\"response.failed\",\"response\":{\"status\":\"failed\"}}\nevent: response.completed\n\n"))
 
-	if framer.terminalEvent != "response.failed" || strings.Contains(output.String(), "event: response.completed") {
+	if framer.terminalEvent != "error" || strings.Contains(output.String(), "event: response.completed") {
 		t.Fatalf("payload error was overridden by completed event: terminal=%q output=%q", framer.terminalEvent, output.String())
 	}
-	if strings.Count(output.String(), "event: response.failed") != 1 {
-		t.Fatalf("payload error output = %q, want one response.failed", output.String())
+	if strings.Count(output.String(), "event: error") != 1 {
+		t.Fatalf("payload error output = %q, want one error event", output.String())
 	}
 }
 

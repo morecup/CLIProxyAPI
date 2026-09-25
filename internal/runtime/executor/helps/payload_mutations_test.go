@@ -261,14 +261,6 @@ func TestSetPayloadValueIfDifferentCallsMarshalerOnce(t *testing.T) {
 	}
 }
 
-func TestRemoveToolTypeReusesArrayWithoutMatch(t *testing.T) {
-	input := []byte(`{"tools":[{"type":"function","name":"lookup","parameters":{"type":"object"}}]}`)
-	output := removeToolTypeFromToolsArray(input, "tools", "image_generation")
-	if &output[0] != &input[0] {
-		t.Fatal("tool filtering without a match caused a payload copy")
-	}
-}
-
 var benchmarkPayloadMutationOutput []byte
 
 func BenchmarkSetStringIfDifferentLargeCanonicalPayload(b *testing.B) {

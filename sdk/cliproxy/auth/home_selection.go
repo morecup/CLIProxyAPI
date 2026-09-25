@@ -141,17 +141,16 @@ type HomeDispatchSelection struct {
 	Executor ProviderExecutor
 	Provider string
 
-	authMu           sync.RWMutex
-	scope            *executionregistry.Scope
-	accountedModel   string
-	requestRetry     int
-	hasRequestRetry  bool
-	resources        *executionResources
-	attemptCancels   *attemptCancels
-	once             sync.Once
-	retained         atomic.Bool
-	runtimeAuthBound atomic.Bool
-	ended            atomic.Bool
+	authMu          sync.RWMutex
+	scope           *executionregistry.Scope
+	accountedModel  string
+	requestRetry    int
+	hasRequestRetry bool
+	resources       *executionResources
+	attemptCancels  *attemptCancels
+	once            sync.Once
+	retained        atomic.Bool
+	ended           atomic.Bool
 }
 
 func newHomeDispatchSelection(auth *Auth, executor ProviderExecutor, provider string, scope *executionregistry.Scope) (*HomeDispatchSelection, error) {

@@ -16,6 +16,15 @@ import (
 	"github.com/tidwall/sjson"
 )
 
+var gjsonPathKeyReplacer = strings.NewReplacer(".", "\\.", "*", "\\*", "?", "\\?")
+
+func escapeGJSONPathKey(key string) string {
+	if strings.IndexAny(key, ".*?") == -1 {
+		return key
+	}
+	return gjsonPathKeyReplacer.Replace(key)
+}
+
 // Walk recursively traverses a JSON structure to find all occurrences of a specific field.
 // It builds paths to each occurrence and adds them to the provided paths slice.
 //

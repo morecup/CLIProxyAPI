@@ -1230,19 +1230,6 @@ func TestExtractSessionID_Headers(t *testing.T) {
 	}
 }
 
-func TestExtractSessionID_CodexSessionIDHeader(t *testing.T) {
-	t.Parallel()
-
-	headers := make(http.Header)
-	headers.Set("Session_id", "codex-session-123")
-
-	got := ExtractSessionID(headers, nil, nil)
-	want := "codex:codex-session-123"
-	if got != want {
-		t.Errorf("ExtractSessionID() with Session_id = %q, want %q", got, want)
-	}
-}
-
 func TestExtractSessionID_ClientRequestIDHeader(t *testing.T) {
 	t.Parallel()
 
@@ -1253,20 +1240,6 @@ func TestExtractSessionID_ClientRequestIDHeader(t *testing.T) {
 	want := "clientreq:pi-session-123"
 	if got != want {
 		t.Errorf("ExtractSessionID() with X-Client-Request-Id = %q, want %q", got, want)
-	}
-}
-
-func TestExtractSessionID_CodexSessionIDPriorityOverClientRequestID(t *testing.T) {
-	t.Parallel()
-
-	headers := make(http.Header)
-	headers.Set("X-Client-Request-Id", "pi-session-123")
-	headers.Set("Session_id", "codex-session-456")
-
-	got := ExtractSessionID(headers, nil, nil)
-	want := "codex:codex-session-456"
-	if got != want {
-		t.Errorf("ExtractSessionID() = %q, want %q (Session_id should take priority over X-Client-Request-Id)", got, want)
 	}
 }
 
@@ -2133,16 +2106,6 @@ func TestExtractSessionIDNativeSignals(t *testing.T) {
 			want:    "claude:lowercase-session",
 		},
 		{
-			name:    "codex hyphen header",
-			headers: http.Header{"Session-Id": []string{"codex-session"}},
-			want:    "codex:codex-session",
-		},
-		{
-			name:    "codex underscore header",
-			headers: http.Header{"Session_id": []string{"legacy-codex-session"}},
-			want:    "codex:legacy-codex-session",
-		},
-		{
 			name:    "open code session affinity",
 			headers: http.Header{"X-Session-Affinity": []string{"ses_opencode"}},
 			want:    "affinity:ses_opencode",
@@ -2191,21 +2154,20 @@ func TestExtractSessionIDNativeSignalPriority(t *testing.T) {
 			want:    "claude:header-session",
 		},
 		{
-			name: "claude metadata beats codex header",
+			name: "claude metadata beats generic header",
 			headers: http.Header{
-				"Session-Id": []string{"codex-session"},
+				"X-Session-Id": []string{"generic-session"},
 			},
 			payload: `{"metadata":{"user_id":"user_hash_account__session_22222222-2222-4222-8222-222222222222"}}`,
 			want:    "claude:22222222-2222-4222-8222-222222222222",
 		},
 		{
-			name: "codex header beats x session id and prompt key",
+			name: "x session id beats prompt key",
 			headers: http.Header{
-				"Session-Id":   []string{"codex-session"},
 				"X-Session-Id": []string{"generic-session"},
 			},
 			payload: `{"prompt_cache_key":"prompt-session"}`,
-			want:    "codex:codex-session",
+			want:    "header:generic-session",
 		},
 		{
 			name: "x session id beats affinity",
@@ -2261,7 +2223,7 @@ func TestExtractSessionIDRejectsInvalidExplicitSignals(t *testing.T) {
 		},
 		{
 			name:    "control character",
-			headers: http.Header{"Session-Id": []string{"bad\x00session"}},
+			headers: http.Header{"X-Session-Id": []string{"bad\x00session"}},
 			want:    "",
 		},
 		{
@@ -2273,9 +2235,9 @@ func TestExtractSessionIDRejectsInvalidExplicitSignals(t *testing.T) {
 			name: "invalid stronger signal falls through",
 			headers: http.Header{
 				"X-Claude-Code-Session-Id": []string{"bad\nsession"},
-				"Session-Id":               []string{"valid-codex"},
+				"X-Session-Id":             []string{"valid-generic"},
 			},
-			want: "codex:valid-codex",
+			want: "header:valid-generic",
 		},
 		{
 			name:    "invalid prompt key falls through to conversation",

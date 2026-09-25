@@ -144,15 +144,8 @@ type Manager struct {
 	auths                     map[string]*Auth
 	scheduler                 *authScheduler
 	// pluginScheduler runs outside m.mu before falling back to native selection.
-	pluginScheduler PluginScheduler
-	// homeRuntimeAuths retains legacy session auth lookups for non-execution callers.
-	homeRuntimeAuths map[string]map[string]*Auth
-	// homeRuntimeAuthOwners prevents a stale selection from clearing a replacement auth.
-	homeRuntimeAuthOwners map[string]map[string]*HomeDispatchSelection
-	// homeSessionSelections owns retained Home selections for websocket sessions.
-	homeSessionSelections map[string]map[homeSessionSelectionKey]*HomeDispatchSelection
-	homeSessionLocks      sync.Map
-	homeSessionAliases    homeSessionAliasCache
+	pluginScheduler    PluginScheduler
+	homeSessionAliases homeSessionAliasCache
 	// providerOffsets tracks per-model provider rotation state for multi-provider routing.
 	providerOffsets             map[string]int
 	homeDispatchBundle          atomic.Pointer[HomeDispatchBundle]
@@ -198,16 +191,13 @@ func NewManager(store Store, selector Selector, hook Hook) *Manager {
 		hook = NoopHook{}
 	}
 	manager := &Manager{
-		store:                 store,
-		executors:             make(map[string]ProviderExecutor),
-		selector:              selector,
-		hook:                  hook,
-		auths:                 make(map[string]*Auth),
-		homeRuntimeAuths:      make(map[string]map[string]*Auth),
-		homeRuntimeAuthOwners: make(map[string]map[string]*HomeDispatchSelection),
-		homeSessionSelections: make(map[string]map[homeSessionSelectionKey]*HomeDispatchSelection),
-		providerOffsets:       make(map[string]int),
-		modelPoolOffsets:      make(map[string]int),
+		store:            store,
+		executors:        make(map[string]ProviderExecutor),
+		selector:         selector,
+		hook:             hook,
+		auths:            make(map[string]*Auth),
+		providerOffsets:  make(map[string]int),
+		modelPoolOffsets: make(map[string]int),
 	}
 	// atomic.Value requires non-nil initial value.
 	manager.runtimeConfig.Store(&internalconfig.Config{})

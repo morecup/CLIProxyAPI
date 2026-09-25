@@ -227,22 +227,6 @@ func TestManager_ShouldRetryAfterError_IgnoresRequestIneligibleOverrides(t *test
 		ineligible *Auth
 	}{
 		{
-			name: "credential policy",
-			ctx:  withCredentialPolicy(context.Background(), CredentialPolicyCodexAlphaSearchV1),
-			eligible: &Auth{
-				ID:         "retry-policy-eligible",
-				Provider:   "codex",
-				Attributes: map[string]string{"auth_kind": "oauth"},
-				Metadata:   map[string]any{"request_retry": 0},
-			},
-			ineligible: &Auth{
-				ID:         "retry-policy-ineligible",
-				Provider:   "codex",
-				Attributes: map[string]string{"api_key": "ordinary"},
-				Metadata:   map[string]any{"request_retry": 2},
-			},
-		},
-		{
 			name: "pinned credential",
 			ctx:  context.Background(),
 			opts: cliproxyexecutor.Options{Metadata: map[string]any{cliproxyexecutor.PinnedAuthMetadataKey: "retry-pinned-eligible"}},

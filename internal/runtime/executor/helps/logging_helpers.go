@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -23,9 +22,7 @@ const (
 	apiAttemptsKey                 = "API_UPSTREAM_ATTEMPTS"
 	apiRequestKey                  = "API_REQUEST"
 	apiResponseKey                 = "API_RESPONSE"
-	apiWebsocketTimelineKey        = "API_WEBSOCKET_TIMELINE"
 	deferredAPIRequestBytesKey     = "DEFERRED_API_REQUEST_BYTES"
-	creditsUsedKey                 = "__antigravity_credits_used__"
 	maxDeferredAPIRequestBodyBytes = 32 << 20 // 32 MiB
 )
 
@@ -284,150 +281,6 @@ func AppendAPIResponseChunk(ctx context.Context, cfg *config.Config, chunk []byt
 	updateAggregatedResponseIfMemoryBacked(ginCtx, attempts)
 }
 
-// RecordAPIWebsocketRequest stores an upstream websocket request event in Gin context.
-func RecordAPIWebsocketRequest(ctx context.Context, cfg *config.Config, info UpstreamRequestLog) {
-	if !requestLogCaptureEnabled(cfg) {
-		return
-	}
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx == nil {
-		return
-	}
-
-	builder := &strings.Builder{}
-	builder.WriteString(fmt.Sprintf("Timestamp: %s\n", time.Now().Format(time.RFC3339Nano)))
-	builder.WriteString("Event: api.websocket.request\n")
-	if info.URL != "" {
-		builder.WriteString(fmt.Sprintf("Upstream URL: %s\n", info.URL))
-	}
-	if auth := formatAuthInfo(info); auth != "" {
-		builder.WriteString(fmt.Sprintf("Auth: %s\n", auth))
-	}
-	builder.WriteString("Headers:\n")
-	writeHeaders(builder, info.Headers)
-	builder.WriteString("\nBody:\n")
-	if len(info.Body) > 0 {
-		builder.Write(info.Body)
-	} else {
-		builder.WriteString("<empty>")
-	}
-	builder.WriteString("\n")
-
-	appendAPIWebsocketTimeline(ginCtx, []byte(builder.String()))
-}
-
-// RecordAPIWebsocketHandshake stores the upstream websocket handshake response metadata.
-func RecordAPIWebsocketHandshake(ctx context.Context, cfg *config.Config, status int, headers http.Header) {
-	logging.SetResponseHeaders(ctx, headers)
-	if !requestLogCaptureEnabled(cfg) {
-		return
-	}
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx == nil {
-		return
-	}
-
-	builder := &strings.Builder{}
-	builder.WriteString(fmt.Sprintf("Timestamp: %s\n", time.Now().Format(time.RFC3339Nano)))
-	builder.WriteString("Event: api.websocket.handshake\n")
-	if status > 0 {
-		builder.WriteString(fmt.Sprintf("Status: %d\n", status))
-	}
-	builder.WriteString("Headers:\n")
-	writeHeaders(builder, headers)
-	builder.WriteString("\n")
-
-	appendAPIWebsocketTimeline(ginCtx, []byte(builder.String()))
-}
-
-// RecordAPIWebsocketUpgradeRejection stores a rejected websocket upgrade as an HTTP attempt.
-func RecordAPIWebsocketUpgradeRejection(ctx context.Context, cfg *config.Config, info UpstreamRequestLog, status int, headers http.Header, body []byte) {
-	logging.SetResponseHeaders(ctx, headers)
-	if !requestLogCaptureEnabled(cfg) {
-		return
-	}
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx == nil {
-		return
-	}
-
-	RecordAPIRequest(ctx, cfg, info)
-	RecordAPIResponseMetadata(ctx, cfg, status, headers)
-	AppendAPIResponseChunk(ctx, cfg, body)
-}
-
-// WebsocketUpgradeRequestURL converts a websocket URL back to its HTTP handshake URL for logging.
-func WebsocketUpgradeRequestURL(rawURL string) string {
-	trimmedURL := strings.TrimSpace(rawURL)
-	if trimmedURL == "" {
-		return ""
-	}
-	parsed, err := url.Parse(trimmedURL)
-	if err != nil {
-		return trimmedURL
-	}
-	switch strings.ToLower(parsed.Scheme) {
-	case "ws":
-		parsed.Scheme = "http"
-	case "wss":
-		parsed.Scheme = "https"
-	}
-	return parsed.String()
-}
-
-// AppendAPIWebsocketResponse stores an upstream websocket response frame in Gin context.
-func AppendAPIWebsocketResponse(ctx context.Context, cfg *config.Config, payload []byte) {
-	if !requestLogCaptureEnabled(cfg) {
-		return
-	}
-	data := bytes.TrimSpace(payload)
-	if len(data) == 0 {
-		return
-	}
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx == nil {
-		return
-	}
-	markAPIResponseTimestamp(ginCtx)
-
-	builder := &strings.Builder{}
-	builder.WriteString(fmt.Sprintf("Timestamp: %s\n", time.Now().Format(time.RFC3339Nano)))
-	builder.WriteString("Event: api.websocket.response\n")
-	builder.Write(data)
-	builder.WriteString("\n")
-
-	appendAPIWebsocketTimeline(ginCtx, []byte(builder.String()))
-}
-
-// AppendCodexAPIWebsocketResponse stores a codex upstream websocket response frame and merges any
-// quota event headers carried by the frame into the request log.
-func AppendCodexAPIWebsocketResponse(ctx context.Context, cfg *config.Config, payload []byte) {
-	logging.MergeResponseHeaders(ctx, ParseCodexQuotaEventHeaders(payload))
-	AppendAPIWebsocketResponse(ctx, cfg, payload)
-}
-
-// RecordAPIWebsocketError stores an upstream websocket error event in Gin context.
-func RecordAPIWebsocketError(ctx context.Context, cfg *config.Config, stage string, err error) {
-	if !requestLogCaptureEnabled(cfg) || err == nil {
-		return
-	}
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx == nil {
-		return
-	}
-	markAPIResponseTimestamp(ginCtx)
-
-	builder := &strings.Builder{}
-	builder.WriteString(fmt.Sprintf("Timestamp: %s\n", time.Now().Format(time.RFC3339Nano)))
-	builder.WriteString("Event: api.websocket.error\n")
-	if trimmed := strings.TrimSpace(stage); trimmed != "" {
-		builder.WriteString(fmt.Sprintf("Stage: %s\n", trimmed))
-	}
-	builder.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
-
-	appendAPIWebsocketTimeline(ginCtx, []byte(builder.String()))
-}
-
 func ginContextFrom(ctx context.Context) *gin.Context {
 	ginCtx, _ := ctx.Value("gin").(*gin.Context)
 	return ginCtx
@@ -556,41 +409,6 @@ func apiResponseSourceOrNil(ginCtx *gin.Context) *logging.FileBodySource {
 		return nil
 	}
 	return source
-}
-
-func appendAPIWebsocketTimeline(ginCtx *gin.Context, chunk []byte) {
-	if ginCtx == nil {
-		return
-	}
-	data := bytes.TrimSpace(chunk)
-	if len(data) == 0 {
-		return
-	}
-	if source, ok := apiWebsocketTimelineSource(ginCtx); ok {
-		if errAppend := source.AppendPart(data); errAppend == nil {
-			return
-		} else {
-			log.WithError(errAppend).Warn("failed to append api websocket timeline log part")
-		}
-	}
-	if existing, exists := ginCtx.Get(apiWebsocketTimelineKey); exists {
-		if existingBytes, ok := existing.([]byte); ok && len(existingBytes) > 0 {
-			combined := make([]byte, 0, len(existingBytes)+len(data)+2)
-			combined = append(combined, existingBytes...)
-			if !bytes.HasSuffix(existingBytes, []byte("\n")) {
-				combined = append(combined, '\n')
-			}
-			combined = append(combined, '\n')
-			combined = append(combined, data...)
-			ginCtx.Set(apiWebsocketTimelineKey, combined)
-			return
-		}
-	}
-	ginCtx.Set(apiWebsocketTimelineKey, bytes.Clone(data))
-}
-
-func apiWebsocketTimelineSource(ginCtx *gin.Context) (*logging.FileBodySource, bool) {
-	return fileBodySourceFromGin(ginCtx, logging.APIWebsocketTimelineSourceContextKey)
 }
 
 func fileBodySourceFromGin(ginCtx *gin.Context, key string) (*logging.FileBodySource, bool) {
@@ -744,25 +562,4 @@ func LogWithRequestID(ctx context.Context) *log.Entry {
 		return log.NewEntry(log.StandardLogger())
 	}
 	return log.WithField("request_id", requestID)
-}
-
-// MarkCreditsUsed flags the request as having used AI credits for billing.
-func MarkCreditsUsed(ctx context.Context) {
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx != nil {
-		ginCtx.Set(creditsUsedKey, true)
-	}
-}
-
-// CreditsUsed returns true if the request used AI credits.
-func CreditsUsed(ctx context.Context) bool {
-	ginCtx := ginContextFrom(ctx)
-	if ginCtx != nil {
-		if val, exists := ginCtx.Get(creditsUsedKey); exists {
-			if b, ok := val.(bool); ok {
-				return b
-			}
-		}
-	}
-	return false
 }

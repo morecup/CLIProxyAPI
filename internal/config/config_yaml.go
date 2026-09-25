@@ -48,7 +48,6 @@ func SaveConfigPreserveComments(configFile string, cfg *Config) error {
 
 	// Remove deprecated sections before merging back the sanitized config.
 	removeLegacyAuthBlock(original.Content[0])
-	removeLegacyOpenAICompatAPIKeys(original.Content[0])
 	removeRemovedIntegrationKeys(original.Content[0])
 	removeLegacyGenerativeLanguageKeys(original.Content[0])
 
@@ -773,25 +772,6 @@ func normalizeCollectionNodeStyles(node *yaml.Node) {
 		}
 	default:
 		// Scalars keep their existing style to preserve quoting
-	}
-}
-
-func removeLegacyOpenAICompatAPIKeys(root *yaml.Node) {
-	if root == nil || root.Kind != yaml.MappingNode {
-		return
-	}
-	idx := findMapKeyIndex(root, "openai-compatibility")
-	if idx < 0 || idx+1 >= len(root.Content) {
-		return
-	}
-	seq := root.Content[idx+1]
-	if seq == nil || seq.Kind != yaml.SequenceNode {
-		return
-	}
-	for i := range seq.Content {
-		if seq.Content[i] != nil && seq.Content[i].Kind == yaml.MappingNode {
-			removeMapKey(seq.Content[i], "api-keys")
-		}
 	}
 }
 

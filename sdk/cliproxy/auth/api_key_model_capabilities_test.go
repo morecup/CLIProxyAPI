@@ -148,13 +148,12 @@ func TestAPIKeyModelRoutingKeepsOneExecutionSnapshotAcrossReload(t *testing.T) {
 	assertResolvedThinkingLevels(t, newReq, "max")
 }
 
-func TestAttachResolvedAPIKeyModelInfoSupportsKeylessOpenAICompatibility(t *testing.T) {
+func TestAttachResolvedAPIKeyModelInfoSupportsKeylessClaudeCredential(t *testing.T) {
 	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{OpenAICompatibility: []internalconfig.OpenAICompatibility{{
-		Name:    "keyless",
+	manager.SetConfig(&internalconfig.Config{ClaudeKey: []internalconfig.ClaudeKey{{
 		Prefix:  "tenant",
 		BaseURL: "https://example.com/v1",
-		Models: []internalconfig.OpenAICompatibilityModel{
+		Models: []internalconfig.ClaudeModel{
 			{
 				Name: "shared-upstream", Alias: "public-model", ForceMapping: true, IsCompat: true,
 				Thinking: &registry.ThinkingSupport{Levels: []string{"high"}},
@@ -167,31 +166,27 @@ func TestAttachResolvedAPIKeyModelInfoSupportsKeylessOpenAICompatibility(t *test
 	}}})
 	auth := &Auth{
 		ID:       "auth-keyless",
-		Provider: "openai-compatibility:keyless",
+		Provider: "claude",
 		Prefix:   "tenant",
 		Attributes: map[string]string{
-			AttributeSource: "config:keyless[0]",
-			"compat_name":   "keyless",
-			"provider_key":  "openai-compatibility:keyless",
+			AttributeAuthKind: AuthKindAPIKey,
+			AttributeSource:   "config:claude[0]",
+			"base_url":        "https://example.com/v1",
 		},
 	}
 	registerCapabilityTestAuth(t, manager, auth)
 	models, _, aliasResult, routing := manager.executionModelCandidatesWithAlias(auth, "tenant/public-model")
-	if len(models) != 2 || models[0] != "shared-upstream" || models[1] != "fallback-upstream" {
-		t.Fatalf("keyless execution models = %v, want [shared-upstream fallback-upstream]", models)
+	if len(models) != 1 || models[0] != "shared-upstream" {
+		t.Fatalf("keyless execution models = %v, want [shared-upstream]", models)
 	}
 	if !aliasResult.ForceMapping || aliasResult.UpstreamModel != "shared-upstream" {
 		t.Fatalf("keyless force mapping result = %+v, want shared-upstream force mapping", aliasResult)
-	}
-	fallbackAliasResult := resolveAttemptAliasResult(routing, auth, "tenant/public-model", "fallback-upstream", aliasResult)
-	if fallbackAliasResult.ForceMapping {
-		t.Fatalf("fallback alias result = %+v, want force mapping disabled", fallbackAliasResult)
 	}
 	req := attachResolvedAPIKeyModelInfo(routing, cliproxyexecutor.Request{}, auth, "tenant/public-model", models[0])
 	assertResolvedThinkingLevels(t, req, "high")
 	info, ok := ResolvedAPIKeyModelInfo(req)
 	if !ok || info == nil || !info.IsCompat {
-		t.Fatal("OpenAI compatibility model IsCompat = false, want true")
+		t.Fatal("keyless claude model IsCompat = false, want true")
 	}
 }
 
@@ -253,46 +248,5 @@ func assertResolvedThinkingLevels(t *testing.T, req cliproxyexecutor.Request, wa
 		if info.Thinking.Levels[i] != want[i] {
 			t.Fatalf("thinking levels = %v, want %v", info.Thinking.Levels, want)
 		}
-	}
-}
-
-func TestCodexAPIKeyModelIsCompat(t *testing.T) {
-	cfg := &internalconfig.Config{CodexKey: []internalconfig.CodexKey{{
-		APIKey:  "codex-key",
-		BaseURL: "https://compat.example.com/v1",
-		Models: []internalconfig.CodexModel{
-			{Name: "deepseek-v4-flash", Alias: "deepseek-alias", IsCompat: true},
-			{Name: "gpt-5.4", Alias: "codex-native"},
-		},
-	}}}
-	auth := &Auth{
-		Provider: "codex",
-		Attributes: map[string]string{
-			AttributeAuthKind: AuthKindAPIKey,
-			AttributeAPIKey:   "codex-key",
-			"base_url":        "https://compat.example.com/v1",
-		},
-	}
-
-	if !CodexAPIKeyModelIsCompat(cfg, auth, "deepseek-v4-flash") {
-		t.Fatal("upstream name IsCompat = false, want true")
-	}
-	if !CodexAPIKeyModelIsCompat(cfg, auth, "deepseek-alias") {
-		t.Fatal("alias IsCompat = false, want true")
-	}
-	if !CodexAPIKeyModelIsCompat(cfg, auth, "deepseek-v4-flash(high)") {
-		t.Fatal("suffix model IsCompat = false, want true")
-	}
-	if CodexAPIKeyModelIsCompat(cfg, auth, "gpt-5.4") {
-		t.Fatal("native model IsCompat = true, want false")
-	}
-	if CodexAPIKeyModelIsCompat(cfg, auth, "missing-model") {
-		t.Fatal("missing model IsCompat = true, want false")
-	}
-	if CodexAPIKeyModelIsCompat(cfg, &Auth{Provider: "claude", Attributes: auth.Attributes}, "deepseek-v4-flash") {
-		t.Fatal("non-codex provider IsCompat = true, want false")
-	}
-	if CodexAPIKeyModelIsCompat(nil, auth, "deepseek-v4-flash") {
-		t.Fatal("nil config IsCompat = true, want false")
 	}
 }

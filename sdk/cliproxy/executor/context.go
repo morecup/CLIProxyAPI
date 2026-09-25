@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-type downstreamWebsocketContextKey struct{}
-type requireUpstreamWebsocketContextKey struct{}
 type upstreamAttemptChainContextKey struct{}
 type upstreamAttemptContextKey struct{}
 type upstreamCompletionChainContextKey struct{}
@@ -111,40 +109,4 @@ func UpstreamAttemptFromContext(ctx context.Context) (UpstreamAttempt, bool) {
 	}
 	attempt, ok := ctx.Value(upstreamAttemptContextKey{}).(UpstreamAttempt)
 	return attempt, ok && attempt.Number > 0 && !attempt.ChainStartedAt.IsZero() && !attempt.StartedAt.IsZero()
-}
-
-// WithDownstreamWebsocket marks the current request as coming from a downstream websocket connection.
-func WithDownstreamWebsocket(ctx context.Context) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return context.WithValue(ctx, downstreamWebsocketContextKey{}, true)
-}
-
-// DownstreamWebsocket reports whether the current request originates from a downstream websocket connection.
-func DownstreamWebsocket(ctx context.Context) bool {
-	if ctx == nil {
-		return false
-	}
-	raw := ctx.Value(downstreamWebsocketContextKey{})
-	enabled, ok := raw.(bool)
-	return ok && enabled
-}
-
-// WithRequiredUpstreamWebsocket marks a request whose incremental context is valid only on the current upstream websocket.
-func WithRequiredUpstreamWebsocket(ctx context.Context) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return context.WithValue(ctx, requireUpstreamWebsocketContextKey{}, true)
-}
-
-// RequiredUpstreamWebsocket reports whether falling back to an HTTP upstream would lose request context.
-func RequiredUpstreamWebsocket(ctx context.Context) bool {
-	if ctx == nil {
-		return false
-	}
-	raw := ctx.Value(requireUpstreamWebsocketContextKey{})
-	enabled, ok := raw.(bool)
-	return ok && enabled
 }

@@ -7,16 +7,6 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-func GeminiTokenCountJSON(count int64) []byte {
-	out := make([]byte, 0, 96)
-	out = append(out, `{"totalTokens":`...)
-	out = strconv.AppendInt(out, count, 10)
-	out = append(out, `,"promptTokensDetails":[{"modality":"TEXT","tokenCount":`...)
-	out = strconv.AppendInt(out, count, 10)
-	out = append(out, `}]}`...)
-	return out
-}
-
 func ClaudeInputTokensJSON(count int64) []byte {
 	out := make([]byte, 0, 32)
 	out = append(out, `{"input_tokens":`...)

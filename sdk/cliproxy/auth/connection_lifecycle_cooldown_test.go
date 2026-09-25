@@ -9,8 +9,6 @@ import (
 	"net/url"
 	"testing"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 func TestManager_MarkResult_ConnectionLifecycleDoesNotCooldown(t *testing.T) {
@@ -26,9 +24,6 @@ func TestManager_MarkResult_ConnectionLifecycleDoesNotCooldown(t *testing.T) {
 		name string
 		err  *Error
 	}{
-		{name: "websocket 1000", err: &Error{Message: "websocket: close 1000 (normal)"}},
-		{name: "websocket 1001", err: &Error{Message: "websocket: close 1001 (going away)"}},
-		{name: "websocket 1006", err: &Error{Message: "websocket: close 1006 (abnormal closure): unexpected EOF"}},
 		{name: "context canceled", err: &Error{Message: "context canceled"}},
 		{name: "context deadline exceeded", err: &Error{Message: "context deadline exceeded"}},
 		{name: "unexpected EOF", err: &Error{Message: "unexpected EOF"}},
@@ -43,12 +38,12 @@ func TestManager_MarkResult_ConnectionLifecycleDoesNotCooldown(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			m := NewManager(nil, nil, nil)
-			auth := &Auth{ID: "auth-lifecycle-" + tc.name, Provider: "codex"}
+			auth := &Auth{ID: "auth-lifecycle-" + tc.name, Provider: "claude"}
 			if _, errRegister := m.Register(context.Background(), auth); errRegister != nil {
 				t.Fatalf("register auth: %v", errRegister)
 			}
 
-			model := "gpt-5.6-sol"
+			model := "claude-test-model"
 			m.MarkResult(context.Background(), Result{
 				AuthID:   auth.ID,
 				Provider: auth.Provider,
@@ -72,7 +67,7 @@ func TestManager_MarkResult_ConnectionLifecycleAuthLevelDoesNotCooldown(t *testi
 	t.Cleanup(func() { transientErrorCooldownSeconds.Store(prevTransient) })
 
 	m := NewManager(nil, nil, nil)
-	auth := &Auth{ID: "auth-lifecycle-auth-level", Provider: "codex"}
+	auth := &Auth{ID: "auth-lifecycle-auth-level", Provider: "claude"}
 	if _, errRegister := m.Register(context.Background(), auth); errRegister != nil {
 		t.Fatalf("register auth: %v", errRegister)
 	}
@@ -82,7 +77,7 @@ func TestManager_MarkResult_ConnectionLifecycleAuthLevelDoesNotCooldown(t *testi
 		Provider: auth.Provider,
 		// Empty model exercises the auth-level failure path.
 		Success: false,
-		Error:   &Error{Message: "websocket: close 1006 (abnormal closure): unexpected EOF"},
+		Error:   &Error{Message: "unexpected EOF"},
 	})
 
 	updated, ok := m.GetByID(auth.ID)
@@ -121,12 +116,12 @@ func TestManager_MarkResult_HTTPStatusWithLifecycleTextStillCooldowns(t *testing
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			m := NewManager(nil, nil, nil)
-			auth := &Auth{ID: "auth-status-" + tc.name, Provider: "codex"}
+			auth := &Auth{ID: "auth-status-" + tc.name, Provider: "claude"}
 			if _, errRegister := m.Register(context.Background(), auth); errRegister != nil {
 				t.Fatalf("register auth: %v", errRegister)
 			}
 
-			model := "gpt-5.6-sol"
+			model := "claude-test-model"
 			before := time.Now()
 			m.MarkResult(context.Background(), Result{
 				AuthID:   auth.ID,
@@ -170,12 +165,12 @@ func TestManager_MarkResult_NonLifecycleStillCooldowns(t *testing.T) {
 	t.Cleanup(func() { transientErrorCooldownSeconds.Store(prevTransient) })
 
 	m := NewManager(nil, nil, nil)
-	auth := &Auth{ID: "auth-still-cools", Provider: "codex"}
+	auth := &Auth{ID: "auth-still-cools", Provider: "claude"}
 	if _, errRegister := m.Register(context.Background(), auth); errRegister != nil {
 		t.Fatalf("register auth: %v", errRegister)
 	}
 
-	model := "gpt-5.6-sol"
+	model := "claude-test-model"
 	before := time.Now()
 	m.MarkResult(context.Background(), Result{
 		AuthID:   auth.ID,
@@ -213,13 +208,7 @@ func TestResultErrorFromError_ConnectionLifecycleDoesNotBecomeRequestScoped(t *t
 		io.ErrUnexpectedEOF,
 		&url.Error{Op: "Post", URL: "https://example.com", Err: context.Canceled},
 		&url.Error{Op: "Post", URL: "https://example.com", Err: context.DeadlineExceeded},
-		&websocket.CloseError{Code: websocket.CloseNormalClosure, Text: "normal"},
-		&websocket.CloseError{Code: websocket.CloseGoingAway, Text: "bye"},
-		&websocket.CloseError{Code: websocket.CloseAbnormalClosure, Text: "unexpected EOF"},
-		fmt.Errorf("upstream read: %w", &websocket.CloseError{Code: websocket.CloseAbnormalClosure, Text: "unexpected EOF"}),
 		fmt.Errorf("wrap: %w", io.ErrUnexpectedEOF),
-		errors.New("websocket: close 1000 (normal)"),
-		errors.New("websocket: close 1006 (abnormal closure): unexpected EOF"),
 		errors.New("context deadline exceeded"),
 		errors.New("unexpected EOF"),
 	}
@@ -264,39 +253,6 @@ func TestIsConnectionLifecycleError_StatusBearingErrorsStayCoolable(t *testing.T
 	}
 }
 
-func TestIsConnectionLifecycleError_TypedCloseWins(t *testing.T) {
-	// Typed websocket close is unambiguous even when an outer status is attached.
-	err := &statusBearingCloseError{
-		status: http.StatusBadGateway,
-		close:  &websocket.CloseError{Code: websocket.CloseAbnormalClosure, Text: "unexpected EOF"},
-	}
-	if !isConnectionLifecycleError(err) {
-		t.Fatalf("typed CloseError should be lifecycle even with outer status")
-	}
-	got := resultErrorFromError(err)
-	if got.Code != connectionLifecycleErrorCode {
-		t.Fatalf("code = %q, want %q", got.Code, connectionLifecycleErrorCode)
-	}
-	if !shouldSkipCredentialCooldown(got) {
-		t.Fatalf("shouldSkipCredentialCooldown(%#v) = false, want true", got)
-	}
-
-	m := NewManager(nil, nil, nil)
-	auth := &Auth{ID: "auth-typed-close", Provider: "codex"}
-	if _, errRegister := m.Register(context.Background(), auth); errRegister != nil {
-		t.Fatalf("register auth: %v", errRegister)
-	}
-	model := "gpt-5.6-sol"
-	m.MarkResult(context.Background(), Result{
-		AuthID:   auth.ID,
-		Provider: auth.Provider,
-		Model:    model,
-		Success:  false,
-		Error:    got,
-	})
-	assertNoCooldown(t, m, auth.ID, model)
-}
-
 type statusBearingError struct {
 	status int
 	msg    string
@@ -304,20 +260,6 @@ type statusBearingError struct {
 
 func (e *statusBearingError) Error() string   { return e.msg }
 func (e *statusBearingError) StatusCode() int { return e.status }
-
-type statusBearingCloseError struct {
-	status int
-	close  *websocket.CloseError
-}
-
-func (e *statusBearingCloseError) Error() string {
-	if e.close == nil {
-		return "status-bearing close"
-	}
-	return e.close.Error()
-}
-func (e *statusBearingCloseError) StatusCode() int { return e.status }
-func (e *statusBearingCloseError) Unwrap() error   { return e.close }
 
 func assertNoCooldown(t *testing.T, m *Manager, authID, model string) {
 	t.Helper()

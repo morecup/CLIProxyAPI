@@ -33,16 +33,6 @@ func (cfg *Config) NormalizePluginsConfig() {
 	}
 }
 
-// SanitizeCodexHeaderDefaults trims surrounding whitespace from the
-// configured Codex header fallback values.
-func (cfg *Config) SanitizeCodexHeaderDefaults() {
-	if cfg == nil {
-		return
-	}
-	cfg.CodexHeaderDefaults.UserAgent = strings.TrimSpace(cfg.CodexHeaderDefaults.UserAgent)
-	cfg.CodexHeaderDefaults.BetaFeatures = strings.TrimSpace(cfg.CodexHeaderDefaults.BetaFeatures)
-}
-
 func (cfg *Config) SanitizeClaudeDesktop() {
 	if cfg == nil {
 		return
@@ -193,69 +183,6 @@ func (cfg *Config) SanitizeOAuthRequestScopedErrors() {
 	cfg.OAuthRequestScopedErrors = out
 }
 
-// SanitizeOpenAICompatibility removes OpenAI-compatibility provider entries that are
-// not actionable, specifically those missing a BaseURL. It trims whitespace before
-// evaluation and preserves the relative order of remaining entries.
-func (cfg *Config) SanitizeOpenAICompatibility() {
-	if cfg == nil || len(cfg.OpenAICompatibility) == 0 {
-		return
-	}
-	out := make([]OpenAICompatibility, 0, len(cfg.OpenAICompatibility))
-	for i := range cfg.OpenAICompatibility {
-		e := cfg.OpenAICompatibility[i]
-		e.Name = strings.TrimSpace(e.Name)
-		e.Prefix = normalizeModelPrefix(e.Prefix)
-		e.BaseURL = strings.TrimSpace(e.BaseURL)
-		e.Headers = NormalizeHeaders(e.Headers)
-		if e.BaseURL == "" {
-			// Skip providers with no base-url; treated as removed
-			continue
-		}
-		out = append(out, e)
-	}
-	cfg.OpenAICompatibility = out
-}
-
-// SanitizeCodexKeys removes Codex API key entries missing a BaseURL.
-// It trims whitespace and preserves order for remaining entries.
-func (cfg *Config) SanitizeCodexKeys() {
-	if cfg == nil {
-		return
-	}
-	cfg.CodexKey = sanitizeCodexKeyEntries(cfg.CodexKey)
-}
-
-// SanitizeXAIKeys removes xAI API key entries missing a BaseURL.
-// It applies the same normalization rules as codex-api-key.
-func (cfg *Config) SanitizeXAIKeys() {
-	if cfg == nil {
-		return
-	}
-	cfg.XAIKey = sanitizeCodexKeyEntries(cfg.XAIKey)
-	for i := range cfg.XAIKey {
-		cfg.XAIKey[i].AlphaSearch = false
-	}
-}
-
-func sanitizeCodexKeyEntries(entries []CodexKey) []CodexKey {
-	if len(entries) == 0 {
-		return entries
-	}
-	out := make([]CodexKey, 0, len(entries))
-	for i := range entries {
-		e := entries[i]
-		e.Prefix = normalizeModelPrefix(e.Prefix)
-		e.BaseURL = strings.TrimSpace(e.BaseURL)
-		e.Headers = NormalizeHeaders(e.Headers)
-		e.ExcludedModels = NormalizeExcludedModels(e.ExcludedModels)
-		if e.BaseURL == "" {
-			continue
-		}
-		out = append(out, e)
-	}
-	return out
-}
-
 // SanitizeClaudeKeys normalizes headers for Claude credentials.
 func (cfg *Config) SanitizeClaudeKeys() {
 	if cfg == nil || len(cfg.ClaudeKey) == 0 {
@@ -267,44 +194,6 @@ func (cfg *Config) SanitizeClaudeKeys() {
 		entry.Headers = NormalizeHeaders(entry.Headers)
 		entry.ExcludedModels = NormalizeExcludedModels(entry.ExcludedModels)
 	}
-}
-
-func sanitizeGeminiKeyEntries(entries []GeminiKey) []GeminiKey {
-	seen := make(map[string]struct{}, len(entries))
-	out := entries[:0]
-	for i := range entries {
-		entry := entries[i]
-		entry.APIKey = strings.TrimSpace(entry.APIKey)
-		entry.BaseURL = strings.TrimSpace(entry.BaseURL)
-		if entry.APIKey == "" && entry.BaseURL == "" {
-			continue
-		}
-		entry.Prefix = normalizeModelPrefix(entry.Prefix)
-		entry.ProxyURL = strings.TrimSpace(entry.ProxyURL)
-		entry.Headers = NormalizeHeaders(entry.Headers)
-		entry.ExcludedModels = NormalizeExcludedModels(entry.ExcludedModels)
-		uniqueKey := formatGeminiKeyDedupID(entry)
-		if _, exists := seen[uniqueKey]; exists {
-			continue
-		}
-		seen[uniqueKey] = struct{}{}
-		out = append(out, entry)
-	}
-	return out
-}
-
-func formatGeminiKeyDedupID(entry GeminiKey) string {
-	var b strings.Builder
-	b.WriteString(entry.APIKey)
-	b.WriteByte(0)
-	b.WriteString(entry.BaseURL)
-	b.WriteByte(0)
-	b.WriteString(entry.ProxyURL)
-	b.WriteByte(0)
-	b.WriteString(entry.Prefix)
-	b.WriteByte(0)
-	b.WriteString(FormatSortedHeaders(entry.Headers))
-	return b.String()
 }
 
 // FormatSortedHeaders serializes headers deterministically with null byte separators.
@@ -325,24 +214,6 @@ func FormatSortedHeaders(headers map[string]string) string {
 		b.WriteByte(0)
 	}
 	return b.String()
-}
-
-// SanitizeGeminiKeys deduplicates and normalizes Gemini credentials.
-// It uses API key, base URL, proxy URL, prefix, and custom headers as the uniqueness key.
-func (cfg *Config) SanitizeGeminiKeys() {
-	if cfg == nil {
-		return
-	}
-	cfg.GeminiKey = sanitizeGeminiKeyEntries(cfg.GeminiKey)
-}
-
-// SanitizeInteractionsKeys deduplicates and normalizes native Interactions credentials.
-// It uses API key, base URL, proxy URL, prefix, and custom headers as the uniqueness key.
-func (cfg *Config) SanitizeInteractionsKeys() {
-	if cfg == nil {
-		return
-	}
-	cfg.InteractionsKey = sanitizeGeminiKeyEntries(cfg.InteractionsKey)
 }
 
 func normalizeModelPrefix(prefix string) string {

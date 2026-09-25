@@ -26,7 +26,7 @@ import (
 )
 
 func TestAuthDispatchRequestIncludesCount(t *testing.T) {
-	req := newAuthDispatchRequest("gpt-5.4", "session-1", http.Header{"Authorization": {"Bearer test"}}, 2, "", nil, "")
+	req := newAuthDispatchRequest("gpt-5.4", "session-1", http.Header{"Authorization": {"Bearer test"}}, 2, nil, "")
 
 	raw, err := json.Marshal(&req)
 	if err != nil {
@@ -49,34 +49,16 @@ func TestAuthDispatchRequestIncludesCount(t *testing.T) {
 }
 
 func TestAuthDispatchRequestDefaultsCountToOne(t *testing.T) {
-	req := newAuthDispatchRequest("gpt-5.4", "", nil, 0, "", nil, "")
+	req := newAuthDispatchRequest("gpt-5.4", "", nil, 0, nil, "")
 
 	if req.Count != 1 {
 		t.Fatalf("count = %d, want 1", req.Count)
-	}
-	if req.CredentialPolicy != "" {
-		t.Fatalf("credential policy = %q, want empty", req.CredentialPolicy)
-	}
-}
-
-func TestAuthDispatchRequestIncludesCredentialPolicy(t *testing.T) {
-	req := newAuthDispatchRequest("gpt-5.4", "", nil, 1, "codex_alpha_search_v1", nil, "")
-	raw, errMarshal := json.Marshal(&req)
-	if errMarshal != nil {
-		t.Fatalf("marshal auth dispatch request: %v", errMarshal)
-	}
-	var payload map[string]any
-	if errUnmarshal := json.Unmarshal(raw, &payload); errUnmarshal != nil {
-		t.Fatalf("unmarshal auth dispatch request: %v", errUnmarshal)
-	}
-	if got := payload["credential_policy"]; got != "codex_alpha_search_v1" {
-		t.Fatalf("credential_policy = %#v, want codex_alpha_search_v1", got)
 	}
 }
 
 func TestAuthDispatchRequestIncludesExcludedAuthIDs(t *testing.T) {
 	excludedAuthIDs := []string{"auth-a", "auth-b"}
-	req := newAuthDispatchRequest("gpt-5.4", "", nil, 2, "", &excludedAuthIDs, "")
+	req := newAuthDispatchRequest("gpt-5.4", "", nil, 2, &excludedAuthIDs, "")
 	if req.Count != 1 {
 		t.Fatalf("new retry-contract count = %d, want 1 for legacy Home compatibility", req.Count)
 	}
@@ -96,7 +78,7 @@ func TestAuthDispatchRequestIncludesExcludedAuthIDs(t *testing.T) {
 
 func TestAuthDispatchRequestIncludesEmptyExcludedAuthIDs(t *testing.T) {
 	excludedAuthIDs := []string{}
-	req := newAuthDispatchRequest("gpt-5.4", "", nil, 2, "", &excludedAuthIDs, "")
+	req := newAuthDispatchRequest("gpt-5.4", "", nil, 2, &excludedAuthIDs, "")
 	if req.Count != 1 {
 		t.Fatalf("new retry-contract count = %d, want 1 for legacy Home compatibility", req.Count)
 	}
@@ -116,7 +98,7 @@ func TestAuthDispatchRequestIncludesEmptyExcludedAuthIDs(t *testing.T) {
 
 func TestAuthDispatchRequestIncludesPinnedAuthID(t *testing.T) {
 	excludedAuthIDs := []string{}
-	req := newAuthDispatchRequest("gpt-5.4", "", nil, 2, "", &excludedAuthIDs, " auth-pinned ")
+	req := newAuthDispatchRequest("gpt-5.4", "", nil, 2, &excludedAuthIDs, " auth-pinned ")
 
 	raw, errMarshal := json.Marshal(&req)
 	if errMarshal != nil {
@@ -133,7 +115,7 @@ func TestAuthDispatchRequestIncludesPinnedAuthID(t *testing.T) {
 
 func TestAuthDispatchRequestDistinguishesLegacyAndRetryRoundProtocol(t *testing.T) {
 	excludedAuthIDs := []string{"auth-a"}
-	legacy := newAuthDispatchRequest("gpt-5.4", "", nil, 3, "", &excludedAuthIDs, "")
+	legacy := newAuthDispatchRequest("gpt-5.4", "", nil, 3, &excludedAuthIDs, "")
 	legacyRaw, errMarshal := json.Marshal(&legacy)
 	if errMarshal != nil {
 		t.Fatalf("marshal legacy auth dispatch request: %v", errMarshal)
@@ -146,7 +128,7 @@ func TestAuthDispatchRequestDistinguishesLegacyAndRetryRoundProtocol(t *testing.
 		t.Fatalf("legacy request unexpectedly included retry_round: %#v", legacyPayload["retry_round"])
 	}
 
-	initial := newAuthDispatchRequestWithRetryRound("gpt-5.4", "", nil, 3, "", 0, &excludedAuthIDs, "")
+	initial := newAuthDispatchRequestWithRetryRound("gpt-5.4", "", nil, 3, 0, &excludedAuthIDs, "")
 	initialRaw, errMarshal := json.Marshal(&initial)
 	if errMarshal != nil {
 		t.Fatalf("marshal initial auth dispatch request: %v", errMarshal)
@@ -162,7 +144,7 @@ func TestAuthDispatchRequestDistinguishesLegacyAndRetryRoundProtocol(t *testing.
 		t.Fatalf("initial retry-contract count = %d, want 1", got)
 	}
 
-	additional := newAuthDispatchRequestWithRetryRound("gpt-5.4", "", nil, 3, "", 2, &excludedAuthIDs, "")
+	additional := newAuthDispatchRequestWithRetryRound("gpt-5.4", "", nil, 3, 2, &excludedAuthIDs, "")
 	additionalRaw, errMarshal := json.Marshal(&additional)
 	if errMarshal != nil {
 		t.Fatalf("marshal additional auth dispatch request: %v", errMarshal)

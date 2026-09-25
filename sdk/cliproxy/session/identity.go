@@ -192,16 +192,9 @@ func DeriveID(format sdktranslator.Format, payload []byte, callerScope string) s
 		Format:      format.String(),
 		CallerScope: strings.TrimSpace(callerScope),
 	}
-	if sourceFormatEqual(format, sdktranslator.FormatGemini) {
-		root.Resource = stringField(body, "cachedContent", "cached_content")
-	}
 
 	switch {
-	case sourceFormatEqual(format, sdktranslator.FormatGemini):
-		root.Instructions, root.User = geminiRoot(body)
-	case sourceFormatEqual(format, sdktranslator.FormatInteractions):
-		root.Instructions, root.User = interactionsRoot(body)
-	case sourceFormatEqual(format, sdktranslator.FormatOpenAIResponse), sourceFormatEqual(format, sdktranslator.FormatCodex):
+	case sourceFormatEqual(format, sdktranslator.FormatOpenAIResponse):
 		root.Instructions, root.User = responsesRoot(body)
 	case sourceFormatEqual(format, sdktranslator.FormatClaude):
 		root.Instructions, root.User = messagesRoot(body, true)
@@ -265,92 +258,6 @@ func responsesRoot(body map[string]any) ([]string, []canonicalPart) {
 		}
 	}
 	return instructions, nil
-}
-
-func geminiRoot(body map[string]any) ([]string, []canonicalPart) {
-	instructions := make([]string, 0)
-	if value, ok := firstField(body, "systemInstruction", "system_instruction"); ok {
-		instructions = appendInstruction(instructions, contentValue(value))
-	}
-	contents, _ := body["contents"].([]any)
-	for _, rawContent := range contents {
-		content, okContent := rawContent.(map[string]any)
-		if !okContent || normalizedString(content["role"]) != "user" {
-			continue
-		}
-		return instructions, canonicalParts(contentValue(content))
-	}
-	return instructions, nil
-}
-
-func interactionsRoot(body map[string]any) ([]string, []canonicalPart) {
-	instructions := make([]string, 0)
-	if value, ok := firstField(body, "system_instruction", "systemInstruction"); ok {
-		instructions = appendInstruction(instructions, contentValue(value))
-	}
-	input, ok := body["input"]
-	if !ok {
-		return instructions, nil
-	}
-	if inputString, okString := input.(string); okString {
-		return instructions, canonicalParts(inputString)
-	}
-	for _, entry := range flattenInteractionEntries(input) {
-		if text, okString := entry.(string); okString {
-			return instructions, canonicalParts(text)
-		}
-		step, okStep := entry.(map[string]any)
-		if !okStep {
-			continue
-		}
-		role := normalizedString(step["role"])
-		stepType := normalizedString(step["type"])
-		if role == "system" || role == "developer" || stepType == "system_instruction" || stepType == "developer_instruction" {
-			instructions = appendInstruction(instructions, contentValue(step))
-			continue
-		}
-		if role == "user" || stepType == "user_input" || ((stepType == "message" || stepType == "") && role == "") {
-			return instructions, canonicalParts(contentValue(step))
-		}
-	}
-	return instructions, nil
-}
-
-func flattenInteractionEntries(value any) []any {
-	entries := make([]any, 0)
-	var appendValue func(any, string)
-	appendValue = func(current any, inheritedRole string) {
-		switch typed := current.(type) {
-		case []any:
-			for _, child := range typed {
-				appendValue(child, inheritedRole)
-			}
-		case map[string]any:
-			role := normalizedString(typed["role"])
-			if role == "" {
-				role = inheritedRole
-			}
-			if steps, ok := typed["steps"].([]any); ok {
-				for _, child := range steps {
-					appendValue(child, role)
-				}
-				return
-			}
-			if role != "" && normalizedString(typed["role"]) == "" {
-				cloned := make(map[string]any, len(typed)+1)
-				for key, child := range typed {
-					cloned[key] = child
-				}
-				cloned["role"] = role
-				typed = cloned
-			}
-			entries = append(entries, typed)
-		default:
-			entries = append(entries, typed)
-		}
-	}
-	appendValue(value, "")
-	return entries
 }
 
 func appendInstruction(instructions []string, value any) []string {

@@ -151,19 +151,6 @@ func TestDeriveClaudeUserID_TurnGrowthWithoutSessionKeyKeepsSameUserID(t *testin
 	}
 }
 
-func TestDeriveClaudeUserID_GeminiTurnGrowthWithoutSessionKeyKeepsSameUserID(t *testing.T) {
-	first := []byte(`{"contents":[{"role":"user","parts":[{"text":"first gemini prompt"}]}]}`)
-	second := []byte(`{"contents":[{"role":"user","parts":[{"text":"first gemini prompt"}]},{"role":"model","parts":[{"text":"answer"}]},{"role":"user","parts":[{"text":"second prompt"}]}]}`)
-	idFirst := DeriveClaudeUserID(first)
-	idSecond := DeriveClaudeUserID(second)
-	if idFirst == "" || idFirst == "unknown" {
-		t.Fatalf("expected valid derived user_id, got %q", idFirst)
-	}
-	if idFirst != idSecond {
-		t.Fatalf("gemini turn growth without session key changed user_id: %q vs %q", idFirst, idSecond)
-	}
-}
-
 func TestDeriveClaudeUserID_FirstMessageFallback(t *testing.T) {
 	rawA := []byte(`{"model":"claude-test","messages":[{"role":"user","content":"message A"}]}`)
 	rawB := []byte(`{"model":"claude-test","messages":[{"role":"user","content":"message B"}]}`)
@@ -214,73 +201,5 @@ func TestDeriveClaudeUserID_ResponsesInputArraySkipsSystemLevelItems(t *testing.
 	}
 	if idA == idB {
 		t.Fatalf("different user messages with same system prompt produced identical user_id: %q", idA)
-	}
-}
-
-func TestDeriveClaudeUserID_GeminiContentsDefaultRole(t *testing.T) {
-	rawA := []byte(`{"contents":[{"parts":[{"text":"gemini message A"}]}]}`)
-	rawB := []byte(`{"contents":[{"parts":[{"text":"gemini message B"}]}]}`)
-	idA := DeriveClaudeUserID(rawA)
-	idB := DeriveClaudeUserID(rawB)
-	if idA == "" || idB == "" || idA == "unknown" || idB == "unknown" {
-		t.Fatalf("expected valid derived user_id for gemini without explicit role, got idA=%q idB=%q", idA, idB)
-	}
-	if idA == idB {
-		t.Fatalf("different gemini messages produced same user_id: %q", idA)
-	}
-}
-
-func TestDeriveClaudeUserID_GeminiContentsMultipleTextParts(t *testing.T) {
-	rawA := []byte(`{"contents":[{"role":"user","parts":[{"text":"Prefix"},{"text":"Question A"}]}]}`)
-	rawB := []byte(`{"contents":[{"role":"user","parts":[{"text":"Prefix"},{"text":"Question B"}]}]}`)
-	idA := DeriveClaudeUserID(rawA)
-	idB := DeriveClaudeUserID(rawB)
-	if idA == "" || idB == "" || idA == "unknown" || idB == "unknown" {
-		t.Fatalf("expected valid derived user_id for gemini multiple parts, got idA=%q idB=%q", idA, idB)
-	}
-	if idA == idB {
-		t.Fatalf("different second parts produced same user_id: %q", idA)
-	}
-}
-
-func TestDeriveClaudeUserID_GeminiContentsSkipsThoughtParts(t *testing.T) {
-	raw := []byte(`{
-		"contents": [
-			{
-				"role": "user",
-				"parts": [
-					{"thought": true, "text": "internal thought"},
-					{"text": "visible content"}
-				]
-			}
-		]
-	}`)
-	rawOnlyVisible := []byte(`{
-		"contents": [
-			{
-				"role": "user",
-				"parts": [
-					{"text": "visible content"}
-				]
-			}
-		]
-	}`)
-	id1 := DeriveClaudeUserID(raw)
-	id2 := DeriveClaudeUserID(rawOnlyVisible)
-	if id1 != id2 {
-		t.Fatalf("thought part changed derived user_id: %q vs %q", id1, id2)
-	}
-}
-
-func TestDeriveClaudeUserID_GeminiSystemInstruction(t *testing.T) {
-	rawCamel := []byte(`{"systemInstruction":{"parts":[{"text":"system rule A"}]}}`)
-	rawSnake := []byte(`{"system_instruction":{"parts":[{"text":"system rule B"}]}}`)
-	idCamel := DeriveClaudeUserID(rawCamel)
-	idSnake := DeriveClaudeUserID(rawSnake)
-	if idCamel == "" || idSnake == "" || idCamel == "unknown" || idSnake == "unknown" {
-		t.Fatalf("expected valid derived user_id for systemInstruction, got camel=%q snake=%q", idCamel, idSnake)
-	}
-	if idCamel == idSnake {
-		t.Fatalf("different system instructions produced same user_id: %q", idCamel)
 	}
 }

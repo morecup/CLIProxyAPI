@@ -48,22 +48,13 @@ func TestShouldSkipMethodForRequestLogging(t *testing.T) {
 			skip: true,
 		},
 		{
-			name: "responses websocket upgrade should not skip",
+			name: "responses get with upgrade header should skip",
 			req: &http.Request{
 				Method: http.MethodGet,
 				URL:    &url.URL{Path: "/v1/responses"},
 				Header: http.Header{"Upgrade": []string{"websocket"}},
 			},
-			skip: false,
-		},
-		{
-			name: "codex responses websocket upgrade should not skip",
-			req: &http.Request{
-				Method: http.MethodGet,
-				URL:    &url.URL{Path: "/backend-api/codex/responses"},
-				Header: http.Header{"Upgrade": []string{"websocket"}},
-			},
-			skip: false,
+			skip: true,
 		},
 		{
 			name: "responses get without upgrade should skip",
@@ -269,15 +260,14 @@ func TestAttachRequestLogSourcesUsesLoggerLogsDir(t *testing.T) {
 	logger := logging.NewFileRequestLogger(true, logsDir, "", 0)
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
-	c.Request = httptest.NewRequest(http.MethodGet, "/backend-api/codex/responses", nil)
-	c.Request.Header.Set("Upgrade", "websocket")
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
 
 	attachRequestLogSources(c, logger, true)
 	defer cleanupFileBodySourcesFromContext(c)
 
 	for _, key := range []string{
-		logging.WebsocketTimelineSourceContextKey,
-		logging.APIWebsocketTimelineSourceContextKey,
+		logging.APIRequestSourceContextKey,
+		logging.APIResponseSourceContextKey,
 	} {
 		value, exists := c.Get(key)
 		if !exists {
@@ -306,8 +296,8 @@ func cleanupFileBodySourcesFromContext(c *gin.Context) {
 		return
 	}
 	for _, key := range []string{
-		logging.WebsocketTimelineSourceContextKey,
-		logging.APIWebsocketTimelineSourceContextKey,
+		logging.APIRequestSourceContextKey,
+		logging.APIResponseSourceContextKey,
 	} {
 		value, exists := c.Get(key)
 		if !exists {

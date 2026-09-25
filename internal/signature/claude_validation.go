@@ -100,12 +100,7 @@
 //     replay compatibility must be decided independently of envelope form.
 //   - Claude Messages API: the full Claude model range, same envelopes as the
 //     Claude Code OAuth subscription.
-//   - Antigravity: only opus-4-6-think and sonnet-4-6, and always the
-//     double-layer R form on Google infrastructure (infra_google). Antigravity
-//     never issues a CAIS envelope or a single-layer E signature, and its replay
-//     path requires R form, so CompatibleAntigravityClaudeThinkingSignature
-//     rejects CAIS signatures.
-//
+
 // A single conversation therefore mixes envelopes whenever a user switches model
 // generations or providers, and every form must stay replayable toward the
 // provider that issued it.

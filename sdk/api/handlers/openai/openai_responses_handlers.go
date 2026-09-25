@@ -18,7 +18,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/optimize-multi-agent-v2"
 	. "github.com/router-for-me/CLIProxyAPI/v7/internal/constant"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
@@ -56,7 +55,6 @@ type responsesSSEFramer struct {
 	lastEvent            string
 	terminalEvent        string
 	terminalError        *interfaces.ErrorMessage
-	failureEvent         string
 	dataFrames           int
 }
 
@@ -185,16 +183,8 @@ func (f *responsesSSEFramer) repairErrorPayload(payload []byte) []byte {
 	errMsg := responsesSSEPayloadErrorMessage(payload)
 	status := errMsg.StatusCode
 	f.terminalError = errMsg
-	failureEvent := f.failureEvent
-	if failureEvent != "response.failed" {
-		failureEvent = "error"
-	}
-	f.terminalEvent = failureEvent
+	f.terminalEvent = "error"
 	errText := responsesStreamErrorText(errMsg, status)
-	if failureEvent == "response.failed" {
-		chunk := handlers.BuildOpenAIResponsesStreamFailedChunk(status, errText, 0)
-		return []byte(fmt.Sprintf("event: response.failed\ndata: %s\n\n", chunk))
-	}
 	chunk := handlers.BuildOpenAIResponsesStreamErrorChunk(status, errText, 0)
 	return []byte(fmt.Sprintf("event: error\ndata: %s\n\n", chunk))
 }
@@ -482,35 +472,6 @@ func (h *OpenAIResponsesAPIHandler) OpenAIResponsesModels(c *gin.Context) {
 	})
 }
 
-func (h *OpenAIResponsesAPIHandler) prepareCodexMultiAgentV2Tools(c *gin.Context, payload []byte) []byte {
-	if h == nil || h.Cfg == nil {
-		return payload
-	}
-
-	requestCtx := context.Background()
-	if c != nil && c.Request != nil {
-		requestCtx = c.Request.Context()
-	}
-	requestCtx = context.WithValue(requestCtx, "gin", c)
-
-	var requestHeaders http.Header
-	if c != nil && c.Request != nil {
-		requestHeaders = c.Request.Header
-	}
-	homeEnabled := h.AuthManager != nil && h.AuthManager.HomeEnabled()
-	updated, prepared := multiagentv2.PrepareCodexMultiAgentV2Tools(
-		requestCtx,
-		requestHeaders,
-		payload,
-		h.Cfg.CodexOptimizeMultiAgentV2,
-		homeEnabled,
-	)
-	if prepared && c != nil {
-		c.Set(multiagentv2.CodexMultiAgentV2ToolsPreparedContextKey, true)
-	}
-	return updated
-}
-
 // Responses handles the /v1/responses endpoint.
 // It determines whether the request is for a streaming or non-streaming response
 // and calls the appropriate handler based on the model provider.
@@ -530,8 +491,6 @@ func (h *OpenAIResponsesAPIHandler) Responses(c *gin.Context) {
 		return
 	}
 
-	rawJSON = h.prepareCodexMultiAgentV2Tools(c, rawJSON)
-
 	// Check if the client requested a streaming response.
 	streamResult := gjson.GetBytes(rawJSON, "stream")
 	if streamResult.Type == gjson.True {
@@ -540,50 +499,6 @@ func (h *OpenAIResponsesAPIHandler) Responses(c *gin.Context) {
 		h.handleNonStreamingResponse(c, rawJSON)
 	}
 
-}
-
-func (h *OpenAIResponsesAPIHandler) Compact(c *gin.Context) {
-	rawJSON, err := handlers.ReadRequestBody(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, handlers.ErrorResponse{
-			Error: handlers.ErrorDetail{
-				Message: fmt.Sprintf("Invalid request: %v", err),
-				Type:    "invalid_request_error",
-			},
-		})
-		return
-	}
-
-	streamResult := gjson.GetBytes(rawJSON, "stream")
-	if streamResult.Type == gjson.True {
-		c.JSON(http.StatusBadRequest, handlers.ErrorResponse{
-			Error: handlers.ErrorDetail{
-				Message: "Streaming not supported for compact responses",
-				Type:    "invalid_request_error",
-			},
-		})
-		return
-	}
-	if streamResult.Exists() {
-		if updated, err := sjson.DeleteBytes(rawJSON, "stream"); err == nil {
-			rawJSON = updated
-		}
-	}
-
-	c.Header("Content-Type", "application/json")
-	modelName := gjson.GetBytes(rawJSON, "model").String()
-	cliCtx, cliCancel := h.GetContextWithCancel(h, c, context.Background())
-	stopKeepAlive := h.StartNonStreamingKeepAlive(c, cliCtx)
-	resp, upstreamHeaders, errMsg := h.ExecuteWithAuthManager(cliCtx, h.HandlerType(), modelName, rawJSON, "responses/compact")
-	stopKeepAlive()
-	if errMsg != nil {
-		h.WriteErrorResponse(c, errMsg)
-		cliCancel(errMsg.Error)
-		return
-	}
-	handlers.WriteUpstreamHeaders(c.Writer.Header(), upstreamHeaders)
-	_, _ = c.Writer.Write(resp)
-	cliCancel()
 }
 
 // handleNonStreamingResponse handles non-streaming chat completion responses
@@ -643,11 +558,7 @@ func (h *OpenAIResponsesAPIHandler) handleStreamingResponse(c *gin.Context, rawJ
 		c.Header("Connection", "keep-alive")
 		c.Header("Access-Control-Allow-Origin", "*")
 	}
-	failureEvent := "error"
-	if isCodexResponsesClientRequest(c) {
-		failureEvent = "response.failed"
-	}
-	framer := &responsesSSEFramer{failureEvent: failureEvent}
+	framer := &responsesSSEFramer{}
 	var initialOutput bytes.Buffer
 
 	// Peek at the first complete SSE data frame.
@@ -753,23 +664,6 @@ func (h *OpenAIResponsesAPIHandler) handleStreamingResponse(c *gin.Context, rawJ
 			h.forwardResponsesStream(c, flusher, func(err error) { cliCancel(err) }, dataChan, errChan, framer)
 			return
 		}
-	}
-}
-
-// isCodexResponsesClientRequest limits the alternate terminal event to official Codex clients.
-func isCodexResponsesClientRequest(c *gin.Context) bool {
-	if c == nil || c.Request == nil {
-		return false
-	}
-	if multiagentv2.IsCodexClientUserAgent(c.GetHeader("User-Agent")) {
-		return true
-	}
-
-	switch originator := strings.ToLower(strings.TrimSpace(c.GetHeader("Originator"))); originator {
-	case "codex desktop", "codex-tui", "codex_cli_rs":
-		return true
-	default:
-		return strings.HasPrefix(originator, "codex desktop/") || strings.HasPrefix(originator, "codex-tui/") || strings.HasPrefix(originator, "codex_cli_rs/")
 	}
 }
 
@@ -908,11 +802,6 @@ func (h *OpenAIResponsesAPIHandler) forwardResponsesStream(c *gin.Context, flush
 	if framer == nil {
 		framer = &responsesSSEFramer{}
 	}
-	if isCodexResponsesClientRequest(c) {
-		framer.failureEvent = "response.failed"
-	} else {
-		framer.failureEvent = "error"
-	}
 	writeTerminalError := func(errMsg *interfaces.ErrorMessage) {
 		framer.Flush(c.Writer)
 		if errMsg == nil {
@@ -925,11 +814,6 @@ func (h *OpenAIResponsesAPIHandler) forwardResponsesStream(c *gin.Context, flush
 		errText := responsesStreamErrorText(errMsg, status)
 		h.logResponsesStreamError(c, framer, errMsg)
 		if framer.terminalEvent != "" {
-			return
-		}
-		if isCodexResponsesClientRequest(c) {
-			chunk := handlers.BuildOpenAIResponsesStreamFailedChunk(status, errText, 0)
-			_, _ = fmt.Fprintf(c.Writer, "\nevent: response.failed\ndata: %s\n\n", string(chunk))
 			return
 		}
 		chunk := handlers.BuildOpenAIResponsesStreamErrorChunk(status, errText, 0)

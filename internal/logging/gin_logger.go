@@ -19,14 +19,10 @@ import (
 // aiAPIPrefixes defines path prefixes for AI API requests that should have request ID tracking.
 var aiAPIPrefixes = []string{
 	"/v1",
-	"/v1beta",
-	"/openai/v1",
-	"/backend-api/codex",
 }
 
 const (
-	skipGinLogKey  = "__gin_skip_request_logging__"
-	creditsUsedKey = "__antigravity_credits_used__"
+	skipGinLogKey = "__gin_skip_request_logging__"
 )
 
 // GinLogrusLogger returns a Gin middleware handler that logs HTTP requests and responses
@@ -79,9 +75,6 @@ func GinLogrusLogger() gin.HandlerFunc {
 			requestID = "--------"
 		}
 		logLine := fmt.Sprintf("%3d | %13v | %15s | %-7s \"%s\"", statusCode, latency, clientIP, method, path)
-		if creditsUsed(c) {
-			logLine += " [credits]"
-		}
 		if errorMessage != "" {
 			logLine = logLine + " | " + errorMessage
 		}
@@ -146,18 +139,6 @@ func shouldSkipGinRequestLogging(c *gin.Context) bool {
 		return false
 	}
 	val, exists := c.Get(skipGinLogKey)
-	if !exists {
-		return false
-	}
-	flag, ok := val.(bool)
-	return ok && flag
-}
-
-func creditsUsed(c *gin.Context) bool {
-	if c == nil {
-		return false
-	}
-	val, exists := c.Get(creditsUsedKey)
 	if !exists {
 		return false
 	}

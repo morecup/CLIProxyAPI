@@ -7,7 +7,7 @@ import (
 func TestParseConfigOAuthRequestScopedErrors(t *testing.T) {
 	const yamlConfig = `
 oauth-request-scoped-errors:
-  vertex:
+  claude:
     - status: 400
       match:
         - "maximum_context_length"
@@ -16,36 +16,10 @@ oauth-request-scoped-errors:
         - "maximum_context_length$"
         - "^context_length_exceeded"
       action: "stop"
-  aistudio:
-    - status: 400
-      match:
-        - "invalid_argument"
-      action: "continue"
-  antigravity:
-    - status: 500
-      match:
-        - "internal_server_error"
-      action: "stop-and-cooldown"
-  claude:
     - status: 429
       match:
         - "rate_limit"
       action: "continue-and-cooldown"
-  codex:
-    - status: 400
-      match:
-        - "context_window_exceeded"
-      action: "stop"
-  kimi:
-    - status: 400
-      match:
-        - "length_limit"
-      action: "stop"
-  xai:
-    - status: 400
-      match:
-        - "max_tokens_exceeded"
-      action: "stop"
 `
 
 	cfg, err := ParseConfigBytes([]byte(yamlConfig))
@@ -53,27 +27,27 @@ oauth-request-scoped-errors:
 		t.Fatalf("ParseConfigFromBytes failed: %v", err)
 	}
 
-	if len(cfg.OAuthRequestScopedErrors) != 7 {
-		t.Fatalf("cfg.OAuthRequestScopedErrors len = %d, want 7", len(cfg.OAuthRequestScopedErrors))
+	if len(cfg.OAuthRequestScopedErrors) != 1 {
+		t.Fatalf("cfg.OAuthRequestScopedErrors len = %d, want 1", len(cfg.OAuthRequestScopedErrors))
 	}
 
-	vertexRules, ok := cfg.OAuthRequestScopedErrors["vertex"]
-	if !ok || len(vertexRules) != 1 {
-		t.Fatalf("vertex rules missing or len != 1: %#v", vertexRules)
+	claudeRules, ok := cfg.OAuthRequestScopedErrors["claude"]
+	if !ok || len(claudeRules) != 2 {
+		t.Fatalf("claude rules missing or len != 2: %#v", claudeRules)
 	}
-	rule := vertexRules[0]
+	rule := claudeRules[0]
 	if rule.Status != 400 || rule.Action != "stop" {
-		t.Errorf("unexpected vertex rule: %+v", rule)
+		t.Errorf("unexpected claude rule: %+v", rule)
 	}
 	if len(rule.Match) != 2 || len(rule.MatchRegexr) != 2 {
-		t.Errorf("unexpected vertex match len: %+v", rule)
+		t.Errorf("unexpected claude match len: %+v", rule)
 	}
 }
 
 func TestSanitizeOAuthRequestScopedErrors(t *testing.T) {
 	cfg := &Config{
 		OAuthRequestScopedErrors: map[string][]RequestScopedErrorRule{
-			" Vertex ": {
+			" Claude ": {
 				{
 					Status:      400,
 					Match:       []string{"  context_length  ", ""},
@@ -99,9 +73,9 @@ func TestSanitizeOAuthRequestScopedErrors(t *testing.T) {
 		t.Fatalf("expected 1 sanitized channel, got %d", len(cfg.OAuthRequestScopedErrors))
 	}
 
-	rules := cfg.OAuthRequestScopedErrors["vertex"]
+	rules := cfg.OAuthRequestScopedErrors["claude"]
 	if len(rules) != 1 {
-		t.Fatalf("expected 1 rule for vertex, got %d", len(rules))
+		t.Fatalf("expected 1 rule for claude, got %d", len(rules))
 	}
 	if rules[0].Status != 400 || rules[0].Action != "stop" {
 		t.Errorf("unexpected sanitized rule: %+v", rules[0])

@@ -90,14 +90,6 @@ func DeriveClaudeUserID(rawJSON []byte) string {
 			seed.WriteString(";system:")
 			seed.WriteString(v.String())
 		}
-		if v := root.Get("systemInstruction"); v.Exists() {
-			seed.WriteString(";systemInstruction:")
-			seed.WriteString(v.String())
-		}
-		if v := root.Get("system_instruction"); v.Exists() {
-			seed.WriteString(";system_instruction:")
-			seed.WriteString(v.String())
-		}
 	}
 
 	if seed.Len() == 0 {
@@ -145,38 +137,6 @@ func firstStableRequestContent(root gjson.Result) string {
 			if content != "" {
 				return content
 			}
-		}
-	}
-
-	if contents := root.Get("contents"); contents.IsArray() {
-		var content string
-		contents.ForEach(func(_, contentItem gjson.Result) bool {
-			role := strings.ToLower(strings.TrimSpace(contentItem.Get("role").String()))
-			// In Gemini API format, missing role defaults to "user"
-			if role == "" || role == "user" {
-				if parts := contentItem.Get("parts"); parts.IsArray() {
-					var texts []string
-					parts.ForEach(func(_, part gjson.Result) bool {
-						if IsGeminiThoughtPart(part) {
-							return true
-						}
-						if text := part.Get("text"); text.Exists() {
-							if val := strings.TrimSpace(text.String()); val != "" {
-								texts = append(texts, val)
-							}
-						}
-						return true
-					})
-					if len(texts) > 0 {
-						content = strings.Join(texts, "\n")
-						return false
-					}
-				}
-			}
-			return true
-		})
-		if content != "" {
-			return content
 		}
 	}
 

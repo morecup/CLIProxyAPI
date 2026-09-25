@@ -668,17 +668,17 @@ func TestFileSynthesizer_Synthesize_OAuthExcludedModelsMerged(t *testing.T) {
 func TestFileSynthesizer_Synthesize_OAuthModelAliases(t *testing.T) {
 	tempDir := t.TempDir()
 	authData := map[string]any{
-		"type":  "codex",
-		"email": "codex@example.com",
+		"type":  "claude",
+		"email": "claude@example.com",
 		"model_aliases": []map[string]any{
-			{"name": " gpt-5.3-codex-spark ", "alias": " gpt-5.5 "},
-			{"name": "gpt-5.3-codex-spark", "alias": "gpt-5.4", "fork": true},
-			{"name": "gpt-5.3-codex-spark", "alias": "gpt-5.5"},
+			{"name": " claude-opus-4-5 ", "alias": " opus "},
+			{"name": "claude-opus-4-5", "alias": "opus-45", "fork": true},
+			{"name": "claude-opus-4-5", "alias": "opus"},
 			{"name": "", "alias": "ignored"},
 		},
 	}
 	data, _ := json.Marshal(authData)
-	errWriteFile := os.WriteFile(filepath.Join(tempDir, "codex-auth.json"), data, 0644)
+	errWriteFile := os.WriteFile(filepath.Join(tempDir, "claude-auth.json"), data, 0644)
 	if errWriteFile != nil {
 		t.Fatalf("failed to write auth file: %v", errWriteFile)
 	}
@@ -700,7 +700,7 @@ func TestFileSynthesizer_Synthesize_OAuthModelAliases(t *testing.T) {
 	}
 
 	got := auths[0].Attributes["model_aliases"]
-	want := `[{"name":"gpt-5.3-codex-spark","alias":"gpt-5.5"},{"name":"gpt-5.3-codex-spark","alias":"gpt-5.4","fork":true}]`
+	want := `[{"name":"claude-opus-4-5","alias":"opus"},{"name":"claude-opus-4-5","alias":"opus-45","fork":true}]`
 	if got != want {
 		t.Fatalf("expected model_aliases %q, got %q", want, got)
 	}

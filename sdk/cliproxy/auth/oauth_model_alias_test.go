@@ -19,11 +19,11 @@ func TestResolveOAuthUpstreamModel_SuffixPreservation(t *testing.T) {
 		{
 			name: "numeric suffix preserved",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro(8192)",
-			want:    "gemini-2.5-pro-exp-03-25(8192)",
+			channel: "claude",
+			input:   "claude-opus-4-5(8192)",
+			want:    "claude-opus-4-5-20251101(8192)",
 		},
 		{
 			name: "level suffix preserved",
@@ -37,11 +37,11 @@ func TestResolveOAuthUpstreamModel_SuffixPreservation(t *testing.T) {
 		{
 			name: "no suffix unchanged",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro",
-			want:    "gemini-2.5-pro-exp-03-25",
+			channel: "claude",
+			input:   "claude-opus-4-5",
+			want:    "claude-opus-4-5-20251101",
 		},
 		{
 			name: "config suffix takes priority",
@@ -55,74 +55,65 @@ func TestResolveOAuthUpstreamModel_SuffixPreservation(t *testing.T) {
 		{
 			name: "auto suffix preserved",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro(auto)",
-			want:    "gemini-2.5-pro-exp-03-25(auto)",
+			channel: "claude",
+			input:   "claude-opus-4-5(auto)",
+			want:    "claude-opus-4-5-20251101(auto)",
 		},
 		{
 			name: "none suffix preserved",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro(none)",
-			want:    "gemini-2.5-pro-exp-03-25(none)",
-		},
-		{
-			name: "kimi suffix preserved",
-			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"kimi": {{Name: "kimi-k2.5", Alias: "k2.5"}},
-			},
-			channel: "kimi",
-			input:   "k2.5(high)",
-			want:    "kimi-k2.5(high)",
+			channel: "claude",
+			input:   "claude-opus-4-5(none)",
+			want:    "claude-opus-4-5-20251101(none)",
 		},
 		{
 			name: "case insensitive alias lookup with suffix",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "Gemini-2.5-Pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "Claude-Opus-4-5"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro(high)",
-			want:    "gemini-2.5-pro-exp-03-25(high)",
+			channel: "claude",
+			input:   "claude-opus-4-5(high)",
+			want:    "claude-opus-4-5-20251101(high)",
 		},
 		{
 			name: "no alias returns empty",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 			},
-			channel: "antigravity",
+			channel: "claude",
 			input:   "unknown-model(high)",
 			want:    "",
 		},
 		{
 			name: "wrong channel returns empty",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"other": {{Name: "other-upstream", Alias: "other-model"}},
 			},
 			channel: "claude",
-			input:   "gemini-2.5-pro(high)",
+			input:   "other-model(high)",
 			want:    "",
 		},
 		{
 			name: "empty suffix filtered out",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro()",
-			want:    "gemini-2.5-pro-exp-03-25",
+			channel: "claude",
+			input:   "claude-opus-4-5()",
+			want:    "claude-opus-4-5-20251101",
 		},
 		{
 			name: "incomplete suffix treated as no suffix",
 			aliases: map[string][]internalconfig.OAuthModelAlias{
-				"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro(high"}},
+				"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5(high"}},
 			},
-			channel: "antigravity",
-			input:   "gemini-2.5-pro(high",
-			want:    "gemini-2.5-pro-exp-03-25",
+			channel: "claude",
+			input:   "claude-opus-4-5(high",
+			want:    "claude-opus-4-5-20251101",
 		},
 	}
 
@@ -145,36 +136,26 @@ func TestResolveOAuthUpstreamModel_SuffixPreservation(t *testing.T) {
 
 func createAuthForChannel(channel string) *Auth {
 	switch channel {
-	case "antigravity":
-		return &Auth{Provider: "antigravity", Attributes: map[string]string{"auth_kind": "oauth"}}
 	case "claude":
 		return &Auth{Provider: "claude", Attributes: map[string]string{"auth_kind": "oauth"}}
-	case "vertex":
-		return &Auth{Provider: "vertex", Attributes: map[string]string{"auth_kind": "oauth"}}
-	case "codex":
-		return &Auth{Provider: "codex", Attributes: map[string]string{"auth_kind": "oauth"}}
-	case "aistudio":
-		return &Auth{Provider: "aistudio"}
-	case "kimi":
-		return &Auth{Provider: "kimi"}
 	default:
 		return &Auth{Provider: channel}
 	}
 }
 
-func TestOAuthModelAliasChannel_APIKeyOnlyProviderUnsupported(t *testing.T) {
+func TestOAuthModelAliasChannel_APIKeyAuthUnsupported(t *testing.T) {
 	t.Parallel()
 
-	if got := OAuthModelAliasChannel("gemini", "oauth"); got != "" {
-		t.Fatalf("OAuthModelAliasChannel() = %q, want empty channel for API-key-only provider", got)
+	if got := OAuthModelAliasChannel("claude", "api_key"); got != "" {
+		t.Fatalf("OAuthModelAliasChannel() = %q, want empty channel for API key auth", got)
 	}
 }
 
-func TestOAuthModelAliasChannel_Kimi(t *testing.T) {
+func TestOAuthModelAliasChannel_Claude(t *testing.T) {
 	t.Parallel()
 
-	if got := OAuthModelAliasChannel("kimi", "oauth"); got != "kimi" {
-		t.Fatalf("OAuthModelAliasChannel() = %q, want %q", got, "kimi")
+	if got := OAuthModelAliasChannel("claude", "oauth"); got != "claude" {
+		t.Fatalf("OAuthModelAliasChannel() = %q, want %q", got, "claude")
 	}
 }
 
@@ -193,18 +174,18 @@ func TestApplyOAuthModelAlias_SuffixPreservation(t *testing.T) {
 	t.Parallel()
 
 	aliases := map[string][]internalconfig.OAuthModelAlias{
-		"antigravity": {{Name: "gemini-2.5-pro-exp-03-25", Alias: "gemini-2.5-pro"}},
+		"claude": {{Name: "claude-opus-4-5-20251101", Alias: "claude-opus-4-5"}},
 	}
 
 	mgr := NewManager(nil, nil, nil)
 	mgr.SetConfig(&internalconfig.Config{})
 	mgr.SetOAuthModelAlias(aliases)
 
-	auth := &Auth{ID: "test-auth-id", Provider: "antigravity"}
+	auth := &Auth{ID: "test-auth-id", Provider: "claude"}
 
-	resolvedModel := mgr.applyOAuthModelAlias(auth, "gemini-2.5-pro(8192)")
-	if resolvedModel != "gemini-2.5-pro-exp-03-25(8192)" {
-		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "gemini-2.5-pro-exp-03-25(8192)")
+	resolvedModel := mgr.applyOAuthModelAlias(auth, "claude-opus-4-5(8192)")
+	if resolvedModel != "claude-opus-4-5-20251101(8192)" {
+		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "claude-opus-4-5-20251101(8192)")
 	}
 }
 
@@ -212,9 +193,9 @@ func TestApplyOAuthModelAlias_ForceMappingSameBasePreservesSuffix(t *testing.T) 
 	t.Parallel()
 
 	aliases := map[string][]internalconfig.OAuthModelAlias{
-		"antigravity": {{
-			Name:         "gemini-2.5-pro",
-			Alias:        "gemini-2.5-pro(8192)",
+		"claude": {{
+			Name:         "claude-opus-4-5",
+			Alias:        "claude-opus-4-5(8192)",
 			ForceMapping: true,
 		}},
 	}
@@ -223,11 +204,11 @@ func TestApplyOAuthModelAlias_ForceMappingSameBasePreservesSuffix(t *testing.T) 
 	mgr.SetConfig(&internalconfig.Config{})
 	mgr.SetOAuthModelAlias(aliases)
 
-	auth := &Auth{ID: "test-auth-id", Provider: "antigravity"}
+	auth := &Auth{ID: "test-auth-id", Provider: "claude"}
 
-	resolvedModel := mgr.applyOAuthModelAlias(auth, "gemini-2.5-pro(8192)")
-	if resolvedModel != "gemini-2.5-pro(8192)" {
-		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "gemini-2.5-pro(8192)")
+	resolvedModel := mgr.applyOAuthModelAlias(auth, "claude-opus-4-5(8192)")
+	if resolvedModel != "claude-opus-4-5(8192)" {
+		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "claude-opus-4-5(8192)")
 	}
 }
 
@@ -239,15 +220,15 @@ func TestApplyOAuthModelAlias_PerAuthForceMappingSameBasePreservesSuffix(t *test
 
 	auth := &Auth{
 		ID:       "test-auth-id",
-		Provider: "antigravity",
+		Provider: "claude",
 		Attributes: map[string]string{
-			"model_aliases": `[{"name":"gemini-2.5-pro","alias":"gemini-2.5-pro(8192)","force-mapping":true}]`,
+			"model_aliases": `[{"name":"claude-opus-4-5","alias":"claude-opus-4-5(8192)","force-mapping":true}]`,
 		},
 	}
 
-	resolvedModel := mgr.applyOAuthModelAlias(auth, "gemini-2.5-pro(8192)")
-	if resolvedModel != "gemini-2.5-pro(8192)" {
-		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "gemini-2.5-pro(8192)")
+	resolvedModel := mgr.applyOAuthModelAlias(auth, "claude-opus-4-5(8192)")
+	if resolvedModel != "claude-opus-4-5(8192)" {
+		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "claude-opus-4-5(8192)")
 	}
 }
 
@@ -255,7 +236,7 @@ func TestApplyOAuthModelAlias_PerAuthOverridesGlobalAlias(t *testing.T) {
 	t.Parallel()
 
 	globalAliases := map[string][]internalconfig.OAuthModelAlias{
-		"codex": {{Name: "gpt-5-global", Alias: "gpt-5.5"}},
+		"claude": {{Name: "claude-global", Alias: "claude-sonnet-4-5"}},
 	}
 
 	mgr := NewManager(nil, nil, nil)
@@ -263,17 +244,17 @@ func TestApplyOAuthModelAlias_PerAuthOverridesGlobalAlias(t *testing.T) {
 	mgr.SetOAuthModelAlias(globalAliases)
 
 	auth := &Auth{
-		ID:       "codex-auth-id",
-		Provider: "codex",
+		ID:       "claude-auth-id",
+		Provider: "claude",
 		Attributes: map[string]string{
 			"auth_kind":     "oauth",
-			"model_aliases": `[{"name":"gpt-5.3-codex-spark","alias":"gpt-5.5"}]`,
+			"model_aliases": `[{"name":"claude-per-auth","alias":"claude-sonnet-4-5"}]`,
 		},
 	}
 
-	resolvedModel := mgr.applyOAuthModelAlias(auth, "gpt-5.5(high)")
-	if resolvedModel != "gpt-5.3-codex-spark(high)" {
-		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "gpt-5.3-codex-spark(high)")
+	resolvedModel := mgr.applyOAuthModelAlias(auth, "claude-sonnet-4-5(high)")
+	if resolvedModel != "claude-per-auth(high)" {
+		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "claude-per-auth(high)")
 	}
 }
 
@@ -284,17 +265,17 @@ func TestApplyOAuthModelAlias_PerAuthAliasSkipsAPIKey(t *testing.T) {
 	mgr.SetConfig(&internalconfig.Config{})
 
 	auth := &Auth{
-		ID:       "codex-api-key-auth",
-		Provider: "codex",
+		ID:       "claude-api-key-auth",
+		Provider: "claude",
 		Attributes: map[string]string{
 			"auth_kind":     "api_key",
-			"model_aliases": `[{"name":"gpt-5.3-codex-spark","alias":"gpt-5.5"}]`,
+			"model_aliases": `[{"name":"claude-per-auth","alias":"claude-sonnet-4-5"}]`,
 		},
 	}
 
-	resolvedModel := mgr.applyOAuthModelAlias(auth, "gpt-5.5")
-	if resolvedModel != "gpt-5.5" {
-		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "gpt-5.5")
+	resolvedModel := mgr.applyOAuthModelAlias(auth, "claude-sonnet-4-5")
+	if resolvedModel != "claude-sonnet-4-5" {
+		t.Errorf("applyOAuthModelAlias() model = %q, want %q", resolvedModel, "claude-sonnet-4-5")
 	}
 }
 
@@ -339,29 +320,29 @@ func TestApplyOAuthModelAliasWithResult_ForceMappingUsesConfigAliasNotRequestSuf
 	t.Parallel()
 	mgr := NewManager(nil, nil, nil)
 	mgr.SetOAuthModelAlias(map[string][]internalconfig.OAuthModelAlias{
-		"codex": {{
-			Name: "gpt-5.4", Alias: "gpt-5.4-fast", Fork: true, ForceMapping: true,
+		"claude": {{
+			Name: "claude-opus-4-5", Alias: "claude-opus-fast", Fork: true, ForceMapping: true,
 		}},
 	})
-	auth := &Auth{ID: "t", Provider: "codex"}
-	res := mgr.applyOAuthModelAliasWithResult(auth, "gpt-5.4-fast(high)")
-	if res.UpstreamModel != "gpt-5.4(high)" {
-		t.Fatalf("upstream = %q want gpt-5.4(high)", res.UpstreamModel)
+	auth := &Auth{ID: "t", Provider: "claude"}
+	res := mgr.applyOAuthModelAliasWithResult(auth, "claude-opus-fast(high)")
+	if res.UpstreamModel != "claude-opus-4-5(high)" {
+		t.Fatalf("upstream = %q want claude-opus-4-5(high)", res.UpstreamModel)
 	}
-	if res.OriginalAlias != "gpt-5.4-fast" {
-		t.Fatalf("OriginalAlias = %q want gpt-5.4-fast", res.OriginalAlias)
+	if res.OriginalAlias != "claude-opus-fast" {
+		t.Fatalf("OriginalAlias = %q want claude-opus-fast", res.OriginalAlias)
 	}
 }
 func TestApplyOAuthModelAliasWithResultPrefersExactSuffixedAlias(t *testing.T) {
 	t.Parallel()
 	manager := NewManager(nil, nil, nil)
 	manager.SetOAuthModelAlias(map[string][]internalconfig.OAuthModelAlias{
-		"codex": {
+		"claude": {
 			{Name: "base-upstream", Alias: "public", Fork: true},
 			{Name: "low-upstream", Alias: "public(low)", Fork: true, ForceMapping: true},
 		},
 	})
-	auth := &Auth{ID: "exact-suffix", Provider: "codex"}
+	auth := &Auth{ID: "exact-suffix", Provider: "claude"}
 	result := manager.applyOAuthModelAliasWithResult(auth, "public(low)")
 	if result.UpstreamModel != "low-upstream(low)" || !result.ForceMapping {
 		t.Fatalf("exact suffixed alias result = %+v, want low-upstream(low) with force mapping", result)
@@ -372,16 +353,16 @@ func TestApplyOAuthModelAliasWithResult_NoForceMappingPreservesRequestedModelInO
 	t.Parallel()
 	mgr := NewManager(nil, nil, nil)
 	mgr.SetOAuthModelAlias(map[string][]internalconfig.OAuthModelAlias{
-		"codex": {{
-			Name: "gpt-5.4", Alias: "gpt-5.4-fast", Fork: true, ForceMapping: false,
+		"claude": {{
+			Name: "claude-opus-4-5", Alias: "claude-opus-fast", Fork: true, ForceMapping: false,
 		}},
 	})
-	auth := &Auth{ID: "t", Provider: "codex"}
-	res := mgr.applyOAuthModelAliasWithResult(auth, "gpt-5.4-fast(high)")
+	auth := &Auth{ID: "t", Provider: "claude"}
+	res := mgr.applyOAuthModelAliasWithResult(auth, "claude-opus-fast(high)")
 	if res.ForceMapping {
 		t.Fatal("expected ForceMapping false")
 	}
-	if res.OriginalAlias != "gpt-5.4-fast(high)" {
+	if res.OriginalAlias != "claude-opus-fast(high)" {
 		t.Fatalf("OriginalAlias = %q want requested model when force-mapping off", res.OriginalAlias)
 	}
 }

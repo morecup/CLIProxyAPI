@@ -8,7 +8,6 @@ import (
 
 	"github.com/tidwall/sjson"
 
-	. "github.com/router-for-me/CLIProxyAPI/v7/internal/constant"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
@@ -35,111 +34,32 @@ type modelRouterSkipDetector interface {
 	HasModelRoutersExcept(string) bool
 }
 
-func preferExecutionProvider(providers []string, preferred string) []string {
-	preferred = strings.ToLower(strings.TrimSpace(preferred))
-	if preferred == "" || len(providers) < 2 {
-		return providers
-	}
-	preferredIndex := -1
-	for i := range providers {
-		if strings.ToLower(strings.TrimSpace(providers[i])) == preferred {
-			preferredIndex = i
-			break
-		}
-	}
-	if preferredIndex <= 0 {
-		return providers
-	}
-	out := make([]string, 0, len(providers))
-	out = append(out, providers[preferredIndex])
-	out = append(out, providers[:preferredIndex]...)
-	out = append(out, providers[preferredIndex+1:]...)
-	return out
-}
-
-func adjustExecutionProvidersForEntryProtocol(entryProtocol string, providers []string) []string {
-	if entryProtocol == Interactions {
-		return preferExecutionProvider(providers, GeminiInteractions)
-	}
-	if supportsNativeInteractionsEntryProtocol(entryProtocol) {
-		return providers
-	}
-	return excludeExecutionProvider(providers, GeminiInteractions)
-}
-
-func supportsNativeInteractionsEntryProtocol(entryProtocol string) bool {
-	switch entryProtocol {
-	case Interactions, OpenAI, OpenaiResponse, Claude, Gemini:
-		return true
-	default:
-		return false
-	}
-}
-
-func excludeExecutionProvider(providers []string, excluded string) []string {
-	excluded = strings.ToLower(strings.TrimSpace(excluded))
-	if excluded == "" || len(providers) == 0 {
-		return providers
-	}
-	excludedIndex := -1
-	for i := range providers {
-		if strings.ToLower(strings.TrimSpace(providers[i])) == excluded {
-			excludedIndex = i
-			break
-		}
-	}
-	if excludedIndex == -1 {
-		return providers
-	}
-	out := make([]string, 0, len(providers)-1)
-	out = append(out, providers[:excludedIndex]...)
-	out = append(out, providers[excludedIndex+1:]...)
-	return out
-}
-
 func (h *BaseAPIHandler) getRequestDetails(modelName string) (providers []string, normalizedModel string, err *interfaces.ErrorMessage) {
-	return h.getRequestDetailsWithOptions(modelName, false)
+	return h.getRequestDetailsWithOptions(modelName)
 }
 
-func validateNativeInteractionsExecution(entryProtocol string, execOptions modelExecutionOptions, routeDecision modelRouteDecision) *interfaces.ErrorMessage {
-	forcedProvider := strings.ToLower(strings.TrimSpace(execOptions.ForcedProvider))
-	if forcedProvider == "" || entryProtocol != Interactions {
-		return nil
-	}
-	if routeDecision.ExecutorPluginID != "" {
-		return nativeInteractionsExecutionError()
-	}
-	if routeProvider := strings.ToLower(strings.TrimSpace(routeDecision.Provider)); routeProvider != "" && routeProvider != forcedProvider {
-		return nativeInteractionsExecutionError()
-	}
-	return nil
-}
-
-func nativeInteractionsExecutionError() *interfaces.ErrorMessage {
+func forcedProviderExecutionError() *interfaces.ErrorMessage {
 	return &interfaces.ErrorMessage{
 		StatusCode: http.StatusBadRequest,
-		Error:      fmt.Errorf("agent is only supported for native interactions execution"),
+		Error:      fmt.Errorf("forced provider conflicts with model routing decision"),
 	}
 }
 
 // providersForExecution resolves the providers and normalized model for a request. When a model
 // router selected a built-in provider, it skips model->provider resolution and uses the router's
 // provider (with an optional target model); otherwise it falls back to the registry-based path.
-func (h *BaseAPIHandler) providersForExecution(modelName, originalRequestedModel string, allowImageModel bool, routeDecision modelRouteDecision, execOptions modelExecutionOptions) ([]string, string, *interfaces.ErrorMessage) {
+func (h *BaseAPIHandler) providersForExecution(modelName, originalRequestedModel string, routeDecision modelRouteDecision, execOptions modelExecutionOptions) ([]string, string, *interfaces.ErrorMessage) {
 	forcedProvider := strings.ToLower(strings.TrimSpace(execOptions.ForcedProvider))
 	if forcedProvider != "" {
 		if routeDecision.ExecutorPluginID != "" {
-			return nil, "", nativeInteractionsExecutionError()
+			return nil, "", forcedProviderExecutionError()
 		}
 		if routeProvider := strings.ToLower(strings.TrimSpace(routeDecision.Provider)); routeProvider != "" && routeProvider != forcedProvider {
-			return nil, "", nativeInteractionsExecutionError()
+			return nil, "", forcedProviderExecutionError()
 		}
 		normalizedModel := strings.TrimSpace(modelName)
 		if normalizedModel == "" {
 			normalizedModel = strings.TrimSpace(originalRequestedModel)
-		}
-		if errMsg := h.validateImageOnlyModel(normalizedModel, allowImageModel); errMsg != nil {
-			return nil, "", errMsg
 		}
 		return []string{forcedProvider}, normalizedModel, nil
 	}
@@ -148,15 +68,12 @@ func (h *BaseAPIHandler) providersForExecution(modelName, originalRequestedModel
 		if routeDecision.Model != "" {
 			normalizedModel = routeDecision.Model
 		}
-		if errMsg := h.validateImageOnlyModel(normalizedModel, allowImageModel); errMsg != nil {
-			return nil, "", errMsg
-		}
 		return []string{routeDecision.Provider}, normalizedModel, nil
 	}
-	return h.getRequestDetailsWithOptions(modelName, allowImageModel)
+	return h.getRequestDetailsWithOptions(modelName)
 }
 
-func (h *BaseAPIHandler) getRequestDetailsWithOptions(modelName string, allowImageModel bool) (providers []string, normalizedModel string, err *interfaces.ErrorMessage) {
+func (h *BaseAPIHandler) getRequestDetailsWithOptions(modelName string) (providers []string, normalizedModel string, err *interfaces.ErrorMessage) {
 	resolvedModelName := modelName
 	initialSuffix := thinking.ParseSuffix(modelName)
 	if initialSuffix.ModelName == "auto" {
@@ -180,10 +97,6 @@ func (h *BaseAPIHandler) getRequestDetailsWithOptions(modelName string, allowIma
 
 	parsed := thinking.ParseSuffix(resolvedModelName)
 	baseModel := strings.TrimSpace(parsed.ModelName)
-
-	if errMsg := h.validateImageOnlyModel(baseModel, allowImageModel); errMsg != nil {
-		return nil, "", errMsg
-	}
 
 	if h != nil && h.AuthManager != nil && h.AuthManager.HomeEnabled() {
 		return []string{"home"}, resolvedModelName, nil
@@ -221,37 +134,6 @@ func (h *BaseAPIHandler) getRequestDetailsWithOptions(modelName string, allowIma
 	// The thinking suffix is preserved in the model name itself, so no
 	// metadata-based configuration passing is needed.
 	return providers, resolvedModelName, nil
-}
-
-func (h *BaseAPIHandler) validateImageOnlyModel(modelName string, allowImageModel bool) *interfaces.ErrorMessage {
-	baseModel := strings.TrimSpace(thinking.ParseSuffix(modelName).ModelName)
-	if baseModel == "" {
-		baseModel = strings.TrimSpace(modelName)
-	}
-	if isOpenAIImageOnlyModel(baseModel) && !allowImageModel {
-		return &interfaces.ErrorMessage{
-			StatusCode: http.StatusServiceUnavailable,
-			Error:      fmt.Errorf("model %s is only supported on /v1/images/generations and /v1/images/edits", routeModelBaseName(baseModel)),
-		}
-	}
-	return nil
-}
-
-func isOpenAIImageOnlyModel(model string) bool {
-	switch strings.ToLower(strings.TrimSpace(routeModelBaseName(model))) {
-	case "gpt-image-1.5", "gpt-image-2", "grok-imagine-image", "grok-imagine-image-quality", "grok-imagine-image-2.0":
-		return true
-	default:
-		return false
-	}
-}
-
-func routeModelBaseName(model string) string {
-	model = strings.TrimSpace(model)
-	if idx := strings.LastIndex(model, "/"); idx >= 0 && idx < len(model)-1 {
-		return strings.TrimSpace(model[idx+1:])
-	}
-	return model
 }
 
 func cloneBytes(src []byte) []byte {

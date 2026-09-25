@@ -302,7 +302,7 @@ func TestClaudeInputTokenStateSkipsUnsupportedFlows(t *testing.T) {
 		upstreamFormat sdktranslator.Format
 		responseFormat sdktranslator.Format
 	}{
-		{name: "non-Claude source", sourceFormat: sdktranslator.FormatOpenAI, upstreamFormat: sdktranslator.FormatGemini, responseFormat: sdktranslator.FormatClaude},
+		{name: "non-Claude source", sourceFormat: sdktranslator.FormatOpenAI, upstreamFormat: sdktranslator.FormatOpenAI, responseFormat: sdktranslator.FormatClaude},
 		{name: "Claude passthrough", sourceFormat: sdktranslator.FormatClaude, upstreamFormat: sdktranslator.FormatClaude, responseFormat: sdktranslator.FormatClaude},
 		{name: "non-Claude response", sourceFormat: sdktranslator.FormatClaude, upstreamFormat: sdktranslator.FormatOpenAI, responseFormat: sdktranslator.FormatOpenAI},
 	}

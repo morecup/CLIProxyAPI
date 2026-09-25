@@ -106,7 +106,7 @@ type reviewedInPlaceByteWrite struct {
 var reviewedInPlaceByteWrites = map[string]reviewedInPlaceByteWrite{
 	"internal/runtime/executor/claude_signing.go":         {2, "writes CCH digits into bytes.Clone(body); the caller's body is never touched"},
 	"internal/runtime/executor/helps/claude_mcp_alias.go": {1, "copies an HMAC sum into a local fixed-size digest array"},
-	"internal/client/codex/live/tcp_proxy.go":             {1, "copies header and payload into a freshly allocated frame"},
+	"internal/claudedesktop/prompt/sdk_resume_history.go": {1, "shifts elements of a locally built []row slice; no byte buffer is shared"},
 	"internal/home/client.go":                             {1, "zeroes a secret buffer after json.Unmarshal has copied every value out"},
 	"internal/pluginstore/auth.go":                        {1, "zeroes a locally built credential buffer after base64 encoding copied it out"},
 }

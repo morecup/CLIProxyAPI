@@ -8,6 +8,20 @@ import (
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
 )
 
+// LoginOptions contains options for the login processes.
+// It provides configuration for authentication flows including browser behavior
+// and interactive prompting capabilities.
+type LoginOptions struct {
+	// NoBrowser indicates whether to skip opening the browser automatically.
+	NoBrowser bool
+
+	// CallbackPort overrides the local OAuth callback port when set (>0).
+	CallbackPort int
+
+	// Prompt allows the caller to provide interactive input when needed.
+	Prompt func(prompt string) (string, error)
+}
+
 // DoClaudeLogin runs the Claude Desktop email magic-link and enrollment flow.
 //
 // Parameters:

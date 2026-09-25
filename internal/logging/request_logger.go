@@ -12,12 +12,10 @@ import (
 )
 
 const (
-	WebsocketTimelineSourceContextKey    = "WEBSOCKET_TIMELINE_SOURCE"
-	APIRequestSourceContextKey           = "API_REQUEST_SOURCE"
-	DeferredAPIRequestContextKey         = "DEFERRED_API_REQUEST"
-	APIResponseSourceContextKey          = "API_RESPONSE_SOURCE"
-	APIResponseCapturedContextKey        = "API_RESPONSE_CAPTURED"
-	APIWebsocketTimelineSourceContextKey = "API_WEBSOCKET_TIMELINE_SOURCE"
+	APIRequestSourceContextKey    = "API_REQUEST_SOURCE"
+	DeferredAPIRequestContextKey  = "DEFERRED_API_REQUEST"
+	APIResponseSourceContextKey   = "API_RESPONSE_SOURCE"
+	APIResponseCapturedContextKey = "API_RESPONSE_CAPTURED"
 )
 
 // DeferredAPIRequest builds an upstream request log only when an error log needs it.
@@ -36,17 +34,15 @@ type RequestLogger interface {
 	//   - statusCode: The response status code
 	//   - responseHeaders: The response headers
 	//   - response: The raw response data
-	//   - websocketTimeline: Optional downstream websocket event timeline
 	//   - apiRequest: The API request data
 	//   - apiResponse: The API response data
-	//   - apiWebsocketTimeline: Optional upstream websocket event timeline
 	//   - requestID: Optional request ID for log file naming
 	//   - requestTimestamp: When the request was received
 	//   - apiResponseTimestamp: When the API response was received
 	//
 	// Returns:
 	//   - error: An error if logging fails, nil otherwise
-	LogRequest(url, method string, requestHeaders map[string][]string, body []byte, statusCode int, responseHeaders map[string][]string, response, websocketTimeline, apiRequest, apiResponse, apiWebsocketTimeline []byte, apiResponseErrors []*interfaces.ErrorMessage, requestID string, requestTimestamp, apiResponseTimestamp time.Time) error
+	LogRequest(url, method string, requestHeaders map[string][]string, body []byte, statusCode int, responseHeaders map[string][]string, response, apiRequest, apiResponse []byte, apiResponseErrors []*interfaces.ErrorMessage, requestID string, requestTimestamp, apiResponseTimestamp time.Time) error
 
 	// LogStreamingRequest initiates logging for a streaming request and returns a writer for chunks.
 	//
@@ -107,16 +103,6 @@ type StreamingLogWriter interface {
 	// Returns:
 	//   - error: An error if writing fails, nil otherwise
 	WriteAPIResponse(apiResponse []byte) error
-
-	// WriteAPIWebsocketTimeline writes the upstream websocket timeline to the log.
-	// This should be called when upstream communication happened over websocket.
-	//
-	// Parameters:
-	//   - apiWebsocketTimeline: The upstream websocket event timeline
-	//
-	// Returns:
-	//   - error: An error if writing fails, nil otherwise
-	WriteAPIWebsocketTimeline(apiWebsocketTimeline []byte) error
 
 	// SetFirstChunkTimestamp sets the TTFB timestamp captured when first chunk was received.
 	//

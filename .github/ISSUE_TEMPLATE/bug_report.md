@@ -18,10 +18,10 @@ Our team doesn't have any GODs or ORACLEs or MIND READERs. Please make sure to a
 A clear and concise description of what the bug is.
 
 **CLI Type**
-What type of CLI account do you use?  (gemini, codex, claude code or openai-compatibility)
+What type of CLI account do you use?  (claude OAuth, claude code, or anthropic-compatible)
 
 **Model Name**
-What model are you using? (example: gemini-2.5-pro, claude-sonnet-4-20250514, gpt-5, etc.)
+What model are you using? (example: claude-sonnet-4-5-20250929, etc.)
 
 **LLM Client**
 What LLM Client are you using? (example: roo-code, cline, claude code, etc.)

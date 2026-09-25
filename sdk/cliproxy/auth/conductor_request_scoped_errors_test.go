@@ -791,19 +791,6 @@ func TestRequestScopedErrors_ResolvedFromManagerConfig(t *testing.T) {
 				},
 			},
 		},
-		OpenAICompatibility: []internalconfig.OpenAICompatibility{
-			{
-				Name:    "my-compat",
-				BaseURL: "https://compat.api",
-				RequestScopedErrors: []internalconfig.RequestScopedErrorRule{
-					{
-						Status: 400,
-						Match:  []string{"from_compat_config_rule"},
-						Action: "stop",
-					},
-				},
-			},
-		},
 	}
 	m := NewManager(nil, nil, nil)
 	m.SetConfig(cfg)
@@ -814,30 +801,15 @@ func TestRequestScopedErrors_ResolvedFromManagerConfig(t *testing.T) {
 		Status:     StatusActive,
 		Attributes: map[string]string{AttributeConfigIndex: "0", "priority": "10"},
 	}
-	authCompat := &Auth{
-		ID:       "auth-config-resolve-compat",
-		Provider: "openai-compatible-my-compat",
-		Status:   StatusActive,
-		Attributes: map[string]string{
-			AttributeConfigIndex: "0",
-			"compat_name":        "my-compat",
-			"priority":           "10",
-		},
-	}
 
 	reg := registry.GetGlobalRegistry()
 	reg.RegisterClient(auth1.ID, "claude", []*registry.ModelInfo{{ID: "claude-3"}})
-	reg.RegisterClient(authCompat.ID, "openai-compatible-my-compat", []*registry.ModelInfo{{ID: "compat-model"}})
 	t.Cleanup(func() {
 		reg.UnregisterClient(auth1.ID)
-		reg.UnregisterClient(authCompat.ID)
 	})
 
 	if _, err := m.Register(context.Background(), auth1); err != nil {
 		t.Fatalf("register auth1: %v", err)
-	}
-	if _, err := m.Register(context.Background(), authCompat); err != nil {
-		t.Fatalf("register authCompat: %v", err)
 	}
 
 	execClaude := &mockCustomErrorExecutor{
@@ -846,14 +818,7 @@ func TestRequestScopedErrors_ResolvedFromManagerConfig(t *testing.T) {
 			return cliproxyexecutor.Response{}, customStatusError{code: 400, msg: "from_config_rule occurred"}
 		},
 	}
-	execCompat := &mockCustomErrorExecutor{
-		identifier: "openai-compatible-my-compat",
-		executeFn: func(ctx context.Context, auth *Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-			return cliproxyexecutor.Response{}, customStatusError{code: 400, msg: "from_compat_config_rule occurred"}
-		},
-	}
 	m.RegisterExecutor(execClaude)
-	m.RegisterExecutor(execCompat)
 
 	_, errExec1 := m.Execute(context.Background(), []string{"claude"}, cliproxyexecutor.Request{Model: "claude-3"}, cliproxyexecutor.Options{})
 	if errExec1 == nil {
@@ -862,15 +827,6 @@ func TestRequestScopedErrors_ResolvedFromManagerConfig(t *testing.T) {
 	a1, _ := m.GetByID("auth-config-resolve-1")
 	if a1.Unavailable || !a1.NextRetryAfter.IsZero() {
 		t.Fatal("expected auth1 not to be in cooldown when resolved from manager config")
-	}
-
-	_, errExec2 := m.Execute(context.Background(), []string{"openai-compatible-my-compat"}, cliproxyexecutor.Request{Model: "compat-model"}, cliproxyexecutor.Options{})
-	if errExec2 == nil {
-		t.Fatal("expected error, got nil")
-	}
-	aCompat, _ := m.GetByID("auth-config-resolve-compat")
-	if aCompat.Unavailable || !aCompat.NextRetryAfter.IsZero() {
-		t.Fatal("expected aCompat not to be in cooldown when resolved from manager config")
 	}
 }
 
@@ -1105,63 +1061,6 @@ func TestRequestScopedErrors_TransientCooldownDisabled_ForceCooldownStillApplies
 	a1, _ := m.GetByID("auth-transient-disabled-1")
 	if !a1.Unavailable || a1.NextRetryAfter.IsZero() {
 		t.Fatal("expected auth1 to be in cooldown despite transientErrorCooldownSeconds=-1")
-	}
-}
-
-func TestRequestScopedErrors_OpenAICompat_BareProviderKeyFallback(t *testing.T) {
-	previous := quotaCooldownDisabled.Load()
-	quotaCooldownDisabled.Store(false)
-	t.Cleanup(func() { quotaCooldownDisabled.Store(previous) })
-
-	cfg := &internalconfig.Config{
-		OpenAICompatibility: []internalconfig.OpenAICompatibility{
-			{
-				Name:    "bare-compat",
-				BaseURL: "https://compat.api",
-				RequestScopedErrors: []internalconfig.RequestScopedErrorRule{
-					{
-						Status: 400,
-						Match:  []string{"from_bare_compat_rule"},
-						Action: "stop",
-					},
-				},
-			},
-		},
-	}
-	m := NewManager(nil, nil, nil)
-	m.SetConfig(cfg)
-
-	authCompat := &Auth{
-		ID:       "auth-bare-compat",
-		Provider: "openai-compatible-bare-compat",
-		Status:   StatusActive,
-	}
-
-	reg := registry.GetGlobalRegistry()
-	reg.RegisterClient(authCompat.ID, "openai-compatible-bare-compat", []*registry.ModelInfo{{ID: "bare-model"}})
-	t.Cleanup(func() {
-		reg.UnregisterClient(authCompat.ID)
-	})
-
-	if _, err := m.Register(context.Background(), authCompat); err != nil {
-		t.Fatalf("register authCompat: %v", err)
-	}
-
-	execCompat := &mockCustomErrorExecutor{
-		identifier: "openai-compatible-bare-compat",
-		executeFn: func(ctx context.Context, auth *Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-			return cliproxyexecutor.Response{}, customStatusError{code: 400, msg: "from_bare_compat_rule"}
-		},
-	}
-	m.RegisterExecutor(execCompat)
-
-	_, errExec := m.Execute(context.Background(), []string{"openai-compatible-bare-compat"}, cliproxyexecutor.Request{Model: "bare-model"}, cliproxyexecutor.Options{})
-	if errExec == nil {
-		t.Fatal("expected error, got nil")
-	}
-	aCompat, _ := m.GetByID("auth-bare-compat")
-	if aCompat.Unavailable || !aCompat.NextRetryAfter.IsZero() {
-		t.Fatal("expected aCompat not to be in cooldown from bare provider fallback")
 	}
 }
 

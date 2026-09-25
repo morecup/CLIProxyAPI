@@ -27,13 +27,7 @@ type apiKeyModelRoutingSnapshot struct {
 }
 
 func isConfiguredModelRoutingAuth(auth *Auth) bool {
-	if auth != nil && auth.AuthKind() == AuthKindAPIKey {
-		return true
-	}
-	if auth == nil || auth.AuthSourceKind() != AuthSourceConfig || auth.Attributes == nil {
-		return false
-	}
-	return strings.TrimSpace(auth.Attributes["compat_name"]) != ""
+	return auth != nil && auth.AuthKind() == AuthKindAPIKey
 }
 
 func (m *Manager) loadAPIKeyModelRouting() *apiKeyModelRoutingSnapshot {
@@ -55,46 +49,6 @@ func ResolvedAPIKeyModelInfo(req cliproxyexecutor.Request) (*registry.ModelInfo,
 		return nil, false
 	}
 	return modelInfo, true
-}
-
-// CodexAPIKeyModelIsCompat reports whether the selected codex-api-key model has
-// is-compat enabled. When true and codex.optimize-multi-agent-v2 is also true,
-// Codex MultiAgentV2 agent_message items are converted into portable Responses
-// message/user input for third-party Responses-compatible endpoints.
-func CodexAPIKeyModelIsCompat(cfg *internalconfig.Config, auth *Auth, model string) bool {
-	if cfg == nil || auth == nil || !strings.EqualFold(strings.TrimSpace(auth.Provider), "codex") {
-		return false
-	}
-	entry := resolveCodexAPIKeyConfig(cfg, auth)
-	if entry == nil || len(entry.Models) == 0 {
-		return false
-	}
-	requested := strings.TrimSpace(model)
-	if requested == "" {
-		return false
-	}
-	baseModel := strings.TrimSpace(thinking.ParseSuffix(requested).ModelName)
-	if baseModel == "" {
-		baseModel = requested
-	}
-	for i := range entry.Models {
-		name := strings.TrimSpace(entry.Models[i].Name)
-		alias := strings.TrimSpace(entry.Models[i].Alias)
-		if name == "" {
-			name = alias
-		}
-		if alias == "" {
-			alias = name
-		}
-		if name == "" {
-			continue
-		}
-		if strings.EqualFold(name, requested) || strings.EqualFold(name, baseModel) ||
-			strings.EqualFold(alias, requested) || strings.EqualFold(alias, baseModel) {
-			return entry.Models[i].IsCompat
-		}
-	}
-	return false
 }
 
 func (m *Manager) attachResolvedAPIKeyModelInfo(req cliproxyexecutor.Request, auth *Auth, routeModel, upstreamModel string) cliproxyexecutor.Request {
@@ -156,38 +110,9 @@ func compileAPIKeyModelCapabilitiesForAuth(cfg *internalconfig.Config, auth *Aut
 	}
 	out := make(map[string][]apiKeyModelCapabilityRoute)
 	switch strings.ToLower(strings.TrimSpace(auth.Provider)) {
-	case "gemini":
-		if entry := resolveGeminiAPIKeyConfig(cfg, auth); entry != nil {
-			compileConfiguredModelCapabilities(out, entry.Models, "gemini")
-		}
-	case "gemini-interactions":
-		if entry := resolveInteractionsAPIKeyConfig(cfg, auth); entry != nil {
-			compileConfiguredModelCapabilities(out, entry.Models, "interactions")
-		}
 	case "claude", "anthropic-compatible":
 		if entry := resolveClaudeAPIKeyConfig(cfg, auth); entry != nil {
 			compileConfiguredModelCapabilities(out, entry.Models, "claude")
-		}
-	case "codex":
-		if entry := resolveCodexAPIKeyConfig(cfg, auth); entry != nil {
-			compileConfiguredModelCapabilities(out, entry.Models, "codex")
-		}
-	case "xai":
-		if entry := resolveXAIAPIKeyConfig(cfg, auth); entry != nil {
-			compileConfiguredModelCapabilities(out, entry.Models, "xai")
-		}
-	case "vertex":
-		if entry := resolveVertexAPIKeyConfig(cfg, auth); entry != nil {
-			compileConfiguredModelCapabilities(out, entry.Models, "gemini")
-		}
-	default:
-		providerKey, compatName := "", ""
-		if auth.Attributes != nil {
-			providerKey = strings.TrimSpace(auth.Attributes["provider_key"])
-			compatName = strings.TrimSpace(auth.Attributes["compat_name"])
-		}
-		if entry := resolveOpenAICompatConfigForAuth(cfg, auth, providerKey, compatName); entry != nil {
-			compileOpenAICompatibleModelCapabilities(out, entry.Models)
 		}
 	}
 	if len(out) == 0 {
@@ -207,16 +132,6 @@ func compileConfiguredModelCapabilities[T interface {
 			isCompat = compatModel.GetIsCompat()
 		}
 		addConfiguredModelCapability(out, models[i].GetName(), models[i].GetAlias(), modelType, models[i].GetThinking(), isCompat)
-	}
-}
-
-func compileOpenAICompatibleModelCapabilities(out map[string][]apiKeyModelCapabilityRoute, models []internalconfig.OpenAICompatibilityModel) {
-	for i := range models {
-		support := models[i].Thinking
-		if support == nil && !models[i].Image {
-			support = &registry.ThinkingSupport{Levels: []string{"low", "medium", "high"}}
-		}
-		addConfiguredModelCapability(out, models[i].Name, models[i].Alias, "openai-compatibility", support, models[i].IsCompat)
 	}
 }
 

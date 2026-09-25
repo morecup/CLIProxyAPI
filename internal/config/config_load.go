@@ -75,8 +75,6 @@ func LoadConfigOptional(configFile string, optional bool) (*Config, error) {
 	cfg.DisableCooling = false
 	cfg.SaveCooldownStatus = false
 	cfg.TransientErrorCooldownSeconds = 0
-	cfg.DisableImageGeneration = DisableImageGenerationOff
-	cfg.WebsocketAuth = true
 	cfg.Pprof.Enable = false
 	cfg.Pprof.Addr = DefaultPprofAddr
 	cfg.RemoteManagement.PanelGitHubRepository = DefaultPanelGitHubRepository
@@ -93,9 +91,6 @@ func LoadConfigOptional(configFile string, optional bool) (*Config, error) {
 
 	cfg.CredentialConcurrency = cfg.CredentialConcurrency.WithDefaults()
 	if errValidate := cfg.CredentialInFlight.Validate(); errValidate != nil {
-		return nil, errValidate
-	}
-	if errValidate := cfg.Codex.LiveMediaRelay.Validate(); errValidate != nil {
 		return nil, errValidate
 	}
 	if errValidate := cfg.ValidateCredentialWeights(); errValidate != nil {
@@ -150,31 +145,10 @@ func LoadConfigOptional(configFile string, optional bool) (*Config, error) {
 		return nil, errResolvePluginsDir
 	}
 
-	// Sanitize Gemini API key configuration and migrate legacy entries.
-	cfg.SanitizeGeminiKeys()
-
-	// Sanitize native Interactions API key configuration.
-	cfg.SanitizeInteractionsKeys()
-
-	// Sanitize Vertex-compatible API keys.
-	cfg.SanitizeVertexCompatKeys()
-
-	// Sanitize Codex keys: drop entries without base-url
-	cfg.SanitizeCodexKeys()
-
-	// Sanitize xAI keys: drop entries without base-url
-	cfg.SanitizeXAIKeys()
-
-	// Sanitize Codex header defaults.
-	cfg.SanitizeCodexHeaderDefaults()
-
 	cfg.SanitizeClaudeDesktop()
 
 	// Sanitize Claude key headers
 	cfg.SanitizeClaudeKeys()
-
-	// Sanitize OpenAI compatibility providers: drop entries without base-url
-	cfg.SanitizeOpenAICompatibility()
 
 	// Normalize OAuth provider model exclusion map.
 	cfg.OAuthExcludedModels = NormalizeOAuthExcludedModels(cfg.OAuthExcludedModels)

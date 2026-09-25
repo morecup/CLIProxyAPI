@@ -18,9 +18,8 @@ import (
 )
 
 const (
-	modelRegistrationMaxWorkersPerCategory         = 5
-	modelRegistrationMaxWorkersOpenAICompatibility = 20
-	homeSubscriberPreAckRetryBackoff               = 100 * time.Millisecond
+	modelRegistrationMaxWorkersPerCategory = 5
+	homeSubscriberPreAckRetryBackoff       = 100 * time.Millisecond
 )
 
 const (
@@ -31,7 +30,7 @@ const (
 type modelRegistrationTask struct {
 	phase    int
 	category string
-	run      func(*openAICompatibilityRegistrationCache)
+	run      func()
 }
 
 type executorRegistrationOptions struct {
@@ -173,8 +172,8 @@ func (s *Service) registerModelsForAuthBatch(ctx context.Context, auths []*corea
 		tasks = append(tasks, modelRegistrationTask{
 			phase:    modelRegistrationPhase(authForRegistration),
 			category: modelRegistrationCategory(authForRegistration),
-			run: func(compatCache *openAICompatibilityRegistrationCache) {
-				s.completeModelRegistrationForAuthWithCache(ctx, authForRegistration, compatCache)
+			run: func() {
+				s.completeModelRegistrationForAuth(ctx, authForRegistration)
 			},
 		})
 	}
@@ -199,12 +198,11 @@ func (s *Service) runModelRegistrationTasks(ctx context.Context, tasks []modelRe
 		otherTasks = append(otherTasks, task)
 	}
 
-	compatCache := s.newOpenAICompatibilityRegistrationCache()
-	s.runModelRegistrationTaskPhase(ctx, configAPIKeyTasks, compatCache)
-	s.runModelRegistrationTaskPhase(ctx, otherTasks, compatCache)
+	s.runModelRegistrationTaskPhase(ctx, configAPIKeyTasks)
+	s.runModelRegistrationTaskPhase(ctx, otherTasks)
 }
 
-func (s *Service) runModelRegistrationTaskPhase(ctx context.Context, tasks []modelRegistrationTask, compatCache *openAICompatibilityRegistrationCache) {
+func (s *Service) runModelRegistrationTaskPhase(ctx context.Context, tasks []modelRegistrationTask) {
 	if len(tasks) == 0 {
 		return
 	}
@@ -229,7 +227,7 @@ func (s *Service) runModelRegistrationTaskPhase(ctx context.Context, tasks []mod
 	for _, category := range order {
 		group := grouped[category]
 		workers := len(group)
-		maxWorkers := modelRegistrationMaxWorkersForCategory(category)
+		maxWorkers := modelRegistrationMaxWorkersPerCategory
 		if workers > maxWorkers {
 			workers = maxWorkers
 		}
@@ -248,7 +246,7 @@ func (s *Service) runModelRegistrationTaskPhase(ctx context.Context, tasks []mod
 						return
 					default:
 					}
-					task.run(compatCache)
+					task.run()
 				}
 			}()
 		}
@@ -278,13 +276,6 @@ func modelRegistrationCategory(auth *coreauth.Auth) string {
 		return "unknown"
 	}
 	provider := strings.ToLower(strings.TrimSpace(auth.Provider))
-	if compatProviderKey, _, compatDetected := openAICompatInfoFromAuth(auth); compatDetected {
-		if compatProviderKey != "" {
-			provider = compatProviderKey
-		} else {
-			provider = "openai-compatibility"
-		}
-	}
 	if provider == "" {
 		provider = "unknown"
 	}
@@ -294,14 +285,6 @@ func modelRegistrationCategory(auth *coreauth.Auth) string {
 		return provider
 	}
 	return provider + ":" + authKind
-}
-
-func modelRegistrationMaxWorkersForCategory(category string) int {
-	category = strings.ToLower(strings.TrimSpace(category))
-	if strings.HasPrefix(category, "openai-compatible-") || strings.HasPrefix(category, "openai-compatibility") {
-		return modelRegistrationMaxWorkersOpenAICompatibility
-	}
-	return modelRegistrationMaxWorkersPerCategory
 }
 
 func (s *Service) registerModelRefreshCallback() {
@@ -339,8 +322,8 @@ func (s *Service) registerModelRefreshCallback() {
 			tasks = append(tasks, modelRegistrationTask{
 				phase:    modelRegistrationPhase(authForRefresh),
 				category: modelRegistrationCategory(authForRefresh),
-				run: func(compatCache *openAICompatibilityRegistrationCache) {
-					if s.refreshModelRegistrationForAuthWithCache(authForRefresh, compatCache) {
+				run: func() {
+					if s.refreshModelRegistrationForAuth(authForRefresh) {
 						refreshedMu.Lock()
 						refreshed++
 						refreshedMu.Unlock()

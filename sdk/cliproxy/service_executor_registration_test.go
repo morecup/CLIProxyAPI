@@ -67,7 +67,6 @@ func TestRegisterAvailableExecutors(t *testing.T) {
 	}
 	expectedPluginHost = service.pluginHost
 	expectedManager = service.coreManager
-	service.ensureWebsocketGateway()
 
 	service.registerAvailableExecutors(nil, executorRegistrationOptions{
 		includeBaseline: true,
@@ -79,16 +78,8 @@ func TestRegisterAvailableExecutors(t *testing.T) {
 	}
 
 	providers := []string{
-		"codex",
 		"claude",
-		"gemini",
-		"gemini-interactions",
-		"vertex",
-		"aistudio",
-		"antigravity",
-		"kimi",
-		"xai",
-		"openai-compatibility",
+		"anthropic-compatible",
 		"plugin-provider",
 	}
 	for _, provider := range providers {
@@ -161,71 +152,7 @@ func TestSyncPluginModelRuntimePreservesSDKExecutorUnlessForced(t *testing.T) {
 
 	service.registerExecutorForAuth(auth, true)
 	got, ok = manager.Executor(custom.Identifier())
-	if !ok {
-		t.Fatal("forced registration removed executor")
-	}
-	if _, replaced := got.(*runtimeexecutor.OpenAICompatExecutor); !replaced {
-		t.Fatalf("forced registration kept %T, want *executor.OpenAICompatExecutor", got)
-	}
-}
-
-func TestRegisterExecutorForAuth_OpenAICompatUsesNamespacedProviderKey(t *testing.T) {
-	testCases := []struct {
-		name  string
-		auths []*coreauth.Auth
-	}{
-		{
-			name: "native first",
-			auths: []*coreauth.Auth{
-				{ID: "native-kimi", Provider: "kimi"},
-				openAICompatKimiAuth(),
-			},
-		},
-		{
-			name: "compat first",
-			auths: []*coreauth.Auth{
-				openAICompatKimiAuth(),
-				{ID: "native-kimi", Provider: "kimi"},
-			},
-		},
-	}
-
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
-			service := &Service{
-				cfg:         &config.Config{},
-				coreManager: coreauth.NewManager(nil, nil, nil),
-			}
-
-			service.registerExecutorsForAuths(tt.auths, true)
-
-			nativeExecutor, okNative := service.coreManager.Executor("kimi")
-			if !okNative {
-				t.Fatal("expected native kimi executor")
-			}
-			if _, okKimi := nativeExecutor.(*runtimeexecutor.KimiExecutor); !okKimi {
-				t.Fatalf("native executor type = %T, want *executor.KimiExecutor", nativeExecutor)
-			}
-
-			compatExecutor, okCompat := service.coreManager.Executor("openai-compatible-kimi")
-			if !okCompat {
-				t.Fatal("expected namespaced OpenAI-compatible executor")
-			}
-			if _, okOpenAICompat := compatExecutor.(*runtimeexecutor.OpenAICompatExecutor); !okOpenAICompat {
-				t.Fatalf("compat executor type = %T, want *executor.OpenAICompatExecutor", compatExecutor)
-			}
-		})
-	}
-}
-
-func openAICompatKimiAuth() *coreauth.Auth {
-	return &coreauth.Auth{
-		ID:       "compat-kimi",
-		Provider: "openai-compatibility",
-		Label:    "kimi",
-		Attributes: map[string]string{
-			"compat_name":  "kimi",
-			"provider_key": "kimi",
-		},
+	if !ok || got != custom {
+		t.Fatal("forced registration removed the SDK executor for an unknown provider")
 	}
 }

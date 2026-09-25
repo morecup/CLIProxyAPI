@@ -65,7 +65,7 @@ func assertOptionalConfigFallback(t *testing.T, cfg *Config) {
 	if errValidate := cfg.CredentialInFlight.Validate(); errValidate != nil {
 		t.Fatalf("CredentialInFlight.Validate() error = %v", errValidate)
 	}
-	if cfg.ErrorLogsMaxFiles != 0 || cfg.WebsocketAuth || cfg.CredentialConcurrency != (CredentialConcurrencyConfig{}) {
+	if cfg.ErrorLogsMaxFiles != 0 || cfg.CredentialConcurrency != (CredentialConcurrencyConfig{}) {
 		t.Fatalf("fallback config changed existing empty-config defaults: %#v", cfg)
 	}
 }

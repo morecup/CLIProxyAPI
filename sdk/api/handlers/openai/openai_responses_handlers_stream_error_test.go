@@ -128,7 +128,6 @@ func TestResponsesHandlerEmitsFailureWhenExecutorStopsAfterPartialOutput(t *test
 
 	request := httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader(`{"model":"premature-responses-stream-model","input":"hi","stream":true}`))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
@@ -136,7 +135,7 @@ func TestResponsesHandlerEmitsFailureWhenExecutorStopsAfterPartialOutput(t *test
 		t.Fatalf("status = %d, want 200 after stream start; body=%s", recorder.Code, recorder.Body.String())
 	}
 	body := recorder.Body.String()
-	if !strings.Contains(body, "response.output_text.delta") || !strings.Contains(body, "event: response.failed") {
+	if !strings.Contains(body, "response.output_text.delta") || !strings.Contains(body, "event: error") {
 		t.Fatalf("handler did not preserve partial output and terminal failure: %q", body)
 	}
 	if !strings.Contains(body, "unexpected EOF") {
@@ -172,11 +171,10 @@ func TestResponsesHandlerCommitsValidFrameBeforeMalformedFrameInSameChunk(t *tes
 	router.POST("/v1/responses", h.Responses)
 	request := httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader(`{"model":"valid-then-malformed-responses-model","input":"hi","stream":true}`))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "response.output_text.delta") || !strings.Contains(recorder.Body.String(), "event: response.failed") {
+	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), "response.output_text.delta") || !strings.Contains(recorder.Body.String(), "event: error") {
 		t.Fatalf("valid then malformed response status=%d body=%q", recorder.Code, recorder.Body.String())
 	}
 }
@@ -303,7 +301,6 @@ func TestResponsesHandlerFlushesDataOnlyFrameBeforeStreamingError(t *testing.T) 
 
 	request := httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader(`{"model":"data-only-first-frame-responses-model","input":"hi","stream":true}`))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
@@ -311,7 +308,7 @@ func TestResponsesHandlerFlushesDataOnlyFrameBeforeStreamingError(t *testing.T) 
 		t.Fatalf("status = %d, want 200 after complete data frame; body=%q", recorder.Code, recorder.Body.String())
 	}
 	body := recorder.Body.String()
-	if !strings.Contains(body, "response.output_text.delta") || !strings.Contains(body, "event: response.failed") {
+	if !strings.Contains(body, "response.output_text.delta") || !strings.Contains(body, "event: error") {
 		t.Fatalf("data-only frame or terminal failure was lost: %q", body)
 	}
 }
@@ -338,7 +335,6 @@ func TestResponsesHandlerEmitsFailureWhenDataOnlyStreamClosesCleanly(t *testing.
 
 	request := httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader(`{"model":"data-only-clean-close-responses-model","input":"hi","stream":true}`))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
@@ -346,7 +342,7 @@ func TestResponsesHandlerEmitsFailureWhenDataOnlyStreamClosesCleanly(t *testing.
 		t.Fatalf("status = %d, want 200 after complete data frame; body=%q", recorder.Code, recorder.Body.String())
 	}
 	body := recorder.Body.String()
-	if !strings.Contains(body, "response.output_text.delta") || !strings.Contains(body, "event: response.failed") {
+	if !strings.Contains(body, "response.output_text.delta") || !strings.Contains(body, "event: error") {
 		t.Fatalf("clean close did not retain data and emit terminal failure: %q", body)
 	}
 	if strings.Contains(body, "event: response.completed") {
@@ -528,7 +524,7 @@ func TestForwardResponsesStreamExposesTerminalErrors(t *testing.T) {
 	}
 }
 
-func TestForwardResponsesStreamUsesResponseFailedForCodex(t *testing.T) {
+func TestForwardResponsesStreamEmitsErrorEventForUpstreamFailure(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	base := handlers.NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, nil)
@@ -537,7 +533,6 @@ func TestForwardResponsesStreamUsesResponseFailedForCodex(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-	c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
@@ -554,18 +549,15 @@ func TestForwardResponsesStreamUsesResponseFailedForCodex(t *testing.T) {
 
 	h.forwardResponsesStream(c, flusher, func(error) {}, data, errs, nil)
 	body := recorder.Body.String()
-	if !strings.Contains(body, "event: response.failed") {
-		t.Fatalf("missing response.failed event: %q", body)
+	if !strings.Contains(body, "event: error") {
+		t.Fatalf("missing error event: %q", body)
 	}
-	if strings.Contains(body, "event: error") {
-		t.Fatalf("unexpected legacy error event for Codex: %q", body)
-	}
-	if !strings.Contains(body, `"type":"invalid_request"`) || !strings.Contains(body, `"code":"cyber_policy"`) {
-		t.Fatalf("missing nested Codex error detail: %q", body)
+	if !strings.Contains(body, `"code":"cyber_policy"`) || !strings.Contains(body, `"blocked"`) {
+		t.Fatalf("missing nested error detail: %q", body)
 	}
 }
 
-func TestForwardResponsesStreamExposesTransportErrorAfterOutputForCodex(t *testing.T) {
+func TestForwardResponsesStreamExposesTransportErrorAfterOutput(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	base := handlers.NewBaseAPIHandlers(&sdkconfig.SDKConfig{RequestLog: true}, nil)
@@ -574,7 +566,6 @@ func TestForwardResponsesStreamExposesTransportErrorAfterOutputForCodex(t *testi
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-	c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
@@ -590,11 +581,11 @@ func TestForwardResponsesStreamExposesTransportErrorAfterOutputForCodex(t *testi
 
 	h.forwardResponsesStream(c, flusher, func(error) {}, data, errs, framer)
 	body := recorder.Body.String()
-	if !strings.Contains(body, "event: response.failed") {
-		t.Fatalf("transport failure ended without response.failed: %q", body)
+	if !strings.Contains(body, "event: error") {
+		t.Fatalf("transport failure ended without error event: %q", body)
 	}
 	if !strings.Contains(body, "unexpected EOF") {
-		t.Fatalf("response.failed lost the upstream error: %q", body)
+		t.Fatalf("error event lost the upstream error: %q", body)
 	}
 
 	loggedValue, ok := c.Get("API_RESPONSE_ERROR")
@@ -671,7 +662,6 @@ func TestForwardResponsesStreamPreservesNestedResponseError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-	c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
 		t.Fatal("expected gin writer to implement http.Flusher")
@@ -686,9 +676,9 @@ func TestForwardResponsesStreamPreservesNestedResponseError(t *testing.T) {
 
 	h.forwardResponsesStream(c, flusher, func(error) {}, data, errs, framer)
 	body := recorder.Body.String()
-	for _, want := range []string{"nested response failure", "upstream_failed", "server_error"} {
+	for _, want := range []string{"nested response failure", "upstream_failed"} {
 		if !strings.Contains(body, want) {
-			t.Fatalf("response.failed lost nested response error field %q: %q", want, body)
+			t.Fatalf("error event lost nested response error field %q: %q", want, body)
 		}
 	}
 }
@@ -757,7 +747,6 @@ func TestForwardResponsesStreamSanitizesPayloadErrorsAndStopsAtFailure(t *testin
 			recorder := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(recorder)
 			c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-			c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 			flusher, ok := c.Writer.(http.Flusher)
 			if !ok {
 				t.Fatal("expected gin writer to implement http.Flusher")
@@ -778,8 +767,8 @@ func TestForwardResponsesStreamSanitizesPayloadErrorsAndStopsAtFailure(t *testin
 			if strings.Contains(body, "payload-secret") || strings.Contains(body, "event: response.completed") {
 				t.Fatalf("payload error leaked or accepted later completion: %q", body)
 			}
-			if strings.Count(body, "event: response.failed") != 1 || !strings.Contains(body, "[REDACTED]") {
-				t.Fatalf("payload error was not converted to one sanitized response.failed: %q", body)
+			if strings.Count(body, "event: error") != 1 || !strings.Contains(body, "[REDACTED]") {
+				t.Fatalf("payload error was not converted to one sanitized error event: %q", body)
 			}
 		})
 	}
@@ -792,7 +781,6 @@ func TestForwardResponsesStreamReportsDataOnlyErrorFlushedAtEOF(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-	c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
 		t.Fatal("expected gin writer to implement http.Flusher")
@@ -809,7 +797,7 @@ func TestForwardResponsesStreamReportsDataOnlyErrorFlushedAtEOF(t *testing.T) {
 	if canceled == nil || !strings.Contains(canceled.Error(), "failed at EOF") {
 		t.Fatalf("EOF error cancel = %v, body=%q", canceled, recorder.Body.String())
 	}
-	if strings.Count(recorder.Body.String(), "event: response.failed") != 1 {
+	if strings.Count(recorder.Body.String(), "event: error") != 1 {
 		t.Fatalf("EOF error terminal output = %q", recorder.Body.String())
 	}
 	if _, okLog := c.Get("API_RESPONSE_ERROR"); !okLog {
@@ -826,7 +814,6 @@ func TestForwardResponsesStreamDoesNotAppendFailureAfterTerminalEvent(t *testing
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-	c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
@@ -869,7 +856,6 @@ func TestForwardResponsesStreamFailsWhenUpstreamClosesWithoutTerminalEvent(t *te
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
-	c.Request.Header.Set("User-Agent", "Codex Desktop/26.803.41515")
 
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
@@ -884,10 +870,10 @@ func TestForwardResponsesStreamFailsWhenUpstreamClosesWithoutTerminalEvent(t *te
 
 	h.forwardResponsesStream(c, flusher, func(error) {}, data, errs, framer)
 	body := recorder.Body.String()
-	if !strings.Contains(body, "event: response.failed") {
-		t.Fatalf("unterminated stream ended without response.failed: %q", body)
+	if !strings.Contains(body, "event: error") {
+		t.Fatalf("unterminated stream ended without error event: %q", body)
 	}
 	if !strings.Contains(body, "closed before a terminal event") {
-		t.Fatalf("response.failed does not explain the premature close: %q", body)
+		t.Fatalf("error event does not explain the premature close: %q", body)
 	}
 }

@@ -52,9 +52,9 @@ type Auth struct {
 	ID string `json:"id"`
 	// Index is a stable runtime identifier derived from auth metadata (not persisted).
 	Index string `json:"-"`
-	// Provider is the upstream provider key (e.g. "gemini", "claude").
+	// Provider is the upstream provider key (e.g. "claude").
 	Provider string `json:"provider"`
-	// Prefix optionally namespaces models for routing (e.g., "teamA/gemini-3-pro-preview").
+	// Prefix optionally namespaces models for routing (e.g., "teamA/claude-sonnet-4-5").
 	Prefix string `json:"prefix,omitempty"`
 	// FileName stores the relative or absolute path of the backing auth file.
 	FileName string `json:"-"`
@@ -332,12 +332,10 @@ func (a *Auth) indexSeed() string {
 	}
 
 	provider := strings.ToLower(strings.TrimSpace(a.Provider))
-	compatName := ""
 	baseURL := ""
 	apiKey := ""
 	filePath := ""
 	if a.Attributes != nil {
-		compatName = strings.TrimSpace(a.Attributes["compat_name"])
 		baseURL = strings.TrimSpace(a.Attributes["base_url"])
 		apiKey = strings.TrimSpace(a.Attributes["api_key"])
 		filePath = strings.TrimSpace(a.Attributes["path"])
@@ -377,18 +375,7 @@ func (a *Auth) indexSeed() string {
 
 	apiPrefix := ""
 	if apiKey != "" {
-		switch {
-		case compatName != "" || strings.EqualFold(provider, "openai-compatibility"):
-			apiPrefix = "openai-compatibility"
-		case strings.EqualFold(provider, "gemini"):
-			apiPrefix = "gemini-api-key"
-		case strings.EqualFold(provider, "gemini-interactions"):
-			apiPrefix = "interactions-api-key"
-		case strings.EqualFold(provider, "codex"):
-			apiPrefix = "codex-api-key"
-		case strings.EqualFold(provider, "xai"):
-			apiPrefix = "xai-api-key"
-		case strings.EqualFold(provider, "claude"), strings.EqualFold(provider, "anthropic-compatible"):
+		if strings.EqualFold(provider, "claude") || strings.EqualFold(provider, "anthropic-compatible") {
 			apiPrefix = "claude-api-key"
 		}
 	}

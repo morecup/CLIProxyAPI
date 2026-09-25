@@ -19,17 +19,17 @@ func TestListAuthFiles_IncludesRecentRequestsBuckets(t *testing.T) {
 	manager := coreauth.NewManager(nil, nil, nil)
 	record := &coreauth.Auth{
 		ID:       "runtime-only-auth-1",
-		Provider: "codex",
+		Provider: "claude",
 		Attributes: map[string]string{
 			"runtime_only": "true",
 		},
 		Metadata: map[string]any{
-			"type": "codex",
+			"type": "claude",
 		},
 		Quota: coreauth.QuotaState{
 			ObservedAt: time.Date(2026, 8, 22, 0, 0, 0, 0, time.UTC),
 			Signals: map[string]string{
-				"X-Codex-Primary-Used-Percent": "58",
+				"Anthropic-Ratelimit-Unified-5h-Utilization": "0.58",
 			},
 		},
 		ModelStates: map[string]*coreauth.ModelState{
@@ -93,7 +93,7 @@ func TestListAuthFiles_IncludesRecentRequestsBuckets(t *testing.T) {
 		t.Fatalf("expected quota observed_at string, got %#v", quota["observed_at"])
 	}
 	quotaSignals, ok := quota["signals"].(map[string]any)
-	if !ok || quotaSignals["X-Codex-Primary-Used-Percent"] != "58" {
+	if !ok || quotaSignals["Anthropic-Ratelimit-Unified-5h-Utilization"] != "0.58" {
 		t.Fatalf("expected auth quota signals, got %#v", quota["signals"])
 	}
 

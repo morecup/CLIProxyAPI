@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -95,13 +94,6 @@ func (m *Manager) Execute(ctx context.Context, providers []string, req cliproxye
 	}
 	if lastErr != nil {
 		lastErr = unwrapRequestStopError(lastErr)
-		if hasAntigravityProvider(normalized) && shouldAttemptAntigravityCreditsFallback(m, lastErr, normalized) {
-			if resp, ok, errCredits := m.tryAntigravityCreditsExecute(ctx, req, opts); errCredits != nil {
-				return cliproxyexecutor.Response{}, errCredits
-			} else if ok {
-				return resp, nil
-			}
-		}
 		return cliproxyexecutor.Response{}, lastErr
 	}
 	return cliproxyexecutor.Response{}, &Error{Code: "auth_not_found", Message: "no auth available"}
@@ -163,11 +155,6 @@ func (m *Manager) ExecuteStream(ctx context.Context, providers []string, req cli
 		}
 		streamResult = completeAttemptsAfterStream(ctx, streamResult, releaseCompletion)
 	}()
-	if m.HomeEnabled() {
-		if unlockSession := m.lockHomeWebsocketSession(ctx, opts); unlockSession != nil {
-			defer unlockSession()
-		}
-	}
 	normalized := m.normalizeProviders(providers)
 	if len(normalized) == 0 {
 		return nil, &Error{Code: "provider_not_found", Message: "no provider supplied"}
@@ -218,13 +205,6 @@ func (m *Manager) ExecuteStream(ctx context.Context, providers []string, req cli
 	}
 	if lastErr != nil {
 		lastErr = unwrapRequestStopError(lastErr)
-		if hasAntigravityProvider(normalized) && shouldAttemptAntigravityCreditsFallback(m, lastErr, normalized) {
-			if result, ok, errCredits := m.tryAntigravityCreditsExecuteStream(ctx, req, opts); errCredits != nil {
-				return nil, errCredits
-			} else if ok {
-				return result, nil
-			}
-		}
 		var bootstrapErr *streamBootstrapError
 		if errors.As(lastErr, &bootstrapErr) && bootstrapErr != nil {
 			return streamErrorResult(bootstrapErr.Headers(), lastErr), nil
@@ -281,26 +261,9 @@ func requestToFormat(provider string, executor ProviderExecutor, req cliproxyexe
 			return formatRequestTo
 		}
 	}
-	source := opts.SourceFormat.String()
-	if source == "openai-image" || source == "openai-video" {
-		return opts.SourceFormat
-	}
-	if opts.Alt == "responses/compact" && !opts.Stream {
-		return sdktranslator.FormatOpenAIResponse
-	}
 	switch strings.ToLower(strings.TrimSpace(provider)) {
-	case "codex":
-		return sdktranslator.FormatCodex
-	case "xai":
-		return sdktranslator.FormatCodex
 	case "claude", "anthropic-compatible":
 		return sdktranslator.FormatClaude
-	case "gemini", "vertex", "aistudio":
-		return sdktranslator.FormatGemini
-	case "kimi":
-		return sdktranslator.FormatOpenAI
-	case "antigravity":
-		return sdktranslator.FormatAntigravity
 	default:
 		return sdktranslator.FormatOpenAI
 	}
@@ -464,11 +427,7 @@ func (m *Manager) executeMixedOnce(ctx context.Context, providers []string, req 
 				}
 				action, okAction := matchRequestScopedErrorAction(auth, errExec, m.runtimeConfigSnapshot())
 				applyRequestScopedActionToResult(action, okAction, &result)
-				if isResponsesCompactAvailabilityNeutralError(execOpts, errExec, result.Error) {
-					m.recordAvailabilityNeutralResult(execCtx, result)
-				} else {
-					m.MarkResult(execCtx, result)
-				}
+				m.MarkResult(execCtx, result)
 				if okAction {
 					if isRequestScopedStop(action, okAction) {
 						return cliproxyexecutor.Response{}, wrapRequestStopError(errExec)
@@ -479,7 +438,7 @@ func (m *Manager) executeMixedOnce(ctx context.Context, providers []string, req 
 					}
 					continue
 				}
-				if isResponsesCompactRequestFaultError(execOpts, errExec) || isRequestInvalidError(errExec) {
+				if isRequestInvalidError(errExec) {
 					return cliproxyexecutor.Response{}, errExec
 				}
 				authErr = errExec
@@ -505,7 +464,7 @@ func (m *Manager) executeMixedOnce(ctx context.Context, providers []string, req 
 				}
 				continue
 			}
-			if isResponsesCompactRequestFaultError(opts, authErr) || isRequestInvalidError(authErr) {
+			if isRequestInvalidError(authErr) {
 				return cliproxyexecutor.Response{}, authErr
 			}
 			lastErr = authErr
@@ -832,12 +791,6 @@ func (m *Manager) executeStreamMixedOnce(ctx context.Context, providers []string
 
 		entry := logEntryWithRequestID(ctx)
 		debugLogAuthSelection(entry, auth, provider, routeModel)
-		if selection != nil {
-			if errRuntimeAuth := m.bindHomeSelectionRuntimeAuth(ctx, opts, selection); errRuntimeAuth != nil {
-				selection.End("runtime_auth_bind_failed")
-				return nil, errRuntimeAuth
-			}
-		}
 		publishSelectedAuthMetadata(opts.Metadata, auth)
 
 		tried[auth.ID] = struct{}{}
@@ -916,7 +869,7 @@ func (m *Manager) executeStreamMixedOnce(ctx context.Context, providers []string
 			}
 			continue
 		}
-		execReq := sanitizeDownstreamWebsocketFallbackRequest(execCtx, auth, req)
+		execReq := req
 		streamExecutionModel := ""
 		if restoreExecutionModel {
 			streamExecutionModel = executionModel
@@ -978,9 +931,6 @@ func (m *Manager) executeStreamMixedOnce(ctx context.Context, providers []string
 			continue
 		}
 		if selection != nil {
-			if m.retainHomeWebsocketSelection(ctx, opts, routeModel, selection) {
-				return wrapHomeStream(ctx, streamResult, nil, releaseAttempt), nil
-			}
 			return wrapHomeStream(ctx, streamResult, selection, releaseAttempt), nil
 		}
 		return streamResult, nil
@@ -989,12 +939,6 @@ func (m *Manager) executeStreamMixedOnce(ctx context.Context, providers []string
 
 func shouldExcludeHomeAuthAfterStreamError(ctx context.Context, auth *Auth, err error) bool {
 	if err == nil || isConnectionLifecycleError(err) {
-		return false
-	}
-	// A 426 during a downstream websocket attempt is a transport fallback
-	// signal. OAuth authorization failures may also recover after a refresh.
-	// Both paths may retry the same credential once.
-	if cliproxyexecutor.DownstreamWebsocket(ctx) && statusCodeFromError(err) == http.StatusUpgradeRequired {
 		return false
 	}
 	return !isUnauthorizedError(err) || auth == nil || auth.AuthKind() != AuthKindOAuth
@@ -1420,38 +1364,6 @@ func pinnedAuthIDFromMetadata(meta map[string]any) string {
 	}
 }
 
-func disallowFreeAuthFromMetadata(meta map[string]any) bool {
-	if len(meta) == 0 {
-		return false
-	}
-	raw, ok := meta[cliproxyexecutor.DisallowFreeAuthMetadataKey]
-	if !ok || raw == nil {
-		return false
-	}
-	switch val := raw.(type) {
-	case bool:
-		return val
-	case string:
-		parsed, err := strconv.ParseBool(strings.TrimSpace(val))
-		return err == nil && parsed
-	case []byte:
-		parsed, err := strconv.ParseBool(strings.TrimSpace(string(val)))
-		return err == nil && parsed
-	default:
-		return false
-	}
-}
-
-func isFreeCodexAuth(auth *Auth) bool {
-	if auth == nil || auth.Attributes == nil {
-		return false
-	}
-	if !strings.EqualFold(strings.TrimSpace(auth.Provider), "codex") {
-		return false
-	}
-	return strings.EqualFold(strings.TrimSpace(auth.Attributes["plan_type"]), "free")
-}
-
 func publishSelectedAuthMetadata(meta map[string]any, auth *Auth) {
 	if len(meta) == 0 || auth == nil {
 		return
@@ -1504,23 +1416,6 @@ type RequestPreparer interface {
 func executorKeyFromAuth(auth *Auth) string {
 	if auth == nil {
 		return ""
-	}
-	if auth.Attributes != nil {
-		providerKey := strings.TrimSpace(auth.Attributes["provider_key"])
-		compatName := strings.TrimSpace(auth.Attributes["compat_name"])
-		if compatName != "" {
-			if providerKey == "" {
-				providerKey = compatName
-			}
-			return util.OpenAICompatibleProviderKey(providerKey)
-		}
-	}
-	if strings.EqualFold(strings.TrimSpace(auth.Provider), "openai-compatibility") {
-		providerKey := strings.TrimSpace(auth.Label)
-		if providerKey == "" {
-			providerKey = "openai-compatibility"
-		}
-		return util.OpenAICompatibleProviderKey(providerKey)
 	}
 	return strings.ToLower(strings.TrimSpace(auth.Provider))
 }

@@ -15,9 +15,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// OpenAIImageModelType marks models that are callable through OpenAI-compatible image endpoints.
-const OpenAIImageModelType = "openai-image"
-
 const (
 	DefaultClaudeMaxInputTokens  = 200000
 	DefaultClaudeMaxOutputTokens = 64000
@@ -33,11 +30,11 @@ type ModelInfo struct {
 	Created int64 `json:"created"`
 	// OwnedBy indicates the organization that owns the model
 	OwnedBy string `json:"owned_by"`
-	// Type indicates the model type (e.g., "claude", "gemini", "openai")
+	// Type indicates the model type (e.g., "claude", "openai")
 	Type string `json:"type"`
 	// DisplayName is the human-readable name for the model
 	DisplayName string `json:"display_name,omitempty"`
-	// Name is used for Gemini-style model names
+	// Name is an optional alternate model name
 	Name string `json:"name,omitempty"`
 	// Version is the model version
 	Version string `json:"version,omitempty"`
@@ -52,7 +49,6 @@ type ModelInfo struct {
 	// ContextLength is the context window size
 	ContextLength int `json:"context_length,omitempty"`
 	// MaxContextLength is an explicit per-model context window override from configuration.
-	// It is carried internally for Codex client model catalog generation.
 	MaxContextLength int `json:"-"`
 	// MaxCompletionTokens is the maximum completion tokens
 	MaxCompletionTokens int `json:"max_completion_tokens,omitempty"`
@@ -62,19 +58,14 @@ type ModelInfo struct {
 	SupportedInputModalities []string `json:"supportedInputModalities,omitempty"`
 	// SupportedOutputModalities lists supported output modalities (e.g., TEXT, IMAGE)
 	SupportedOutputModalities []string `json:"supportedOutputModalities,omitempty"`
-	// SupportsWebSearch indicates this Antigravity model is listed by
-	// fetchAvailableModels.webSearchModelIds and can execute native googleSearch.
-	SupportsWebSearch bool `json:"supports_web_search,omitempty"`
-
 	// Thinking holds provider-specific reasoning/thinking budget capabilities.
-	// This is optional and currently used for Gemini thinking budget normalization.
 	Thinking *ThinkingSupport `json:"thinking,omitempty"`
 
 	// Config holds model-specific runtime overrides loaded from models.json.
 	Config *ModelConfig `json:"config,omitempty"`
 
 	// UserDefined indicates this model was defined through config file's models[]
-	// array (e.g., openai-compatibility.*.models[], *-api-key.models[]).
+	// array (e.g., claude-api-key models[]).
 	// UserDefined models have thinking configuration passed through without validation.
 	UserDefined bool `json:"-"`
 
@@ -286,7 +277,7 @@ func (r *ModelRegistry) triggerModelsUnregistered(provider, clientID string) {
 // RegisterClient registers a client and its supported models
 // Parameters:
 //   - clientID: Unique identifier for the client
-//   - clientProvider: Provider name (e.g., "gemini", "claude", "openai")
+//   - clientProvider: Provider name (e.g., "claude")
 //   - models: List of models that this client can provide
 func (r *ModelRegistry) RegisterClient(clientID, clientProvider string, models []*ModelInfo) {
 	r.mutex.Lock()
@@ -820,7 +811,7 @@ func (r *ModelRegistry) ClientSupportsModel(clientID, modelID string) bool {
 
 // GetAvailableModels returns all models that have at least one available client
 // Parameters:
-//   - handlerType: The handler type to filter models for (e.g., "openai", "claude", "gemini")
+//   - handlerType: The handler type to filter models for (e.g., "openai", "claude")
 //
 // Returns:
 //   - []map[string]any: List of available models in the requested format
@@ -975,7 +966,7 @@ func cloneModelMapValue(value any) any {
 
 // GetAvailableModelsByProvider returns models available for the given provider identifier.
 // Parameters:
-//   - provider: Provider identifier (e.g., "codex", "gemini", "antigravity")
+//   - provider: Provider identifier (e.g., "claude")
 //
 // Returns:
 //   - []*ModelInfo: List of available models for the provider
@@ -1277,39 +1268,6 @@ func (r *ModelRegistry) convertModelToMap(model *ModelInfo, handlerType string) 
 		result["max_tokens"] = maxOutput
 		return result
 
-	case "gemini":
-		result := map[string]any{}
-		if model.Name != "" {
-			result["name"] = model.Name
-		} else {
-			result["name"] = model.ID
-		}
-		if model.Version != "" {
-			result["version"] = model.Version
-		}
-		if model.DisplayName != "" {
-			result["displayName"] = model.DisplayName
-		}
-		if model.Description != "" {
-			result["description"] = model.Description
-		}
-		if model.InputTokenLimit > 0 {
-			result["inputTokenLimit"] = model.InputTokenLimit
-		}
-		if model.OutputTokenLimit > 0 {
-			result["outputTokenLimit"] = model.OutputTokenLimit
-		}
-		if len(model.SupportedGenerationMethods) > 0 {
-			result["supportedGenerationMethods"] = append([]string(nil), model.SupportedGenerationMethods...)
-		}
-		if len(model.SupportedInputModalities) > 0 {
-			result["supportedInputModalities"] = append([]string(nil), model.SupportedInputModalities...)
-		}
-		if len(model.SupportedOutputModalities) > 0 {
-			result["supportedOutputModalities"] = append([]string(nil), model.SupportedOutputModalities...)
-		}
-		return result
-
 	default:
 		// Generic format
 		result := map[string]any{
@@ -1356,7 +1314,7 @@ func (r *ModelRegistry) CleanupExpiredQuotas() {
 // available clients that are not suspended or over quota.
 //
 // Parameters:
-//   - handlerType: The API handler type (e.g., "openai", "claude", "gemini")
+//   - handlerType: The API handler type (e.g., "openai", "claude")
 //
 // Returns:
 //   - string: The model ID of the first available model, or empty string if none available

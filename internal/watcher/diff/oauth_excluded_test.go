@@ -58,22 +58,22 @@ func TestSummarizeOAuthExcludedModels_NormalizesKeys(t *testing.T) {
 	}
 }
 
-func TestSummarizeVertexModels(t *testing.T) {
-	summary := SummarizeVertexModels([]config.VertexCompatModel{
+func TestSummarizeClaudeModels(t *testing.T) {
+	summary := SummarizeClaudeModels([]config.ClaudeModel{
 		{Name: "m1"},
 		{Name: " ", Alias: "alias"},
 		{}, // ignored
 	})
 	if summary.count != 2 {
-		t.Fatalf("expected 2 vertex models, got %d", summary.count)
+		t.Fatalf("expected 2 claude models, got %d", summary.count)
 	}
 	if summary.hash == "" {
 		t.Fatal("expected non-empty hash")
 	}
-	if empty := SummarizeVertexModels(nil); empty.count != 0 || empty.hash != "" {
+	if empty := SummarizeClaudeModels(nil); empty.count != 0 || empty.hash != "" {
 		t.Fatalf("expected empty summary for nil input, got %+v", empty)
 	}
-	if blank := SummarizeVertexModels([]config.VertexCompatModel{{Name: " "}}); blank.count != 0 || blank.hash != "" {
+	if blank := SummarizeClaudeModels([]config.ClaudeModel{{Name: " "}}); blank.count != 0 || blank.hash != "" {
 		t.Fatalf("expected blank model ignored, got %+v", blank)
 	}
 }

@@ -366,41 +366,6 @@ func TestHomePinnedAuthRetriesOnlyPinnedCredential(t *testing.T) {
 	}
 }
 
-func TestHomeExcludedCredentialEndsRetainedWebsocketSelection(t *testing.T) {
-	dispatcher := &retryContractHomeDispatcher{
-		authIDs:   []string{"home-retry-a", "home-retry-b"},
-		websocket: true,
-	}
-	manager := NewManager(nil, nil, nil)
-	manager.SetConfig(&internalconfig.Config{Home: internalconfig.HomeConfig{Enabled: true}})
-	manager.SetRetryConfig(0, time.Second, 2)
-	manager.PublishHomeDispatch(dispatcher, executionregistry.New(), 1)
-	manager.RegisterExecutor(&retainingRetryContractHomeExecutor{retryContractHomeExecutor: &retryContractHomeExecutor{}})
-
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{Metadata: map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "home-retry-session",
-	}}
-	if _, errExecute := manager.Execute(ctx, []string{"home-retry-contract"}, cliproxyexecutor.Request{Model: "gpt"}, opts); errExecute != nil {
-		t.Fatalf("first Execute() error = %v", errExecute)
-	}
-
-	pickOpts := withHomeExcludedAuthIDs(opts, map[string]struct{}{"home-retry-a": {}})
-	selection, errPick := manager.pickHomeDispatchSelection(ctx, "gpt", pickOpts)
-	if errPick != nil {
-		t.Fatalf("pickHomeDispatchSelection() error = %v", errPick)
-	}
-	defer selection.End("test_complete")
-	if auth := selection.CloneAuth(); auth == nil || auth.ID != "home-retry-b" {
-		t.Fatalf("selected auth = %#v, want home-retry-b", auth)
-	}
-
-	excluded := dispatcher.Excluded()
-	if len(excluded) != 2 || len(excluded[0]) != 0 || len(excluded[1]) != 1 || excluded[1][0] != "home-retry-a" {
-		t.Fatalf("Home excluded auth IDs = %v, want [[], [home-retry-a]]", excluded)
-	}
-}
-
 func TestHomeRetryRoundTriesFreshCredentialWhenRequestRetryIsZero(t *testing.T) {
 	for _, stream := range []bool{false, true} {
 		t.Run(map[bool]string{false: "nonstream", true: "stream"}[stream], func(t *testing.T) {

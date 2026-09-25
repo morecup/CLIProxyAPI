@@ -16,17 +16,6 @@ func parsePluginExecutorResponseUsage(protocol string, payload []byte) usage.Det
 	switch strings.ToLower(strings.TrimSpace(protocol)) {
 	case "claude", "anthropic-compatible":
 		return parseClaudePayloadUsage(payload)
-	case "gemini":
-		return helps.ParseGeminiUsage(payload)
-	case "interactions", "interactions-response":
-		return helps.ParseInteractionsUsage(payload)
-	case "antigravity":
-		return helps.ParseAntigravityUsage(payload)
-	case "codex", "openai-response":
-		if detail, ok := helps.ParseCodexUsage(payload); ok {
-			return detail
-		}
-		return helps.ParseOpenAIUsage(payload)
 	default:
 		return helps.ParseOpenAIUsage(payload)
 	}
@@ -42,34 +31,6 @@ func observePluginExecutorStreamUsage(protocol string, payload []byte, buffer *h
 			if detail, ok := parseClaudeStreamLine(line); ok {
 				observeMergedStreamUsage(buffer, detail)
 			}
-		})
-	case "gemini":
-		iterateStreamLines(payload, func(line []byte) {
-			if detail, ok := helps.ParseGeminiStreamUsage(line); ok {
-				buffer.Observe(detail, ok)
-			}
-		})
-	case "interactions", "interactions-response":
-		iterateStreamLines(payload, func(line []byte) {
-			if detail, ok := helps.ParseInteractionsStreamUsage(line); ok {
-				observeMergedStreamUsage(buffer, detail)
-			}
-		})
-	case "antigravity":
-		iterateStreamLines(payload, func(line []byte) {
-			if detail, ok := helps.ParseAntigravityStreamUsage(line); ok {
-				buffer.Observe(detail, ok)
-			}
-		})
-	case "codex", "openai-response":
-		iterateStreamLines(payload, func(line []byte) {
-			if jsonBytes := extractStreamJSONPayload(line); len(jsonBytes) > 0 {
-				if detail, ok := helps.ParseCodexUsage(jsonBytes); ok {
-					buffer.Observe(detail, ok)
-					return
-				}
-			}
-			buffer.ObserveOpenAIStream(line)
 		})
 	default:
 		iterateStreamLines(payload, func(line []byte) {

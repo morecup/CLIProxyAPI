@@ -193,9 +193,6 @@ func requestExecutionMetadata(ctx context.Context) map[string]any {
 	if callerScope := requestCallerScope(ginCtx); callerScope != "" {
 		meta[coreexecutor.CallerScopeMetadataKey] = callerScope
 	}
-	if disallowFreeAuthFromContext(ctx) {
-		meta[coreexecutor.DisallowFreeAuthMetadataKey] = true
-	}
 	return meta
 }
 

@@ -37,18 +37,6 @@ func TestDeriveIDStableAcrossConversationGrowth(t *testing.T) {
 			first:  `{"instructions":"system prompt","input":[{"type":"message","role":"developer","content":[{"type":"input_text","text":"developer prompt"}]},{"type":"message","role":"user","content":[{"type":"input_text","text":"complete first user prompt"}]}]}`,
 			later:  `{"instructions":"system prompt","input":[{"type":"message","role":"developer","content":[{"type":"input_text","text":"developer prompt"}]},{"type":"message","role":"user","content":[{"type":"input_text","text":"complete first user prompt"}]},{"type":"message","role":"assistant","content":[{"type":"output_text","text":"answer"}]},{"type":"message","role":"user","content":[{"type":"input_text","text":"next"}]}]}`,
 		},
-		{
-			name:   "gemini",
-			format: sdktranslator.FormatGemini,
-			first:  `{"systemInstruction":{"parts":[{"text":"system prompt"}]},"contents":[{"role":"user","parts":[{"text":"complete first user prompt"}]}]}`,
-			later:  `{"systemInstruction":{"parts":[{"text":"system prompt"}]},"contents":[{"role":"user","parts":[{"text":"complete first user prompt"}]},{"role":"model","parts":[{"text":"answer"}]},{"role":"user","parts":[{"text":"next"}]}]}`,
-		},
-		{
-			name:   "interactions",
-			format: sdktranslator.FormatInteractions,
-			first:  `{"system_instruction":"system prompt","input":[{"type":"developer_instruction","text":"developer prompt"},{"type":"user_input","content":[{"type":"text","text":"complete first user prompt"}]}]}`,
-			later:  `{"system_instruction":"system prompt","input":[{"type":"developer_instruction","text":"developer prompt"},{"type":"user_input","content":[{"type":"text","text":"complete first user prompt"}]},{"type":"model_output","content":[{"type":"text","text":"answer"}]},{"type":"user_input","content":[{"type":"text","text":"next"}]}]}`,
-		},
 	}
 
 	for _, test := range tests {
@@ -87,7 +75,7 @@ func TestDeriveIDInstructionPrefixAndFullUser(t *testing.T) {
 	}
 }
 
-func TestDeriveIDCallerIsolationAndGeminiCachedContent(t *testing.T) {
+func TestDeriveIDCallerIsolation(t *testing.T) {
 	t.Parallel()
 
 	payload := []byte(`{"messages":[{"role":"user","content":"same prompt"}]}`)
@@ -95,19 +83,6 @@ func TestDeriveIDCallerIsolationAndGeminiCachedContent(t *testing.T) {
 	callerB := DeriveID(sdktranslator.FormatOpenAI, payload, CallerScope("api-key-b"))
 	if callerA == "" || callerB == "" || callerA == callerB {
 		t.Fatalf("caller isolation failed: callerA=%q callerB=%q", callerA, callerB)
-	}
-
-	firstCached := []byte(`{"cachedContent":"cachedContents/abc","contents":[{"role":"user","parts":[{"text":"first"}]}]}`)
-	grownCached := []byte(`{"cachedContent":"cachedContents/abc","contents":[{"role":"user","parts":[{"text":"first"}]},{"role":"model","parts":[{"text":"answer"}]},{"role":"user","parts":[{"text":"next"}]}]}`)
-	differentCached := []byte(`{"cachedContent":"cachedContents/abc","contents":[{"role":"user","parts":[{"text":"different"}]}]}`)
-	firstID := DeriveID(sdktranslator.FormatGemini, firstCached, "caller-a")
-	grownID := DeriveID(sdktranslator.FormatGemini, grownCached, "caller-a")
-	differentID := DeriveID(sdktranslator.FormatGemini, differentCached, "caller-a")
-	if firstID == "" || firstID != grownID {
-		t.Fatalf("cachedContent conversation growth changed identity: first=%q grown=%q", firstID, grownID)
-	}
-	if differentID == firstID {
-		t.Fatalf("different first user prompts sharing cachedContent produced the same identity: %q", firstID)
 	}
 }
 

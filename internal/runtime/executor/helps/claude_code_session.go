@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 )
 
@@ -96,15 +95,4 @@ func extractClaudeCodeSessionIDFromPayload(payload []byte) string {
 		return strings.TrimSpace(gjson.Get(userID, "session_id").String())
 	}
 	return ""
-}
-
-// ClaudeCodePromptCache derives a deterministic upstream prompt_cache_key for one Claude Code agent.
-func ClaudeCodePromptCache(ctx context.Context, modelName string, payload []byte, headers http.Header) (CodexCache, bool, error) {
-	modelName = strings.TrimSpace(modelName)
-	executionScope, ok := ClaudeCodeExecutionScope(ctx, payload, headers)
-	if modelName == "" || !ok {
-		return CodexCache{}, false, nil
-	}
-	identity := strings.Join([]string{"cli-proxy-api:codex:claude-code", modelName, executionScope}, "\x00")
-	return CodexCache{ID: uuid.NewSHA1(uuid.NameSpaceOID, []byte(identity)).String()}, true, nil
 }

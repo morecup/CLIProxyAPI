@@ -21,11 +21,11 @@ func TestUploadAuthFile_PreservesPriorityAttributes(t *testing.T) {
 	manager := coreauth.NewManager(nil, nil, nil)
 	h := NewHandlerWithoutConfigFilePath(&config.Config{AuthDir: authDir}, manager)
 
-	content := `{"type":"codex","email":"midai0530@gmail.com","priority":98}`
+	content := `{"type":"claude","email":"midai0530@gmail.com","priority":98}`
 
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
-	part, err := writer.CreateFormFile("file", "codex-midai0530@gmail.com-plus.json")
+	part, err := writer.CreateFormFile("file", "claude-midai0530@gmail.com-plus.json")
 	if err != nil {
 		t.Fatalf("failed to create multipart file: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestUploadAuthFile_PreservesPriorityAttributes(t *testing.T) {
 		t.Fatalf("expected status ok, got %#v", payload["status"])
 	}
 
-	auth, ok := manager.GetByID("codex-midai0530@gmail.com-plus.json")
+	auth, ok := manager.GetByID("claude-midai0530@gmail.com-plus.json")
 	if !ok || auth == nil {
 		t.Fatalf("expected uploaded auth record to exist")
 	}

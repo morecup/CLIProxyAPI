@@ -88,7 +88,7 @@ func TestUsageQueuePluginNormalizesDirectSDKUsageByProvider(t *testing.T) {
 		wantTotal int
 	}{
 		{provider: "openai", wantTotal: 130},
-		{provider: "gemini", wantTotal: 142},
+		{provider: "claude", wantTotal: 142},
 	}
 	for _, tt := range tests {
 		t.Run(tt.provider, func(t *testing.T) {

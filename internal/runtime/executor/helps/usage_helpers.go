@@ -18,7 +18,6 @@ import (
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
 	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 type UsageReporter struct {
@@ -411,21 +410,6 @@ func APIKeyFromContext(ctx context.Context) string {
 
 func resolveUsageSource(auth *cliproxyauth.Auth, ctxAPIKey string) string {
 	if auth != nil {
-		provider := strings.TrimSpace(auth.Provider)
-		if strings.EqualFold(provider, "vertex") {
-			if auth.Metadata != nil {
-				if projectID, ok := auth.Metadata["project_id"].(string); ok {
-					if trimmed := strings.TrimSpace(projectID); trimmed != "" {
-						return trimmed
-					}
-				}
-				if project, ok := auth.Metadata["project"].(string); ok {
-					if trimmed := strings.TrimSpace(project); trimmed != "" {
-						return trimmed
-					}
-				}
-			}
-		}
 		if _, value := auth.AccountInfo(); value != "" {
 			return strings.TrimSpace(value)
 		}
@@ -544,28 +528,6 @@ func (b *StreamUsageBuffer) Detail() (usage.Detail, bool) {
 		return usage.Detail{}, false
 	}
 	return b.detail, true
-}
-
-func ParseCodexUsage(data []byte) (usage.Detail, bool) {
-	responseServiceTier := extractResponseServiceTier(data)
-	usageNode := gjson.ParseBytes(data).Get("response.usage")
-	if !hasOpenAIStyleUsageTokenFields(usageNode) {
-		if responseServiceTier == "" {
-			return usage.Detail{}, false
-		}
-		return usage.Detail{ResponseServiceTier: responseServiceTier}, true
-	}
-	detail := parseOpenAIStyleUsageNode(usageNode)
-	detail.ResponseServiceTier = responseServiceTier
-	return detail, true
-}
-
-func ParseCodexImageToolUsage(data []byte) (usage.Detail, bool) {
-	usageNode := gjson.ParseBytes(data).Get("response.tool_usage.image_gen")
-	if !hasOpenAIStyleUsageTokenFields(usageNode) {
-		return usage.Detail{}, false
-	}
-	return parseOpenAIStyleUsageNode(usageNode), true
 }
 
 func ParseOpenAIUsage(data []byte) usage.Detail {
@@ -767,105 +729,6 @@ func parseClaudeUsageNode(usageNode gjson.Result) usage.Detail {
 	return detail
 }
 
-func parseGeminiFamilyUsageDetail(node gjson.Result) usage.Detail {
-	cachedTokens := node.Get("cachedContentTokenCount").Int()
-	toolUseTokens := firstExistingUsageNode(node, "toolUsePromptTokenCount", "tool_use_prompt_token_count").Int()
-	inputTokens, okInput := safeUsageTokenSum(node.Get("promptTokenCount").Int(), toolUseTokens)
-	detail := usage.Detail{
-		InputTokens:     inputTokens,
-		OutputTokens:    node.Get("candidatesTokenCount").Int(),
-		ReasoningTokens: node.Get("thoughtsTokenCount").Int(),
-		TotalTokens:     node.Get("totalTokenCount").Int(),
-		CachedTokens:    cachedTokens,
-		CacheReadTokens: cachedTokens,
-	}
-	if !okInput {
-		detail.TokenBreakdown = invalidUsageTokenBreakdown(detail.TotalTokens)
-		return detail
-	}
-	if detail.TotalTokens == 0 {
-		var okTotal bool
-		detail.TotalTokens, okTotal = safeUsageTokenSum(detail.InputTokens, detail.OutputTokens, detail.ReasoningTokens)
-		if !okTotal {
-			detail.TotalTokens = 0
-			detail.TokenBreakdown = invalidUsageTokenBreakdown(0)
-			return detail
-		}
-	}
-	detail.TokenBreakdown = usage.NewSeparateReasoningTokenBreakdown(
-		detail.InputTokens,
-		detail.CacheReadTokens,
-		detail.CacheCreationTokens,
-		detail.OutputTokens,
-		detail.ReasoningTokens,
-		detail.TotalTokens,
-	)
-	return detail
-}
-
-func parseInteractionsUsageDetail(node gjson.Result) usage.Detail {
-	cacheRead := firstExistingUsageNode(node, "cache_read_tokens", "cacheReadTokens")
-	toolUseTokens := firstExistingUsageNode(node, "tool_use_tokens", "total_tool_use_tokens", "toolUseTokens", "totalToolUseTokens").Int()
-	inputTokens, okInput := safeUsageTokenSum(
-		firstExistingUsageNode(node, "input_tokens", "prompt_tokens", "total_input_tokens").Int(),
-		toolUseTokens,
-	)
-	detail := usage.Detail{
-		InputTokens:         inputTokens,
-		OutputTokens:        firstExistingUsageNode(node, "output_tokens", "completion_tokens", "total_output_tokens").Int(),
-		ReasoningTokens:     firstExistingUsageNode(node, "reasoning_tokens", "thoughtsTokenCount", "total_thought_tokens").Int(),
-		TotalTokens:         firstExistingUsageNode(node, "total_tokens", "totalTokenCount").Int(),
-		CachedTokens:        firstExistingUsageNode(node, "cached_tokens", "cachedContentTokenCount", "total_cached_tokens").Int(),
-		CacheReadTokens:     cacheRead.Int(),
-		CacheCreationTokens: firstExistingUsageNode(node, "cache_creation_tokens", "cacheCreationTokens", "cache_write_tokens", "cacheWriteTokens").Int(),
-	}
-	if !okInput {
-		detail.TokenBreakdown = invalidUsageTokenBreakdown(detail.TotalTokens)
-		return detail
-	}
-	if !cacheRead.Exists() && detail.CachedTokens > 0 {
-		detail.CacheReadTokens = detail.CachedTokens
-	}
-	if detail.TotalTokens == 0 {
-		var okTotal bool
-		detail.TotalTokens, okTotal = safeUsageTokenSum(detail.InputTokens, detail.OutputTokens, detail.ReasoningTokens)
-		if !okTotal {
-			detail.TotalTokens = 0
-			detail.TokenBreakdown = invalidUsageTokenBreakdown(0)
-			return detail
-		}
-	}
-	detail.TokenBreakdown = usage.NewSeparateReasoningTokenBreakdown(
-		detail.InputTokens,
-		detail.CacheReadTokens,
-		detail.CacheCreationTokens,
-		detail.OutputTokens,
-		detail.ReasoningTokens,
-		detail.TotalTokens,
-	)
-	return detail
-}
-
-func hasUsageDetail(detail usage.Detail) bool {
-	return hasNonZeroTokenUsage(detail)
-}
-
-func ParseInteractionsUsage(data []byte) usage.Detail {
-	root := gjson.ParseBytes(data)
-	node := firstExistingUsageNode(root, "usage", "total_usage", "metadata.total_usage", "metadata.usage", "usageMetadata", "usage_metadata", "interaction.usage", "interaction.total_usage", "interaction.metadata.total_usage")
-	if !node.Exists() {
-		return usage.Detail{}
-	}
-	if node.Get("promptTokenCount").Exists() || node.Get("candidatesTokenCount").Exists() {
-		detail := parseGeminiFamilyUsageDetail(node)
-		detail.ResponseServiceTier = extractResponseServiceTier(data)
-		return detail
-	}
-	detail := parseInteractionsUsageDetail(node)
-	detail.ResponseServiceTier = extractResponseServiceTier(data)
-	return detail
-}
-
 func extractResponseServiceTier(payload []byte) string {
 	if len(payload) == 0 || !gjson.ValidBytes(payload) {
 		return ""
@@ -874,58 +737,12 @@ func extractResponseServiceTier(payload []byte) string {
 }
 
 func extractResponseServiceTierFromValidJSON(payload []byte) string {
-	for _, path := range []string{"response.service_tier", "service_tier", "interaction.service_tier"} {
+	for _, path := range []string{"response.service_tier", "service_tier"} {
 		if tier := strings.TrimSpace(gjson.GetBytes(payload, path).String()); tier != "" {
 			return tier
 		}
 	}
 	return ""
-}
-
-func ParseInteractionsStreamUsage(line []byte) (usage.Detail, bool) {
-	payload := jsonPayload(line)
-	if len(payload) == 0 {
-		payload = line
-	}
-	if len(payload) == 0 || !gjson.ValidBytes(payload) {
-		return usage.Detail{}, false
-	}
-	detail := ParseInteractionsUsage(payload)
-	if !hasUsageDetail(detail) {
-		return usage.Detail{}, false
-	}
-	return detail, true
-}
-
-func ParseGeminiUsage(data []byte) usage.Detail {
-	usageNode := gjson.ParseBytes(data)
-	node := usageNode.Get("usageMetadata")
-	if !node.Exists() {
-		node = usageNode.Get("usage_metadata")
-	}
-	if !node.Exists() {
-		return usage.Detail{}
-	}
-	return parseGeminiFamilyUsageDetail(node)
-}
-
-func ParseGeminiStreamUsage(line []byte) (usage.Detail, bool) {
-	payload := jsonPayload(line)
-	if len(payload) == 0 || !gjson.ValidBytes(payload) {
-		return usage.Detail{}, false
-	}
-	node := gjson.GetBytes(payload, "usageMetadata")
-	if !node.Exists() {
-		node = gjson.GetBytes(payload, "usage_metadata")
-	}
-	if !node.Exists() {
-		return usage.Detail{}, false
-	}
-	detail := parseGeminiFamilyUsageDetail(node)
-	if !hasNonZeroTokenUsage(detail) {
-		return usage.Detail{}, false
-	}
-	return detail, true
 }
 
 func firstExistingUsageNode(root gjson.Result, paths ...string) gjson.Result {
@@ -936,213 +753,6 @@ func firstExistingUsageNode(root gjson.Result, paths ...string) gjson.Result {
 		}
 	}
 	return gjson.Result{}
-}
-
-func safeUsageTokenSum(values ...int64) (int64, bool) {
-	var total int64
-	for _, value := range values {
-		if value < 0 || total > int64(^uint64(0)>>1)-value {
-			return 0, false
-		}
-		total += value
-	}
-	return total, true
-}
-
-func invalidUsageTokenBreakdown(total int64) usage.TokenBreakdown {
-	if total < 0 {
-		total = 0
-	}
-	return usage.TokenBreakdown{
-		SchemaVersion:      usage.TokenAccountingSchemaVersion,
-		Quality:            usage.TokenAccountingQualityInconsistent,
-		TotalTokens:        total,
-		UnclassifiedTokens: total,
-	}
-}
-
-func ParseAntigravityUsage(data []byte) usage.Detail {
-	usageNode := gjson.ParseBytes(data)
-	node := usageNode.Get("response.usageMetadata")
-	if !node.Exists() {
-		node = usageNode.Get("usageMetadata")
-	}
-	if !node.Exists() {
-		node = usageNode.Get("usage_metadata")
-	}
-	if !node.Exists() {
-		return usage.Detail{}
-	}
-	return parseGeminiFamilyUsageDetail(node)
-}
-
-func ParseAntigravityStreamUsage(line []byte) (usage.Detail, bool) {
-	payload := jsonPayload(line)
-	if len(payload) == 0 || !gjson.ValidBytes(payload) {
-		return usage.Detail{}, false
-	}
-	node := gjson.GetBytes(payload, "response.usageMetadata")
-	if !node.Exists() {
-		node = gjson.GetBytes(payload, "usageMetadata")
-	}
-	if !node.Exists() {
-		node = gjson.GetBytes(payload, "usage_metadata")
-	}
-	if !node.Exists() {
-		return usage.Detail{}, false
-	}
-	return parseGeminiFamilyUsageDetail(node), true
-}
-
-var stopChunkWithoutUsage sync.Map
-
-func rememberStopWithoutUsage(traceID string) {
-	stopChunkWithoutUsage.Store(traceID, struct{}{})
-	time.AfterFunc(10*time.Minute, func() { stopChunkWithoutUsage.Delete(traceID) })
-}
-
-// FilterSSEUsageMetadata removes usageMetadata from SSE events that are not
-// terminal (finishReason != "stop"). Stop chunks are left untouched. This
-// function is shared between aistudio and antigravity executors.
-func FilterSSEUsageMetadata(payload []byte) []byte {
-	if len(payload) == 0 {
-		return payload
-	}
-
-	lines := bytes.Split(payload, []byte("\n"))
-	modified := false
-	foundData := false
-	for idx, line := range lines {
-		trimmed := bytes.TrimSpace(line)
-		if len(trimmed) == 0 || !bytes.HasPrefix(trimmed, []byte("data:")) {
-			continue
-		}
-		foundData = true
-		dataIdx := bytes.Index(line, []byte("data:"))
-		if dataIdx < 0 {
-			continue
-		}
-		rawJSON := bytes.TrimSpace(line[dataIdx+5:])
-		traceID := gjson.GetBytes(rawJSON, "traceId").String()
-		if isStopChunkWithoutUsage(rawJSON) && traceID != "" {
-			rememberStopWithoutUsage(traceID)
-			continue
-		}
-		if traceID != "" {
-			if _, ok := stopChunkWithoutUsage.Load(traceID); ok && hasUsageMetadata(rawJSON) {
-				stopChunkWithoutUsage.Delete(traceID)
-				continue
-			}
-		}
-
-		cleaned, changed := StripUsageMetadataFromJSON(rawJSON)
-		if !changed {
-			continue
-		}
-		var rebuilt []byte
-		rebuilt = append(rebuilt, line[:dataIdx]...)
-		rebuilt = append(rebuilt, []byte("data:")...)
-		if len(cleaned) > 0 {
-			rebuilt = append(rebuilt, ' ')
-			rebuilt = append(rebuilt, cleaned...)
-		}
-		lines[idx] = rebuilt
-		modified = true
-	}
-	if !modified {
-		if !foundData {
-			// Handle payloads that are raw JSON without SSE data: prefix.
-			trimmed := bytes.TrimSpace(payload)
-			cleaned, changed := StripUsageMetadataFromJSON(trimmed)
-			if !changed {
-				return payload
-			}
-			return cleaned
-		}
-		return payload
-	}
-	return bytes.Join(lines, []byte("\n"))
-}
-
-// StripUsageMetadataFromJSON drops usageMetadata unless finishReason is present (terminal).
-// It handles both formats:
-// - Aistudio: candidates.0.finishReason
-// - Antigravity: response.candidates.0.finishReason
-func StripUsageMetadataFromJSON(rawJSON []byte) ([]byte, bool) {
-	jsonBytes := bytes.TrimSpace(rawJSON)
-	if len(jsonBytes) == 0 || !gjson.ValidBytes(jsonBytes) {
-		return rawJSON, false
-	}
-
-	// Check for finishReason in both aistudio and antigravity formats
-	finishReason := gjson.GetBytes(jsonBytes, "candidates.0.finishReason")
-	if !finishReason.Exists() {
-		finishReason = gjson.GetBytes(jsonBytes, "response.candidates.0.finishReason")
-	}
-	terminalReason := finishReason.Exists() && strings.TrimSpace(finishReason.String()) != ""
-
-	usageMetadata := gjson.GetBytes(jsonBytes, "usageMetadata")
-	if !usageMetadata.Exists() {
-		usageMetadata = gjson.GetBytes(jsonBytes, "response.usageMetadata")
-	}
-
-	// Terminal chunk: keep as-is.
-	if terminalReason {
-		return rawJSON, false
-	}
-
-	// Nothing to strip
-	if !usageMetadata.Exists() {
-		return rawJSON, false
-	}
-
-	// Remove usageMetadata from both possible locations
-	cleaned := jsonBytes
-	var changed bool
-
-	if usageMetadata = gjson.GetBytes(cleaned, "usageMetadata"); usageMetadata.Exists() {
-		// Rename usageMetadata to cpaUsageMetadata in the message_start event of Claude
-		cleaned, _ = sjson.SetRawBytes(cleaned, "cpaUsageMetadata", []byte(usageMetadata.Raw))
-		cleaned, _ = sjson.DeleteBytes(cleaned, "usageMetadata")
-		changed = true
-	}
-
-	if usageMetadata = gjson.GetBytes(cleaned, "response.usageMetadata"); usageMetadata.Exists() {
-		// Rename usageMetadata to cpaUsageMetadata in the message_start event of Claude
-		cleaned, _ = sjson.SetRawBytes(cleaned, "response.cpaUsageMetadata", []byte(usageMetadata.Raw))
-		cleaned, _ = sjson.DeleteBytes(cleaned, "response.usageMetadata")
-		changed = true
-	}
-
-	return cleaned, changed
-}
-
-func hasUsageMetadata(jsonBytes []byte) bool {
-	if len(jsonBytes) == 0 || !gjson.ValidBytes(jsonBytes) {
-		return false
-	}
-	if gjson.GetBytes(jsonBytes, "usageMetadata").Exists() {
-		return true
-	}
-	if gjson.GetBytes(jsonBytes, "response.usageMetadata").Exists() {
-		return true
-	}
-	return false
-}
-
-func isStopChunkWithoutUsage(jsonBytes []byte) bool {
-	if len(jsonBytes) == 0 || !gjson.ValidBytes(jsonBytes) {
-		return false
-	}
-	finishReason := gjson.GetBytes(jsonBytes, "candidates.0.finishReason")
-	if !finishReason.Exists() {
-		finishReason = gjson.GetBytes(jsonBytes, "response.candidates.0.finishReason")
-	}
-	trimmed := strings.TrimSpace(finishReason.String())
-	if !finishReason.Exists() || trimmed == "" {
-		return false
-	}
-	return !hasUsageMetadata(jsonBytes)
 }
 
 func JSONPayload(line []byte) []byte {

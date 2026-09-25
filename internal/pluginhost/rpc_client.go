@@ -133,9 +133,6 @@ func registerRPCPlugin(ctx context.Context, host *Host, id string, client plugin
 	if resp.Capabilities.StreamChunkInterceptor {
 		plugin.Capabilities.StreamChunkInterceptor = adapter
 	}
-	if resp.Capabilities.WebSocketResponseObserver {
-		plugin.Capabilities.WebSocketResponseObserver = adapter
-	}
 	if resp.Capabilities.ThinkingApplier {
 		plugin.Capabilities.ThinkingApplier = rpcThinkingApplier{rpcPluginAdapter: adapter}
 	}
@@ -214,9 +211,6 @@ func sanitizePluginRequest(request any) any {
 	case pluginapi.StreamChunkInterceptRequest:
 		req.Metadata = sanitizePluginMetadata(req.Metadata)
 		return req
-	case pluginapi.WebSocketResponseEvent:
-		req.Metadata = sanitizePluginMetadata(req.Metadata)
-		return req
 	case rpcRequestInterceptRequest:
 		req.Metadata = sanitizePluginMetadata(req.Metadata)
 		return req
@@ -230,9 +224,6 @@ func sanitizePluginRequest(request any) any {
 		req.Metadata = sanitizePluginMetadata(req.Metadata)
 		return req
 	case rpcStreamChunkInterceptRequest:
-		req.Metadata = sanitizePluginMetadata(req.Metadata)
-		return req
-	case rpcWebSocketResponseEvent:
 		req.Metadata = sanitizePluginMetadata(req.Metadata)
 		return req
 	case pluginapi.ExecutorHTTPRequest:
@@ -537,16 +528,6 @@ func (a *rpcPluginAdapter) InterceptStreamChunk(ctx context.Context, req plugina
 		StreamChunkInterceptRequest: req,
 		HostCallbackID:              callbackID,
 	})
-}
-
-func (a *rpcPluginAdapter) ObserveWebSocketResponseEvent(ctx context.Context, event pluginapi.WebSocketResponseEvent) error {
-	callbackID, closeCallback := a.openHostCallbackContext(ctx)
-	defer closeCallback()
-	_, errCall := callPlugin[rpcEmptyResponse](ctx, a.client, pluginabi.MethodWebSocketResponseEvent, rpcWebSocketResponseEvent{
-		WebSocketResponseEvent: event,
-		HostCallbackID:         callbackID,
-	})
-	return errCall
 }
 
 func (a rpcThinkingApplier) ApplyThinking(ctx context.Context, req pluginapi.ThinkingApplyRequest) (pluginapi.PayloadResponse, error) {

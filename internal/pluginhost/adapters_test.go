@@ -3034,53 +3034,65 @@ func TestExecutorAdapterSelectsCustomOutputWithHostResponseTranslator(t *testing
 
 func TestExecutorAdapterConsumesTranslatedStreamChunksWithoutOutput(t *testing.T) {
 	adapter := &executorAdapter{}
-	request := []byte(`{"model":"qmodel_latest","stream":true,"tool_choice":"auto","parallel_tool_calls":true}`)
+	request := []byte(`{"model":"claude-sonnet-4-6","stream":true,"tool_choice":{"type":"auto"}}`)
 	prepared := preparedExecutorCall{
 		req: coreexecutor.Request{
-			Model:   "qmodel_latest",
+			Model:   "claude-sonnet-4-6",
 			Payload: request,
 		},
 		opts: coreexecutor.Options{
 			OriginalRequest: request,
 		},
-		requestedFormat: sdktranslator.FormatOpenAIResponse,
-		outputFormat:    sdktranslator.FormatOpenAI,
+		requestedFormat: sdktranslator.FormatOpenAI,
+		outputFormat:    sdktranslator.FormatClaude,
 	}
 	var param any
 
-	startPayload := []byte(`{"choices":[{"delta":{"content":"","tool_calls":[{"function":{"arguments":"","name":"get_weather"},"id":"call_69755759d70640e3b7a42805","index":0,"type":"function"}]},"index":0}],"created":1780767281,"id":"chatcmpl-ba492ed2-2901-9d1f-80e7-b6dfe97fefaa","model":"auto","object":"chat.completion.chunk"}`)
-	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, startPayload, &param); len(got) == 0 {
-		t.Fatal("tool call start payload was not translated")
+	startPayload := []byte(`data: {"type":"message_start","message":{"id":"msg_stream_1","type":"message","role":"assistant","model":"claude-sonnet-4-6","usage":{"input_tokens":12,"output_tokens":0}}}`)
+	startFrames := adapter.translateExecutorStreamPayload(context.Background(), prepared, startPayload, &param)
+	if len(startFrames) == 0 {
+		t.Fatal("message_start payload was not translated")
+	}
+	if !bytes.Contains(startFrames[0], []byte(`"role":"assistant"`)) {
+		t.Fatalf("message_start payload did not produce an assistant role chunk: %q", startFrames[0])
 	}
 
-	emptyArgumentsPayload := []byte(`{"choices":[{"delta":{"content":"","tool_calls":[{"function":{"arguments":""},"id":"","index":0,"type":"function"}]},"index":0}],"created":1780767281,"id":"chatcmpl-ba492ed2-2901-9d1f-80e7-b6dfe97fefaa","model":"auto","object":"chat.completion.chunk"}`)
-	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, emptyArgumentsPayload, &param); len(got) != 0 {
-		t.Fatalf("empty arguments payload leaked through translation fallback: %q", got[0])
+	toolUseStartPayload := []byte(`data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_1","name":"get_weather","input":{}}}`)
+	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, toolUseStartPayload, &param); len(got) != 0 {
+		t.Fatalf("tool_use start payload leaked through translation fallback: %q", got[0])
 	}
 
-	finishPayload := []byte(`{"choices":[{"delta":{},"finish_reason":"tool_calls","index":0}],"created":1780767281,"id":"chatcmpl-ba492ed2-2901-9d1f-80e7-b6dfe97fefaa","model":"auto","object":"chat.completion.chunk"}`)
-	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, finishPayload, &param); len(got) == 0 {
+	argsDeltaPayload := []byte(`data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"city\":\"paris\"}"}}`)
+	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, argsDeltaPayload, &param); len(got) != 0 {
+		t.Fatalf("input_json_delta payload leaked through translation fallback: %q", got[0])
+	}
+
+	toolUseStopPayload := []byte(`data: {"type":"content_block_stop","index":0}`)
+	stopFrames := adapter.translateExecutorStreamPayload(context.Background(), prepared, toolUseStopPayload, &param)
+	if len(stopFrames) == 0 {
+		t.Fatal("content_block_stop payload was not translated")
+	}
+	if !bytes.Contains(stopFrames[0], []byte(`"name":"get_weather"`)) || !bytes.Contains(stopFrames[0], []byte(`"id":"toolu_1"`)) {
+		t.Fatalf("content_block_stop did not emit the accumulated tool call: %q", stopFrames[0])
+	}
+
+	pingPayload := []byte(`data: {"type":"ping"}`)
+	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, pingPayload, &param); len(got) != 0 {
+		t.Fatalf("ping payload leaked through translation fallback: %q", got[0])
+	}
+
+	finishPayload := []byte(`data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":7}}`)
+	finishFrames := adapter.translateExecutorStreamPayload(context.Background(), prepared, finishPayload, &param)
+	if len(finishFrames) == 0 {
 		t.Fatal("finish payload was not translated")
 	}
-
-	usagePayload := []byte(`{"choices":[],"created":1780767281,"id":"chatcmpl-ba492ed2-2901-9d1f-80e7-b6dfe97fefaa","model":"auto","object":"chat.completion.chunk","usage":{"completion_tokens":179,"completion_tokens_details":{"reasoning_tokens":121},"prompt_tokens":331,"prompt_tokens_details":{"cached_tokens":0},"total_tokens":510}}`)
-	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, usagePayload, &param); len(got) != 0 {
-		t.Fatalf("usage-only payload leaked through translation fallback: %q", got[0])
+	if !bytes.Contains(finishFrames[0], []byte(`"finish_reason":"tool_calls"`)) {
+		t.Fatalf("finish payload did not carry the mapped stop reason: %q", finishFrames[0])
 	}
 
-	donePayload := []byte(`data: [DONE]`)
-	doneFrames := adapter.translateExecutorStreamPayload(context.Background(), prepared, donePayload, &param)
-	if len(doneFrames) != 1 {
-		t.Fatalf("done payload translated to %d frames, want 1", len(doneFrames))
-	}
-	if !bytes.Contains(doneFrames[0], []byte("response.completed")) {
-		t.Fatalf("done payload did not produce response.completed: %q", doneFrames[0])
-	}
-	if !bytes.Contains(doneFrames[0], []byte(`"input_tokens":331`)) ||
-		!bytes.Contains(doneFrames[0], []byte(`"output_tokens":179`)) ||
-		!bytes.Contains(doneFrames[0], []byte(`"reasoning_tokens":121`)) ||
-		!bytes.Contains(doneFrames[0], []byte(`"total_tokens":510`)) {
-		t.Fatalf("completed payload did not preserve usage: %q", doneFrames[0])
+	stopPayload := []byte(`data: {"type":"message_stop"}`)
+	if got := adapter.translateExecutorStreamPayload(context.Background(), prepared, stopPayload, &param); len(got) != 0 {
+		t.Fatalf("message_stop payload leaked through translation fallback: %q", got[0])
 	}
 }
 

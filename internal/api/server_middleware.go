@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	codexlive "github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/live"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/home"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
@@ -115,10 +114,6 @@ func isExampleAPIKeySafeModeProxyPath(path string) bool {
 		return true
 	case path == "/v1beta" || strings.HasPrefix(path, "/v1beta/"):
 		return true
-	case path == "/openai/v1" || strings.HasPrefix(path, "/openai/v1/"):
-		return true
-	case path == "/backend-api/codex" || strings.HasPrefix(path, "/backend-api/codex/"):
-		return true
 	default:
 		return false
 	}
@@ -150,10 +145,6 @@ func corsMiddleware() gin.HandlerFunc {
 // it allows all requests (legacy behaviour).
 func AuthMiddleware(manager *sdkaccess.Manager) gin.HandlerFunc {
 	return accessAuthMiddleware(manager, false)
-}
-
-func realtimeStandardAuthMiddleware(manager *sdkaccess.Manager) gin.HandlerFunc {
-	return accessAuthMiddleware(manager, true)
 }
 
 func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.HandlerFunc {
@@ -196,38 +187,5 @@ func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.Ha
 			return
 		}
 		c.AbortWithStatusJSON(statusCode, gin.H{"error": err.Message})
-	}
-}
-
-func realtimeAuthMiddleware(manager *sdkaccess.Manager, handler *codexlive.Handler) gin.HandlerFunc {
-	fallback := realtimeStandardAuthMiddleware(manager)
-	return func(c *gin.Context) {
-		authorization, matched, errAuthenticate := handler.AuthenticateClientSecret(c.Request)
-		if !matched {
-			fallback(c)
-			return
-		}
-		if errAuthenticate != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": gin.H{
-				"message": errAuthenticate.Error(),
-				"type":    "invalid_request_error",
-				"param":   nil,
-				"code":    "invalid_realtime_client_secret",
-			}})
-			return
-		}
-		principal := authorization.IssuerPrincipal
-		if principal == "" {
-			principal = authorization.Principal
-		}
-		provider := authorization.IssuerProvider
-		if provider == "" {
-			provider = "realtime-client-secret"
-		}
-		c.Set("userApiKey", principal)
-		c.Set("accessProvider", provider)
-		c.Set(codexlive.ClientSecretSessionContextKey, authorization.Session)
-		c.Set(codexlive.ClientSecretPrincipalContextKey, authorization.Principal)
-		c.Next()
 	}
 }

@@ -157,161 +157,85 @@ func TestAPICallTransportAPIKeyAuthFallsBackToConfigProxyURL(t *testing.T) {
 	h := &Handler{
 		cfg: &config.Config{
 			SDKConfig: sdkconfig.SDKConfig{ProxyURL: "http://global-proxy.example.com:8080"},
-			GeminiKey: []config.GeminiKey{{
-				APIKey:   "gemini-key",
-				ProxyURL: "http://gemini-proxy.example.com:8080",
-			}},
 			ClaudeKey: []config.ClaudeKey{{
 				APIKey:   "claude-key",
 				ProxyURL: "http://claude-proxy.example.com:8080",
 			}},
-			CodexKey: []config.CodexKey{{
-				APIKey:   "codex-key",
-				ProxyURL: "http://codex-proxy.example.com:8080",
-			}},
-			XAIKey: []config.XAIKey{{
-				APIKey:   "xai-key",
-				ProxyURL: "http://xai-proxy.example.com:8080",
-			}},
-			OpenAICompatibility: []config.OpenAICompatibility{{
-				Name:    "bohe",
-				BaseURL: "https://bohe.example.com",
-				APIKeyEntries: []config.OpenAICompatibilityAPIKey{{
-					APIKey:   "compat-key",
-					ProxyURL: "http://compat-proxy.example.com:8080",
-				}},
-			}},
 		},
 	}
 
-	cases := []struct {
-		name      string
-		auth      *coreauth.Auth
-		wantProxy string
-	}{
-		{
-			name: "gemini",
-			auth: &coreauth.Auth{
-				Provider:   "gemini",
-				Attributes: map[string]string{"api_key": "gemini-key"},
-			},
-			wantProxy: "http://gemini-proxy.example.com:8080",
-		},
-		{
-			name: "claude",
-			auth: &coreauth.Auth{
-				Provider:   "claude",
-				Attributes: map[string]string{"api_key": "claude-key"},
-			},
-			wantProxy: "http://claude-proxy.example.com:8080",
-		},
-		{
-			name: "codex",
-			auth: &coreauth.Auth{
-				Provider:   "codex",
-				Attributes: map[string]string{"api_key": "codex-key"},
-			},
-			wantProxy: "http://codex-proxy.example.com:8080",
-		},
-		{
-			name: "xai",
-			auth: &coreauth.Auth{
-				Provider:   "xai",
-				Attributes: map[string]string{"api_key": "xai-key"},
-			},
-			wantProxy: "http://xai-proxy.example.com:8080",
-		},
-		{
-			name: "openai-compatibility",
-			auth: &coreauth.Auth{
-				Provider: "bohe",
-				Attributes: map[string]string{
-					"api_key":      "compat-key",
-					"compat_name":  "bohe",
-					"provider_key": "bohe",
-				},
-			},
-			wantProxy: "http://compat-proxy.example.com:8080",
-		},
+	auth := &coreauth.Auth{
+		Provider:   "claude",
+		Attributes: map[string]string{"api_key": "claude-key"},
 	}
 
-	for _, tc := range cases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+	transport := h.apiCallTransport(auth, "")
+	httpTransport, ok := transport.(*http.Transport)
+	if !ok {
+		t.Fatalf("transport type = %T, want *http.Transport", transport)
+	}
 
-			transport := h.apiCallTransport(tc.auth, "")
-			httpTransport, ok := transport.(*http.Transport)
-			if !ok {
-				t.Fatalf("transport type = %T, want *http.Transport", transport)
-			}
+	req, errRequest := http.NewRequest(http.MethodGet, "https://example.com", nil)
+	if errRequest != nil {
+		t.Fatalf("http.NewRequest returned error: %v", errRequest)
+	}
 
-			req, errRequest := http.NewRequest(http.MethodGet, "https://example.com", nil)
-			if errRequest != nil {
-				t.Fatalf("http.NewRequest returned error: %v", errRequest)
-			}
-
-			proxyURL, errProxy := httpTransport.Proxy(req)
-			if errProxy != nil {
-				t.Fatalf("httpTransport.Proxy returned error: %v", errProxy)
-			}
-			if proxyURL == nil || proxyURL.String() != tc.wantProxy {
-				t.Fatalf("proxy URL = %v, want %s", proxyURL, tc.wantProxy)
-			}
-		})
+	proxyURL, errProxy := httpTransport.Proxy(req)
+	if errProxy != nil {
+		t.Fatalf("httpTransport.Proxy returned error: %v", errProxy)
+	}
+	if proxyURL == nil || proxyURL.String() != "http://claude-proxy.example.com:8080" {
+		t.Fatalf("proxy URL = %v, want claude credential proxy", proxyURL)
 	}
 }
 
-func TestAuthByIndexDistinguishesSharedAPIKeysAcrossProviders(t *testing.T) {
+func TestAuthByIndexDistinguishesAuths(t *testing.T) {
 	t.Parallel()
 
 	manager := coreauth.NewManager(nil, nil, nil)
-	geminiAuth := &coreauth.Auth{
-		ID:       "gemini:apikey:123",
-		Provider: "gemini",
+	authA := &coreauth.Auth{
+		ID:       "claude:apikey:123",
+		Provider: "claude",
 		Attributes: map[string]string{
-			"api_key": "shared-key",
+			"api_key": "key-a",
 		},
 	}
-	compatAuth := &coreauth.Auth{
-		ID:       "openai-compatibility:bohe:456",
-		Provider: "bohe",
-		Label:    "bohe",
+	authB := &coreauth.Auth{
+		ID:       "claude:apikey:456",
+		Provider: "claude",
 		Attributes: map[string]string{
-			"api_key":      "shared-key",
-			"compat_name":  "bohe",
-			"provider_key": "bohe",
+			"api_key": "key-b",
 		},
 	}
 
-	if _, errRegister := manager.Register(context.Background(), geminiAuth); errRegister != nil {
-		t.Fatalf("register gemini auth: %v", errRegister)
+	if _, errRegister := manager.Register(context.Background(), authA); errRegister != nil {
+		t.Fatalf("register authA: %v", errRegister)
 	}
-	if _, errRegister := manager.Register(context.Background(), compatAuth); errRegister != nil {
-		t.Fatalf("register compat auth: %v", errRegister)
+	if _, errRegister := manager.Register(context.Background(), authB); errRegister != nil {
+		t.Fatalf("register authB: %v", errRegister)
 	}
 
-	geminiIndex := geminiAuth.EnsureIndex()
-	compatIndex := compatAuth.EnsureIndex()
-	if geminiIndex == compatIndex {
-		t.Fatalf("shared api key produced duplicate auth_index %q", geminiIndex)
+	indexA := authA.EnsureIndex()
+	indexB := authB.EnsureIndex()
+	if indexA == indexB {
+		t.Fatalf("shared api key produced duplicate auth_index %q", indexA)
 	}
 
 	h := &Handler{authManager: manager}
 
-	gotGemini := h.authByIndex(geminiIndex)
-	if gotGemini == nil {
-		t.Fatal("expected gemini auth by index")
+	gotA := h.authByIndex(indexA)
+	if gotA == nil {
+		t.Fatal("expected authA by index")
 	}
-	if gotGemini.ID != geminiAuth.ID {
-		t.Fatalf("authByIndex(gemini) returned %q, want %q", gotGemini.ID, geminiAuth.ID)
+	if gotA.ID != authA.ID {
+		t.Fatalf("authByIndex(A) returned %q, want %q", gotA.ID, authA.ID)
 	}
 
-	gotCompat := h.authByIndex(compatIndex)
-	if gotCompat == nil {
-		t.Fatal("expected compat auth by index")
+	gotB := h.authByIndex(indexB)
+	if gotB == nil {
+		t.Fatal("expected authB by index")
 	}
-	if gotCompat.ID != compatAuth.ID {
-		t.Fatalf("authByIndex(compat) returned %q, want %q", gotCompat.ID, compatAuth.ID)
+	if gotB.ID != authB.ID {
+		t.Fatalf("authByIndex(B) returned %q, want %q", gotB.ID, authB.ID)
 	}
 }

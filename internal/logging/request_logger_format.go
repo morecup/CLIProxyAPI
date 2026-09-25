@@ -25,14 +25,10 @@ func (l *FileRequestLogger) writeNonStreamingLog(
 	requestHeaders map[string][]string,
 	requestBody []byte,
 	requestBodyPath string,
-	websocketTimeline []byte,
-	websocketTimelineSource *FileBodySource,
 	apiRequest []byte,
 	apiRequestSource *FileBodySource,
 	apiResponse []byte,
 	apiResponseSource *FileBodySource,
-	apiWebsocketTimeline []byte,
-	apiWebsocketTimelineSource *FileBodySource,
 	apiResponseErrors []*interfaces.ErrorMessage,
 	statusCode int,
 	responseHeaders map[string][]string,
@@ -44,16 +40,8 @@ func (l *FileRequestLogger) writeNonStreamingLog(
 	if requestTimestamp.IsZero() {
 		requestTimestamp = time.Now()
 	}
-	isWebsocketTranscript := hasSectionPayload(websocketTimeline) || hasFileBodySourcePayload(websocketTimelineSource)
-	downstreamTransport := inferDownstreamTransport(requestHeaders, websocketTimeline, websocketTimelineSource)
-	upstreamTransport := inferUpstreamTransport(apiRequest, apiRequestSource, apiResponse, apiResponseSource, apiWebsocketTimeline, apiWebsocketTimelineSource, apiResponseErrors)
-	if errWrite := writeRequestInfoWithBody(w, url, method, requestHeaders, requestBody, requestBodyPath, requestTimestamp, downstreamTransport, upstreamTransport, !isWebsocketTranscript); errWrite != nil {
-		return errWrite
-	}
-	if errWrite := writeAPISectionWithSource(w, "=== WEBSOCKET TIMELINE ===\n", "=== WEBSOCKET TIMELINE", websocketTimeline, websocketTimelineSource, time.Time{}); errWrite != nil {
-		return errWrite
-	}
-	if errWrite := writeAPISectionWithSource(w, "=== API WEBSOCKET TIMELINE ===\n", "=== API WEBSOCKET TIMELINE", apiWebsocketTimeline, apiWebsocketTimelineSource, time.Time{}); errWrite != nil {
+	upstreamTransport := inferUpstreamTransport(apiRequest, apiRequestSource, apiResponse, apiResponseSource, apiResponseErrors)
+	if errWrite := writeRequestInfoWithBody(w, url, method, requestHeaders, requestBody, requestBodyPath, requestTimestamp, "http", upstreamTransport, true); errWrite != nil {
 		return errWrite
 	}
 	if errWrite := writePreformattedAPISectionWithSource(w, "=== API REQUEST ===\n", "=== API REQUEST", apiRequest, apiRequestSource, time.Time{}); errWrite != nil {
@@ -64,12 +52,6 @@ func (l *FileRequestLogger) writeNonStreamingLog(
 	}
 	if errWrite := writePreformattedAPISectionWithSource(w, "=== API RESPONSE ===\n", "=== API RESPONSE", apiResponse, apiResponseSource, apiResponseTimestamp); errWrite != nil {
 		return errWrite
-	}
-	if isWebsocketTranscript {
-		// Intentionally omit the generic downstream HTTP response section for websocket
-		// transcripts. The durable session exchange is captured in WEBSOCKET TIMELINE,
-		// and appending a one-off upgrade response snapshot would dilute that transcript.
-		return nil
 	}
 	return writeResponseSection(w, statusCode, true, responseHeaders, bytes.NewReader(response), decompressErr, true)
 }
@@ -213,35 +195,11 @@ func hasFileBodySourcePayload(source *FileBodySource) bool {
 	return source != nil && source.HasPayload()
 }
 
-func inferDownstreamTransport(headers map[string][]string, websocketTimeline []byte, websocketTimelineSource *FileBodySource) string {
-	if hasSectionPayload(websocketTimeline) || hasFileBodySourcePayload(websocketTimelineSource) {
-		return "websocket"
-	}
-	for key, values := range headers {
-		if strings.EqualFold(strings.TrimSpace(key), "Upgrade") {
-			for _, value := range values {
-				if strings.EqualFold(strings.TrimSpace(value), "websocket") {
-					return "websocket"
-				}
-			}
-		}
-	}
-	return "http"
-}
-
-func inferUpstreamTransport(apiRequest []byte, apiRequestSource *FileBodySource, apiResponse []byte, apiResponseSource *FileBodySource, apiWebsocketTimeline []byte, apiWebsocketTimelineSource *FileBodySource, _ []*interfaces.ErrorMessage) string {
-	hasHTTP := hasSectionPayload(apiRequest) || hasFileBodySourcePayload(apiRequestSource) || hasSectionPayload(apiResponse) || hasFileBodySourcePayload(apiResponseSource)
-	hasWS := hasSectionPayload(apiWebsocketTimeline) || hasFileBodySourcePayload(apiWebsocketTimelineSource)
-	switch {
-	case hasHTTP && hasWS:
-		return "websocket+http"
-	case hasWS:
-		return "websocket"
-	case hasHTTP:
+func inferUpstreamTransport(apiRequest []byte, apiRequestSource *FileBodySource, apiResponse []byte, apiResponseSource *FileBodySource, _ []*interfaces.ErrorMessage) string {
+	if hasSectionPayload(apiRequest) || hasFileBodySourcePayload(apiRequestSource) || hasSectionPayload(apiResponse) || hasFileBodySourcePayload(apiResponseSource) {
 		return "http"
-	default:
-		return ""
 	}
+	return ""
 }
 
 func writeLogPart(w io.Writer, payload []byte, prependNewline bool) error {
@@ -436,7 +394,6 @@ func responseBodyStartsWithLeadingNewline(reader *bufio.Reader) bool {
 //   - method: The HTTP method
 //   - headers: The request headers
 //   - body: The request body
-//   - websocketTimeline: The downstream websocket event timeline
 //   - apiRequest: The API request data
 //   - apiResponse: The API response data
 //   - response: The raw response data
@@ -445,42 +402,12 @@ func responseBodyStartsWithLeadingNewline(reader *bufio.Reader) bool {
 //
 // Returns:
 //   - string: The formatted log content
-func (l *FileRequestLogger) formatLogContent(url, method string, headers map[string][]string, body, websocketTimeline, apiRequest, apiResponse, apiWebsocketTimeline, response []byte, status int, responseHeaders map[string][]string, apiResponseErrors []*interfaces.ErrorMessage) string {
+func (l *FileRequestLogger) formatLogContent(url, method string, headers map[string][]string, body, apiRequest, apiResponse, response []byte, status int, responseHeaders map[string][]string, apiResponseErrors []*interfaces.ErrorMessage) string {
 	var content strings.Builder
-	isWebsocketTranscript := hasSectionPayload(websocketTimeline)
-	downstreamTransport := inferDownstreamTransport(headers, websocketTimeline, nil)
-	upstreamTransport := inferUpstreamTransport(apiRequest, nil, apiResponse, nil, apiWebsocketTimeline, nil, apiResponseErrors)
+	upstreamTransport := inferUpstreamTransport(apiRequest, nil, apiResponse, nil, apiResponseErrors)
 
 	// Request info
-	content.WriteString(l.formatRequestInfo(url, method, headers, body, downstreamTransport, upstreamTransport, !isWebsocketTranscript))
-
-	if len(websocketTimeline) > 0 {
-		if bytes.HasPrefix(websocketTimeline, []byte("=== WEBSOCKET TIMELINE")) {
-			content.Write(websocketTimeline)
-			if !bytes.HasSuffix(websocketTimeline, []byte("\n")) {
-				content.WriteString("\n")
-			}
-		} else {
-			content.WriteString("=== WEBSOCKET TIMELINE ===\n")
-			content.Write(websocketTimeline)
-			content.WriteString("\n")
-		}
-		content.WriteString("\n")
-	}
-
-	if len(apiWebsocketTimeline) > 0 {
-		if bytes.HasPrefix(apiWebsocketTimeline, []byte("=== API WEBSOCKET TIMELINE")) {
-			content.Write(apiWebsocketTimeline)
-			if !bytes.HasSuffix(apiWebsocketTimeline, []byte("\n")) {
-				content.WriteString("\n")
-			}
-		} else {
-			content.WriteString("=== API WEBSOCKET TIMELINE ===\n")
-			content.Write(apiWebsocketTimeline)
-			content.WriteString("\n")
-		}
-		content.WriteString("\n")
-	}
+	content.WriteString(l.formatRequestInfo(url, method, headers, body, "http", upstreamTransport, true))
 
 	if len(apiRequest) > 0 {
 		if bytes.HasPrefix(apiRequest, []byte("=== API REQUEST")) {
@@ -515,12 +442,6 @@ func (l *FileRequestLogger) formatLogContent(url, method string, headers map[str
 			content.WriteString("\n")
 		}
 		content.WriteString("\n")
-	}
-
-	if isWebsocketTranscript {
-		// Mirror writeNonStreamingLog: websocket transcripts end with the dedicated
-		// timeline sections instead of a generic downstream HTTP response block.
-		return content.String()
 	}
 
 	// Response section

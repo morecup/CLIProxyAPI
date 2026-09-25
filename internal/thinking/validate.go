@@ -54,14 +54,13 @@ func ValidateConfig(config ThinkingConfig, modelInfo *registry.ModelInfo, fromFo
 	}
 
 	// allowClampUnsupported determines whether to clamp unsupported levels instead of returning an error.
-	// This applies when crossing provider families (e.g., openai→gemini, claude→gemini) and the target
+	// This applies when crossing protocol families (e.g., openai→claude) and the target
 	// model supports discrete levels. Same-family conversions require strict validation.
 	//
-	// modelFamilyMismatch covers providers that reuse another protocol on the wire
-	// (e.g. Kimi serving Claude-compatible /v1/messages). In that path fromFormat and
-	// toFormat both look like "claude", but the model itself is not Claude-family, so
-	// unsupported levels such as "max" should clamp to the nearest supported level
-	// (typically "high") instead of failing validation.
+	// modelFamilyMismatch covers models that reuse another protocol on the wire:
+	// fromFormat and toFormat may both look like "claude", but the model itself is
+	// not Claude-family, so unsupported levels such as "max" should clamp to the
+	// nearest supported level instead of failing validation.
 	toCapability := detectModelCapability(modelInfo)
 	toHasLevelSupport := toCapability == CapabilityLevelOnly || toCapability == CapabilityHybrid
 	modelFamilyMismatch := false
@@ -372,38 +371,11 @@ func normalizeLevels(levels []string) []string {
 // isBudgetCapableProvider returns true if the provider supports budget-based thinking.
 // These providers may also support level-based thinking (hybrid models).
 func isBudgetCapableProvider(provider string) bool {
-	switch provider {
-	case "gemini", "antigravity", "claude":
-		return true
-	default:
-		return false
-	}
-}
-
-func isGeminiFamily(provider string) bool {
-	switch provider {
-	case "gemini", "antigravity":
-		return true
-	default:
-		return false
-	}
-}
-
-func isOpenAIFamily(provider string) bool {
-	switch provider {
-	case "openai", "openai-response", "codex":
-		return true
-	default:
-		return false
-	}
+	return provider == "claude"
 }
 
 func isSameProviderFamily(from, to string) bool {
-	if from == to {
-		return true
-	}
-	return (isGeminiFamily(from) && isGeminiFamily(to)) ||
-		(isOpenAIFamily(from) && isOpenAIFamily(to))
+	return from == to
 }
 
 func abs(x int) int {

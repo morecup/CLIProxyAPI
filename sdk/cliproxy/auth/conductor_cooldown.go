@@ -12,7 +12,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/clienterror"
 	internalconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	internallogging "github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
@@ -60,30 +59,7 @@ func quotaCooldownDisabledForAuthWithConfig(auth *Auth, cfg *internalconfig.Conf
 }
 
 func providerCoolingOverrideForAuth(auth *Auth, cfg *internalconfig.Config) (bool, bool) {
-	if auth == nil || cfg == nil {
-		return false, false
-	}
-	provider := strings.ToLower(strings.TrimSpace(auth.Provider))
-	if provider == "" {
-		return false, false
-	}
-	providerKey := ""
-	compatName := ""
-	if auth.Attributes != nil {
-		providerKey = strings.TrimSpace(auth.Attributes["provider_key"])
-		compatName = strings.TrimSpace(auth.Attributes["compat_name"])
-	}
-	if providerKey == "" && compatName == "" && provider != "openai-compatibility" {
-		return false, false
-	}
-	if providerKey == "" {
-		providerKey = provider
-	}
-	entry := resolveOpenAICompatConfig(cfg, providerKey, compatName, provider)
-	if entry == nil || entry.DisableCooling == nil {
-		return false, false
-	}
-	return *entry.DisableCooling, true
+	return false, false
 }
 
 func nextTransientErrorRetryAfter(now time.Time) time.Time {
@@ -1360,14 +1336,6 @@ func isConnectionLifecycleError(err error) bool {
 	if err == nil {
 		return false
 	}
-	// Typed WebSocket close codes are an unambiguous connection lifecycle signal.
-	var closeErr *websocket.CloseError
-	if errors.As(err, &closeErr) && closeErr != nil {
-		switch closeErr.Code {
-		case websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure:
-			return true
-		}
-	}
 	// Credential/auth/quota statuses must never be reclassified from response text.
 	if statusCodeFromError(err) != 0 {
 		return false
@@ -1401,12 +1369,6 @@ func isConnectionLifecycleMessage(message string) bool {
 	}
 	switch lower {
 	case "context canceled", "context deadline exceeded", "eof", "unexpected eof":
-		return true
-	}
-	// gorilla/websocket CloseError.Error() and common wrappers.
-	if strings.Contains(lower, "websocket: close 1000") ||
-		strings.Contains(lower, "websocket: close 1001") ||
-		strings.Contains(lower, "websocket: close 1006") {
 		return true
 	}
 	// Wrapped transport EOF phrasing (e.g. "read tcp ...: unexpected EOF").
@@ -1620,58 +1582,6 @@ func isCountTokensEndpointNotFoundError(err error, requestedModel string) bool {
 	}
 	baseModel := thinking.ParseSuffix(requestedModel).ModelName
 	return !isExplicitModelNotFoundError(err, baseModel)
-}
-
-func isResponsesCompactRequest(opts cliproxyexecutor.Options) bool {
-	return opts.Alt == "responses/compact"
-}
-
-func isResponsesCompactRequestFaultError(opts cliproxyexecutor.Options, err error) bool {
-	if !isResponsesCompactRequest(opts) || err == nil {
-		return false
-	}
-	if isCredentialScopedError(err) || isCloudflareChallengeError(err) || isInvalidGrantError(err) {
-		return false
-	}
-	status := statusCodeFromError(err)
-	if clienterror.IsRequestFault(status, err) {
-		return true
-	}
-	switch status {
-	case http.StatusBadRequest,
-		http.StatusNotFound,
-		http.StatusMethodNotAllowed,
-		http.StatusConflict,
-		http.StatusRequestEntityTooLarge,
-		http.StatusUnprocessableEntity,
-		http.StatusNotImplemented:
-		return true
-	default:
-		return false
-	}
-}
-
-func isResponsesCompactAvailabilityNeutralError(opts cliproxyexecutor.Options, err error, resultErr *Error) bool {
-	if !isResponsesCompactRequest(opts) {
-		return false
-	}
-	if resultErr != nil && resultErr.Code == ErrorCodeForceCooldown {
-		return false
-	}
-	if isCredentialScopedError(err) || isCloudflareChallengeError(err) || isInvalidGrantError(err) {
-		return false
-	}
-	if resultErr != nil && (isCloudflareChallengeResultError(resultErr) || isInvalidGrantResultError(resultErr)) {
-		return false
-	}
-	status := statusCodeFromError(err)
-	if status == 0 && resultErr != nil {
-		status = statusCodeFromResult(resultErr)
-	}
-	if status == http.StatusUnauthorized || status == http.StatusPaymentRequired || status == http.StatusForbidden || status == http.StatusTooManyRequests {
-		return false
-	}
-	return true
 }
 
 func isExplicitModelNotFoundError(err error, requestedModel string) bool {

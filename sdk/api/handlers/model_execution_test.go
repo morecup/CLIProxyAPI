@@ -522,96 +522,53 @@ func TestExecuteModelStreamContextCancel(t *testing.T) {
 }
 
 func TestExecuteProtocolWithAuthManagerUsesForcedProvider(t *testing.T) {
-	model := "interactions-agent-target"
-	requestBody := []byte(`{"agent":"agents/test-agent","input":"hi"}`)
+	model := "claude-sonnet-4-5"
+	requestBody := []byte(`{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"hi"}]}`)
 	executor := &modelExecutionCaptureExecutor{
-		provider: "gemini",
+		provider: "claude",
 		execute: func(ctx context.Context, auth *coreauth.Auth, req coreexecutor.Request, opts coreexecutor.Options) (coreexecutor.Response, error) {
-			return coreexecutor.Response{Payload: []byte(`{"id":"interaction_1"}`)}, nil
+			return coreexecutor.Response{Payload: []byte(`{"id":"msg_1"}`)}, nil
 		},
 	}
 	handler := newModelExecutionHandler(t, model, executor, &sdkconfig.SDKConfig{})
 
 	resp, errMsg := handler.ExecuteProtocolWithAuthManager(context.Background(), ProtocolExecutionRequest{
-		EntryProtocol:  "interactions",
-		ExitProtocol:   "interactions",
-		ForcedProvider: "gemini",
+		EntryProtocol:  "openai",
+		ExitProtocol:   "openai",
+		ForcedProvider: "claude",
 		Model:          model,
 		Body:           requestBody,
 	})
 	if errMsg != nil {
 		t.Fatalf("ExecuteProtocolWithAuthManager() error = %+v", errMsg)
 	}
-	if string(resp.Body) != `{"id":"interaction_1"}` {
-		t.Fatalf("body = %q, want native interactions response", resp.Body)
+	if string(resp.Body) != `{"id":"msg_1"}` {
+		t.Fatalf("body = %q, want claude response", resp.Body)
 	}
 
 	gotReq, gotOpts := executor.captured()
 	if gotReq.Model != model {
 		t.Fatalf("executor model = %q, want %q", gotReq.Model, model)
 	}
-	if gotOpts.SourceFormat != sdktranslator.FormatInteractions {
-		t.Fatalf("SourceFormat = %q, want %q", gotOpts.SourceFormat, sdktranslator.FormatInteractions)
+	if gotOpts.SourceFormat != sdktranslator.FormatOpenAI {
+		t.Fatalf("SourceFormat = %q, want %q", gotOpts.SourceFormat, sdktranslator.FormatOpenAI)
 	}
-	if gotOpts.ResponseFormat != sdktranslator.FormatInteractions {
-		t.Fatalf("ResponseFormat = %q, want %q", gotOpts.ResponseFormat, sdktranslator.FormatInteractions)
+	if gotOpts.ResponseFormat != sdktranslator.FormatOpenAI {
+		t.Fatalf("ResponseFormat = %q, want %q", gotOpts.ResponseFormat, sdktranslator.FormatOpenAI)
 	}
 	if gotOpts.Metadata[coreexecutor.RequestedModelMetadataKey] != model {
 		t.Fatalf("requested model metadata = %#v, want %q", gotOpts.Metadata[coreexecutor.RequestedModelMetadataKey], model)
 	}
 }
 
-func TestPreferExecutionProviderMovesPreferredFirst(t *testing.T) {
-	providers := preferExecutionProvider([]string{"gemini", "gemini-interactions", "claude"}, "gemini-interactions")
-	want := []string{"gemini-interactions", "gemini", "claude"}
-	if len(providers) != len(want) {
-		t.Fatalf("providers = %#v, want %#v", providers, want)
-	}
-	for i := range want {
-		if providers[i] != want[i] {
-			t.Fatalf("providers = %#v, want %#v", providers, want)
-		}
-	}
-}
-
-func TestAdjustExecutionProvidersExcludesInteractionsProviderForUnsupportedEntry(t *testing.T) {
-	providers := adjustExecutionProvidersForEntryProtocol("codex", []string{"gemini-interactions", "codex"})
-	want := []string{"codex"}
-	if len(providers) != len(want) {
-		t.Fatalf("providers = %#v, want %#v", providers, want)
-	}
-	for i := range want {
-		if providers[i] != want[i] {
-			t.Fatalf("providers = %#v, want %#v", providers, want)
-		}
-	}
-}
-
-func TestAdjustExecutionProvidersKeepsInteractionsProviderForSupportedNativeInteractionsEntries(t *testing.T) {
-	for _, entryProtocol := range []string{constant.OpenAI, constant.OpenaiResponse, constant.Claude, constant.Gemini} {
-		t.Run(entryProtocol, func(t *testing.T) {
-			providers := adjustExecutionProvidersForEntryProtocol(entryProtocol, []string{"gemini-interactions"})
-			want := []string{"gemini-interactions"}
-			if len(providers) != len(want) {
-				t.Fatalf("providers = %#v, want %#v", providers, want)
-			}
-			for i := range want {
-				if providers[i] != want[i] {
-					t.Fatalf("providers = %#v, want %#v", providers, want)
-				}
-			}
-		})
-	}
-}
-
-func TestExecuteModelStreamKeepsInteractionsProviderForOpenAIEntry(t *testing.T) {
-	model := "gemini-3.1-flash-lite"
-	requestBody := []byte(`{"model":"gemini-3.1-flash-lite","stream":true,"messages":[{"role":"user","content":"hi"}]}`)
+func TestExecuteModelStreamRoutesToClaudeProviderForOpenAIEntry(t *testing.T) {
+	model := "claude-sonnet-4-5"
+	requestBody := []byte(`{"model":"claude-sonnet-4-5","stream":true,"messages":[{"role":"user","content":"hi"}]}`)
 	executor := &modelExecutionCaptureExecutor{
-		provider: constant.GeminiInteractions,
+		provider: constant.Claude,
 		stream: func(ctx context.Context, auth *coreauth.Auth, req coreexecutor.Request, opts coreexecutor.Options) (*coreexecutor.StreamResult, error) {
 			chunks := make(chan coreexecutor.StreamChunk, 1)
-			chunks <- coreexecutor.StreamChunk{Payload: []byte(`{"id":"chunk_1","object":"chat.completion.chunk","choices":[]}`)}
+			chunks <- coreexecutor.StreamChunk{Payload: []byte(`{"id":"chatcmpl_1","object":"chat.completion.chunk","choices":[]}`)}
 			close(chunks)
 			return &coreexecutor.StreamResult{Chunks: chunks}, nil
 		},
@@ -640,20 +597,20 @@ func TestExecuteModelStreamKeepsInteractionsProviderForOpenAIEntry(t *testing.T)
 }
 
 func TestExecuteProtocolWithAuthManagerAgentUsesSelectionModelForAuth(t *testing.T) {
-	selectionModel := "gemini-2.5-flash"
-	agentModel := "agents/test-agent"
-	requestBody := []byte(`{"agent":"agents/test-agent","input":"hi"}`)
+	selectionModel := "claude-sonnet-4-5"
+	agentModel := "claude-opus-4-5"
+	requestBody := []byte(`{"model":"claude-opus-4-5","input":"hi"}`)
 	executor := &modelExecutionCaptureExecutor{
-		provider: constant.GeminiInteractions,
+		provider: constant.Claude,
 		execute: func(ctx context.Context, auth *coreauth.Auth, req coreexecutor.Request, opts coreexecutor.Options) (coreexecutor.Response, error) {
-			return coreexecutor.Response{Payload: []byte(`{"id":"interaction_1"}`)}, nil
+			return coreexecutor.Response{Payload: []byte(`{"id":"msg_1"}`)}, nil
 		},
 	}
 	manager := coreauth.NewManager(nil, nil, nil)
 	manager.RegisterExecutor(executor)
 	auth := &coreauth.Auth{
 		ID:       "model-execution-agent-selection",
-		Provider: constant.GeminiInteractions,
+		Provider: constant.Claude,
 		Status:   coreauth.StatusActive,
 		Metadata: map[string]any{"email": "agent-selection@example.com"},
 	}
@@ -668,9 +625,9 @@ func TestExecuteProtocolWithAuthManagerAgentUsesSelectionModelForAuth(t *testing
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, manager)
 
 	resp, errMsg := handler.ExecuteProtocolWithAuthManager(context.Background(), ProtocolExecutionRequest{
-		EntryProtocol:      "interactions",
-		ExitProtocol:       "interactions",
-		ForcedProvider:     constant.GeminiInteractions,
+		EntryProtocol:      "openai",
+		ExitProtocol:       "openai",
+		ForcedProvider:     constant.Claude,
 		AuthSelectionModel: selectionModel,
 		Model:              agentModel,
 		Body:               requestBody,
@@ -678,8 +635,8 @@ func TestExecuteProtocolWithAuthManagerAgentUsesSelectionModelForAuth(t *testing
 	if errMsg != nil {
 		t.Fatalf("ExecuteProtocolWithAuthManager() error = %+v", errMsg)
 	}
-	if string(resp.Body) != `{"id":"interaction_1"}` {
-		t.Fatalf("body = %q, want native interactions response", resp.Body)
+	if string(resp.Body) != `{"id":"msg_1"}` {
+		t.Fatalf("body = %q, want claude response", resp.Body)
 	}
 	gotReq, gotOpts := executor.captured()
 	if gotReq.Model != agentModel {
@@ -694,14 +651,14 @@ func TestExecuteProtocolWithAuthManagerAgentUsesSelectionModelForAuth(t *testing
 }
 
 func TestExecuteProtocolStreamWithAuthManagerAgentUsesSelectionModelForAuth(t *testing.T) {
-	selectionModel := "gemini-2.5-flash"
-	agentModel := "agents/test-agent"
-	requestBody := []byte(`{"agent":"agents/test-agent","input":"hi","stream":true}`)
+	selectionModel := "claude-sonnet-4-5"
+	agentModel := "claude-opus-4-5"
+	requestBody := []byte(`{"model":"claude-opus-4-5","input":"hi","stream":true}`)
 	executor := &modelExecutionCaptureExecutor{
-		provider: constant.GeminiInteractions,
+		provider: constant.Claude,
 		stream: func(ctx context.Context, auth *coreauth.Auth, req coreexecutor.Request, opts coreexecutor.Options) (*coreexecutor.StreamResult, error) {
 			chunks := make(chan coreexecutor.StreamChunk, 1)
-			chunks <- coreexecutor.StreamChunk{Payload: []byte(`{"id":"interaction_1"}`)}
+			chunks <- coreexecutor.StreamChunk{Payload: []byte(`{"id":"msg_1"}`)}
 			close(chunks)
 			return &coreexecutor.StreamResult{Chunks: chunks}, nil
 		},
@@ -710,7 +667,7 @@ func TestExecuteProtocolStreamWithAuthManagerAgentUsesSelectionModelForAuth(t *t
 	manager.RegisterExecutor(executor)
 	auth := &coreauth.Auth{
 		ID:       "model-execution-agent-stream-selection",
-		Provider: constant.GeminiInteractions,
+		Provider: constant.Claude,
 		Status:   coreauth.StatusActive,
 		Metadata: map[string]any{"email": "agent-stream-selection@example.com"},
 	}
@@ -725,9 +682,9 @@ func TestExecuteProtocolStreamWithAuthManagerAgentUsesSelectionModelForAuth(t *t
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, manager)
 
 	stream, errMsg := handler.ExecuteProtocolStreamWithAuthManager(context.Background(), ProtocolExecutionRequest{
-		EntryProtocol:      "interactions",
-		ExitProtocol:       "interactions",
-		ForcedProvider:     constant.GeminiInteractions,
+		EntryProtocol:      "openai",
+		ExitProtocol:       "openai",
+		ForcedProvider:     constant.Claude,
 		AuthSelectionModel: selectionModel,
 		Model:              agentModel,
 		Stream:             true,
@@ -743,8 +700,8 @@ func TestExecuteProtocolStreamWithAuthManagerAgentUsesSelectionModelForAuth(t *t
 	if chunk.Err != nil {
 		t.Fatalf("stream chunk error = %+v", chunk.Err)
 	}
-	if string(chunk.Payload) != `{"id":"interaction_1"}` {
-		t.Fatalf("stream chunk payload = %q, want native interactions response", chunk.Payload)
+	if string(chunk.Payload) != `{"id":"msg_1"}` {
+		t.Fatalf("stream chunk payload = %q, want claude response", chunk.Payload)
 	}
 	gotReq, gotOpts := executor.captured()
 	if gotReq.Model != agentModel {
@@ -758,31 +715,31 @@ func TestExecuteProtocolStreamWithAuthManagerAgentUsesSelectionModelForAuth(t *t
 	}
 }
 
-func TestProvidersForExecutionForcedGeminiRejectsRouterProvider(t *testing.T) {
+func TestProvidersForExecutionForcedProviderRejectsRouterProvider(t *testing.T) {
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, nil)
-	decision := modelRouteDecision{Provider: "claude", Model: "claude-sonnet-4"}
-	_, _, errMsg := handler.providersForExecution("agents/test-agent", "agents/test-agent", false, decision, modelExecutionOptions{ForcedProvider: "gemini"})
+	decision := modelRouteDecision{Provider: "anthropic-compatible", Model: "claude-sonnet-4"}
+	_, _, errMsg := handler.providersForExecution("claude-sonnet-4-5", "claude-sonnet-4-5", decision, modelExecutionOptions{ForcedProvider: "claude"})
 	if errMsg == nil {
-		t.Fatal("providersForExecution() error = nil, want native interactions error")
+		t.Fatal("providersForExecution() error = nil, want forced provider conflict error")
 	}
 	if errMsg.StatusCode != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d", errMsg.StatusCode, http.StatusBadRequest)
 	}
-	if errMsg.Error == nil || !strings.Contains(errMsg.Error.Error(), "native interactions") {
-		t.Fatalf("error = %v, want native interactions message", errMsg.Error)
+	if errMsg.Error == nil || !strings.Contains(errMsg.Error.Error(), "forced provider") {
+		t.Fatalf("error = %v, want forced provider conflict message", errMsg.Error)
 	}
 }
 
-func TestProvidersForExecutionForcedGeminiUsesGeminiProvider(t *testing.T) {
+func TestProvidersForExecutionForcedProviderUsesForcedProvider(t *testing.T) {
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, nil)
-	providers, model, errMsg := handler.providersForExecution("agents/test-agent", "agents/test-agent", false, modelRouteDecision{}, modelExecutionOptions{ForcedProvider: "gemini"})
+	providers, model, errMsg := handler.providersForExecution("claude-sonnet-4-5", "claude-sonnet-4-5", modelRouteDecision{}, modelExecutionOptions{ForcedProvider: "claude"})
 	if errMsg != nil {
 		t.Fatalf("providersForExecution() error = %+v", errMsg)
 	}
-	if len(providers) != 1 || providers[0] != "gemini" {
-		t.Fatalf("providers = %#v, want [gemini]", providers)
+	if len(providers) != 1 || providers[0] != "claude" {
+		t.Fatalf("providers = %#v, want [claude]", providers)
 	}
-	if model != "agents/test-agent" {
-		t.Fatalf("model = %q, want agents/test-agent", model)
+	if model != "claude-sonnet-4-5" {
+		t.Fatalf("model = %q, want claude-sonnet-4-5", model)
 	}
 }

@@ -1055,23 +1055,6 @@ func TestClaudeExecutor_CountTokensCountsLocallyWithoutUpstreamRequest(t *testin
 		})
 	}
 
-	executor := newAnthropicCompatibleTestExecutor(&config.Config{})
-	resp, err := executor.CountTokens(context.Background(), nil, cliproxyexecutor.Request{
-		Model:   "claude-sonnet-4-5",
-		Payload: payload,
-	}, cliproxyexecutor.Options{
-		SourceFormat:   sdktranslator.FormatClaude,
-		ResponseFormat: sdktranslator.FormatGemini,
-	})
-	if err != nil {
-		t.Fatalf("CountTokens() Gemini response error = %v", err)
-	}
-	if got := gjson.GetBytes(resp.Payload, "totalTokens").Int(); got != expectedCount {
-		t.Fatalf("Gemini totalTokens = %d, want %d; payload = %s", got, expectedCount, resp.Payload)
-	}
-	if got := gjson.GetBytes(resp.Payload, "promptTokensDetails.0.tokenCount").Int(); got != expectedCount {
-		t.Fatalf("Gemini prompt token detail = %d, want %d; payload = %s", got, expectedCount, resp.Payload)
-	}
 }
 
 func TestClaudeExecutor_CountTokensRejectsInvalidRequests(t *testing.T) {

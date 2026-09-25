@@ -9,8 +9,8 @@ The examples use Go 1.24+ and the v6 module path.
 
 ## Concepts
 
-- Provider executor: a runtime component implementing `auth.ProviderExecutor` that performs outbound calls for a given provider key (e.g., `gemini`, `claude`, `codex`). Executors can also implement `RequestPreparer` to inject credentials on raw HTTP requests.
-- Translator registry: schema conversion functions routed by `sdk/translator`. The built‑in handlers translate between OpenAI/Gemini/Claude/Codex formats; you can register new ones.
+- Provider executor: a runtime component implementing `auth.ProviderExecutor` that performs outbound calls for a given provider key (e.g., `claude`, `anthropic-compatible`). Executors can also implement `RequestPreparer` to inject credentials on raw HTTP requests.
+- Translator registry: schema conversion functions routed by `sdk/translator`. The built‑in handlers translate between OpenAI and Claude formats; you can register new ones.
 - Model registry: publishes the list of available models per client/provider to power `/v1/models` and routing hints.
 
 ## 1) Implement a Provider Executor
@@ -69,7 +69,7 @@ If your auth entries use provider `"myprov"`, the manager routes requests to you
 
 ## 2) Register Translators
 
-The handlers accept OpenAI/Gemini/Claude/Codex inputs. To support a new provider format, register translation functions in `sdk/translator`’s default registry.
+The handlers accept OpenAI and Claude inputs. To support a new provider format, register translation functions in `sdk/translator`’s default registry.
 
 Direction matters:
 - Request: register from inbound schema to provider schema

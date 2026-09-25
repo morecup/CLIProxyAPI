@@ -284,41 +284,9 @@ func (c *Client) DeleteAPIKey(index int) error {
 	return nil
 }
 
-// GetGeminiKeys fetches Gemini API keys.
-// API returns {"gemini-api-key": [...]}.
-func (c *Client) GetGeminiKeys() ([]map[string]any, error) {
-	return c.getWrappedKeyList("/v0/management/gemini-api-key", "gemini-api-key")
-}
-
-// GetInteractionsKeys fetches native Interactions API keys.
-// API returns {"interactions-api-key": [...]}.
-func (c *Client) GetInteractionsKeys() ([]map[string]any, error) {
-	return c.getWrappedKeyList("/v0/management/interactions-api-key", "interactions-api-key")
-}
-
 // GetClaudeKeys fetches Claude API keys.
 func (c *Client) GetClaudeKeys() ([]map[string]any, error) {
 	return c.getWrappedKeyList("/v0/management/claude-api-key", "claude-api-key")
-}
-
-// GetCodexKeys fetches Codex API keys.
-func (c *Client) GetCodexKeys() ([]map[string]any, error) {
-	return c.getWrappedKeyList("/v0/management/codex-api-key", "codex-api-key")
-}
-
-// GetXAIKeys fetches xAI API keys.
-func (c *Client) GetXAIKeys() ([]map[string]any, error) {
-	return c.getWrappedKeyList("/v0/management/xai-api-key", "xai-api-key")
-}
-
-// GetVertexKeys fetches Vertex API keys.
-func (c *Client) GetVertexKeys() ([]map[string]any, error) {
-	return c.getWrappedKeyList("/v0/management/vertex-api-key", "vertex-api-key")
-}
-
-// GetOpenAICompat fetches OpenAI compatibility entries.
-func (c *Client) GetOpenAICompat() ([]map[string]any, error) {
-	return c.getWrappedKeyList("/v0/management/openai-compatibility", "openai-compatibility")
 }
 
 // getWrappedKeyList fetches a wrapped list from the API.

@@ -3,7 +3,6 @@ package management
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -19,12 +18,7 @@ import (
 
 const defaultAPICallTimeout = 60 * time.Second
 
-const (
-	antigravityOAuthClientID     = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com"
-	antigravityOAuthClientSecret = "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"
-)
-
-var antigravityOAuthTokenURL = "https://oauth2.googleapis.com/token"
+const ()
 
 type apiCallRequest struct {
 	AuthIndexSnake  *string           `json:"auth_index"`
@@ -245,133 +239,7 @@ func (h *Handler) resolveTokenForAuth(ctx context.Context, auth *coreauth.Auth, 
 	if auth == nil {
 		return "", nil
 	}
-
-	if strings.EqualFold(strings.TrimSpace(auth.Provider), "antigravity") {
-		token, errToken := h.refreshAntigravityOAuthAccessToken(ctx, auth, requestProxyURL)
-		return token, errToken
-	}
-
 	return tokenValueForAuth(auth), nil
-}
-
-func (h *Handler) refreshAntigravityOAuthAccessToken(ctx context.Context, auth *coreauth.Auth, requestProxyURL string) (string, error) {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	if auth == nil {
-		return "", nil
-	}
-
-	metadata := auth.Metadata
-	if len(metadata) == 0 {
-		return "", fmt.Errorf("antigravity oauth metadata missing")
-	}
-
-	current := strings.TrimSpace(tokenValueFromMetadata(metadata))
-	if current != "" && !antigravityTokenNeedsRefresh(metadata) {
-		return current, nil
-	}
-
-	refreshToken := stringValue(metadata, "refresh_token")
-	if refreshToken == "" {
-		return "", fmt.Errorf("antigravity refresh token missing")
-	}
-
-	tokenURL := strings.TrimSpace(antigravityOAuthTokenURL)
-	if tokenURL == "" {
-		tokenURL = "https://oauth2.googleapis.com/token"
-	}
-	form := url.Values{}
-	form.Set("client_id", antigravityOAuthClientID)
-	form.Set("client_secret", antigravityOAuthClientSecret)
-	form.Set("grant_type", "refresh_token")
-	form.Set("refresh_token", refreshToken)
-
-	req, errReq := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(form.Encode()))
-	if errReq != nil {
-		return "", errReq
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	httpClient := &http.Client{
-		Timeout:   defaultAPICallTimeout,
-		Transport: h.apiCallTransport(auth, requestProxyURL),
-	}
-	resp, errDo := httpClient.Do(req)
-	if errDo != nil {
-		return "", errDo
-	}
-	defer func() {
-		if errClose := resp.Body.Close(); errClose != nil {
-			log.Errorf("response body close error: %v", errClose)
-		}
-	}()
-
-	bodyBytes, errRead := io.ReadAll(resp.Body)
-	if errRead != nil {
-		return "", errRead
-	}
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return "", fmt.Errorf("antigravity oauth token refresh failed: status %d: %s", resp.StatusCode, strings.TrimSpace(string(bodyBytes)))
-	}
-
-	var tokenResp struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-		ExpiresIn    int64  `json:"expires_in"`
-		TokenType    string `json:"token_type"`
-	}
-	if errUnmarshal := json.Unmarshal(bodyBytes, &tokenResp); errUnmarshal != nil {
-		return "", errUnmarshal
-	}
-
-	if strings.TrimSpace(tokenResp.AccessToken) == "" {
-		return "", fmt.Errorf("antigravity oauth token refresh returned empty access_token")
-	}
-
-	if auth.Metadata == nil {
-		auth.Metadata = make(map[string]any)
-	}
-	now := time.Now()
-	auth.Metadata["access_token"] = strings.TrimSpace(tokenResp.AccessToken)
-	if strings.TrimSpace(tokenResp.RefreshToken) != "" {
-		auth.Metadata["refresh_token"] = strings.TrimSpace(tokenResp.RefreshToken)
-	}
-	if tokenResp.ExpiresIn > 0 {
-		auth.Metadata["expires_in"] = tokenResp.ExpiresIn
-		auth.Metadata["timestamp"] = now.UnixMilli()
-		auth.Metadata["expired"] = now.Add(time.Duration(tokenResp.ExpiresIn) * time.Second).Format(time.RFC3339)
-	}
-	auth.Metadata["type"] = "antigravity"
-
-	if h != nil && h.authManager != nil {
-		auth.LastRefreshedAt = now
-		auth.UpdatedAt = now
-		_, _ = h.authManager.Update(ctx, auth)
-	}
-
-	return strings.TrimSpace(tokenResp.AccessToken), nil
-}
-
-func antigravityTokenNeedsRefresh(metadata map[string]any) bool {
-	// Refresh a bit early to avoid requests racing token expiry.
-	const skew = 30 * time.Second
-
-	if metadata == nil {
-		return true
-	}
-	if expStr, ok := metadata["expired"].(string); ok {
-		if ts, errParse := time.Parse(time.RFC3339, strings.TrimSpace(expStr)); errParse == nil {
-			return !ts.After(time.Now().Add(skew))
-		}
-	}
-	expiresIn := int64Value(metadata["expires_in"])
-	timestampMs := int64Value(metadata["timestamp"])
-	if expiresIn > 0 && timestampMs > 0 {
-		exp := time.UnixMilli(timestampMs).Add(time.Duration(expiresIn) * time.Second)
-		return !exp.After(time.Now().Add(skew))
-	}
-	return true
 }
 
 func int64Value(raw any) int64 {
@@ -573,81 +441,15 @@ func proxyURLFromAPIKeyConfig(cfg *config.Config, auth *coreauth.Auth) string {
 	if cfg == nil || auth == nil {
 		return ""
 	}
-	authKind, authAccount := auth.AccountInfo()
+	authKind, _ := auth.AccountInfo()
 	if !strings.EqualFold(strings.TrimSpace(authKind), "api_key") {
 		return ""
 	}
 
-	attrs := auth.Attributes
-	compatName := ""
-	providerKey := ""
-	if len(attrs) > 0 {
-		compatName = strings.TrimSpace(attrs["compat_name"])
-		providerKey = strings.TrimSpace(attrs["provider_key"])
-	}
-	if compatName != "" || strings.EqualFold(strings.TrimSpace(auth.Provider), "openai-compatibility") {
-		return resolveOpenAICompatAPIKeyProxyURL(cfg, auth, strings.TrimSpace(authAccount), providerKey, compatName)
-	}
-
 	switch strings.ToLower(strings.TrimSpace(auth.Provider)) {
-	case "gemini":
-		if entry := resolveAPIKeyConfig(cfg.GeminiKey, auth); entry != nil {
-			return strings.TrimSpace(entry.ProxyURL)
-		}
-	case "gemini-interactions":
-		if entry := resolveAPIKeyConfig(cfg.InteractionsKey, auth); entry != nil {
-			return strings.TrimSpace(entry.ProxyURL)
-		}
 	case "claude", "anthropic-compatible":
 		if entry := resolveAPIKeyConfig(cfg.ClaudeKey, auth); entry != nil {
 			return strings.TrimSpace(entry.ProxyURL)
-		}
-	case "codex":
-		if entry := resolveAPIKeyConfig(cfg.CodexKey, auth); entry != nil {
-			return strings.TrimSpace(entry.ProxyURL)
-		}
-	case "xai":
-		if entry := resolveAPIKeyConfig(cfg.XAIKey, auth); entry != nil {
-			return strings.TrimSpace(entry.ProxyURL)
-		}
-	}
-	return ""
-}
-
-func resolveOpenAICompatAPIKeyProxyURL(cfg *config.Config, auth *coreauth.Auth, apiKey, providerKey, compatName string) string {
-	if cfg == nil || auth == nil {
-		return ""
-	}
-	apiKey = strings.TrimSpace(apiKey)
-	if apiKey == "" {
-		return ""
-	}
-	candidates := make([]string, 0, 3)
-	if v := strings.TrimSpace(compatName); v != "" {
-		candidates = append(candidates, v)
-	}
-	if v := strings.TrimSpace(providerKey); v != "" {
-		candidates = append(candidates, v)
-	}
-	if v := strings.TrimSpace(auth.Provider); v != "" {
-		candidates = append(candidates, v)
-	}
-
-	for i := range cfg.OpenAICompatibility {
-		compat := &cfg.OpenAICompatibility[i]
-		if compat.Disabled {
-			continue
-		}
-		for _, candidate := range candidates {
-			if candidate != "" && strings.EqualFold(strings.TrimSpace(candidate), compat.Name) {
-				for j := range compat.APIKeyEntries {
-					entry := &compat.APIKeyEntries[j]
-					if strings.EqualFold(strings.TrimSpace(entry.APIKey), apiKey) {
-						return strings.TrimSpace(entry.ProxyURL)
-					}
-				}
-				return ""
-			}
 		}
 	}
 	return ""

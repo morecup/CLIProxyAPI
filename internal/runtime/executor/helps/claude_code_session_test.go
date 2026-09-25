@@ -30,25 +30,6 @@ func TestExtractClaudeCodeSessionIDFromHeader(t *testing.T) {
 	}
 }
 
-func TestClaudeCodePromptCacheStableAcrossRequests(t *testing.T) {
-	ctx := context.Background()
-	payload := []byte(`{"metadata":{"user_id":"{\"session_id\":\"cache-session-2\"}"}}`)
-	first, ok, err := ClaudeCodePromptCache(ctx, "grok-composer-2.5-fast", payload, nil)
-	if err != nil {
-		t.Fatalf("ClaudeCodePromptCache first error: %v", err)
-	}
-	if !ok || first.ID == "" {
-		t.Fatalf("ClaudeCodePromptCache first = %#v, ok=%v, want cached id", first, ok)
-	}
-	second, ok, err := ClaudeCodePromptCache(ctx, "grok-composer-2.5-fast", payload, nil)
-	if err != nil {
-		t.Fatalf("ClaudeCodePromptCache second error: %v", err)
-	}
-	if !ok || second.ID != first.ID {
-		t.Fatalf("second cache id = %q, want %q", second.ID, first.ID)
-	}
-}
-
 func TestExtractClaudeCodeSessionIDPrefersHeaderOverPayload(t *testing.T) {
 	payload := []byte(`{"metadata":{"user_id":"{"session_id":"payload-session"}"}}`)
 	headers := http.Header{}
@@ -94,29 +75,5 @@ func TestClaudeCodeExecutionScopeIsolatesAgents(t *testing.T) {
 	}
 	if rootScope == childAScope || childAScope == childBScope || rootScope == childBScope {
 		t.Fatalf("agent scopes are not isolated: root=%q a=%q b=%q", rootScope, childAScope, childBScope)
-	}
-}
-
-func TestClaudeCodePromptCacheDeterministicAndAgentScoped(t *testing.T) {
-	rootHeaders := http.Header{}
-	rootHeaders.Set(ClaudeCodeSessionHeader, "session-cache-agents")
-	childHeaders := rootHeaders.Clone()
-	childHeaders.Set(ClaudeCodeAgentHeader, "agent-a")
-
-	rootFirst, ok, errFirst := ClaudeCodePromptCache(context.Background(), "gpt-5.4", nil, rootHeaders)
-	if errFirst != nil || !ok {
-		t.Fatalf("root first cache = %#v, %v, %v", rootFirst, ok, errFirst)
-	}
-	rootSecond, ok, errSecond := ClaudeCodePromptCache(context.Background(), "gpt-5.4", nil, rootHeaders)
-	if errSecond != nil || !ok || rootSecond.ID != rootFirst.ID {
-		t.Fatalf("root second cache = %#v, %v, %v; want ID %q", rootSecond, ok, errSecond, rootFirst.ID)
-	}
-	child, ok, errChild := ClaudeCodePromptCache(context.Background(), "gpt-5.4", nil, childHeaders)
-	if errChild != nil || !ok || child.ID == rootFirst.ID {
-		t.Fatalf("child cache = %#v, %v, %v; root ID %q", child, ok, errChild, rootFirst.ID)
-	}
-	otherModel, ok, errModel := ClaudeCodePromptCache(context.Background(), "gpt-5.5", nil, rootHeaders)
-	if errModel != nil || !ok || otherModel.ID == rootFirst.ID {
-		t.Fatalf("other model cache = %#v, %v, %v; root ID %q", otherModel, ok, errModel, rootFirst.ID)
 	}
 }

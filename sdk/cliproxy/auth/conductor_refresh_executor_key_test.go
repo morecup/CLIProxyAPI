@@ -44,17 +44,12 @@ func (e *countingRefreshExecutor) HttpRequest(context.Context, *Auth, *http.Requ
 func TestRefreshAuthForRequest_UsesExecutorKeyFromAuth(t *testing.T) {
 	ctx := context.Background()
 	manager := NewManager(nil, &RoundRobinSelector{}, nil)
-	executor := &countingRefreshExecutor{id: "openai-compatible-custom"}
+	executor := &countingRefreshExecutor{id: "claude"}
 	manager.RegisterExecutor(executor)
 
 	auth := &Auth{
 		ID:       "compat-oauth",
-		Provider: "plugin-provider",
-		Attributes: map[string]string{
-			"compat_name":  "custom",
-			"provider_key": "custom",
-			"base_url":     "https://compat.example.com/v1",
-		},
+		Provider: "claude",
 		Metadata: map[string]any{
 			"access_token":  "old-token",
 			"refresh_token": "refresh-1",

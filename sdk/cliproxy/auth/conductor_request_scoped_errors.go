@@ -111,45 +111,10 @@ func extractRequestScopedErrorRules(auth *Auth, cfg *internalconfig.Config) []in
 		}
 	}
 
-	providerKey := ""
-	compatName := ""
-	if auth.Attributes != nil {
-		providerKey = auth.Attributes["provider_key"]
-		compatName = auth.Attributes["compat_name"]
-	}
-	if compatName == "" {
-		if strings.HasPrefix(provider, "openai-compatible-") {
-			compatName = strings.TrimPrefix(provider, "openai-compatible-")
-		} else if strings.HasPrefix(provider, "openai-compatibility:") {
-			compatName = strings.TrimPrefix(provider, "openai-compatibility:")
-		}
-	}
-	if compatName != "" || providerKey != "" || provider == "openai-compatibility" || strings.HasPrefix(provider, "openai-compatibility:") || strings.HasPrefix(provider, "openai-compatible") {
-		if entry := resolveOpenAICompatConfigForAuth(cfg, auth, providerKey, compatName); entry != nil {
-			return entry.RequestScopedErrors
-		}
-	}
-
 	switch provider {
 	case "claude", "anthropic-compatible":
 		if index >= 0 && index < len(cfg.ClaudeKey) {
 			return cfg.ClaudeKey[index].RequestScopedErrors
-		}
-	case "codex":
-		if index >= 0 && index < len(cfg.CodexKey) {
-			return cfg.CodexKey[index].RequestScopedErrors
-		}
-	case "xai":
-		if index >= 0 && index < len(cfg.XAIKey) {
-			return cfg.XAIKey[index].RequestScopedErrors
-		}
-	case "gemini":
-		if index >= 0 && index < len(cfg.GeminiKey) {
-			return cfg.GeminiKey[index].RequestScopedErrors
-		}
-	case "interactions", "gemini-interactions":
-		if index >= 0 && index < len(cfg.InteractionsKey) {
-			return cfg.InteractionsKey[index].RequestScopedErrors
 		}
 	}
 

@@ -251,12 +251,8 @@ func TestTranslatedRequestNeverPairsLegacyModelWithMidSystemMessage(t *testing.T
 			payload: `{"model":"` + legacyModel + `","messages":[{"role":"system","content":"Top rule"},{"role":"user","content":"hi"},{"role":"system","content":"Mid rule"},{"role":"assistant","content":"ok"},{"role":"user","content":"go"}]}`},
 		{name: "openai chat ending on a system message", format: sdktranslator.FormatOpenAI,
 			payload: `{"model":"` + legacyModel + `","messages":[{"role":"user","content":"hi"},{"role":"system","content":"Mid rule"}]}`},
-		{name: "gemini with a system instruction", format: sdktranslator.FormatGemini,
-			payload: `{"contents":[{"role":"user","parts":[{"text":"hi"}]}],"systemInstruction":{"parts":[{"text":"Top rule"}]}}`},
 		{name: "openai responses with instructions", format: sdktranslator.FormatOpenAIResponse,
 			payload: `{"model":"` + legacyModel + `","instructions":"Top rule","input":[{"role":"user","content":[{"type":"input_text","text":"hi"}]}]}`},
-		{name: "interactions with a system instruction", format: sdktranslator.FormatInteractions,
-			payload: `{"model":"` + legacyModel + `","system_instruction":"Top rule","input":[{"type":"user_input","content":[{"type":"text","text":"hi"}]}]}`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			upstream := &midSystemUpstream{}

@@ -106,8 +106,6 @@ func TestFileRequestLogger_HomeEnabled_ForwardsWhenRequestLogEnabled(t *testing.
 		nil,
 		nil,
 		nil,
-		nil,
-		nil,
 		"req-1",
 		time.Now(),
 		time.Now(),
@@ -154,45 +152,40 @@ func TestFileRequestLogger_LogRequestWithSourcesWritesLocalLogAndCleansParts(t *
 	logsDir := t.TempDir()
 	logger := NewFileRequestLogger(true, logsDir, "", 0)
 
-	timelineSource, errSource := logger.NewFileBodySource("websocket-timeline-test")
+	apiRequestSource, errSource := logger.NewFileBodySource("api-request-test")
 	if errSource != nil {
 		t.Fatalf("logger.NewFileBodySource: %v", errSource)
 	}
-	if errAppend := timelineSource.AppendPart([]byte("Timestamp: 2026-05-25T12:00:00Z\nEvent: websocket.request\n{}")); errAppend != nil {
+	if errAppend := apiRequestSource.AppendPart([]byte("POST https://api.anthropic.com/v1/messages\n{\"model\":\"claude\"}")); errAppend != nil {
 		t.Fatalf("AppendPart request: %v", errAppend)
 	}
-	if errAppend := timelineSource.AppendPart([]byte("Timestamp: 2026-05-25T12:00:01Z\nEvent: websocket.response\n{}")); errAppend != nil {
-		t.Fatalf("AppendPart response: %v", errAppend)
-	}
-	partPaths := timelineSource.Paths()
+	partPaths := apiRequestSource.Paths()
 	for _, path := range partPaths {
 		if !strings.HasPrefix(path, logsDir+string(os.PathSeparator)) {
 			t.Fatalf("part path %s is not under logs dir %s", path, logsDir)
 		}
 	}
 
-	errLog := logger.LogRequestWithOptionsAndSources(
-		"/v1/responses/ws",
-		http.MethodGet,
-		map[string][]string{"Upgrade": {"websocket"}},
+	errLog := logger.LogRequestWithOptionsAndAllSources(
+		"/v1/messages",
+		http.MethodPost,
+		map[string][]string{"Content-Type": {"application/json"}},
+		[]byte(`{"input":"hello"}`),
+		http.StatusOK,
+		map[string][]string{"Content-Type": {"application/json"}},
+		[]byte(`{"ok":true}`),
 		nil,
-		http.StatusSwitchingProtocols,
-		map[string][]string{"Upgrade": {"websocket"}},
-		nil,
-		nil,
-		timelineSource,
-		nil,
-		nil,
+		apiRequestSource,
 		nil,
 		nil,
 		nil,
 		false,
-		"ws-req-1",
+		"req-src-1",
 		time.Now(),
 		time.Now(),
 	)
 	if errLog != nil {
-		t.Fatalf("LogRequestWithOptionsAndSources error: %v", errLog)
+		t.Fatalf("LogRequestWithOptionsAndAllSources error: %v", errLog)
 	}
 
 	assertFileBodySourceCleaned(t, partPaths)
@@ -216,11 +209,11 @@ func TestFileRequestLogger_LogRequestWithSourcesWritesLocalLogAndCleansParts(t *
 	if errReadLog != nil {
 		t.Fatalf("read log file: %v", errReadLog)
 	}
-	if !bytes.Contains(raw, []byte("=== WEBSOCKET TIMELINE ===")) {
-		t.Fatalf("websocket timeline section missing: %s", string(raw))
+	if !bytes.Contains(raw, []byte("=== REQUEST INFO ===")) {
+		t.Fatalf("request info section missing: %s", string(raw))
 	}
-	if !bytes.Contains(raw, []byte("Event: websocket.request")) || !bytes.Contains(raw, []byte("Event: websocket.response")) {
-		t.Fatalf("merged websocket events missing: %s", string(raw))
+	if !bytes.Contains(raw, []byte("https://api.anthropic.com/v1/messages")) {
+		t.Fatalf("file-backed api request content missing: %s", string(raw))
 	}
 }
 
@@ -239,42 +232,40 @@ func TestFileRequestLogger_HomeEnabled_ForwardsSourceLogAndCleansParts(t *testin
 	logger := NewFileRequestLogger(true, logsDir, "", 0)
 	logger.SetHomeEnabled(true)
 
-	timelineSource, errSource := logger.NewFileBodySource("home-websocket-timeline-test")
+	apiRequestSource, errSource := logger.NewFileBodySource("home-api-request-test")
 	if errSource != nil {
 		t.Fatalf("logger.NewFileBodySource: %v", errSource)
 	}
-	if errAppend := timelineSource.AppendPart([]byte("Timestamp: 2026-05-25T12:00:00Z\nEvent: websocket.request\n{}")); errAppend != nil {
+	if errAppend := apiRequestSource.AppendPart([]byte("POST https://api.anthropic.com/v1/messages\n{\"model\":\"claude\"}")); errAppend != nil {
 		t.Fatalf("AppendPart request: %v", errAppend)
 	}
-	partPaths := timelineSource.Paths()
+	partPaths := apiRequestSource.Paths()
 	for _, path := range partPaths {
 		if !strings.HasPrefix(path, logsDir+string(os.PathSeparator)) {
 			t.Fatalf("part path %s is not under logs dir %s", path, logsDir)
 		}
 	}
 
-	errLog := logger.LogRequestWithOptionsAndSources(
-		"/v1/responses/ws",
-		http.MethodGet,
-		map[string][]string{"Upgrade": {"websocket"}},
+	errLog := logger.LogRequestWithOptionsAndAllSources(
+		"/v1/messages",
+		http.MethodPost,
+		map[string][]string{"Content-Type": {"application/json"}},
 		nil,
-		http.StatusSwitchingProtocols,
-		map[string][]string{"Upgrade": {"websocket"}},
-		nil,
-		nil,
-		timelineSource,
+		http.StatusOK,
+		map[string][]string{"Content-Type": {"application/json"}},
 		nil,
 		nil,
+		apiRequestSource,
 		nil,
 		nil,
 		nil,
 		false,
-		"home-ws-req-1",
+		"home-req-src-1",
 		time.Now(),
 		time.Now(),
 	)
 	if errLog != nil {
-		t.Fatalf("LogRequestWithOptionsAndSources error: %v", errLog)
+		t.Fatalf("LogRequestWithOptionsAndAllSources error: %v", errLog)
 	}
 	if len(stub.pushed) != 1 {
 		t.Fatalf("home pushed records = %d, want 1", len(stub.pushed))
@@ -287,11 +278,11 @@ func TestFileRequestLogger_HomeEnabled_ForwardsSourceLogAndCleansParts(t *testin
 	if errUnmarshal := json.Unmarshal(stub.pushed[0], &got); errUnmarshal != nil {
 		t.Fatalf("unmarshal payload: %v payload=%s", errUnmarshal, string(stub.pushed[0]))
 	}
-	if got.RequestID != "home-ws-req-1" {
-		t.Fatalf("request_id = %q, want home-ws-req-1", got.RequestID)
+	if got.RequestID != "home-req-src-1" {
+		t.Fatalf("request_id = %q, want home-req-src-1", got.RequestID)
 	}
-	if !strings.Contains(got.RequestLog, "Event: websocket.request") {
-		t.Fatalf("forwarded request_log missing websocket request: %s", got.RequestLog)
+	if !strings.Contains(got.RequestLog, "https://api.anthropic.com/v1/messages") {
+		t.Fatalf("forwarded request_log missing api request source content: %s", got.RequestLog)
 	}
 	assertFileBodySourceCleaned(t, partPaths)
 }
@@ -372,8 +363,6 @@ func TestFileRequestLogger_HomeEnabled_DoesNotForwardForcedErrorLogsWhenRequestL
 		http.StatusBadGateway,
 		map[string][]string{"Content-Type": {"application/json"}},
 		[]byte(`{"error":"upstream failure"}`),
-		nil,
-		nil,
 		nil,
 		nil,
 		nil,

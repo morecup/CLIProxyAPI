@@ -168,7 +168,7 @@ func (h *handlerDirectExecutorInterceptorHost) InterceptStreamChunk(ctx context.
 }
 
 func (h *handlerDirectExecutorInterceptorHost) PluginExecutorRequestToFormat(pluginID string, req coreexecutor.Request, opts coreexecutor.Options) sdktranslator.Format {
-	return sdktranslator.FormatCodex
+	return sdktranslator.FormatClaude
 }
 
 func TestHandlerModelRouterRoutesBeforeRequestDetails(t *testing.T) {
@@ -231,8 +231,8 @@ func TestHandlerModelRouterDirectExecutorRunsAfterAuthInterceptor(t *testing.T) 
 	if !host.afterAuthCalled {
 		t.Fatal("after-auth interceptor was not called")
 	}
-	if host.afterAuthReq.SourceFormat != "openai" || host.afterAuthReq.ToFormat != "codex" {
-		t.Fatalf("after-auth formats = %q -> %q, want openai -> codex", host.afterAuthReq.SourceFormat, host.afterAuthReq.ToFormat)
+	if host.afterAuthReq.SourceFormat != "openai" || host.afterAuthReq.ToFormat != "claude" {
+		t.Fatalf("after-auth formats = %q -> %q, want openai -> claude", host.afterAuthReq.SourceFormat, host.afterAuthReq.ToFormat)
 	}
 	if host.afterAuthReq.Model != originalModel || host.afterAuthReq.RequestedModel != originalModel {
 		t.Fatalf("after-auth models = %q/%q, want original model", host.afterAuthReq.Model, host.afterAuthReq.RequestedModel)
@@ -575,7 +575,7 @@ func TestExecuteModelPropagatesRouterSkipPluginID(t *testing.T) {
 func TestHandlerProvidersForExecutionUsesRouterProvider(t *testing.T) {
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, nil)
 	decision := modelRouteDecision{Provider: "claude", Model: "claude-sonnet-4"}
-	providers, normalizedModel, errMsg := handler.providersForExecution("ignored-by-router", "original-model", false, decision, modelExecutionOptions{})
+	providers, normalizedModel, errMsg := handler.providersForExecution("ignored-by-router", "original-model", decision, modelExecutionOptions{})
 	if errMsg != nil {
 		t.Fatalf("providersForExecution() error = %+v", errMsg)
 	}
@@ -590,7 +590,7 @@ func TestHandlerProvidersForExecutionUsesRouterProvider(t *testing.T) {
 func TestHandlerProvidersForExecutionFallsBackToOriginalModel(t *testing.T) {
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, nil)
 	decision := modelRouteDecision{Provider: "claude"}
-	providers, normalizedModel, errMsg := handler.providersForExecution("ignored-by-router", "original-model", false, decision, modelExecutionOptions{})
+	providers, normalizedModel, errMsg := handler.providersForExecution("ignored-by-router", "original-model", decision, modelExecutionOptions{})
 	if errMsg != nil {
 		t.Fatalf("providersForExecution() error = %+v", errMsg)
 	}
@@ -624,39 +624,6 @@ func TestHandlerModelRouterProviderRouteUsesAuthManager(t *testing.T) {
 	}
 	if host.lastPluginID != "" {
 		t.Fatalf("plugin executor path was used (plugin id = %q); want provider path via AuthManager", host.lastPluginID)
-	}
-}
-
-func TestHandlerProvidersForExecutionRejectsImageOnlyModelOnProviderRoute(t *testing.T) {
-	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{}, nil)
-	cases := []struct {
-		name          string
-		originalModel string
-		decision      modelRouteDecision
-	}{
-		{
-			name:          "target-model",
-			originalModel: "original-model",
-			decision:      modelRouteDecision{Provider: "claude", Model: "gpt-image-2"},
-		},
-		{
-			name:          "target-model-thinking-suffix",
-			originalModel: "original-model",
-			decision:      modelRouteDecision{Provider: "claude", Model: "gpt-image-2(auto)"},
-		},
-		{
-			name:          "original-model-thinking-suffix",
-			originalModel: "gpt-image-2(auto)",
-			decision:      modelRouteDecision{Provider: "claude"},
-		},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			_, _, errMsg := handler.providersForExecution("ignored", tc.originalModel, false, tc.decision, modelExecutionOptions{})
-			if errMsg == nil || errMsg.StatusCode != http.StatusServiceUnavailable {
-				t.Fatalf("providersForExecution() error = %+v, want image-only service unavailable", errMsg)
-			}
-		})
 	}
 }
 

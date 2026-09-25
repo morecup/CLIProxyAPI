@@ -20,7 +20,6 @@ const (
 	tokenAccountingSemanticsUnknown tokenAccountingSemantics = iota
 	tokenAccountingSemanticsSubset
 	tokenAccountingSemanticsIndependent
-	tokenAccountingSemanticsSeparateReasoning
 )
 
 // TokenInputBreakdown contains mutually exclusive input token buckets.
@@ -185,39 +184,6 @@ func NewIndependentTokenBreakdown(uncachedInput, cacheRead, cacheWrite, nonReaso
 	}
 }
 
-// NewSeparateReasoningTokenBreakdown normalizes protocols where cache tokens
-// are included in input totals while reasoning is separate from ordinary output.
-func NewSeparateReasoningTokenBreakdown(inputTotal, cacheRead, cacheWrite, nonReasoningOutput, reasoning, total int64) TokenBreakdown {
-	if inputTotal < 0 || cacheRead < 0 || cacheWrite < 0 || cacheRead+cacheWrite > inputTotal {
-		return inconsistentTokenBreakdown(total, 0)
-	}
-	outputTotal, okOutput := nonNegativeSum(nonReasoningOutput, reasoning)
-	expectedTotal, okExpected := nonNegativeSum(inputTotal, outputTotal)
-	if !okOutput || !okExpected {
-		return inconsistentTokenBreakdown(total, expectedTotal)
-	}
-	resolvedTotal, okTotal := resolveAccountingTotal(total, expectedTotal)
-	if !okTotal {
-		return inconsistentTokenBreakdown(total, expectedTotal)
-	}
-	return TokenBreakdown{
-		SchemaVersion: TokenAccountingSchemaVersion,
-		Quality:       TokenAccountingQualityComplete,
-		TotalTokens:   resolvedTotal,
-		Input: TokenInputBreakdown{
-			TotalTokens:      inputTotal,
-			UncachedTokens:   inputTotal - cacheRead - cacheWrite,
-			CacheReadTokens:  cacheRead,
-			CacheWriteTokens: cacheWrite,
-		},
-		Output: TokenOutputBreakdown{
-			TotalTokens:        outputTotal,
-			NonReasoningTokens: nonReasoningOutput,
-			ReasoningTokens:    reasoning,
-		},
-	}
-}
-
 // NewUnclassifiedTokenBreakdown preserves an authoritative total without
 // guessing how an unknown protocol partitions it.
 func NewUnclassifiedTokenBreakdown(total int64) TokenBreakdown {
@@ -250,7 +216,7 @@ func EnsureTokenBreakdownForProvider(detail Detail, provider, executorType strin
 		semantics := tokenAccountingSemanticsFor(provider, executorType)
 		if detail.CacheReadTokens == 0 && detail.CachedTokens > 0 && detail.InputTokens == 0 &&
 			detail.OutputTokens == 0 && detail.ReasoningTokens == 0 && detail.CacheCreationTokens == 0 && detail.TotalTokens == 0 &&
-			(semantics == tokenAccountingSemanticsSubset || semantics == tokenAccountingSemanticsSeparateReasoning) {
+			semantics == tokenAccountingSemanticsSubset {
 			detail.CacheReadTokens = detail.CachedTokens
 		}
 		detail.TokenBreakdown = tokenBreakdownForSemantics(detail, semantics)
@@ -266,9 +232,7 @@ func tokenBreakdownForSemantics(detail Detail, semantics tokenAccountingSemantic
 		if total, okTotal := unclassifiedTokenLowerBound(detail); !okTotal {
 			return inconsistentTokenBreakdown(detail.TotalTokens, 0)
 		} else if total > 0 && (semantics == tokenAccountingSemanticsUnknown ||
-			semantics == tokenAccountingSemanticsSubset ||
-			(semantics == tokenAccountingSemanticsSeparateReasoning &&
-				(detail.CacheReadTokens > 0 || detail.CacheCreationTokens > 0 || detail.CachedTokens > 0))) {
+			semantics == tokenAccountingSemanticsSubset) {
 			return NewUnclassifiedTokenBreakdown(total)
 		}
 	}
@@ -284,15 +248,6 @@ func tokenBreakdownForSemantics(detail Detail, semantics tokenAccountingSemantic
 		)
 	case tokenAccountingSemanticsIndependent:
 		return NewIndependentTokenBreakdown(
-			detail.InputTokens,
-			detail.CacheReadTokens,
-			detail.CacheCreationTokens,
-			detail.OutputTokens,
-			detail.ReasoningTokens,
-			detail.TotalTokens,
-		)
-	case tokenAccountingSemanticsSeparateReasoning:
-		return NewSeparateReasoningTokenBreakdown(
 			detail.InputTokens,
 			detail.CacheReadTokens,
 			detail.CacheCreationTokens,
@@ -339,21 +294,14 @@ func tokenAccountingSemanticsFor(provider, executorType string) tokenAccountingS
 	if value == "" || value == "unknown" || value == "unknown unknown" {
 		return tokenAccountingSemanticsUnknown
 	}
-	if normalizedExecutor == "openaicompatexecutor" || normalizedProvider == "openai-compatibility" || strings.HasPrefix(normalizedProvider, "openai-compatible-") {
+	if strings.Contains(normalizedExecutor, "openai") {
 		return tokenAccountingSemanticsSubset
 	}
 	if strings.Contains(value, "claude") || strings.Contains(value, "anthropic") {
 		return tokenAccountingSemanticsIndependent
 	}
-	for _, marker := range []string{"gemini", "aistudio", "antigravity", "vertex", "interaction"} {
-		if strings.Contains(value, marker) {
-			return tokenAccountingSemanticsSeparateReasoning
-		}
-	}
-	for _, marker := range []string{"openai", "codex", "xai", "grok", "kimi", "qwen", "deepseek", "openrouter"} {
-		if strings.Contains(value, marker) {
-			return tokenAccountingSemanticsSubset
-		}
+	if strings.Contains(normalizedProvider, "openai") {
+		return tokenAccountingSemanticsSubset
 	}
 	return tokenAccountingSemanticsUnknown
 }
