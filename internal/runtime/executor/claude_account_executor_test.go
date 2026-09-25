@@ -943,3 +943,53 @@ func telemetryStatusForMachine(t *testing.T, statuses []claudetelemetry.Status, 
 	t.Fatalf("telemetry status for machine profile %q is missing: %#v", machineProfileID, statuses)
 	return claudetelemetry.Status{}
 }
+
+func TestClaudeAccountExecutorPromoteReactivatesApprovedRevision(t *testing.T) {
+	auth := newClaudeAccountRuntimeTestAuth(t,
+		"46000000-0000-4000-8000-000000000001",
+		"56000000-0000-4000-8000-000000000001",
+		"66000000-0000-4000-8000-000000000001",
+	)
+	auth.ProxyURL = "socks5h://127.0.0.1:11080"
+	executor := newClaudeAccountTestExecutor(&config.Config{
+		SDKConfig:     config.SDKConfig{ProxyURL: "http://127.0.0.1:3128"},
+		ClaudeDesktop: config.ClaudeDesktopConfig{StatePath: t.TempDir()},
+	})
+	t.Cleanup(executor.Close)
+	if errProvision := executor.Provision(auth); errProvision != nil {
+		t.Fatal(errProvision)
+	}
+	approved := accountRuntimeForAuth(t, executor, auth.ID).revision
+
+	// A registration path that drops auth.ProxyURL (e.g. the file token store)
+	// falls back to the global proxy and observes a different revision.
+	noProxyAuth := auth.Clone()
+	noProxyAuth.ProxyURL = ""
+	if errSchedule := executor.CanScheduleAuth(noProxyAuth); errSchedule == nil || !strings.Contains(errSchedule.Error(), "quarantined") {
+		t.Fatalf("CanScheduleAuth(drifted) error = %v, want quarantine", errSchedule)
+	}
+	status := executor.AccountStatus(auth.ID)
+	if status.State != claudedesktop.EnrollmentQuarantined || status.ObservedRevision == "" || status.ObservedRevision == approved {
+		t.Fatalf("drift quarantine was not recorded: %+v", status)
+	}
+
+	// A different revision still cannot be promoted past the stale observation.
+	thirdAuth := auth.Clone()
+	thirdAuth.ProxyURL = "socks5h://127.0.0.1:22020"
+	if errPromote := executor.PromoteAuth(thirdAuth); errPromote == nil || !strings.Contains(errPromote.Error(), "observed runtime revision changed") {
+		t.Fatalf("PromoteAuth(third revision) error = %v, want observed-mismatch rejection", errPromote)
+	}
+
+	// The desired revision already matches the approved binding, so promotion
+	// re-activates it instead of deadlocking on the stale observation.
+	if errPromote := executor.PromoteAuth(auth); errPromote != nil {
+		t.Fatalf("PromoteAuth(approved revision) error = %v", errPromote)
+	}
+	status = executor.AccountStatus(auth.ID)
+	if status.State != claudedesktop.EnrollmentActive || !status.RuntimeLoaded || status.ApprovedRevision != approved || status.ObservedRevision != "" {
+		t.Fatalf("promoted binding = %+v, want active approved revision without stale observation", status)
+	}
+	if errSchedule := executor.CanScheduleAuth(auth); errSchedule != nil {
+		t.Fatalf("CanScheduleAuth(after promote) error = %v", errSchedule)
+	}
+}

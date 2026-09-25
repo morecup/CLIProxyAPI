@@ -401,3 +401,24 @@ func (f fileStoreMultiAuthParserFunc) ParseAuth(context.Context, pluginapi.AuthP
 func (f fileStoreMultiAuthParserFunc) ParseAuths(ctx context.Context, req pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
 	return f(ctx, req)
 }
+
+func TestFileTokenStoreListMapsProxyURL(t *testing.T) {
+	baseDir := t.TempDir()
+	path := filepath.Join(baseDir, "proxied.json")
+	if errWrite := os.WriteFile(path, []byte(`{"type":"codex","proxy_url":"socks5h://127.0.0.1:11080"}`), 0o600); errWrite != nil {
+		t.Fatalf("write auth file: %v", errWrite)
+	}
+	store := NewFileTokenStore()
+	store.SetBaseDir(baseDir)
+
+	auths, errList := store.List(context.Background())
+	if errList != nil {
+		t.Fatalf("List() error = %v", errList)
+	}
+	if len(auths) != 1 {
+		t.Fatalf("List() len = %d, want 1", len(auths))
+	}
+	if got := auths[0].ProxyURL; got != "socks5h://127.0.0.1:11080" {
+		t.Fatalf("listed ProxyURL = %q, want per-account proxy from proxy_url metadata", got)
+	}
+}

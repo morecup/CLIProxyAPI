@@ -391,11 +391,15 @@ func (e *ClaudeAccountExecutor) activateRuntimeBinding(auth *cliproxyauth.Auth, 
 			return newClaudeDesktopEligibilityError("restore the previous runtime configuration before rollback")
 		}
 	} else {
-		if previousBinding.ApprovedRevision == revision && previousBinding.State == claudedesktop.EnrollmentActive {
-			e.mu.Unlock()
-			return e.Provision(auth)
-		}
-		if previousBinding.ObservedRevision != "" && previousBinding.ObservedRevision != revision {
+		if previousBinding.ApprovedRevision == revision {
+			if previousBinding.State == claudedesktop.EnrollmentActive {
+				e.mu.Unlock()
+				return e.Provision(auth)
+			}
+			// The desired revision already matches the approved binding, so a
+			// stale observed revision is leftover state and must not block
+			// promotion; fall through and re-activate the approved binding.
+		} else if previousBinding.ObservedRevision != "" && previousBinding.ObservedRevision != revision {
 			e.mu.Unlock()
 			return newClaudeDesktopEligibilityError("observed runtime revision changed; inspect status before promotion")
 		}
