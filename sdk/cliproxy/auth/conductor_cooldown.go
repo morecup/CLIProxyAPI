@@ -720,6 +720,7 @@ func (m *Manager) MarkResult(ctx context.Context, result Result) {
 	m.mu.Lock()
 	if auth, ok := m.auths[result.AuthID]; ok && auth != nil {
 		now := time.Now()
+		m.observeCredentialHealthLocked(auth, result, now)
 		responseHeaders := internallogging.GetResponseHeaders(ctx)
 		modelState := existingModelState(auth, modelKey)
 		var cooldownRecordsBefore []CooldownStateRecord
@@ -963,6 +964,7 @@ func (m *Manager) updateSessionAffinity(result Result) {
 
 func (m *Manager) recordExecutionResult(ctx context.Context, result Result, auth *Auth, ephemeral bool) {
 	if !ephemeral {
+		result.credentialFingerprint = credentialHealthFingerprint(auth)
 		m.MarkResult(ctx, result)
 		return
 	}

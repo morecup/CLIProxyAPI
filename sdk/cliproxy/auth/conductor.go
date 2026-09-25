@@ -63,6 +63,8 @@ type AuthLifecycleSynchronizer interface {
 
 // Result captures execution outcome used to adjust auth state.
 type Result struct {
+	// credentialFingerprint binds diagnostic observations to the token actually used.
+	credentialFingerprint string
 	// AuthID references the auth that produced this result.
 	AuthID string
 	// Provider is copied for convenience when emitting hooks.
@@ -129,6 +131,7 @@ func (NoopHook) OnResult(context.Context, Result) {}
 
 // Manager orchestrates auth lifecycle, selection, execution, and persistence.
 type Manager struct {
+	credentialHealthRecords   map[string]*credentialHealthRecord
 	store                     Store
 	cooldownStore             CooldownStateStore
 	pendingCooldownStateStore CooldownStateStore
