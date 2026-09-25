@@ -222,6 +222,9 @@ type StreamChunk struct {
 	Payload []byte
 	// Err reports any terminal error encountered while producing chunks.
 	Err error
+	// Completed marks a successful protocol terminal event. Connection cleanup
+	// after this event must not turn a completed upstream request into a failure.
+	Completed bool
 }
 
 // StreamResult wraps the streaming response, providing both the chunk channel

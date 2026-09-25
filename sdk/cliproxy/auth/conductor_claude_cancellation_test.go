@@ -315,3 +315,36 @@ func TestClaudeRequestCancellationDoesNotChangeOtherProviders(t *testing.T) {
 		}
 	}
 }
+
+func TestManagerClaudeCompletedStreamSurvivesCallerCancellation(t *testing.T) {
+	source := make(chan cliproxyexecutor.StreamChunk, 1)
+	source <- cliproxyexecutor.StreamChunk{Payload: []byte("first")}
+	executor := &claudeCancellationTestExecutor{
+		streamFn: func(context.Context, *Auth) (*cliproxyexecutor.StreamResult, error) {
+			return &cliproxyexecutor.StreamResult{Chunks: source}, nil
+		},
+	}
+	hook := &resultCaptureHook{}
+	manager, auth, model := newClaudeCancellationTestManager(t, executor, hook)
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	stream, err := manager.ExecuteStream(ctx, []string{"claude"}, cliproxyexecutor.Request{Model: model}, cliproxyexecutor.Options{Stream: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	<-stream.Chunks
+	source <- cliproxyexecutor.StreamChunk{Payload: []byte("message_stop"), Completed: true}
+	<-stream.Chunks
+	cancel()
+	source <- cliproxyexecutor.StreamChunk{Err: claudeRequestScopedCancellation{}}
+	close(source)
+	for range stream.Chunks {
+	}
+	stored, _ := manager.GetByID(auth.ID)
+	if stored.Success != 1 || stored.Failed != 0 {
+		t.Fatalf("completed request totals = %d/%d, want success=1 failed=0", stored.Success, stored.Failed)
+	}
+	if results := hook.Results(); len(results) != 1 || !results[0].Success {
+		t.Fatalf("results = %#v, want exactly one success", results)
+	}
+}

@@ -155,12 +155,20 @@ func (m *Manager) wrapStreamResult(ctx context.Context, auth *Auth, provider, re
 	go func() {
 		defer close(out)
 		var failed bool
+		var completed bool
 		forward := true
 		var rewriter *StreamRewriter
 		if aliasResult.ForceMapping && strings.TrimSpace(aliasResult.OriginalAlias) != "" {
 			rewriter = NewStreamRewriter(StreamRewriteOptions{RewriteModel: aliasResult.OriginalAlias})
 		}
 		emit := func(chunk cliproxyexecutor.StreamChunk) bool {
+			if chunk.Completed && chunk.Err == nil && !failed && !completed {
+				completed = true
+				m.recordExecutionResult(ctx, Result{AuthID: auth.ID, Provider: provider, Model: resultModel, Success: true, Options: opts}, auth, ephemeralResult)
+			}
+			if chunk.Err != nil && completed {
+				return true
+			}
 			if chunk.Err != nil && !failed {
 				failed = true
 				entry := logEntryWithRequestID(ctx)
@@ -208,16 +216,12 @@ func (m *Manager) wrapStreamResult(ctx context.Context, auth *Auth, provider, re
 			}
 		}
 		for _, chunk := range buffered {
-			if ok := emit(chunk); !ok {
-				discardStreamChunks(remaining)
-				return
-			}
+			emit(chunk)
 		}
 		for chunk := range remaining {
-			if ok := emit(chunk); !ok {
-				discardStreamChunks(remaining)
-				return
-			}
+			// Continue observing the outcome after the downstream closes. Dropping
+			// these chunks loses a protocol completion racing with cancellation.
+			emit(chunk)
 		}
 		if tail := finishForceMappedStreamChunks(rewriter); len(tail) > 0 {
 			tailChunk := cliproxyexecutor.StreamChunk{Payload: tail}
@@ -225,7 +229,7 @@ func (m *Manager) wrapStreamResult(ctx context.Context, auth *Auth, provider, re
 				return
 			}
 		}
-		if !failed && (ephemeralResult || claudeOAuthRequestCancellation(ctx, auth, nil) == nil) {
+		if !failed && !completed && forward && (ephemeralResult || claudeOAuthRequestCancellation(ctx, auth, nil) == nil) {
 			m.recordExecutionResult(ctx, Result{AuthID: auth.ID, Provider: provider, Model: resultModel, Success: true, Options: opts}, auth, ephemeralResult)
 		}
 	}()

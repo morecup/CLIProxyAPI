@@ -6,9 +6,11 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claudedesktop"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/watcher/synthesizer"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
@@ -310,6 +312,13 @@ func normalizeAuth(a *coreauth.Auth) *coreauth.Auth {
 	clone.NextRefreshAfter = time.Time{}
 	clone.Runtime = nil
 	clone.Quota.NextRecoverAt = time.Time{}
+	if claudedesktop.IsDesktopMetadata(clone.Metadata) {
+		if token, _ := clone.Metadata["access_token"].(string); strings.TrimSpace(token) != "" {
+			// Saving unchanged Desktop credentials generates fresh ciphertext. Compare
+			// the hydrated secrets instead so persistence does not reset auth cooldowns.
+			delete(clone.Metadata, claudedesktop.MetadataCredentialsKey)
+		}
+	}
 	return clone
 }
 

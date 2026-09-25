@@ -553,13 +553,17 @@ func (e *ClaudeAccountExecutor) ExecuteStream(ctx context.Context, auth *cliprox
 		defer runtimeRef.release()
 		defer release()
 		forward := true
-		cancelForward := func() {
-			forward = false
-			// Preserve one observable cancellation even if the downstream
-			// consumer stopped reading. Do not pin the account drain on it.
+		completed := false
+		finishCancelledForward := func() {
+			// Resolve cancellation only after draining, so a terminal event
+			// already read upstream can still establish the successful outcome.
 			select {
 			case <-out:
 			default:
+			}
+			if completed {
+				out <- cliproxyexecutor.StreamChunk{Completed: true}
+				return
 			}
 			cause := ctx.Err()
 			if cancelled := newClaudeDesktopCancellationError(ctx, true, cause); cancelled != nil {
@@ -568,21 +572,24 @@ func (e *ClaudeAccountExecutor) ExecuteStream(ctx context.Context, auth *cliprox
 			out <- cliproxyexecutor.StreamChunk{Err: cause}
 		}
 		for chunk := range result.Chunks {
+			if chunk.Completed && chunk.Err == nil {
+				completed = true
+			}
 			if !forward {
 				continue
 			}
 			if ctx.Err() != nil {
-				cancelForward()
+				forward = false
 				continue
 			}
 			select {
 			case <-ctx.Done():
-				cancelForward()
+				forward = false
 			case out <- chunk:
 			}
 		}
-		if forward && ctx.Err() != nil {
-			cancelForward()
+		if !forward || (!completed && ctx.Err() != nil) {
+			finishCancelledForward()
 		}
 	}()
 	return &cliproxyexecutor.StreamResult{Headers: result.Headers, Chunks: out}, nil

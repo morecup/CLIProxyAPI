@@ -330,6 +330,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		defer close(out)
 		defer releaseQuery()
 		telemetryCompleted := false
+		upstreamCompleted := false
 		var telemetryErr error
 		defer func() {
 			if telemetryCompleted {
@@ -356,6 +357,17 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			if cancelErr == nil {
 				return false
 			}
+			if upstreamCompleted {
+				telemetryCompleted = true
+				// The caller can close immediately after the terminal event. Keep
+				// its successful outcome observable even when payload forwarding stops.
+				select {
+				case <-out:
+				default:
+				}
+				out <- cliproxyexecutor.StreamChunk{Completed: true}
+				return true
+			}
 			telemetryErr = cancelErr
 			helps.RecordAPIResponseError(ctx, e.cfg, cancelErr)
 			reporter.PublishFailure(ctx, cancelErr)
@@ -376,6 +388,19 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			case <-ctx.Done():
 			}
 		}
+		completeResponse := func(messageID string, metrics claudeDesktopResponseMetricState) {
+			if telemetryCompleted {
+				return
+			}
+			if errLineage := e.commitClaudeDesktopRequestLineage(lineageState, upstreamRequestID); errLineage != nil {
+				helps.LogWithRequestID(ctx).WithError(errLineage).Warn("claude desktop: failed to persist request lineage")
+			}
+			commitClaudeDiagnostics(diagnosticsState, messageID)
+			if desktopTelemetrySpan != nil {
+				desktopTelemetrySpan.ObserveResponseContentMetrics(upstreamRequestID, metrics.stopReason, metrics.textContentLength, metrics.thinkingLength(), metrics.toolUseContentLengths())
+			}
+			telemetryCompleted = true
+		}
 
 		// If the response target is Claude, directly forward complete SSE events without translation.
 		if responseFormat == to {
@@ -384,15 +409,17 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			var event bytes.Buffer
 			var upstreamMessageID string
 			responseMetrics := claudeDesktopResponseMetricState{}
-			upstreamCompleted := false
 			flushEvent := func() bool {
 				if event.Len() == 0 {
 					return true
 				}
 				cloned := bytes.Clone(event.Bytes())
 				event.Reset()
+				if upstreamCompleted {
+					completeResponse(upstreamMessageID, responseMetrics)
+				}
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: cloned}:
+				case out <- cliproxyexecutor.StreamChunk{Payload: cloned, Completed: upstreamCompleted}:
 					return true
 				case <-ctx.Done():
 					return false
@@ -430,20 +457,11 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			if emitCancellation(scanner.Err()) {
 				return
 			}
-			if errScan := scanner.Err(); errScan != nil {
+			if errScan := scanner.Err(); errScan != nil && !upstreamCompleted {
 				emitResponseError(errScan)
 				return
 			}
-			if upstreamCompleted {
-				if errLineage := e.commitClaudeDesktopRequestLineage(lineageState, upstreamRequestID); errLineage != nil {
-					helps.LogWithRequestID(ctx).WithError(errLineage).Warn("claude desktop: failed to persist request lineage")
-				}
-				commitClaudeDiagnostics(diagnosticsState, upstreamMessageID)
-				if desktopTelemetrySpan != nil {
-					desktopTelemetrySpan.ObserveResponseContentMetrics(upstreamRequestID, responseMetrics.stopReason, responseMetrics.textContentLength, responseMetrics.thinkingLength(), responseMetrics.toolUseContentLengths())
-				}
-				telemetryCompleted = true
-			} else if e.desktopOnly {
+			if !upstreamCompleted && e.desktopOnly {
 				emitResponseError(errClaudeDesktopStreamIncomplete)
 			}
 			return
@@ -455,7 +473,6 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		var param any
 		var upstreamMessageID string
 		responseMetrics := claudeDesktopResponseMetricState{}
-		upstreamCompleted := false
 		for scanner.Scan() {
 			line := scanner.Bytes()
 			observeClaudeStreamLine(line, &upstreamMessageID, &upstreamCompleted)
@@ -473,6 +490,9 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			if desktopTelemetrySpan != nil {
 				desktopTelemetrySpan.ObserveStreamLine(restoredLine)
 			}
+			if upstreamCompleted {
+				completeResponse(upstreamMessageID, responseMetrics)
+			}
 			line = e.restoreResponseModel(restoredLine, req.Model)
 			chunks := sdktranslator.TranslateStream(
 				ctx,
@@ -489,9 +509,12 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 					chunks[i] = helps.EnsureResponsesUsageDetails(chunk)
 				}
 			}
+			if upstreamCompleted && len(chunks) == 0 {
+				chunks = [][]byte{nil}
+			}
 			for i := range chunks {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i], Completed: upstreamCompleted && i == len(chunks)-1}:
 				case <-ctx.Done():
 					emitCancellation(ctx.Err())
 					return
@@ -501,20 +524,11 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		if emitCancellation(scanner.Err()) {
 			return
 		}
-		if errScan := scanner.Err(); errScan != nil {
+		if errScan := scanner.Err(); errScan != nil && !upstreamCompleted {
 			emitResponseError(errScan)
 			return
 		}
-		if upstreamCompleted {
-			if errLineage := e.commitClaudeDesktopRequestLineage(lineageState, upstreamRequestID); errLineage != nil {
-				helps.LogWithRequestID(ctx).WithError(errLineage).Warn("claude desktop: failed to persist request lineage")
-			}
-			commitClaudeDiagnostics(diagnosticsState, upstreamMessageID)
-			if desktopTelemetrySpan != nil {
-				desktopTelemetrySpan.ObserveResponseContentMetrics(upstreamRequestID, responseMetrics.stopReason, responseMetrics.textContentLength, responseMetrics.thinkingLength(), responseMetrics.toolUseContentLengths())
-			}
-			telemetryCompleted = true
-		} else if e.desktopOnly {
+		if !upstreamCompleted && e.desktopOnly {
 			emitResponseError(errClaudeDesktopStreamIncomplete)
 		}
 	}()
